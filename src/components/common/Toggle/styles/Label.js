@@ -10,6 +10,7 @@ export default styled.label`
   padding: 5px;
   position: relative;
   // height: 26px;
-  min-width: 40px;
+  min-width: 50px;
   transform: scale(1.5);
+  margin-bottom: 0;
 `;
