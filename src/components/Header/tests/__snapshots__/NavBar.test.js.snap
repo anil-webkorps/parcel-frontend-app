@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<NavBar /> should match snapshot 1`] = `
+.c0 {
+  border-bottom: 1px solid #eee;
+  -webkit-transition: all 0.5s linear;
+  transition: all 0.5s linear;
+}
+
+<div
+  className="c0"
+/>
+`;
