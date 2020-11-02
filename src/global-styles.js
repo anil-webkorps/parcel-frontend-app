@@ -11,6 +11,14 @@ export const lightTheme = {
   border: {
     color: "#eee",
   },
+  card: {
+    backgroundColor: "#f2f2f2",
+    color: "#363537",
+    inner: {
+      backgroundColor: "#fff",
+      borderColor: "#f2f2f2",
+    },
+  },
 };
 export const darkTheme = {
   body: "#363537",
@@ -22,6 +30,14 @@ export const darkTheme = {
   },
   border: {
     color: "#535766",
+  },
+  card: {
+    backgroundColor: "#292C35",
+    color: "#fff",
+    inner: {
+      backgroundColor: "#292C40",
+      borderColor: "#333",
+    },
   },
 };
 

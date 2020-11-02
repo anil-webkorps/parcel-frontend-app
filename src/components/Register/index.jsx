@@ -1,40 +1,58 @@
 import React, { useState, useEffect } from "react";
-import Button from "components/common/Button";
+
 import Container from "react-bootstrap/Container";
 import { useActiveWeb3React } from "hooks";
 import ConnectButton from "components/Connect";
+import { Card } from "components/common/Card";
 import CreateSafeButton from "./CreateSafeButton";
+import SignButton from "./SignButton";
+
+import { Background, InnerCard, Image } from "./styles";
 
 const Register = () => {
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(null);
 
   const { active } = useActiveWeb3React();
 
   useEffect(() => {
     setIsConnected(active);
   }, [active]);
+
   return (
-    <div>
-      <Container style={{ marginTop: "5em" }}>
+    <Background backgroundColor="#F2F2F2" minHeight="92vh">
+      <Container>
         {isConnected ? (
           <div>
-            <div className="mb-4">
-              Please Sign the terms and conditions before continuing...
-            </div>
-            <Button>Sign and Accept Terms</Button>
-            <div className="mt-5 mb-4">You need to create a Gnosis safe:</div>
-            <CreateSafeButton />
+            <Card className="mx-auto">
+              <Image minHeight="323px" />
+              <InnerCard>
+                <div className="mb-4">
+                  Please Sign the terms and conditions before continuing...
+                </div>
+                <SignButton />
+                <div className="mt-4 mb-3">
+                  You need to create a Gnosis safe:
+                </div>
+                <CreateSafeButton />
+              </InnerCard>
+            </Card>
           </div>
         ) : (
           <div>
-            <div className="mb-4">
-              Please connect your Ethereum wallet before continuing...
-            </div>
-            <ConnectButton />
+            <Card className="mx-auto">
+              <Image minHeight="323px" />
+              <InnerCard>
+                <h2>Hey there</h2>
+                <div className="mb-4">
+                  Please connect your Ethereum wallet to proceed.
+                </div>
+                <ConnectButton />
+              </InnerCard>
+            </Card>
           </div>
         )}
       </Container>
-    </div>
+    </Background>
   );
 };
 
