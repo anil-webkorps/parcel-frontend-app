@@ -36,7 +36,7 @@ export const darkTheme = {
     backgroundColor: "#292C35",
     color: "#fff",
     inner: {
-      backgroundColor: "#292C40",
+      backgroundColor: "#f1f1f1",
       borderColor: "#333",
       disabledBackgroundColor: "f2f2f2",
     },
@@ -56,11 +56,22 @@ const GlobalStyle = createGlobalStyle`
     background: ${({ theme }) => theme.background};
     color: ${({ theme }) => theme.text};
     transition: all 0.50s linear;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 
   body.fontLoaded {
     font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+
+  a {
+    &:hover {
+      text-decoration: none;
+      color: inherit;
+    }
+  }
+
+  .modal {
+    color: #373737;
   }
 
   #app {

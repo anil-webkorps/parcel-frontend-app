@@ -30,7 +30,7 @@ const Register = () => {
   }, [active, sign]);
 
   return (
-    <Background backgroundColor="#F2F2F2" minHeight="92vh">
+    <Background withImage minHeight="92vh">
       <Container>
         {isConnected ? (
           <div>

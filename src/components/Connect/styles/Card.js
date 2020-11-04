@@ -13,7 +13,7 @@ export default styled.button`
   transition: box-shadow 150ms ease-in-out, background 200ms ease-in-out;
   border-radius: 4px;
   cursor: pointer;
-  color: inherit;
+  color: #373737;
   &:hover {
     box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.1);
   }

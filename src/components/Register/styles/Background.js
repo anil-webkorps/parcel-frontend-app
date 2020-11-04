@@ -1,7 +1,14 @@
 import styled from "styled-components/macro";
+import BackgroundImage from "assets/images/background.png";
 
 export default styled.div`
-  background-color: ${(props) => props.backgroundColor};
+  background: ${(props) =>
+    props.withImage
+      ? `url(${BackgroundImage}) no-repeat`
+      : props.backgroundColor};
+
+  background-size: contain;
+  background-repeat: repeat;
   min-height: ${(props) => props.minHeight};
   display: flex;
   justify-content: center;

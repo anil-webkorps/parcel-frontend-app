@@ -20,4 +20,8 @@ export default styled(Link)`
     background: #41addd;
     color: #fff;
   }
+
+  &:hover {
+    color: ${({ theme }) => theme.logo.color};
+  }
 `;

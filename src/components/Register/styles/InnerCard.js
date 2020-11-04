@@ -12,5 +12,9 @@ export default styled.div`
   border-radius: 16px;
   opacity: 1;
   padding: 32px;
-  color: ${({ disabled }) => (disabled ? "grey" : "#000")};
+  color: ${({ disabled }) => (disabled ? "grey" : "#373737")};
+
+  h2 {
+    font-weight: bold;
+  }
 `;

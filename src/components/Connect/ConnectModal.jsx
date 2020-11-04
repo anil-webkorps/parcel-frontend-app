@@ -58,7 +58,7 @@ const ConnectToWalletModal = (props) => {
           What is a wallet?
         </div>
         {showInfo && (
-          <div>
+          <div style={{ transition: "all 0.50s linear" }}>
             Wallets are used to send, receive, and store digital assets like
             Ether. Wallets come in many forms. They are either built into your
             browser, an extension added to your browser, a piece of hardware
