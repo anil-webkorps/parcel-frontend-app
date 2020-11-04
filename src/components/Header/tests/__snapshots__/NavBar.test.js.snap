@@ -5,6 +5,7 @@ exports[`<NavBar /> should match snapshot 1`] = `
   border-bottom: 1px solid #eee;
   -webkit-transition: all 0.5s linear;
   transition: all 0.5s linear;
+  height: 8vh;
 }
 
 <div

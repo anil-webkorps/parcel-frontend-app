@@ -17,6 +17,7 @@ export const lightTheme = {
     inner: {
       backgroundColor: "#fff",
       borderColor: "#f2f2f2",
+      disabledBackgroundColor: "f2f2f2",
     },
   },
 };
@@ -37,6 +38,7 @@ export const darkTheme = {
     inner: {
       backgroundColor: "#292C40",
       borderColor: "#333",
+      disabledBackgroundColor: "f2f2f2",
     },
   },
 };
@@ -65,12 +67,6 @@ const GlobalStyle = createGlobalStyle`
     background-color: #fafafa;
     min-height: 100%;
     min-width: 100%;
-  }
-
-  p,
-  label {
-    font-family: Georgia, Times, 'Times New Roman', serif;
-    line-height: 1.5em;
   }
 `;
 
