@@ -58,8 +58,8 @@ const Register = () => {
                   </InnerCard>
                 </div>
               ) : (
-                <InnerCard height="480px">
-                  <div className="mb-4">
+                <InnerCard height="500px">
+                  <div className="my-4">
                     Please sign this message using your private key and
                     authorize Parcel.
                   </div>
