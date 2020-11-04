@@ -39,15 +39,15 @@ const Register = () => {
               <InnerCard height="80px" disabled>
                 <div className="row justify-content-between align-items-center mx-2">
                   <div>Login</div>
-                  <div className="my-3">Success</div>
+                  <div className="my-3">Successful</div>
                 </div>
               </InnerCard>
               {hasSigned ? (
                 <div>
                   <InnerCard height="80px" disabled>
                     <div className="row justify-content-between align-items-center mx-2">
-                      <div>Signed</div>
-                      <div className="my-3">Success</div>
+                      <div>Authorization</div>
+                      <div className="my-3">Successful</div>
                     </div>
                   </InnerCard>
                   <InnerCard height="420px">
