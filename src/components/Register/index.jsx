@@ -36,23 +36,23 @@ const Register = () => {
           <div>
             <Card className="mx-auto">
               {/* <Image minHeight="323px" /> */}
-              <InnerCard height="100px" disabled>
+              <InnerCard height="80px" disabled>
                 <div className="row justify-content-between align-items-center mx-2">
                   <div>Login</div>
-                  <div className="mt-4 mb-3">Success</div>
+                  <div className="my-3">Success</div>
                 </div>
               </InnerCard>
               {hasSigned ? (
                 <div>
-                  <InnerCard height="100px" disabled>
+                  <InnerCard height="80px" disabled>
                     <div className="row justify-content-between align-items-center mx-2">
                       <div>Signed</div>
-                      <div className="mt-4 mb-3">Success</div>
+                      <div className="my-3">Success</div>
                     </div>
                   </InnerCard>
-                  <InnerCard height="380px">
-                    <div className="mt-4 mb-3">
-                      You need to create a Gnosis safe:
+                  <InnerCard height="420px">
+                    <div className="my-2">
+                      Please enter the details and create the Gnosis Safe:
                     </div>
                     <CreateSafeForm />
                   </InnerCard>
@@ -60,7 +60,8 @@ const Register = () => {
               ) : (
                 <InnerCard height="480px">
                   <div className="mb-4">
-                    Please Sign the terms and conditions before continuing...
+                    Please sign this message using your private key and
+                    authorize Parcel.
                   </div>
                   <ScrollText>
                     <p>
@@ -101,7 +102,11 @@ const Register = () => {
                       gravida, a lacinia felis accumsan.
                     </p>
                   </ScrollText>
-                  <SignButton setSign={setSign} />
+                  <SignButton
+                    setSign={setSign}
+                    large
+                    className="mx-auto d-block mt-3"
+                  />
                 </InnerCard>
               )}
             </Card>
@@ -111,11 +116,13 @@ const Register = () => {
             <Card className="mx-auto">
               <Image minHeight="323px" />
               <InnerCard height="257px">
-                <h2>Hey there</h2>
-                <div className="mb-4">
+                <h2 className="text-center">Welcome to Parcel</h2>
+                <div className="mb-4 text-center">
+                  Your one stop for crypto payroll management.
+                  <br />
                   Please connect your Ethereum wallet to proceed.
                 </div>
-                <ConnectButton />
+                <ConnectButton large className="mx-auto d-block" />
               </InnerCard>
             </Card>
           </div>

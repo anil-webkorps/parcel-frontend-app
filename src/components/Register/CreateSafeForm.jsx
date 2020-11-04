@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -11,7 +11,9 @@ import saga from "store/register/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import { registerUser } from "store/register/actions";
 import { makeSelectLoading } from "store/register/selectors";
-import { library } from "@fortawesome/fontawesome-svg-core";
+import SuccessModal from "./SuccessModal";
+
+import { FormContainer, InputContainer } from "./styles";
 
 const key = "register";
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS } = addresses;
@@ -37,6 +39,12 @@ export default function CreateSafeButton() {
     ProxyFactoryABI,
     true
   );
+
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleToggle = () => {
+    setShowSuccess(!showSuccess);
+  };
 
   const getOwnersFromValues = (values) => {
     const ownersAddress = Object.keys(values)
@@ -138,56 +146,70 @@ export default function CreateSafeButton() {
       }
       console.log({ body });
       dispatch(registerUser(body));
+      setShowSuccess(true);
     },
     [gnosisSafeMasterContract, proxyFactory, account, dispatch]
   );
 
   return (
-    <div>
+    <div className="mt-2">
       <form onSubmit={handleSubmit(createSafe)}>
-        <div>
-          <label htmlFor="name" className="mr-3">
-            Organization Name
-          </label>
-          <input type="text" name="name" ref={register({ required: true })} />
-          {errors.name && <p>Required!</p>}
-        </div>
+        <FormContainer>
+          <InputContainer dividerBottom>
+            <label htmlFor="name" className="mr-3">
+              Organization Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              ref={register({ required: true })}
+              placeholder="Awesome Company Inc"
+            />
+            {errors.name && <p className="text-danger">Required!</p>}
+          </InputContainer>
+          <div className="d-flex">
+            <InputContainer className="col-6" dividerBottom dividerRight>
+              <label htmlFor="owner_name_1" className="mr-3">
+                Owner Name
+              </label>
+              <input
+                type="text"
+                name="owner_name_1"
+                ref={register({ required: true })}
+                placeholder="John Doe"
+              />
+              {errors.owner_name_1 && <p className="text-danger">Required!</p>}
+            </InputContainer>
+            <InputContainer className="col-6" dividerBottom>
+              <label htmlFor="owner_address_1" className="mr-3">
+                Address
+              </label>
+              <input
+                type="text"
+                name="owner_address_1"
+                ref={register({ required: true })}
+                placeholder="0x32Be...2D88"
+              />
+              {errors.owner_address_1 && (
+                <p className="text-danger">Required!</p>
+              )}
+            </InputContainer>
+          </div>
 
-        <div>
-          <label htmlFor="owner_name_1" className="mr-3">
-            Owner Name
-          </label>
-          <input
-            type="text"
-            name="owner_name_1"
-            ref={register({ required: true })}
-          />
-          {errors.owner_name_1 && <p>Required!</p>}
-        </div>
-        <div>
-          <label htmlFor="owner_address_1" className="mr-3">
-            Address
-          </label>
-          <input
-            type="text"
-            name="owner_address_1"
-            ref={register({ required: true })}
-          />
-          {errors.owner_address_1 && <p>Required!</p>}
-        </div>
+          <InputContainer>
+            <label htmlFor="referralId" className="mr-3">
+              Referral Code (Optional)
+            </label>
+            <input type="text" name="referralId" ref={register()} />
+            {errors.referralId && <p className="text-danger">Required!</p>}
+          </InputContainer>
+        </FormContainer>
 
-        <div>
-          <label htmlFor="referralId" className="mr-3">
-            Referral Code (Optional)
-          </label>
-          <input type="text" name="referralId" ref={register()} />
-          {errors.referralId && <p>Required!</p>}
-        </div>
-
-        <Button type="submit">
+        <Button large className="mt-3" type="submit">
           Create Gnosis Safe {loading && <span className="ml-3">Loading</span>}
         </Button>
       </form>
+      <SuccessModal show={showSuccess} handleToggle={handleToggle} />
     </div>
   );
 }

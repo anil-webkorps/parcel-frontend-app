@@ -5,7 +5,7 @@ export default styled.div`
   background: ${(props) =>
     props.withImage
       ? `url(${BackgroundImage}) no-repeat`
-      : props.backgroundColor};
+      : props.theme.background};
 
   background-size: contain;
   background-repeat: repeat;

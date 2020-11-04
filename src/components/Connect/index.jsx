@@ -9,7 +9,7 @@ import ConnectToWalletModal from "./ConnectModal";
 import NetworkModal from "./NetworkModal";
 import Button from "components/common/Button";
 
-const ConnectToWallet = () => {
+const ConnectToWallet = ({ className, ...rest }) => {
   const { chainId, active } = useWeb3React();
 
   const handleClick = () => {
@@ -26,7 +26,12 @@ const ConnectToWallet = () => {
 
   return (
     <div>
-      <Button type="button" onClick={handleClick}>
+      <Button
+        type="button"
+        onClick={handleClick}
+        className={className}
+        {...rest}
+      >
         {!active ? (
           <span>Connect</span>
         ) : (

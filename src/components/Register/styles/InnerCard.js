@@ -11,9 +11,9 @@ export default styled.div`
   transition: all 0.5s linear;
   border-radius: 16px;
   opacity: 1;
-  padding: 32px;
+  padding: 16px 32px;
   color: ${({ disabled }) => (disabled ? "grey" : "#373737")};
-
+  overflow-y: auto;
   h2 {
     font-weight: bold;
   }

@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import { useActiveWeb3React } from "hooks";
 import Button from "components/common/Button";
 
-export default function CreateSafeButton({ setSign }) {
+export default function CreateSafeButton({ setSign, ...rest }) {
   // const setSign = useLocalStorage("SIGNATURE")[1];
   const { library, account } = useActiveWeb3React();
 
@@ -22,7 +22,9 @@ export default function CreateSafeButton({ setSign }) {
 
   return (
     <div>
-      <Button onClick={signTerms}>Sign and Accept Terms</Button>
+      <Button onClick={signTerms} {...rest}>
+        Authorize Parcel
+      </Button>
     </div>
   );
 }

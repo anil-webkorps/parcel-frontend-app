@@ -5,13 +5,24 @@ export default styled.button`
   background-color: #7367f0;
 
   color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0;
-  line-height: 24px;
   text-align: center;
   border: none;
-  padding: 5px 20px;
+  padding: 10px 20px;
+  font-family: Montserrat;
+  font-size: 16px;
+  font-weight: 500;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: 1.19;
+  letter-spacing: normal;
+
+  ${(props) =>
+    props.large &&
+    `
+    width: 100%;
+    min-height: 60px;
+    border-radius: 10px;
+  `}
 
   &:hover {
     background-color: #3c3c3c;
