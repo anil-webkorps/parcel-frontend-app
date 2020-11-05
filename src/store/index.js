@@ -1,11 +1,7 @@
-import { createStore, combineReducers, applyMiddleware, compose } from "redux";
+import { createStore, applyMiddleware, compose } from "redux";
 import createSagaMiddleware from "redux-saga";
 
-import theme from "./theme/reducer";
-
-export const rootReducer = combineReducers({
-  theme,
-});
+import createReducer from "./reducers";
 
 export default function configureStore(initialState = {}) {
   let composeEnhancers = compose;
@@ -32,11 +28,12 @@ export default function configureStore(initialState = {}) {
   const enhancers = [applyMiddleware(...middlewares)];
 
   const store = createStore(
-    rootReducer,
+    createReducer(),
     initialState,
     composeEnhancers(...enhancers)
   );
   store.runSaga = sagaMiddleware.run;
+  store.injectedReducers = {}; // Reducer registry
   store.injectedSagas = {}; // Saga registry
   return store;
 }

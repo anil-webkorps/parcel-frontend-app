@@ -9,17 +9,20 @@ exports[`<Header /> should render a div 1`] = `
       class="NavBarContent-sc-1mdt97k-0 evOqRE"
     >
       <a
-        class="HeaderLink-sc-1d6bmzm-0 eZgfOc"
+        class="HeaderLink-sc-1d6bmzm-0 kHbZXH"
         href="/"
       >
-        Parcel
+        <div
+          class="Logo-nfvd7h-0 PCcWQ mr-2"
+        />
+         Parcel
       </a>
       <div
         class="NavGroup-zql0jc-0 iGMSok"
       >
         <div>
           <button
-            class="Button-sc-1sbjppv-0 iRfuSF"
+            class="Button-sc-1sbjppv-0 ccunzv"
             type="button"
           >
             <span>

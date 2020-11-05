@@ -1,24 +1,34 @@
 import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 
 import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage } from "hooks";
 import ConnectButton from "components/Connect";
 import { Card } from "components/common/Card";
 import CreateSafeForm from "./CreateSafeForm";
-import SignButton from "./SignButton";
-
+import SignButton from "../AuthorizeButton";
+import { useInjectReducer } from "utils/injectReducer";
+import reducer from "store/registerWizard/reducer";
 import { Background, InnerCard, Image, ScrollText } from "./styles";
+import { makeSelectStep } from "store/registerWizard/selectors";
+import { chooseStep } from "store/registerWizard/actions";
 
+const key = "registerWizard";
 const Register = () => {
-  const [isConnected, setIsConnected] = useState(null);
   const [hasSigned, setHasSigned] = useState(false);
   const [sign, setSign] = useLocalStorage("SIGNATURE");
 
   const { active } = useActiveWeb3React();
 
+  useInjectReducer({ key, reducer });
+
+  const dispatch = useDispatch();
+  const step = useSelector(makeSelectStep());
+
   useEffect(() => {
-    setIsConnected(active);
-  }, [active]);
+    if (active && step === 1) dispatch(chooseStep(step + 1));
+    if (!active) dispatch(chooseStep(1));
+  }, [active, dispatch, step]);
 
   // const sign = useMemo(() => sign, [sign]);
 
@@ -29,10 +39,28 @@ const Register = () => {
     }
   }, [active, sign]);
 
+  const renderConnect = () => (
+    <div>
+      <Card className="mx-auto">
+        <Image minHeight="323px" />
+        <InnerCard height="257px">
+          <h2 className="text-center">Welcome to Parcel</h2>
+          <div className="mb-4 text-center">
+            Your one stop for crypto payroll management.
+            <br />
+            Please connect your Ethereum wallet to proceed.
+          </div>
+          <ConnectButton large className="mx-auto d-block" />
+        </InnerCard>
+      </Card>
+    </div>
+  );
+
   return (
     <Background withImage minHeight="92vh">
       <Container>
-        {isConnected ? (
+        {step === 1 && renderConnect()}
+        {step === 2 && (
           <div>
             <Card className="mx-auto">
               {/* <Image minHeight="323px" /> */}
@@ -109,21 +137,6 @@ const Register = () => {
                   />
                 </InnerCard>
               )}
-            </Card>
-          </div>
-        ) : (
-          <div>
-            <Card className="mx-auto">
-              <Image minHeight="323px" />
-              <InnerCard height="257px">
-                <h2 className="text-center">Welcome to Parcel</h2>
-                <div className="mb-4 text-center">
-                  Your one stop for crypto payroll management.
-                  <br />
-                  Please connect your Ethereum wallet to proceed.
-                </div>
-                <ConnectButton large className="mx-auto d-block" />
-              </InnerCard>
             </Card>
           </div>
         )}
