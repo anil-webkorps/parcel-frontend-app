@@ -2,7 +2,15 @@ import { Link } from "react-router-dom";
 
 import { Button } from "./styles";
 
-const CustomButton = ({ children, className, to, href, ...rest }) => {
+const CustomButton = ({
+  children,
+  className,
+  to,
+  href,
+  iconOnly,
+  style: propStyles,
+  ...rest
+}) => {
   if (to) {
     return (
       <Link to={to}>
@@ -18,6 +26,18 @@ const CustomButton = ({ children, className, to, href, ...rest }) => {
           {children}
         </Button>
       </a>
+    );
+  }
+
+  if (iconOnly) {
+    return (
+      <Button
+        className={className}
+        style={{ border: "none", background: "none", ...propStyles }}
+        {...rest}
+      >
+        {children}
+      </Button>
     );
   }
 
