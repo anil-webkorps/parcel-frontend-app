@@ -15,7 +15,7 @@ const reducer = (state = initialState, action) =>
         break;
 
       case UPDATE_FORM:
-        draft.form = action.formData;
+        draft.form = { ...draft.form, ...action.formData };
         break;
     }
   });

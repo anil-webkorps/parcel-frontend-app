@@ -22,8 +22,8 @@ export default function CreateSafeButton({ setSign, ...rest }) {
 
   return (
     <div>
-      <Button onClick={signTerms} {...rest}>
-        Authorize Parcel
+      <Button type="button" onClick={signTerms} {...rest}>
+        I'm in
       </Button>
     </div>
   );
