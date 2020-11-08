@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useLocation, useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
@@ -12,7 +13,7 @@ import { useActiveWeb3React, useLocalStorage, useContract } from "hooks";
 import ConnectButton from "components/Connect";
 import { Card } from "components/common/Card";
 // import CreateSafeForm from "./CreateSafeForm";
-import AuthorizeButton from "../AuthorizeButton";
+// import AuthorizeButton from "../AuthorizeButton";
 import { useInjectReducer } from "utils/injectReducer";
 import registerWizardReducer from "store/registerWizard/reducer";
 import registerReducer from "store/register/reducer";
@@ -40,6 +41,7 @@ import registerSaga from "store/register/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import { registerUser } from "store/register/actions";
 import { makeSelectLoading } from "store/register/selectors";
+import { cryptoUtils } from "parcel-sdk";
 
 const registerKey = "register";
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS } = addresses;
@@ -63,30 +65,36 @@ const REGISTER_STEPS = {
 };
 
 const Register = () => {
-  // const [hasSigned, setHasSigned] = useState(false);
   const [sign, setSign] = useLocalStorage("SIGNATURE");
 
-  const { active, account } = useActiveWeb3React();
+  const { active, account, library } = useActiveWeb3React();
 
+  // Reducers
   useInjectReducer({ key: registerWizardKey, reducer: registerWizardReducer });
   useInjectReducer({ key: registerKey, reducer: registerReducer });
 
-  const dispatch = useDispatch();
-  const step = useSelector(makeSelectStep());
-  const formData = useSelector(makeSelectFormData());
-  const loading = useSelector(makeSelectLoading());
+  // Sagas
   useInjectSaga({ key: registerKey, saga: registerSaga });
 
-  const { register, handleSubmit, errors, reset, control } = useForm({
-    defaultValues: {
-      owners: [{ name: "", owner: "bruh" }],
-    },
-  });
+  // Route
+  // const history = useHistory();
+  const location = useLocation();
+
+  const dispatch = useDispatch();
+
+  // Selectors
+  const step = useSelector(makeSelectStep());
+  const formData = useSelector(makeSelectFormData());
+  // const loading = useSelector(makeSelectLoading());
+
+  // Form
+  const { register, handleSubmit, errors, reset, control } = useForm();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "owners",
   });
 
+  // Contracts
   const gnosisSafeMasterContract = useContract(
     GNOSIS_SAFE_ADDRESS,
     GnosisSafeABI,
@@ -105,41 +113,81 @@ const Register = () => {
   }, [active, dispatch, step]);
 
   useEffect(() => {
-    reset({ owners: [{ name: "", owner: account }], ...formData });
+    reset({
+      owners: [{ name: "", owner: account }],
+      ...formData,
+    });
   }, [reset, formData, account]);
 
   useEffect(() => {
-    if (sign && sign[0] && active) {
-      // console.log({ sign });
-      // setHasSigned(true);
-    }
-  }, [active, sign]);
+    const searchParams = new URLSearchParams(location.search);
+    const referralId = searchParams.get("referralId");
+    if (referralId) dispatch(updateForm({ referralId }));
+  }, [location, dispatch]); // eslint-disable-line
 
-  const onSubmit = (values) => {
+  const onSubmit = async (values) => {
     // console.log(values);
     dispatch(updateForm(values));
-    dispatch(chooseStep(step + 1));
+    console.log({ values });
+    if (step === STEPS.THREE && !formData.referralId) {
+      try {
+        await createSafe(values.threshold); // ugly hack - TODO: Fix race condition and remove arg
+        dispatch(chooseStep(step + 1));
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      dispatch(chooseStep(step + 1));
+    }
+
+    if (step > STEPS.FOUR) {
+      console.log("REDIRECTING....");
+    }
   };
+
+  const signTerms = useCallback(async () => {
+    if (!!library && !!account) {
+      try {
+        await library
+          .getSigner(account)
+          .signMessage(`sign your ${account} to create encryption key`)
+          .then((signature) => {
+            setSign(signature);
+            if (formData.referralId) createSafeWithMetaTransaction();
+            else {
+              console.log({ formData });
+              const body = {
+                name: cryptoUtils.encryptData(formData.name, signature),
+                safeAddress: formData.safeAddress,
+                createdBy: account,
+                owners: formData.owners,
+                proxyData: {
+                  from: account,
+                  params: [GNOSIS_SAFE_ADDRESS, formData.creationData],
+                },
+              };
+              dispatch(registerUser(body));
+            }
+          });
+      } catch (error) {
+        console.error("Transaction Failed");
+      }
+    }
+  }, [library, account, setSign, dispatch, formData]); //eslint-disable-line
 
   const goBack = () => {
     dispatch(chooseStep(step - 1));
   };
 
-  const createSafe = useCallback(async () => {
-    let body;
-
+  const createSafe = async (_threshold) => {
+    // let body;
     if (gnosisSafeMasterContract && proxyFactory && account) {
       const ownerAddresses = formData.owners.map(({ owner }) => owner);
-      const threshold = Number(formData.threshold);
-      /// @dev Setup function sets initial storage of contract.
-      /// @param _owners List of Safe owners.
-      /// @param _threshold Number of required confirmations for a Safe transaction.
-      /// @param to Contract address for optional delegate call.
-      /// @param data Data payload for optional delegate call.
-      /// @param fallbackHandler Handler for fallback calls to this contract
-      /// @param paymentToken Token that should be used for the payment (0 is ETH)
-      /// @param payment Value that should be paid
-      /// @param paymentReceiver Adddress that should receive the payment (or 0 if tx.origin)
+      console.log({ formData });
+      const threshold = formData.threshold
+        ? parseInt(formData.threshold)
+        : _threshold;
+      console.log({ ownerAddresses, threshold });
       const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
         "setup",
         [
@@ -154,57 +202,81 @@ const Register = () => {
         ]
       );
 
-      if (formData.referralId) {
-        // Execute Meta transaction
+      console.log({ ownerAddresses, threshold, creationData });
 
-        body = {
-          name: formData.name,
-          // referralId: values.referralId,
-          // safeAddress: "",
-          createdBy: account,
-          owners: formData.owners,
-          proxyData: {
-            from: account,
-            params: [GNOSIS_SAFE_ADDRESS, creationData],
-          },
-        };
-      } else {
-        // Execute normal transaction
-        // Create Proxy
-        const estimateGas = await proxyFactory.estimateGas.createProxy(
-          GNOSIS_SAFE_ADDRESS,
-          creationData
+      // Execute normal transaction
+      // Create Proxy
+      const estimateGas = await proxyFactory.estimateGas.createProxy(
+        GNOSIS_SAFE_ADDRESS,
+        creationData
+      );
+
+      const tx = await proxyFactory.createProxy(
+        GNOSIS_SAFE_ADDRESS,
+        creationData,
+        { gasLimit: estimateGas, gasPrice: "10000000000" }
+      );
+
+      proxyFactory.once("ProxyCreation", (proxy) => {
+        console.log({ proxy });
+        dispatch(
+          updateForm({
+            safeAddress: proxy,
+            creationData,
+          })
         );
+      });
 
-        const tx = await proxyFactory.createProxy(
-          GNOSIS_SAFE_ADDRESS,
-          creationData,
-          { gasLimit: estimateGas }
-        );
-
-        const deployedProxy = proxyFactory.once(
-          "ProxyCreation",
-          (proxy) => proxy
-        );
-
-        const result = await tx.wait();
-        console.log("tx success", result);
-
-        body = {
-          name: formData.name,
-          safeAddress: deployedProxy.address,
-          createdBy: account,
-          owners: formData.owners,
-          proxyData: {
-            from: account,
-            params: [GNOSIS_SAFE_ADDRESS, creationData],
-          },
-        };
-      }
+      const result = await tx.wait();
+      console.log("tx success", result);
     }
-    console.log({ body });
+  };
+
+  const createSafeWithMetaTransaction = useCallback(async () => {
+    let body;
+
+    if (gnosisSafeMasterContract && proxyFactory && account && sign) {
+      const ownerAddresses = formData.owners.map(({ owner }) => owner);
+      const threshold = Number(formData.threshold);
+
+      const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
+        "setup",
+        [
+          ownerAddresses,
+          threshold,
+          "0x0000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000",
+          0,
+          "0x0000000000000000000000000000000000000000",
+        ]
+      );
+
+      // Execute Meta transaction
+
+      body = {
+        name: cryptoUtils.encryptData(formData.name, sign),
+        referralId: formData.referralId,
+        safeAddress: "",
+        createdBy: account,
+        owners: formData.owners,
+        proxyData: {
+          from: account,
+          params: [GNOSIS_SAFE_ADDRESS, creationData],
+        },
+      };
+      console.log({ body });
+    }
     dispatch(registerUser(body));
-  }, [gnosisSafeMasterContract, proxyFactory, account, dispatch, formData]);
+  }, [
+    gnosisSafeMasterContract,
+    proxyFactory,
+    account,
+    dispatch,
+    formData,
+    sign,
+  ]);
 
   const renderConnect = () => (
     <div>
@@ -347,7 +419,7 @@ const Register = () => {
                       type="button"
                       iconOnly
                       onClick={() => remove(index)}
-                      style={{ backgroundColor: "red" }}
+                      style={{ backgroundColor: "#ff1c46" }}
                       className="px-2 py-2"
                     >
                       <FontAwesomeIcon icon={faMinus} color="#fff" />
@@ -421,7 +493,14 @@ const Register = () => {
           Please sign this message using your private key and authorize Parcel.
         </p>
 
-        <AuthorizeButton setSign={setSign} large className="mx-auto d-block" />
+        <Button
+          type="button"
+          onClick={signTerms}
+          large
+          className="mx-auto d-block"
+        >
+          I'm in
+        </Button>
       </StepDetails>
     );
   };
