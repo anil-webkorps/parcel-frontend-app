@@ -8,6 +8,7 @@ const CustomButton = ({
   to,
   href,
   iconOnly,
+  secondary,
   style: propStyles,
   ...rest
 }) => {
@@ -42,7 +43,7 @@ const CustomButton = ({
   }
 
   return (
-    <Button className={className} {...rest}>
+    <Button className={className} secondary={secondary} {...rest}>
       {children}
     </Button>
   );

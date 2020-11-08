@@ -31,4 +31,13 @@ export default styled.button`
   &:focus {
     outline: 0;
   }
+
+  ${(props) =>
+    props.secondary &&
+    `background: white; border: 1px solid #7367f0; color: #7367f0;
+      &:hover {
+        background-color: #7367f0;
+        color: white;
+      }
+    `}
 `;

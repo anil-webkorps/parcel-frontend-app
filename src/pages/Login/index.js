@@ -1,7 +1,9 @@
 import React from "react";
 
+import Login from "components/Login";
+
 const LoginPage = () => {
-  return <h3 className="my-4 text-center">Login</h3>;
+  return <Login />;
 };
 
 export default LoginPage;
