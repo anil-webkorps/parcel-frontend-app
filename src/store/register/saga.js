@@ -5,7 +5,6 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 import { REGISTER_USER } from "./action-types";
 import { registerUserSuccess, registerUserError } from "./actions";
-
 import request from "utils/request";
 // import { makeSelectUsername } from "containers/HomePage/selectors";
 import { registerEndPoint } from "constants/endpoints";

@@ -10,6 +10,7 @@ export const initialState = {
   error: false,
   transactionHash: "",
   log: "",
+  shouldRedirect: false,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -27,6 +28,7 @@ const reducer = (state = initialState, action) =>
         draft.transactionHash = action.transactionHash;
         draft.log = action.log;
         draft.loading = false;
+        draft.shouldRedirect = true;
         break;
 
       case REGISTER_USER_ERROR:

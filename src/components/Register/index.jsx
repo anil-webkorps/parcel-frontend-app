@@ -40,7 +40,7 @@ import ProxyFactoryABI from "constants/abis/ProxyFactory.json";
 import registerSaga from "store/register/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import { registerUser } from "store/register/actions";
-import { makeSelectLoading } from "store/register/selectors";
+import { makeSelectShouldRedirect } from "store/register/selectors";
 import { cryptoUtils } from "parcel-sdk";
 
 const registerKey = "register";
@@ -77,7 +77,7 @@ const Register = () => {
   useInjectSaga({ key: registerKey, saga: registerSaga });
 
   // Route
-  // const history = useHistory();
+  const history = useHistory();
   const location = useLocation();
 
   const dispatch = useDispatch();
@@ -85,6 +85,7 @@ const Register = () => {
   // Selectors
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
+  const shouldRedirect = useSelector(makeSelectShouldRedirect());
   // const loading = useSelector(makeSelectLoading());
 
   // Form
@@ -113,6 +114,10 @@ const Register = () => {
   }, [active, dispatch, step]);
 
   useEffect(() => {
+    if (shouldRedirect) history.push("/dashboard");
+  }, [shouldRedirect, history]);
+
+  useEffect(() => {
     reset({
       owners: [{ name: "", owner: account }],
       ...formData,
@@ -128,7 +133,6 @@ const Register = () => {
   const onSubmit = async (values) => {
     // console.log(values);
     dispatch(updateForm(values));
-    console.log({ values });
     if (step === STEPS.THREE && !formData.referralId) {
       try {
         await createSafe(values.threshold); // ugly hack - TODO: Fix race condition and remove arg
@@ -138,10 +142,6 @@ const Register = () => {
       }
     } else {
       dispatch(chooseStep(step + 1));
-    }
-
-    if (step > STEPS.FOUR) {
-      console.log("REDIRECTING....");
     }
   };
 
@@ -168,7 +168,8 @@ const Register = () => {
               };
               dispatch(registerUser(body));
             }
-          });
+          })
+          .then(() => history.push("/dashboard"));
       } catch (error) {
         console.error("Transaction Failed");
       }
@@ -183,7 +184,7 @@ const Register = () => {
     // let body;
     if (gnosisSafeMasterContract && proxyFactory && account) {
       const ownerAddresses = formData.owners.map(({ owner }) => owner);
-      console.log({ formData });
+
       const threshold = formData.threshold
         ? parseInt(formData.threshold)
         : _threshold;

@@ -6,22 +6,20 @@ export default styled(Link)`
   padding: 0.25em 0;
   margin: 1em 0;
   text-decoration: none;
-  -webkit-font-smoothing: antialiased;
-  -webkit-touch-callout: none;
-  user-select: none;
   cursor: pointer;
   outline: 0;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: bold;
   font-size: 20px;
   color: ${({ theme }) => theme.logo.color};
 
   &:active {
-    background: #41addd;
+    background: none;
     color: #fff;
   }
 
   &:hover {
     color: ${({ theme }) => theme.logo.color};
+    text-decoration: none;
   }
 `;

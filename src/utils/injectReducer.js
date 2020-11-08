@@ -39,7 +39,7 @@ const useInjectReducer = ({ key, reducer }) => {
   const context = React.useContext(ReactReduxContext);
   React.useEffect(() => {
     getInjectors(context.store).injectReducer(key, reducer);
-  }, []);
+  }, []); //eslint-disable-line
 };
 
 export { useInjectReducer };

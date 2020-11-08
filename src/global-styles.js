@@ -68,10 +68,15 @@ const GlobalStyle = createGlobalStyle`
   }
 
   a {
-    &:hover {
+    &:hover, &:focus,   {
       text-decoration: none;
       color: inherit;
+      background: none;
     }
+    &:active{
+      background : red;
+    }
+
   }
 
   .modal {

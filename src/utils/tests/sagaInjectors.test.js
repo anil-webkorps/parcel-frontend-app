@@ -130,7 +130,7 @@ describe("injectors", () => {
       expect(() => inject("test", testSaga)).toThrow();
     });
 
-    it("it should not check a store if the second argument is true", () => {
+    it("should not check a store if the second argument is true", () => {
       Reflect.deleteProperty(store, "dispatch");
 
       expect(() => injectSaga("test", { saga: testSaga })).not.toThrow();

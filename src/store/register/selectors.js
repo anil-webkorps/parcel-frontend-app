@@ -22,10 +22,17 @@ const makeSelectTransactionHash = () =>
 const makeSelectLog = () =>
   createSelector(selectRegister, (registerState) => registerState.log);
 
+const makeSelectShouldRedirect = () =>
+  createSelector(
+    selectRegister,
+    (registerState) => registerState.makeSelectShouldRedirect
+  );
+
 export {
   selectRegister,
   makeSelectLoading,
   makeSelectError,
   makeSelectTransactionHash,
   makeSelectLog,
+  makeSelectShouldRedirect,
 };
