@@ -3,6 +3,8 @@
  */
 
 import { call, put, takeLatest } from "redux-saga/effects";
+import { push } from "connected-react-router";
+
 import { LOGIN_USER } from "./action-types";
 import { loginUserSuccess, loginUserError } from "./actions";
 import request from "utils/request";
@@ -24,6 +26,7 @@ export function* loginUser(action) {
       yield put(loginUserError(result.log));
     } else {
       yield put(loginUserSuccess(result.transactionHash, result.log));
+      yield put(push("/dashboard"));
     }
   } catch (err) {
     yield put(loginUserError(err));

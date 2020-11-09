@@ -2,7 +2,6 @@ import produce from "immer";
 import {
   CHOOSE_STEP,
   UPDATE_FORM,
-  SELECT_SAFE,
   GET_SAFES,
   GET_SAFES_SUCCESS,
   GET_SAFES_ERROR,
@@ -14,7 +13,6 @@ export const initialState = {
   loading: false,
   safes: [],
   error: false,
-  selectedSafe: "",
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -27,10 +25,6 @@ const reducer = (state = initialState, action) =>
 
       case UPDATE_FORM:
         draft.form = { ...draft.form, ...action.formData };
-        break;
-
-      case SELECT_SAFE:
-        draft.selectedSafe = action.safe;
         break;
 
       case GET_SAFES:

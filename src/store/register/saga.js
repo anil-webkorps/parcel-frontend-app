@@ -3,6 +3,7 @@
  */
 
 import { call, put, takeLatest } from "redux-saga/effects";
+import { push } from "connected-react-router";
 import { REGISTER_USER } from "./action-types";
 import { registerUserSuccess, registerUserError } from "./actions";
 import request from "utils/request";
@@ -32,6 +33,7 @@ export function* registerUser(action) {
       yield put(registerUserError(result.log));
     } else {
       yield put(registerUserSuccess(result.transactionHash, result.log));
+      yield put(push("/dashboard"));
     }
   } catch (err) {
     yield put(registerUserError(err));

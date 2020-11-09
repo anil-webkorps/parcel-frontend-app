@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useLocation, useHistory } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
@@ -40,7 +40,6 @@ import ProxyFactoryABI from "constants/abis/ProxyFactory.json";
 import registerSaga from "store/register/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import { registerUser } from "store/register/actions";
-import { makeSelectShouldRedirect } from "store/register/selectors";
 import { cryptoUtils } from "parcel-sdk";
 
 const registerKey = "register";
@@ -77,7 +76,6 @@ const Register = () => {
   useInjectSaga({ key: registerKey, saga: registerSaga });
 
   // Route
-  const history = useHistory();
   const location = useLocation();
 
   const dispatch = useDispatch();
@@ -85,7 +83,6 @@ const Register = () => {
   // Selectors
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
-  const shouldRedirect = useSelector(makeSelectShouldRedirect());
   // const loading = useSelector(makeSelectLoading());
 
   // Form
@@ -112,10 +109,6 @@ const Register = () => {
     if (active && step === STEPS.ZERO) dispatch(chooseStep(step + 1));
     if (!active) dispatch(chooseStep(STEPS.ZERO));
   }, [active, dispatch, step]);
-
-  useEffect(() => {
-    if (shouldRedirect) history.push("/dashboard");
-  }, [shouldRedirect, history]);
 
   useEffect(() => {
     reset({
@@ -155,7 +148,6 @@ const Register = () => {
             setSign(signature);
             if (formData.referralId) createSafeWithMetaTransaction();
             else {
-              console.log({ formData });
               const body = {
                 name: cryptoUtils.encryptData(formData.name, signature),
                 safeAddress: formData.safeAddress,
@@ -168,8 +160,7 @@ const Register = () => {
               };
               dispatch(registerUser(body));
             }
-          })
-          .then(() => history.push("/dashboard"));
+          });
       } catch (error) {
         console.error("Transaction Failed");
       }

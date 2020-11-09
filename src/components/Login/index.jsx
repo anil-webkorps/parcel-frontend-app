@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useLocation, useHistory } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
@@ -32,17 +32,11 @@ import {
 import {
   makeSelectFormData,
   makeSelectStep,
-  makeSelectSelectedSafe,
   makeSelectLoading,
   makeSelectSafes,
   makeSelectError,
 } from "store/loginWizard/selectors";
-import {
-  chooseStep,
-  updateForm,
-  selectSafe,
-  getSafes,
-} from "store/loginWizard/actions";
+import { chooseStep, updateForm, getSafes } from "store/loginWizard/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
 import { Input, ErrorMessage } from "components/common/Form";
@@ -61,8 +55,7 @@ import loginSaga from "store/login/saga";
 import loginWizardSaga from "store/loginWizard/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import { loginUser } from "store/login/actions";
-import { makeSelectShouldRedirect } from "store/login/selectors";
-import { cryptoUtils } from "parcel-sdk";
+// import { cryptoUtils } from "parcel-sdk";
 
 const loginKey = "login";
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS } = addresses;
@@ -79,10 +72,18 @@ const STEPS = {
 
 const LOGIN_STEPS = {
   [STEPS.ZERO]: "Connect",
-  [STEPS.ONE]: "Choose Safe",
-  [STEPS.TWO]: "Privacy",
+  [STEPS.ONE]: "Privacy",
+  [STEPS.TWO]: "Choose Safe",
   // [STEPS.THREE]: "Payment Threshold",
   // [STEPS.FOUR]: "Privacy",
+};
+
+const IMPORT_STEPS = {
+  [STEPS.ZERO]: "Connect",
+  [STEPS.ONE]: "Choose Safe",
+  [STEPS.TWO]: "Privacy",
+  [STEPS.THREE]: "Company Name",
+  [STEPS.FOUR]: "Owner Name",
 };
 
 const Login = () => {
@@ -99,7 +100,6 @@ const Login = () => {
   useInjectSaga({ key: loginWizardKey, saga: loginWizardSaga });
 
   // Router
-  const history = useHistory();
   const location = useLocation();
 
   const dispatch = useDispatch();
@@ -107,9 +107,7 @@ const Login = () => {
   // Selectors
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
-  const shouldRedirect = useSelector(makeSelectShouldRedirect());
   const safes = useSelector(makeSelectSafes());
-  const selectedSafe = useSelector(makeSelectSelectedSafe());
   const getSafesLoading = useSelector(makeSelectLoading());
   const getSafesError = useSelector(makeSelectError());
   // const loading = useSelector(makeSelectLoading());
@@ -135,13 +133,8 @@ const Login = () => {
   );
 
   useEffect(() => {
-    // if (active && step === STEPS.ZERO) dispatch(chooseStep(step + 1));
     if (!active) dispatch(chooseStep(STEPS.ZERO));
   }, [active, dispatch, step]);
-
-  useEffect(() => {
-    if (shouldRedirect) history.push("/dashboard");
-  }, [shouldRedirect, history]);
 
   useEffect(() => {
     reset({
@@ -156,17 +149,16 @@ const Login = () => {
     if (referralId) dispatch(updateForm({ referralId }));
   }, [location, dispatch]); // eslint-disable-line
 
-  const onSubmit = async (values) => {
-    // console.log(values);
-    dispatch(updateForm(values));
-    dispatch(chooseStep(step + 1));
-  };
-
   useEffect(() => {
     if (step === STEPS.ONE && account) {
       dispatch(getSafes(account));
     }
   }, [step, dispatch, account]);
+
+  const onSubmit = async (values) => {
+    dispatch(updateForm(values));
+    dispatch(chooseStep(step + 1));
+  };
 
   const signTerms = useCallback(async () => {
     if (!!library && !!account) {
@@ -176,9 +168,8 @@ const Login = () => {
           .signMessage(`sign your ${account} to create encryption key`)
           .then((signature) => {
             setSign(signature);
-            dispatch(loginUser(selectedSafe));
-          })
-          .then(() => history.push("/dashboard"));
+            goNext();
+          });
       } catch (error) {
         console.error("Transaction Failed");
       }
@@ -498,8 +489,8 @@ const Login = () => {
   }, [safes]);
 
   const handleSelectSafe = (safe) => {
-    dispatch(selectSafe(safe));
-    goNext();
+    // dispatch(selectSafe(safe));
+    dispatch(loginUser(safe));
   };
 
   const renderSafes = () => {
@@ -572,39 +563,9 @@ const Login = () => {
           {step !== STEPS.ZERO && renderStepHeader()}
           <form onSubmit={handleSubmit(onSubmit)}>
             {step === STEPS.ZERO && renderConnect()}
-            {step === STEPS.ONE && renderSafes()}
-            {step === STEPS.TWO && renderPrivacy()}
+            {step === STEPS.ONE && renderPrivacy()}
+            {step === STEPS.TWO && renderSafes()}
           </form>
-          {/* <div>
-            {hasSigned ? (
-              <div>
-                <InnerCard height="80px" disabled>
-                  <div className="row justify-content-between align-items-center mx-2">
-                    <div>Authorization</div>
-                    <div className="my-3">Successful</div>
-                  </div>
-                </InnerCard>
-                <InnerCard height="420px">
-                  <div className="my-2">
-                    Please enter the details and create the Gnosis Safe:
-                  </div>
-                  <CreateSafeForm />
-                </InnerCard>
-              </div>
-            ) : (
-              <InnerCard height="500px">
-                <div className="my-4">
-                  Please sign this message using your private key and authorize
-                  Parcel.
-                </div>
-                <SignButton
-                  setSign={setSign}
-                  large
-                  className="mx-auto d-block mt-3"
-                />
-              </InnerCard>
-            )}
-          </div> */}
         </Card>
       </Container>
     </Background>
