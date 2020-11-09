@@ -4,10 +4,10 @@ import {
   LOGIN_USER_ERROR,
 } from "./action-types";
 
-export function loginUser(body) {
+export function loginUser(safeAddress) {
   return {
     type: LOGIN_USER,
-    body,
+    safeAddress,
   };
 }
 

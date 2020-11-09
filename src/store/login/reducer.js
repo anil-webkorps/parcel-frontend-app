@@ -34,6 +34,7 @@ const reducer = (state = initialState, action) =>
       case LOGIN_USER_ERROR:
         draft.error = action.error;
         draft.loading = false;
+        draft.shouldRedirect = false;
         break;
     }
   });

@@ -1,5 +1,6 @@
 export const CHOOSE_STEP = "parcel/loginWizard/CHOOSE_STEP";
 export const UPDATE_FORM = "parcel/loginWizard/UPDATE_FORM";
+export const SELECT_SAFE = "parcel/loginWizard/SELECT_SAFE";
 
 export const GET_SAFES = "parcel/loginWizard/GET_SAFES";
 export const GET_SAFES_SUCCESS = "parcel/loginWizard/GET_SAFES_SUCCESS";

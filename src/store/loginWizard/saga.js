@@ -15,9 +15,6 @@ export function* getSafes(action) {
   const requestURL = `${getSafesEndpoint}?owner=${action.owner}`;
   const options = {
     method: "GET",
-    header: {
-      "content-type": "application/json",
-    },
   };
 
   try {

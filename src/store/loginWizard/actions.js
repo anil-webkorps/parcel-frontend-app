@@ -1,6 +1,7 @@
 import {
   CHOOSE_STEP,
   UPDATE_FORM,
+  SELECT_SAFE,
   GET_SAFES,
   GET_SAFES_SUCCESS,
   GET_SAFES_ERROR,
@@ -17,6 +18,13 @@ export function updateForm(formData) {
   return {
     type: UPDATE_FORM,
     formData,
+  };
+}
+
+export function selectSafe(safe) {
+  return {
+    type: SELECT_SAFE,
+    safe,
   };
 }
 

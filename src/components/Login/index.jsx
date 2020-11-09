@@ -32,11 +32,17 @@ import {
 import {
   makeSelectFormData,
   makeSelectStep,
+  makeSelectSelectedSafe,
   makeSelectLoading,
   makeSelectSafes,
   makeSelectError,
 } from "store/loginWizard/selectors";
-import { chooseStep, updateForm, getSafes } from "store/loginWizard/actions";
+import {
+  chooseStep,
+  updateForm,
+  selectSafe,
+  getSafes,
+} from "store/loginWizard/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
 import { Input, ErrorMessage } from "components/common/Form";
@@ -103,6 +109,7 @@ const Login = () => {
   const formData = useSelector(makeSelectFormData());
   const shouldRedirect = useSelector(makeSelectShouldRedirect());
   const safes = useSelector(makeSelectSafes());
+  const selectedSafe = useSelector(makeSelectSelectedSafe());
   const getSafesLoading = useSelector(makeSelectLoading());
   const getSafesError = useSelector(makeSelectError());
   // const loading = useSelector(makeSelectLoading());
@@ -161,17 +168,6 @@ const Login = () => {
     }
   }, [step, dispatch, account]);
 
-  // useEffect(() => {
-  //   if (safes.length) {
-  //     const safeDetails = safes.reduce((details, safe) => {
-  //       // get name and balance from the api or from SC
-  //       return details.push({ address: safe, name: "Parcel Safe", balance: "1"})
-  //     }, [])
-
-  //     setSafeDetails()
-  //   }
-  // }, [safes])
-
   const signTerms = useCallback(async () => {
     if (!!library && !!account) {
       try {
@@ -180,21 +176,7 @@ const Login = () => {
           .signMessage(`sign your ${account} to create encryption key`)
           .then((signature) => {
             setSign(signature);
-            if (formData.referralId) createSafeWithMetaTransaction();
-            else {
-              console.log({ formData });
-              const body = {
-                name: cryptoUtils.encryptData(formData.name, signature),
-                safeAddress: formData.safeAddress,
-                createdBy: account,
-                owners: formData.owners,
-                proxyData: {
-                  from: account,
-                  params: [GNOSIS_SAFE_ADDRESS, formData.creationData],
-                },
-              };
-              dispatch(loginUser(body));
-            }
+            dispatch(loginUser(selectedSafe));
           })
           .then(() => history.push("/dashboard"));
       } catch (error) {
@@ -205,6 +187,10 @@ const Login = () => {
 
   const goBack = () => {
     dispatch(chooseStep(step - 1));
+  };
+
+  const goNext = () => {
+    dispatch(chooseStep(step + 1));
   };
 
   const createSafe = async (_threshold) => {
@@ -259,52 +245,6 @@ const Login = () => {
       console.log("tx success", result);
     }
   };
-
-  const createSafeWithMetaTransaction = useCallback(async () => {
-    let body;
-
-    if (gnosisSafeMasterContract && proxyFactory && account && sign) {
-      const ownerAddresses = formData.owners.map(({ owner }) => owner);
-      const threshold = Number(formData.threshold);
-
-      const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
-        "setup",
-        [
-          ownerAddresses,
-          threshold,
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
-          0,
-          "0x0000000000000000000000000000000000000000",
-        ]
-      );
-
-      // Execute Meta transaction
-
-      body = {
-        name: cryptoUtils.encryptData(formData.name, sign),
-        referralId: formData.referralId,
-        safeAddress: "",
-        createdBy: account,
-        owners: formData.owners,
-        proxyData: {
-          from: account,
-          params: [GNOSIS_SAFE_ADDRESS, creationData],
-        },
-      };
-      console.log({ body });
-    }
-    dispatch(loginUser(body));
-  }, [
-    gnosisSafeMasterContract,
-    proxyFactory,
-    account,
-    dispatch,
-    formData,
-    sign,
-  ]);
 
   const renderConnect = () => (
     <div>
@@ -557,11 +497,21 @@ const Login = () => {
     }, []);
   }, [safes]);
 
+  const handleSelectSafe = (safe) => {
+    dispatch(selectSafe(safe));
+    goNext();
+  };
+
   const renderSafes = () => {
     if (getSafesLoading)
       return <div className="text-center my-5">Loading...</div>;
     if (!safes.length)
-      return <div className="text-center my-5">Oops, no safe found...</div>;
+      return (
+        <div className="text-center my-5">
+          <p className="mb-4">Oops, no safe found...</p>
+          <Button to="/">Sign Up</Button>
+        </div>
+      );
 
     return (
       <StepDetails>
@@ -570,7 +520,7 @@ const Login = () => {
           Select the safe with which you would like to continue
         </p>
         {safeDetails.map(({ safe, name, balance }) => (
-          <Safe key={safe}>
+          <Safe key={safe} onClick={() => handleSelectSafe(safe)}>
             <div className="top">
               <div className="details">
                 <div className="icon">
@@ -623,6 +573,7 @@ const Login = () => {
           <form onSubmit={handleSubmit(onSubmit)}>
             {step === STEPS.ZERO && renderConnect()}
             {step === STEPS.ONE && renderSafes()}
+            {step === STEPS.TWO && renderPrivacy()}
           </form>
           {/* <div>
             {hasSigned ? (

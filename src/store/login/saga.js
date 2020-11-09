@@ -12,7 +12,7 @@ import { loginEndpoint } from "constants/endpoints";
 export function* loginUser(action) {
   // Select username from store
   // const username = yield select(makeSelectUsername());
-  const requestURL = loginEndpoint;
+  const requestURL = `${loginEndpoint}?safeAddress=${action.safeAddress}`;
   const options = {
     method: "GET",
   };
