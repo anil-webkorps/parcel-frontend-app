@@ -19,6 +19,18 @@ const makeSelectFormData = () =>
     (loginWizardState) => loginWizardState.form
   );
 
+const makeSelectFlow = () =>
+  createSelector(
+    selectLoginWizard,
+    (loginWizardState) => loginWizardState.flow
+  );
+
+const makeSelectChosenSafeAddress = () =>
+  createSelector(
+    selectLoginWizard,
+    (loginWizardState) => loginWizardState.chosenSafeAddress
+  );
+
 const makeSelectLoading = () =>
   createSelector(
     selectLoginWizard,
@@ -41,6 +53,8 @@ export {
   selectLoginWizard,
   makeSelectStep,
   makeSelectFormData,
+  makeSelectFlow,
+  makeSelectChosenSafeAddress,
   makeSelectLoading,
   makeSelectSafes,
   makeSelectError,

@@ -1,5 +1,5 @@
 /**
- * Gets the repositories of the user from Github
+ * Login saga
  */
 
 import { call, put, takeLatest } from "redux-saga/effects";
@@ -21,7 +21,8 @@ export function* loginUser(action) {
 
   try {
     const result = yield call(request, requestURL, options);
-    if (result.flag !== 200) {
+    if (result.flag === 145) {
+    } else if (result.flag !== 200) {
       // Error in payload
       yield put(loginUserError(result.log));
     } else {

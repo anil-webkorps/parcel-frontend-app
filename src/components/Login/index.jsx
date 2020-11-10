@@ -16,8 +16,6 @@ import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage, useContract } from "hooks";
 import ConnectButton from "components/Connect";
 import { Card } from "components/common/Card";
-// import CreateSafeForm from "./CreateSafeForm";
-// import AuthorizeButton from "../AuthorizeButton";
 import { useInjectReducer } from "utils/injectReducer";
 import loginWizardReducer from "store/loginWizard/reducer";
 import loginReducer from "store/login/reducer";
@@ -32,11 +30,18 @@ import {
 import {
   makeSelectFormData,
   makeSelectStep,
+  makeSelectFlow,
+  makeSelectChosenSafeAddress,
   makeSelectLoading,
   makeSelectSafes,
-  makeSelectError,
 } from "store/loginWizard/selectors";
-import { chooseStep, updateForm, getSafes } from "store/loginWizard/actions";
+import {
+  chooseStep,
+  updateForm,
+  selectFlow,
+  getSafes,
+  fetchSafes,
+} from "store/loginWizard/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
 import { Input, ErrorMessage } from "components/common/Form";
@@ -53,14 +58,17 @@ import GnosisSafeABI from "constants/abis/GnosisSafe.json";
 import ProxyFactoryABI from "constants/abis/ProxyFactory.json";
 import loginSaga from "store/login/saga";
 import loginWizardSaga from "store/loginWizard/saga";
+import registerSaga from "store/register/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import { loginUser } from "store/login/actions";
-// import { cryptoUtils } from "parcel-sdk";
+import { registerUser } from "store/register/actions";
+import { cryptoUtils } from "parcel-sdk";
 
-const loginKey = "login";
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS } = addresses;
 
+const loginKey = "login";
 const loginWizardKey = "loginWizard";
+const registerKey = "register";
 
 const STEPS = {
   ZERO: 0,
@@ -70,24 +78,49 @@ const STEPS = {
   FOUR: 4,
 };
 
+const FLOWS = {
+  IMPORT: "IMPORT",
+  LOGIN: "LOGIN",
+};
+
+const getStepsByFlow = (flow) => {
+  switch (flow) {
+    case FLOWS.IMPORT:
+      return IMPORT_STEPS;
+    case FLOWS.LOGIN:
+      return LOGIN_STEPS;
+    default:
+      return LOGIN_STEPS;
+  }
+};
+
+const getStepsCountByFlow = (flow) => {
+  switch (flow) {
+    case FLOWS.IMPORT:
+      return Object.keys(IMPORT_STEPS).length;
+    case FLOWS.LOGIN:
+      return Object.keys(LOGIN_STEPS).length;
+    default:
+      return Object.keys(LOGIN_STEPS).length;
+  }
+};
 const LOGIN_STEPS = {
   [STEPS.ZERO]: "Connect",
   [STEPS.ONE]: "Privacy",
   [STEPS.TWO]: "Choose Safe",
-  // [STEPS.THREE]: "Payment Threshold",
-  // [STEPS.FOUR]: "Privacy",
 };
 
 const IMPORT_STEPS = {
   [STEPS.ZERO]: "Connect",
-  [STEPS.ONE]: "Choose Safe",
-  [STEPS.TWO]: "Privacy",
+  [STEPS.ONE]: "Privacy",
+  [STEPS.TWO]: "Choose Safe",
   [STEPS.THREE]: "Company Name",
   [STEPS.FOUR]: "Owner Name",
+  [STEPS.FIVE]: "Threshold",
 };
 
 const Login = () => {
-  const [sign, setSign] = useLocalStorage("SIGNATURE");
+  const [sign, setSign] = useLocalStorage("SIGNATURE"); // eslint-disable-line
 
   const { active, account, library } = useActiveWeb3React();
 
@@ -98,6 +131,7 @@ const Login = () => {
   // Sagas
   useInjectSaga({ key: loginKey, saga: loginSaga });
   useInjectSaga({ key: loginWizardKey, saga: loginWizardSaga });
+  useInjectSaga({ key: registerKey, saga: registerSaga });
 
   // Router
   const location = useLocation();
@@ -109,7 +143,8 @@ const Login = () => {
   const formData = useSelector(makeSelectFormData());
   const safes = useSelector(makeSelectSafes());
   const getSafesLoading = useSelector(makeSelectLoading());
-  const getSafesError = useSelector(makeSelectError());
+  const flow = useSelector(makeSelectFlow());
+  const chosenSafeAddress = useSelector(makeSelectChosenSafeAddress());
   // const loading = useSelector(makeSelectLoading());
 
   // Form
@@ -157,7 +192,12 @@ const Login = () => {
 
   const onSubmit = async (values) => {
     dispatch(updateForm(values));
-    dispatch(chooseStep(step + 1));
+
+    if (flow === FLOWS.IMPORT && step === getStepsByFlow()) {
+      await signup(values.threshold);
+    } else {
+      dispatch(chooseStep(step + 1));
+    }
   };
 
   const signTerms = useCallback(async () => {
@@ -184,10 +224,14 @@ const Login = () => {
     dispatch(chooseStep(step + 1));
   };
 
-  const createSafe = async (_threshold) => {
+  const signup = async (_threshold) => {
     // let body;
     if (gnosisSafeMasterContract && proxyFactory && account) {
       const ownerAddresses = formData.owners.map(({ owner }) => owner);
+      const encryptedOwners = formData.owners.map((name, owner) => ({
+        name: cryptoUtils(name, sign),
+        owner,
+      }));
 
       const threshold = formData.threshold
         ? parseInt(formData.threshold)
@@ -207,34 +251,24 @@ const Login = () => {
         ]
       );
 
-      console.log({ ownerAddresses, threshold, creationData });
+      const body = {
+        name: cryptoUtils.encryptData(formData.name, sign),
+        safeAddress: chosenSafeAddress,
+        createdBy: account,
+        owners: encryptedOwners,
+        proxyData: {
+          from: account,
+          params: [GNOSIS_SAFE_ADDRESS, creationData],
+        },
+      };
 
-      // Execute normal transaction
-      // Create Proxy
-      const estimateGas = await proxyFactory.estimateGas.createProxy(
-        GNOSIS_SAFE_ADDRESS,
-        creationData
-      );
-
-      const tx = await proxyFactory.createProxy(
-        GNOSIS_SAFE_ADDRESS,
-        creationData,
-        { gasLimit: estimateGas, gasPrice: "10000000000" }
-      );
-
-      proxyFactory.once("ProxyCreation", (proxy) => {
-        console.log({ proxy });
-        dispatch(
-          updateForm({
-            safeAddress: proxy,
-            creationData,
-          })
-        );
-      });
-
-      const result = await tx.wait();
-      console.log("tx success", result);
+      dispatch(registerUser(body));
     }
+  };
+
+  const handleSelectFlow = (flow) => {
+    dispatch(selectFlow(flow));
+    goNext();
   };
 
   const renderConnect = () => (
@@ -252,12 +286,23 @@ const Login = () => {
         ) : (
           <div className="row">
             <div className="col-6">
-              <Button large secondary>
+              <Button
+                type="button"
+                large
+                secondary
+                onClick={() => handleSelectFlow(FLOWS.IMPORT)}
+              >
                 Import Existing Safe
               </Button>
             </div>
             <div className="col-6">
-              <Button large>Login</Button>
+              <Button
+                type="button"
+                large
+                onClick={() => handleSelectFlow(FLOWS.LOGIN)}
+              >
+                Login
+              </Button>
             </div>
           </div>
         )}
@@ -265,30 +310,33 @@ const Login = () => {
     </div>
   );
 
-  const renderStepHeader = () => (
-    <div>
-      <div style={{ height: "50px", padding: "8px 32px" }}>
-        {step > 1 && (
+  const renderStepHeader = () => {
+    const steps = getStepsByFlow(flow);
+    return (
+      <div>
+        <div style={{ height: "50px", padding: "8px 32px" }}>
           <Button iconOnly onClick={goBack} className="px-0">
             <FontAwesomeIcon icon={faArrowLeft} color="#aaa" />
           </Button>
-        )}
+        </div>
+        <StepInfo>
+          <div>
+            <h3 className="title">Login</h3>
+            <p className="next">
+              {steps[step + 1] ? `NEXT: ${steps[step + 1]}` : `Finish`}
+            </p>
+          </div>
+          <div className="step-progress">
+            <CircularProgress
+              current={step}
+              max={getStepsCountByFlow(flow)}
+              color="#7367f0"
+            />
+          </div>
+        </StepInfo>
       </div>
-      <StepInfo>
-        <div>
-          <h3 className="title">Login</h3>
-          <p className="next">
-            {LOGIN_STEPS[step + 1]
-              ? `NEXT: ${LOGIN_STEPS[step + 1]}`
-              : `Finish`}
-          </p>
-        </div>
-        <div className="step-progress">
-          <CircularProgress current={step} max={2} color="#7367f0" />
-        </div>
-      </StepInfo>
-    </div>
-  );
+    );
+  };
 
   const renderCompanyName = () => {
     return (
@@ -444,7 +492,7 @@ const Login = () => {
 
         <ErrorMessage name="threshold" errors={errors} />
         <Button large type="submit" className="mt-3">
-          Proceed
+          Complete Import
         </Button>
       </StepDetails>
     );
@@ -489,9 +537,11 @@ const Login = () => {
   }, [safes]);
 
   const handleSelectSafe = (safe) => {
-    // dispatch(selectSafe(safe));
     dispatch(loginUser(safe));
   };
+  const handleRefetch = useCallback(() => {
+    dispatch(fetchSafes(account));
+  }, [dispatch, account]);
 
   const renderSafes = () => {
     if (getSafesLoading)
@@ -501,6 +551,10 @@ const Login = () => {
         <div className="text-center my-5">
           <p className="mb-4">Oops, no safe found...</p>
           <Button to="/">Sign Up</Button>
+
+          <p className="mt-5 pt-5 retry-text" onClick={handleRefetch}>
+            Safe not loaded?
+          </p>
         </div>
       );
 
@@ -552,6 +606,9 @@ const Login = () => {
             </div>
           </Safe>
         ))}
+        <p className="mt-2 retry-text" onClick={handleRefetch}>
+          Safe not loaded?
+        </p>
       </StepDetails>
     );
   };
@@ -565,6 +622,9 @@ const Login = () => {
             {step === STEPS.ZERO && renderConnect()}
             {step === STEPS.ONE && renderPrivacy()}
             {step === STEPS.TWO && renderSafes()}
+            {step === STEPS.THREE && renderOwnerDetails()}
+            {step === STEPS.FOUR && renderCompanyName()}
+            {step === STEPS.FIVE && renderThreshold()}
           </form>
         </Card>
       </Container>
