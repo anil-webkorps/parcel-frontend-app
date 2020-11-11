@@ -33,7 +33,7 @@ export function* registerUser(action) {
       yield put(registerUserError(result.log));
     } else {
       yield put(registerUserSuccess(result.transactionHash, result.log));
-      yield put(push("/dashboard"));
+      if (action.redirect) yield put(push("/dashboard"));
     }
   } catch (err) {
     yield put(registerUserError(err));

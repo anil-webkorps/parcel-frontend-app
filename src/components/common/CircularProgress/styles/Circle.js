@@ -21,7 +21,7 @@ export default styled.div`
 
   circle:nth-child(2) {
     stroke-dashoffset: calc(220 - (${(props) => props.percentage} * 220) / 100);
-    stroke: #7367f0;
+    stroke: ${({ theme }) => theme.primary};
     animation: percent 1.5s linear;
     animation-delay: 0s;
     transition: all 0.5s linear;

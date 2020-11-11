@@ -64,7 +64,7 @@ export default styled.div`
       top: 0;
       width: 56px;
       height: 100%;
-      background-color: #7367f0;
+      background-color: ${({ theme }) => theme.primary};
       border-radius: 0 16px 16px 0;
       display: flex;
       justify-content: center;

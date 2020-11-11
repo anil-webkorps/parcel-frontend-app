@@ -43,10 +43,14 @@ export function fetchSafes(owner) {
     owner,
   };
 }
-export function getSafes(owner) {
+
+// status = 0 => get safes from cache
+// status = 1 => get safes from gnosis api
+export function getSafes(owner, status = 0) {
   return {
     type: GET_SAFES,
     owner,
+    status,
   };
 }
 

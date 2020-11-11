@@ -1,6 +1,6 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
@@ -65,6 +65,7 @@ const REGISTER_STEPS = {
 
 const Register = () => {
   const [sign, setSign] = useLocalStorage("SIGNATURE");
+  const [loadingTx, setLoadinTx] = useState(false);
 
   const { active, account, library } = useActiveWeb3React();
 
@@ -77,6 +78,7 @@ const Register = () => {
 
   // Route
   const location = useLocation();
+  const history = useHistory();
 
   const dispatch = useDispatch();
 
@@ -148,11 +150,17 @@ const Register = () => {
             setSign(signature);
             if (formData.referralId) createSafeWithMetaTransaction();
             else {
+              const encryptedOwners = formData.owners.map(
+                ({ name, owner }) => ({
+                  name: cryptoUtils.encryptData(name, sign),
+                  owner,
+                })
+              );
               const body = {
                 name: cryptoUtils.encryptData(formData.name, signature),
                 safeAddress: formData.safeAddress,
                 createdBy: account,
-                owners: formData.owners,
+                owners: encryptedOwners,
                 proxyData: {
                   from: account,
                   params: [GNOSIS_SAFE_ADDRESS, formData.creationData],
@@ -172,7 +180,6 @@ const Register = () => {
   };
 
   const createSafe = async (_threshold) => {
-    // let body;
     if (gnosisSafeMasterContract && proxyFactory && account) {
       const ownerAddresses = formData.owners.map(({ owner }) => owner);
 
@@ -194,8 +201,6 @@ const Register = () => {
         ]
       );
 
-      console.log({ ownerAddresses, threshold, creationData });
-
       // Execute normal transaction
       // Create Proxy
       const estimateGas = await proxyFactory.estimateGas.createProxy(
@@ -210,7 +215,6 @@ const Register = () => {
       );
 
       proxyFactory.once("ProxyCreation", (proxy) => {
-        console.log({ proxy });
         dispatch(
           updateForm({
             safeAddress: proxy,
@@ -229,6 +233,10 @@ const Register = () => {
 
     if (gnosisSafeMasterContract && proxyFactory && account && sign) {
       const ownerAddresses = formData.owners.map(({ owner }) => owner);
+      const encryptedOwners = formData.owners.map(({ name, owner }) => ({
+        name: cryptoUtils.encryptData(name, sign),
+        owner,
+      }));
       const threshold = Number(formData.threshold);
 
       const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
@@ -252,15 +260,22 @@ const Register = () => {
         referralId: formData.referralId,
         safeAddress: "",
         createdBy: account,
-        owners: formData.owners,
+        owners: encryptedOwners,
         proxyData: {
           from: account,
           params: [GNOSIS_SAFE_ADDRESS, creationData],
         },
       };
-      console.log({ body });
     }
-    dispatch(registerUser(body));
+    setLoadinTx(true);
+    dispatch(registerUser(body, false));
+
+    proxyFactory.once("ProxyCreation", (proxy) => {
+      if (proxy) {
+        setLoadinTx(false);
+        history.push("/dashboard");
+      }
+    });
   }, [
     gnosisSafeMasterContract,
     proxyFactory,
@@ -268,6 +283,7 @@ const Register = () => {
     dispatch,
     formData,
     sign,
+    history,
   ]);
 
   const renderConnect = () => (
@@ -493,6 +509,11 @@ const Register = () => {
         >
           I'm in
         </Button>
+        {loadingTx && (
+          <span className="ml-3 my-3">
+            Waiting for transaction confirmation...
+          </span>
+        )}
       </StepDetails>
     );
   };
@@ -509,36 +530,6 @@ const Register = () => {
             {step === STEPS.THREE && renderThreshold()}
             {step === STEPS.FOUR && renderPrivacy()}
           </form>
-          {/* <div>
-            {hasSigned ? (
-              <div>
-                <InnerCard height="80px" disabled>
-                  <div className="row justify-content-between align-items-center mx-2">
-                    <div>Authorization</div>
-                    <div className="my-3">Successful</div>
-                  </div>
-                </InnerCard>
-                <InnerCard height="420px">
-                  <div className="my-2">
-                    Please enter the details and create the Gnosis Safe:
-                  </div>
-                  <CreateSafeForm />
-                </InnerCard>
-              </div>
-            ) : (
-              <InnerCard height="500px">
-                <div className="my-4">
-                  Please sign this message using your private key and authorize
-                  Parcel.
-                </div>
-                <SignButton
-                  setSign={setSign}
-                  large
-                  className="mx-auto d-block mt-3"
-                />
-              </InnerCard>
-            )}
-          </div> */}
         </Card>
       </Container>
     </Background>

@@ -2,7 +2,7 @@ import styled from "styled-components/macro";
 
 export default styled.button`
   border-radius: 4px;
-  background-color: #7367f0;
+  background-color: ${(props) => props.theme.primary};
 
   color: #ffffff;
   text-align: center;
@@ -34,9 +34,11 @@ export default styled.button`
 
   ${(props) =>
     props.secondary &&
-    `background: white; border: 1px solid #7367f0; color: #7367f0;
+    `background: white;
+      border: 1px solid ${props.theme.primary};
+      color: ${props.theme.primary};
       &:hover {
-        background-color: #7367f0;
+        background-color: ${props.theme.primary};
         color: white;
       }
     `}

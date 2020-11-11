@@ -11,6 +11,7 @@ import {
   faUser,
   faWallet,
 } from "@fortawesome/free-solid-svg-icons";
+import { cryptoUtils } from "parcel-sdk";
 
 import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage, useContract } from "hooks";
@@ -19,14 +20,7 @@ import { Card } from "components/common/Card";
 import { useInjectReducer } from "utils/injectReducer";
 import loginWizardReducer from "store/loginWizard/reducer";
 import loginReducer from "store/login/reducer";
-import {
-  Background,
-  InnerCard,
-  Image,
-  StepDetails,
-  StepInfo,
-  Safe,
-} from "./styles";
+// import registerWizardReducer from "store/registerWizard/reducer";
 import {
   makeSelectFormData,
   makeSelectStep,
@@ -41,6 +35,7 @@ import {
   selectFlow,
   getSafes,
   fetchSafes,
+  chooseSafe,
 } from "store/loginWizard/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
@@ -62,7 +57,16 @@ import registerSaga from "store/register/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import { loginUser } from "store/login/actions";
 import { registerUser } from "store/register/actions";
-import { cryptoUtils } from "parcel-sdk";
+
+import {
+  Background,
+  InnerCard,
+  Image,
+  StepDetails,
+  StepInfo,
+  Safe,
+  RetryText,
+} from "./styles";
 
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS } = addresses;
 
@@ -76,6 +80,8 @@ const STEPS = {
   TWO: 2,
   THREE: 3,
   FOUR: 4,
+  FIVE: 5,
+  SIX: 6,
 };
 
 const FLOWS = {
@@ -97,11 +103,11 @@ const getStepsByFlow = (flow) => {
 const getStepsCountByFlow = (flow) => {
   switch (flow) {
     case FLOWS.IMPORT:
-      return Object.keys(IMPORT_STEPS).length;
+      return Object.keys(IMPORT_STEPS).length - 1;
     case FLOWS.LOGIN:
-      return Object.keys(LOGIN_STEPS).length;
+      return Object.keys(LOGIN_STEPS).length - 1;
     default:
-      return Object.keys(LOGIN_STEPS).length;
+      return Object.keys(LOGIN_STEPS).length - 1;
   }
 };
 const LOGIN_STEPS = {
@@ -127,6 +133,7 @@ const Login = () => {
   // Reducers
   useInjectReducer({ key: loginWizardKey, reducer: loginWizardReducer });
   useInjectReducer({ key: loginKey, reducer: loginReducer });
+  // useInjectReducer({ key: registerWizardKey, reducer: registerWizardReducer });
 
   // Sagas
   useInjectSaga({ key: loginKey, saga: loginSaga });
@@ -186,6 +193,9 @@ const Login = () => {
 
   useEffect(() => {
     if (step === STEPS.ONE && account) {
+      dispatch(fetchSafes(account));
+    }
+    if (step === STEPS.TWO && account) {
       dispatch(getSafes(account));
     }
   }, [step, dispatch, account]);
@@ -193,10 +203,10 @@ const Login = () => {
   const onSubmit = async (values) => {
     dispatch(updateForm(values));
 
-    if (flow === FLOWS.IMPORT && step === getStepsByFlow()) {
+    if (flow === FLOWS.IMPORT && step === getStepsCountByFlow(FLOWS.IMPORT)) {
       await signup(values.threshold);
     } else {
-      dispatch(chooseStep(step + 1));
+      goNext();
     }
   };
 
@@ -228,15 +238,14 @@ const Login = () => {
     // let body;
     if (gnosisSafeMasterContract && proxyFactory && account) {
       const ownerAddresses = formData.owners.map(({ owner }) => owner);
-      const encryptedOwners = formData.owners.map((name, owner) => ({
-        name: cryptoUtils(name, sign),
+      const encryptedOwners = formData.owners.map(({ name, owner }) => ({
+        name: cryptoUtils.encryptData(name, sign),
         owner,
       }));
 
       const threshold = formData.threshold
         ? parseInt(formData.threshold)
         : _threshold;
-      console.log({ ownerAddresses, threshold });
       const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
         "setup",
         [
@@ -261,6 +270,8 @@ const Login = () => {
           params: [GNOSIS_SAFE_ADDRESS, creationData],
         },
       };
+
+      console.log({ body });
 
       dispatch(registerUser(body));
     }
@@ -530,17 +541,19 @@ const Login = () => {
       // get name and balance from the api or from SC
       return details.concat({
         safe,
-        name: "Parcel Safe",
+        name: "Gnosis Safe",
         balance: "1",
       });
     }, []);
   }, [safes]);
 
   const handleSelectSafe = (safe) => {
+    dispatch(chooseSafe(safe));
     dispatch(loginUser(safe));
+    goNext();
   };
   const handleRefetch = useCallback(() => {
-    dispatch(fetchSafes(account));
+    dispatch(getSafes(account, 1)); // 1 => get safes from gnosis api
   }, [dispatch, account]);
 
   const renderSafes = () => {
@@ -552,9 +565,7 @@ const Login = () => {
           <p className="mb-4">Oops, no safe found...</p>
           <Button to="/">Sign Up</Button>
 
-          <p className="mt-5 pt-5 retry-text" onClick={handleRefetch}>
-            Safe not loaded?
-          </p>
+          <RetryText onClick={handleRefetch}>Safe not loaded?</RetryText>
         </div>
       );
 
@@ -606,9 +617,7 @@ const Login = () => {
             </div>
           </Safe>
         ))}
-        <p className="mt-2 retry-text" onClick={handleRefetch}>
-          Safe not loaded?
-        </p>
+        <RetryText onClick={handleRefetch}>Safe not loaded?</RetryText>
       </StepDetails>
     );
   };

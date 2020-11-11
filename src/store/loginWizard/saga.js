@@ -4,16 +4,12 @@
 
 import { call, put, fork, takeLatest } from "redux-saga/effects";
 import { GET_SAFES, FETCH_SAFES } from "./action-types";
-import {
-  getSafes as getSafesRequest,
-  getSafesSuccess,
-  getSafesError,
-} from "./actions";
+import { getSafesSuccess, getSafesError } from "./actions";
 import request from "utils/request";
 import { getSafesEndpoint, fetchSafesEndPoint } from "constants/endpoints";
 
 export function* getSafes(action) {
-  const requestURL = `${getSafesEndpoint}?owner=${action.owner}`;
+  const requestURL = `${getSafesEndpoint}?owner=${action.owner}&status=${action.status}`;
   const options = {
     method: "GET",
   };
@@ -43,9 +39,10 @@ export function* fetchSafes(action) {
       // Error in payload
       yield put(getSafesError(result.log));
     } else {
-      // Fetch safes api will make a call that will return in ~20 seconds
+      // Fetch safes api will asynchronously call get safes
+      // so that by the time the user reaches the select safe section
+      // the safes are ready
       yield put(getSafesSuccess([], result.log));
-      yield put(getSafesRequest(action.owner));
     }
   } catch (err) {
     yield put(getSafesError(err));

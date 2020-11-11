@@ -4,10 +4,11 @@ import {
   REGISTER_USER_ERROR,
 } from "./action-types";
 
-export function registerUser(body) {
+export function registerUser(body, redirect = true) {
   return {
     type: REGISTER_USER,
     body,
+    redirect,
   };
 }
 
