@@ -10,6 +10,7 @@ const InputField = ({
   required,
   pattern,
   type,
+  labelStyle = {},
   ...rest
 }) => (
   <>
@@ -20,7 +21,11 @@ const InputField = ({
       type={type}
       {...rest}
     />
-    {label ? <label htmlFor={id || name}>{label}</label> : null}
+    {label ? (
+      <label htmlFor={id || name} style={labelStyle}>
+        {label}
+      </label>
+    ) : null}
   </>
 );
 

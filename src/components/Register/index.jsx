@@ -53,14 +53,50 @@ const STEPS = {
   TWO: 2,
   THREE: 3,
   FOUR: 4,
+  FIVE: 5,
 };
 
-const REGISTER_STEPS = {
+const FLOWS = {
+  COMPANY: "COMPANY",
+  INDIVIDUAL: "INDIVIDUAL",
+};
+
+const getStepsByFlow = (flow) => {
+  switch (flow) {
+    case FLOWS.COMPANY:
+      return COMPANY_REGISTER_STEPS;
+    case FLOWS.INDIVIDUAL:
+      return INDIVIDUAL_REGISTER_STEPS;
+    default:
+      return COMPANY_REGISTER_STEPS;
+  }
+};
+
+const getStepsCountByFlow = (flow) => {
+  switch (flow) {
+    case FLOWS.COMPANY:
+      return Object.keys(COMPANY_REGISTER_STEPS).length - 1;
+    case FLOWS.INDIVIDUAL:
+      return Object.keys(INDIVIDUAL_REGISTER_STEPS).length - 1;
+    default:
+      return Object.keys(COMPANY_REGISTER_STEPS).length - 1;
+  }
+};
+
+const COMPANY_REGISTER_STEPS = {
   [STEPS.ZERO]: "Connect",
-  [STEPS.ONE]: "Company Name",
-  [STEPS.TWO]: "Owner Details",
-  [STEPS.THREE]: "Payment Threshold",
-  [STEPS.FOUR]: "Privacy",
+  [STEPS.ONE]: "About you",
+  [STEPS.TWO]: "Owner Address/Name",
+  [STEPS.THREE]: "Owner Details",
+  [STEPS.FOUR]: "Payment Threshold",
+  [STEPS.FIVE]: "Privacy",
+};
+
+const INDIVIDUAL_REGISTER_STEPS = {
+  [STEPS.ZERO]: "Connect",
+  [STEPS.ONE]: "About you",
+  [STEPS.TWO]: "Owner Address/Name",
+  [STEPS.THREE]: "Privacy",
 };
 
 const Register = () => {
@@ -114,6 +150,7 @@ const Register = () => {
 
   useEffect(() => {
     reset({
+      flow: FLOWS.INDIVIDUAL,
       owners: [{ name: "", owner: account }],
       ...formData,
     });
@@ -128,9 +165,15 @@ const Register = () => {
   const onSubmit = async (values) => {
     // console.log(values);
     dispatch(updateForm(values));
-    if (step === STEPS.THREE && !formData.referralId) {
+    console.log({ formData });
+    // const lastStep = getStepsCountByFlow(formData.flow);
+    if (
+      ((formData.flow === FLOWS.INDIVIDUAL && step === STEPS.TWO) ||
+        (formData.flow === FLOWS.COMPANY && step === STEPS.FOUR)) &&
+      !formData.referralId
+    ) {
       try {
-        await createSafe(values.threshold); // ugly hack - TODO: Fix race condition and remove arg
+        await createSafe(values.threshold || 1); // ugly hack - TODO: Fix race condition and remove arg
         dispatch(chooseStep(step + 1));
       } catch (err) {
         console.error(err);
@@ -150,12 +193,18 @@ const Register = () => {
             setSign(signature);
             if (formData.referralId) createSafeWithMetaTransaction();
             else {
-              const encryptedOwners = formData.owners.map(
-                ({ name, owner }) => ({
-                  name: cryptoUtils.encryptData(name, sign),
-                  owner,
-                })
-              );
+              const encryptedOwners =
+                formData.owners && formData.owners.length
+                  ? formData.owners.map(({ name, owner }) => ({
+                      name: cryptoUtils.encryptData(name, signature),
+                      owner,
+                    }))
+                  : [
+                      {
+                        owner: account,
+                        name: cryptoUtils.encryptData(formData.name, signature),
+                      },
+                    ];
               const body = {
                 name: cryptoUtils.encryptData(formData.name, signature),
                 safeAddress: formData.safeAddress,
@@ -181,12 +230,14 @@ const Register = () => {
 
   const createSafe = async (_threshold) => {
     if (gnosisSafeMasterContract && proxyFactory && account) {
-      const ownerAddresses = formData.owners.map(({ owner }) => owner);
+      const ownerAddresses =
+        formData.owners && formData.owners.length
+          ? formData.owners.map(({ owner }) => owner)
+          : [account];
 
       const threshold = formData.threshold
         ? parseInt(formData.threshold)
         : _threshold;
-      console.log({ ownerAddresses, threshold });
       const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
         "setup",
         [
@@ -232,11 +283,22 @@ const Register = () => {
     let body;
 
     if (gnosisSafeMasterContract && proxyFactory && account && sign) {
-      const ownerAddresses = formData.owners.map(({ owner }) => owner);
-      const encryptedOwners = formData.owners.map(({ name, owner }) => ({
-        name: cryptoUtils.encryptData(name, sign),
-        owner,
-      }));
+      const ownerAddresses =
+        formData.owners && formData.owners.length
+          ? formData.owners.map(({ owner }) => owner)
+          : [account];
+      const encryptedOwners =
+        formData.owners && formData.owners.length
+          ? formData.owners.map(({ name, owner }) => ({
+              name: cryptoUtils.encryptData(name, sign),
+              owner,
+            }))
+          : [
+              {
+                owner: account,
+                name: cryptoUtils.encryptData(formData.name, sign),
+              },
+            ];
       const threshold = Number(formData.threshold);
 
       const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
@@ -301,30 +363,37 @@ const Register = () => {
     </div>
   );
 
-  const renderStepHeader = () => (
-    <div>
-      <div style={{ height: "50px", padding: "8px 32px" }}>
-        {step > 1 && (
-          <Button iconOnly onClick={goBack} className="px-0">
-            <FontAwesomeIcon icon={faArrowLeft} color="#aaa" />
-          </Button>
-        )}
+  const renderStepHeader = () => {
+    const steps = getStepsByFlow(formData.flow);
+    return (
+      <div>
+        <div style={{ height: "50px", padding: "8px 32px" }}>
+          {step > 1 && (
+            <Button iconOnly onClick={goBack} className="px-0">
+              <FontAwesomeIcon icon={faArrowLeft} color="#aaa" />
+            </Button>
+          )}
+        </div>
+        <StepInfo>
+          <div>
+            <h3 className="title">Sign Up</h3>
+            <p className="next">
+              {steps[step + 1] ? `NEXT: ${steps[step + 1]}` : `Finish`}
+            </p>
+          </div>
+          {step > STEPS.ONE && (
+            <div className="step-progress">
+              <CircularProgress
+                current={step}
+                max={getStepsCountByFlow(formData.flow)}
+                color="#7367f0"
+              />
+            </div>
+          )}
+        </StepInfo>
       </div>
-      <StepInfo>
-        <div>
-          <h3 className="title">Sign Up</h3>
-          <p className="next">
-            {REGISTER_STEPS[step + 1]
-              ? `NEXT: ${REGISTER_STEPS[step + 1]}`
-              : `Finish`}
-          </p>
-        </div>
-        <div className="step-progress">
-          <CircularProgress current={step} max={4} color="#7367f0" />
-        </div>
-      </StepInfo>
-    </div>
-  );
+    );
+  };
 
   const renderCompanyName = () => {
     return (
@@ -347,6 +416,32 @@ const Register = () => {
         <ErrorMessage name="name" errors={errors} />
         <Button large type="submit" className="mt-3">
           Proceed
+        </Button>
+      </StepDetails>
+    );
+  };
+
+  const renderIndividualName = () => {
+    return (
+      <StepDetails>
+        <Img
+          src={CompanyPng}
+          alt="company"
+          className="my-2"
+          width="130px"
+          style={{ minWidth: "130px" }}
+        />
+        <h3 className="title">What is your Name</h3>
+        <p className="subtitle">You’ll be know by this name on Parcel.</p>
+        <Input
+          name="name"
+          register={register}
+          required={`Individual Name is required`}
+          placeholder="John Doe"
+        />
+        <ErrorMessage name="name" errors={errors} />
+        <Button large type="submit" className="mt-3">
+          Create Safe and Proceed
         </Button>
       </StepDetails>
     );
@@ -518,17 +613,96 @@ const Register = () => {
     );
   };
 
+  const renderAboutYou = () => {
+    return (
+      <StepDetails>
+        <Img
+          src={CompanyPng}
+          alt="individual"
+          className="my-2"
+          width="130px"
+          style={{ minWidth: "130px" }}
+        />
+        <h3 className="title">What best defines you?</h3>
+        <p className="subtitle">Tell us about you</p>
+        <div
+          className="row mr-4 align-items-center justify-content-between radio-toolbar"
+          style={{ padding: "10px 16px 0" }}
+        >
+          <Input
+            name={`flow`}
+            register={register}
+            type="radio"
+            id={`flow-individual`}
+            value={FLOWS.INDIVIDUAL}
+            defaultChecked
+            label={"I'm an Individual"}
+            labelStyle={{ minWidth: "260px" }}
+          />
+          <Input
+            name={`flow`}
+            register={register}
+            type="radio"
+            id={`flow-company`}
+            value={FLOWS.COMPANY}
+            label={"I have a Company"}
+            labelStyle={{ minWidth: "260px" }}
+          />
+        </div>
+
+        <ErrorMessage name="flow" errors={errors} />
+        <Button large type="submit" className="mt-3">
+          Proceed
+        </Button>
+      </StepDetails>
+    );
+  };
+
+  const renderSteps = () => {
+    switch (step) {
+      case STEPS.ZERO: {
+        return renderConnect();
+      }
+
+      case STEPS.ONE: {
+        return renderAboutYou();
+      }
+
+      case STEPS.TWO: {
+        if (formData.flow === FLOWS.COMPANY) return renderCompanyName();
+        else return renderIndividualName();
+      }
+
+      case STEPS.THREE: {
+        if (formData.flow === FLOWS.COMPANY) return renderOwnerDetails();
+        else return renderPrivacy();
+      }
+
+      case STEPS.FOUR: {
+        return renderThreshold();
+      }
+
+      case STEPS.FIVE: {
+        return renderPrivacy();
+      }
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <Background withImage minHeight="92vh">
       <Container>
         <Card className="mx-auto" style={{ backgroundColor: "#fff" }}>
           {step !== STEPS.ZERO && renderStepHeader()}
           <form onSubmit={handleSubmit(onSubmit)}>
-            {step === STEPS.ZERO && renderConnect()}
-            {step === STEPS.ONE && renderCompanyName()}
-            {step === STEPS.TWO && renderOwnerDetails()}
-            {step === STEPS.THREE && renderThreshold()}
-            {step === STEPS.FOUR && renderPrivacy()}
+            {renderSteps()}
+            {/* {step === STEPS.ZERO && renderConnect()}
+            {step === STEPS.TWO && renderCompanyName()}
+            {step === STEPS.THREE && renderOwnerDetails()}
+            {step === STEPS.FOUR && renderThreshold()}
+            {step === STEPS.FIVE && renderPrivacy()} */}
           </form>
         </Card>
       </Container>

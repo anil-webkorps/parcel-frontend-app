@@ -6,6 +6,7 @@ export default styled.div`
   align-items: center;
   border-top: solid 1px rgba(170, 170, 170, 0.2);
   border-bottom: solid 1px rgba(170, 170, 170, 0.2);
+  min-height: 110px;
 
   .title {
     padding: 10px 36px;
