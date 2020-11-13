@@ -23,6 +23,7 @@ import {
   makeSelectStep,
 } from "store/registerWizard/selectors";
 import { chooseStep, updateForm } from "store/registerWizard/actions";
+import { setOwnerDetails } from "store/global/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
 import { Input, ErrorMessage } from "components/common/Form";
@@ -165,7 +166,6 @@ const Register = () => {
   const onSubmit = async (values) => {
     // console.log(values);
     dispatch(updateForm(values));
-    console.log({ formData });
     // const lastStep = getStepsCountByFlow(formData.flow);
     if (
       ((formData.flow === FLOWS.INDIVIDUAL && step === STEPS.TWO) ||
@@ -215,6 +215,7 @@ const Register = () => {
                   params: [GNOSIS_SAFE_ADDRESS, formData.creationData],
                 },
               };
+              dispatch(setOwnerDetails(formData.name, formData.safeAddress));
               dispatch(registerUser(body));
             }
           });
@@ -334,6 +335,7 @@ const Register = () => {
 
     proxyFactory.once("ProxyCreation", (proxy) => {
       if (proxy) {
+        dispatch(setOwnerDetails(formData.name, proxy));
         setLoadinTx(false);
         history.push("/dashboard");
       }

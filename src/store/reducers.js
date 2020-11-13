@@ -4,7 +4,7 @@
 
 import { combineReducers } from "redux";
 import { connectRouter } from "connected-react-router";
-// import globalReducer from "./global/reducer";
+import globalReducer from "./global/reducer";
 import themeReducer from "./theme/reducer";
 import history from "utils/history";
 
@@ -13,7 +13,7 @@ import history from "utils/history";
  */
 export default function createReducer(injectedReducers = {}) {
   const rootReducer = combineReducers({
-    // global: globalReducer,
+    global: globalReducer,
     router: connectRouter(history),
     theme: themeReducer,
     ...injectedReducers,

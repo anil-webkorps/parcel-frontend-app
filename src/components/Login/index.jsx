@@ -1,6 +1,5 @@
 import React, { useEffect, useCallback, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
@@ -37,6 +36,7 @@ import {
   fetchSafes,
   chooseSafe,
 } from "store/loginWizard/actions";
+import { setOwnerDetails } from "store/global/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
 import { Input, ErrorMessage } from "components/common/Form";
@@ -133,15 +133,11 @@ const Login = () => {
   // Reducers
   useInjectReducer({ key: loginWizardKey, reducer: loginWizardReducer });
   useInjectReducer({ key: loginKey, reducer: loginReducer });
-  // useInjectReducer({ key: registerWizardKey, reducer: registerWizardReducer });
 
   // Sagas
   useInjectSaga({ key: loginKey, saga: loginSaga });
   useInjectSaga({ key: loginWizardKey, saga: loginWizardSaga });
   useInjectSaga({ key: registerKey, saga: registerSaga });
-
-  // Router
-  const location = useLocation();
 
   const dispatch = useDispatch();
 
@@ -184,12 +180,6 @@ const Login = () => {
       ...formData,
     });
   }, [reset, formData, account]);
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const referralId = searchParams.get("referralId");
-    if (referralId) dispatch(updateForm({ referralId }));
-  }, [location, dispatch]); // eslint-disable-line
 
   useEffect(() => {
     if (step === STEPS.ONE && account) {
@@ -271,8 +261,7 @@ const Login = () => {
         },
       };
 
-      console.log({ body });
-
+      dispatch(setOwnerDetails(formData.name, chosenSafeAddress));
       dispatch(registerUser(body));
     }
   };
@@ -541,14 +530,15 @@ const Login = () => {
       // get name and balance from the api or from SC
       return details.concat({
         safe,
-        name: "Gnosis Safe",
+        name: "Gnosis Safe User",
         balance: "1",
       });
     }, []);
   }, [safes]);
 
-  const handleSelectSafe = (safe) => {
+  const handleSelectSafe = (name, safe) => {
     dispatch(chooseSafe(safe));
+    dispatch(setOwnerDetails(name, safe));
     dispatch(loginUser(safe));
     goNext();
   };
@@ -576,7 +566,7 @@ const Login = () => {
           Select the safe with which you would like to continue
         </p>
         {safeDetails.map(({ safe, name, balance }) => (
-          <Safe key={safe} onClick={() => handleSelectSafe(safe)}>
+          <Safe key={safe} onClick={() => handleSelectSafe(name, safe)}>
             <div className="top">
               <div className="details">
                 <div className="icon">
