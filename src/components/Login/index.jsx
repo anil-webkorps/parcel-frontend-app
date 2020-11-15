@@ -615,7 +615,14 @@ const Login = () => {
   return (
     <Background withImage minHeight="92vh" className="py-3">
       <Container>
-        <Card className="mx-auto" style={{ backgroundColor: "#fff" }}>
+        <Card
+          className="mx-auto"
+          style={{
+            backgroundColor: "#fff",
+            maxWidth: "668px",
+            minHeight: "580px",
+          }}
+        >
           {step !== STEPS.ZERO && renderStepHeader()}
           <form onSubmit={handleSubmit(onSubmit)}>
             {step === STEPS.ZERO && renderConnect()}

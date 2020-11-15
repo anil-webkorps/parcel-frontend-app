@@ -22,4 +22,8 @@ export default styled(Link)`
     color: ${({ theme }) => theme.logo.color};
     text-decoration: none;
   }
+
+  &.dashboard-link {
+    color: #fff;
+  }
 `;

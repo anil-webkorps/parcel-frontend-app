@@ -696,16 +696,16 @@ const Register = () => {
   return (
     <Background withImage minHeight="92vh">
       <Container>
-        <Card className="mx-auto" style={{ backgroundColor: "#fff" }}>
+        <Card
+          className="mx-auto"
+          style={{
+            backgroundColor: "#fff",
+            maxWidth: "668px",
+            minHeight: "580px",
+          }}
+        >
           {step !== STEPS.ZERO && renderStepHeader()}
-          <form onSubmit={handleSubmit(onSubmit)}>
-            {renderSteps()}
-            {/* {step === STEPS.ZERO && renderConnect()}
-            {step === STEPS.TWO && renderCompanyName()}
-            {step === STEPS.THREE && renderOwnerDetails()}
-            {step === STEPS.FOUR && renderThreshold()}
-            {step === STEPS.FIVE && renderPrivacy()} */}
-          </form>
+          <form onSubmit={handleSubmit(onSubmit)}>{renderSteps()}</form>
         </Card>
       </Container>
     </Background>

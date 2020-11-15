@@ -1,8 +1,7 @@
 import styled from "styled-components/macro";
 
 export default styled.div`
-  max-width: 668px;
-  min-height: 580px;
+  min-height: 100%;
   background: ${({ theme }) => theme.card.backgroundColor};
   color: ${({ theme }) => theme.card.color};
   box-shadow: 0px 3px 6px #00000029;
