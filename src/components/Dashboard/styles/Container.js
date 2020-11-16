@@ -13,13 +13,17 @@ export default styled.div`
   top: 180px;
   .account {
     grid-row: 1/5;
+    transition: all 0.5s linear;
+    width: 750px;
   }
 
   .status {
+    max-width: 530px;
   }
 
   .payments {
     grid-row: 2/5;
+    max-width: 530px;
   }
 
   .card-title {
@@ -63,7 +67,8 @@ export default styled.div`
     grid-gap: 20px;
     margin-top: 20px;
     .overview-card {
-      width: 353px;
+      max-width: 353px;
+      width: 100%;
       height: 120px;
       padding: 25px 15px;
       border-radius: 8px;

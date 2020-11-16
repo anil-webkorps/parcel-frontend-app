@@ -9,6 +9,7 @@ import Header from "components/Header";
 import RegisterPage from "pages/Register";
 import LoginPage from "pages/Login";
 import DashboardPage from "./Dashboard";
+import SideNavProvider from "context/SideNavContext";
 
 export default function App() {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
@@ -16,12 +17,14 @@ export default function App() {
   return (
     <div className="app">
       <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
-        <Header />
-        <Switch>
-          <Route exact path="/" component={RegisterPage} />
-          <Route exact path="/login" component={LoginPage} />
-          <Route exact path="/dashboard" component={DashboardPage} />
-        </Switch>
+        <SideNavProvider>
+          <Header />
+          <Switch>
+            <Route exact path="/" component={RegisterPage} />
+            <Route exact path="/login" component={LoginPage} />
+            <Route exact path="/dashboard" component={DashboardPage} />
+          </Switch>
+        </SideNavProvider>
         <GlobalStyle />
       </ThemeProvider>
     </div>

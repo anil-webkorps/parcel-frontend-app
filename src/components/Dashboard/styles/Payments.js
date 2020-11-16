@@ -39,9 +39,10 @@ export default styled.div`
 
   .payment-details {
     width: 100%;
+    min-width: 200px;
     max-height: 56px;
     margin-left: 16px;
-    padding: 11px 183px 10px 20px;
+    padding: 11px 0 10px 20px;
     border-radius: 8px;
     border: solid 1px #f2f2f2;
 

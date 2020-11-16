@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
@@ -12,8 +12,10 @@ import { Card } from "components/common/Card";
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 import USDCIcon from "assets/icons/tokens/USDC-icon.png";
+import { SideNavContext } from "context/SideNavContext";
 
 export default function Dashboard() {
+  const [toggled] = useContext(SideNavContext);
   // eslint-disable-next-line
   const [tokenDetails, setTokenDetails] = useState([
     {
@@ -67,14 +69,30 @@ export default function Dashboard() {
     },
   ]);
   return (
-    <div className="position-relative">
+    <div
+      className="position-relative"
+      style={{
+        marginLeft: toggled ? "150px" : "0",
+        transition: "all 0.5s linear",
+      }}
+    >
       <Info>
         <div className="title">Hey Tarun,</div>
         <div className="subtitle">We have a few things for you to look at</div>
       </Info>
       <Container>
-        <div className="account">
-          <Card className="p-4" style={{ background: "#fff" }}>
+        <div
+          className="account"
+          style={{
+            maxWidth: toggled ? "650px" : "750px",
+          }}
+        >
+          <Card
+            className="p-4"
+            style={{
+              background: "#fff",
+            }}
+          >
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <div className="card-title">Account</div>
