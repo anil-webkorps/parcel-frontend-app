@@ -4,7 +4,7 @@ import { createContext } from "react";
 export const SideNavContext = createContext();
 
 export default function SideNavProvider({ children }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const handleToggle = () => {
     setOpen(!open);
   };

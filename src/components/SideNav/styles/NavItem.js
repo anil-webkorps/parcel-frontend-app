@@ -11,6 +11,10 @@ export default styled.div`
     transition: 0.3s;
   }
 
+  a:focus {
+    background: transparent;
+  }
+
   a {
     text-decoration: none;
     display: block;
