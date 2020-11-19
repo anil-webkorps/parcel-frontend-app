@@ -57,7 +57,7 @@ export default styled.div`
 
   &:hover {
     .select-safe {
-      background: red;
+      background: transparent;
       display: block;
       position: absolute;
       right: 0;

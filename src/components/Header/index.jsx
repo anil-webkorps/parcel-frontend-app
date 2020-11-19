@@ -1,38 +1,63 @@
-import React, { useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
 import { useLocation } from "react-router-dom";
 
-import { HeaderLink, NavBar, NavBarContent, NavGroup, Logo } from "./styles";
-import { toggleTheme } from "store/theme/actions";
-import Toggle from "components/common/Toggle";
-// import Button from "components/common/Button";
+import {
+  HeaderLink,
+  NavBar,
+  NavBarContent,
+  NavGroup,
+  AccountAddress,
+  Circle,
+} from "./styles";
+import CopyButton from "components/common/Copy";
+
 import ConnectButton from "components/Connect";
 import DashboardHeader from "./DashboardHeader";
+import { useActiveWeb3React } from "hooks";
+import { Account } from "components/common/Web3Utils";
+import Button from "components/common/Button";
 
 function PlainHeader() {
-  const dispatch = useDispatch();
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/";
+  const isSignupPage = location.pathname === "/signup";
+  const { account } = useActiveWeb3React();
 
-  const handleToggle = useCallback(() => {
-    dispatch(toggleTheme());
-  }, [dispatch]);
+  const renderSignUpButton = () => (
+    <Button type="button" to="/signup" className="secondary ml-3">
+      Sign Up
+    </Button>
+  );
+  const renderLoginButton = () => (
+    <Button type="button" to="/" className="secondary ml-3">
+      Login
+    </Button>
+  );
 
   return (
     <div>
       <NavBar>
         <NavBarContent>
-          <HeaderLink to="/">
-            <Logo className="mr-2" /> Parcel
-          </HeaderLink>
-          {/* <button onClick={handleToggle}>Toggle</button> */}
+          <div className="d-flex justify-content-center align-items-center">
+            <HeaderLink to="/" className="dashboard-link">
+              Parcel
+            </HeaderLink>
+          </div>
           <NavGroup>
-            {/* <Button className="mr-2">Connect</Button> */}
-            <ConnectButton>Connect </ConnectButton>
-            <Toggle
-              className="ml-5"
-              onChange={handleToggle}
-              toggled={isDarkMode}
-            ></Toggle>
+            {account ? (
+              <AccountAddress>
+                <p>
+                  <Account />
+                </p>
+                <Circle className="ml-2">
+                  <CopyButton id="address" tooltip="address" value={account} />
+                </Circle>
+              </AccountAddress>
+            ) : (
+              <ConnectButton>Connect</ConnectButton>
+            )}
+            {isLoginPage && renderSignUpButton()}
+            {isSignupPage && renderLoginButton()}
           </NavGroup>
         </NavBarContent>
       </NavBar>

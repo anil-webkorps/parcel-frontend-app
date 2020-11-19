@@ -61,7 +61,7 @@ export const Account = (isFormat = true) => {
     account === undefined ? null : account === null ? null : account;
 
   if (accountNo && isFormat) {
-    return `${accountNo.substring(0, 6)}...${accountNo.substring(
+    return `${accountNo.substring(0, 9)}...${accountNo.substring(
       accountNo.length - 4
     )}`;
   }

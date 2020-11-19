@@ -289,7 +289,7 @@ const Login = () => {
               <Button
                 type="button"
                 large
-                secondary
+                className="secondary"
                 onClick={() => handleSelectFlow(FLOWS.IMPORT)}
               >
                 Import Existing Safe

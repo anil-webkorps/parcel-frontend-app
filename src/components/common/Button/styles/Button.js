@@ -32,14 +32,13 @@ export default styled.button`
     outline: 0;
   }
 
-  ${(props) =>
-    props.secondary &&
-    `background: white;
-      border: 1px solid ${props.theme.primary};
-      color: ${props.theme.primary};
-      &:hover {
-        background-color: ${props.theme.primary};
-        color: white;
-      }
-    `}
+  &.secondary {
+    background: white;
+    border: 1px solid ${(props) => props.theme.primary};
+    color: ${(props) => props.theme.primary};
+    &:hover {
+      background-color: ${(props) => props.theme.primary};
+      color: white;
+    }
+  }
 `;

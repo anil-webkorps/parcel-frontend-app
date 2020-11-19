@@ -8,14 +8,13 @@ const CustomButton = ({
   to,
   href,
   iconOnly,
-  secondary,
   style: propStyles,
   ...rest
 }) => {
   if (to) {
     return (
       <Link to={to}>
-        <Button className={className} {...rest}>
+        <Button className={`w-100 ${className}`} {...rest}>
           {children}
         </Button>
       </Link>
@@ -43,7 +42,7 @@ const CustomButton = ({
   }
 
   return (
-    <Button className={className} secondary={secondary} {...rest}>
+    <Button className={className} {...rest}>
       {children}
     </Button>
   );

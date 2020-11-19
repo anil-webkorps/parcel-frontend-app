@@ -20,8 +20,8 @@ export default function App() {
         <SideNavProvider>
           <Header />
           <Switch>
-            <Route exact path="/" component={RegisterPage} />
-            <Route exact path="/login" component={LoginPage} />
+            <Route exact path="/" component={LoginPage} />
+            <Route exact path="/signup" component={RegisterPage} />
             <Route exact path="/dashboard" component={DashboardPage} />
           </Switch>
         </SideNavProvider>

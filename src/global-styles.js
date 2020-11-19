@@ -76,7 +76,7 @@ const GlobalStyle = createGlobalStyle`
       background: none;
     }
     &:active{
-      background : red;
+      background : none;
     }
 
   }
