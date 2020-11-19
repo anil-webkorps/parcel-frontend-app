@@ -14,7 +14,7 @@ export default styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: all 0.5s linear;
+  // transition: all 0.5s linear;
 
   font-size: 10px;
   font-weight: 300;

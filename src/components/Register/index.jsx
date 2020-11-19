@@ -103,7 +103,8 @@ const INDIVIDUAL_REGISTER_STEPS = {
 
 const Register = () => {
   const [sign, setSign] = useLocalStorage("SIGNATURE");
-  const [loadingTx, setLoadinTx] = useState(false);
+  const [loadingTx, setLoadingTx] = useState(false);
+  const [createSafeLoading, setCreateSafeLoading] = useState(false);
 
   const { active, account, library } = useActiveWeb3React();
 
@@ -276,7 +277,9 @@ const Register = () => {
         );
       });
 
+      setCreateSafeLoading(true);
       const result = await tx.wait();
+      setCreateSafeLoading(false);
       console.log("tx success", result);
     }
   };
@@ -331,13 +334,13 @@ const Register = () => {
         },
       };
     }
-    setLoadinTx(true);
+    setLoadingTx(true);
     dispatch(registerUser(body, false));
 
     proxyFactory.once("ProxyCreation", (proxy) => {
       if (proxy) {
         dispatch(setOwnerDetails(formData.name, proxy));
-        setLoadinTx(false);
+        setLoadingTx(false);
         history.push("/dashboard");
       }
     });
@@ -443,7 +446,13 @@ const Register = () => {
           placeholder="John Doe"
         />
         <ErrorMessage name="name" errors={errors} />
-        <Button large type="submit" className="mt-3">
+        <Button
+          large
+          type="submit"
+          className="mt-3"
+          loading={createSafeLoading}
+          disabled={createSafeLoading}
+        >
           Create Safe and Proceed
         </Button>
       </StepDetails>

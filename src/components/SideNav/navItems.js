@@ -43,7 +43,7 @@ const navItems = [
     link: "/dashboard",
     name: "For Support",
     icon: faQuestionCircle,
-    style: { position: "absolute", top: "78%" },
+    style: { position: "absolute", top: "78%", minWidth: "100px" },
   },
 ];
 

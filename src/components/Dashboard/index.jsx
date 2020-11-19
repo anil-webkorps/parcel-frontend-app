@@ -183,7 +183,7 @@ export default function Dashboard() {
       className="position-relative"
       style={{
         marginLeft: toggled ? "150px" : "0",
-        transition: "all 0.5s linear",
+        transition: "all 0.25s linear",
       }}
     >
       <Info>

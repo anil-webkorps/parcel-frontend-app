@@ -9,7 +9,7 @@ export default styled.div`
   top: 80px;
   left: 0;
   overflow-x: hidden;
-  transition: all 0.5s linear;
+  transition: all 0.25s linear;
   padding-top: 60px;
   box-shadow: 3px 3px 8px 0 rgba(0, 0, 0, 0.16);
   background-color: #7367f0;
