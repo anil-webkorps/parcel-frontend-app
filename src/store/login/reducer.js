@@ -3,6 +3,7 @@ import {
   LOGIN_USER,
   LOGIN_USER_SUCCESS,
   LOGIN_USER_ERROR,
+  IMPORT_SAFE,
 } from "./action-types";
 
 export const initialState = {
@@ -10,7 +11,7 @@ export const initialState = {
   error: false,
   safeAddress: "",
   log: "",
-  shouldRedirect: false,
+  flag: 0,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -22,19 +23,23 @@ const reducer = (state = initialState, action) =>
         draft.error = false;
         draft.safeAddress = "";
         draft.log = "";
+        draft.flag = 0;
         break;
 
       case LOGIN_USER_SUCCESS:
         draft.safeAddress = action.safeAddress;
         draft.log = action.log;
         draft.loading = false;
-        draft.shouldRedirect = true;
         break;
 
       case LOGIN_USER_ERROR:
         draft.error = action.error;
         draft.loading = false;
-        draft.shouldRedirect = false;
+        break;
+
+      case IMPORT_SAFE:
+        draft.flag = action.flag;
+        draft.loading = false;
         break;
     }
   });

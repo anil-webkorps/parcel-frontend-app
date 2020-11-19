@@ -6,7 +6,7 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import { push } from "connected-react-router";
 
 import { LOGIN_USER } from "./action-types";
-import { loginUserSuccess, loginUserError } from "./actions";
+import { loginUserSuccess, loginUserError, setImportSafeFlag } from "./actions";
 import request from "utils/request";
 // import { makeSelectUsername } from "containers/HomePage/selectors";
 import { loginEndpoint } from "constants/endpoints";
@@ -22,6 +22,7 @@ export function* loginUser(action) {
   try {
     const result = yield call(request, requestURL, options);
     if (result.flag === 145) {
+      yield put(setImportSafeFlag(result.flag));
     } else if (result.flag !== 200) {
       // Error in payload
       yield put(loginUserError(result.log));

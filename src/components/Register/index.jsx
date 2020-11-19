@@ -42,6 +42,7 @@ import registerSaga from "store/register/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import { registerUser } from "store/register/actions";
 import { cryptoUtils } from "parcel-sdk";
+import { MESSAGE_TO_SIGN } from "constants/index";
 
 const registerKey = "register";
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS } = addresses;
@@ -188,7 +189,7 @@ const Register = () => {
       try {
         await library
           .getSigner(account)
-          .signMessage(`sign your ${account} to create encryption key`)
+          .signMessage(MESSAGE_TO_SIGN)
           .then((signature) => {
             setSign(signature);
             if (formData.referralId) createSafeWithMetaTransaction();

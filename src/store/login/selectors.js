@@ -19,11 +19,8 @@ const makeSelectSafeAddress = () =>
 const makeSelectLog = () =>
   createSelector(selectLogin, (loginState) => loginState.log);
 
-const makeSelectShouldRedirect = () =>
-  createSelector(
-    selectLogin,
-    (loginState) => loginState.makeSelectShouldRedirect
-  );
+const makeSelectFlag = () =>
+  createSelector(selectLogin, (loginState) => loginState.flag);
 
 export {
   selectLogin,
@@ -31,5 +28,5 @@ export {
   makeSelectError,
   makeSelectSafeAddress,
   makeSelectLog,
-  makeSelectShouldRedirect,
+  makeSelectFlag,
 };

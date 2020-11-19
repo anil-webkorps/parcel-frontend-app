@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,6 +11,7 @@ import {
   faWallet,
 } from "@fortawesome/free-solid-svg-icons";
 import { cryptoUtils } from "parcel-sdk";
+import { utils } from "ethers";
 
 import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage, useContract } from "hooks";
@@ -36,6 +37,7 @@ import {
   fetchSafes,
   chooseSafe,
 } from "store/loginWizard/actions";
+import { makeSelectFlag } from "store/login/selectors";
 import { setOwnerDetails } from "store/global/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
@@ -49,6 +51,7 @@ import PrivacyPng from "assets/images/register/privacy.png";
 import { Error } from "components/common/Form/styles";
 
 import addresses from "constants/addresses";
+import { MESSAGE_TO_SIGN } from "constants/index";
 import GnosisSafeABI from "constants/abis/GnosisSafe.json";
 import ProxyFactoryABI from "constants/abis/ProxyFactory.json";
 import loginSaga from "store/login/saga";
@@ -127,6 +130,7 @@ const IMPORT_STEPS = {
 
 const Login = () => {
   const [sign, setSign] = useLocalStorage("SIGNATURE"); // eslint-disable-line
+  const [hasAlreadySigned, setHasAlreadySigned] = useState(false);
 
   const { active, account, library } = useActiveWeb3React();
 
@@ -148,6 +152,7 @@ const Login = () => {
   const getSafesLoading = useSelector(makeSelectLoading());
   const flow = useSelector(makeSelectFlow());
   const chosenSafeAddress = useSelector(makeSelectChosenSafeAddress());
+  const flag = useSelector(makeSelectFlag());
   // const loading = useSelector(makeSelectLoading());
 
   // Form
@@ -183,12 +188,28 @@ const Login = () => {
 
   useEffect(() => {
     if (step === STEPS.ONE && account) {
+      if (sign) {
+        const msgHash = utils.hashMessage(MESSAGE_TO_SIGN);
+        const recoveredAddress = utils.recoverAddress(msgHash, sign);
+        if (recoveredAddress === account) {
+          setHasAlreadySigned(true);
+        }
+      }
       dispatch(fetchSafes(account));
     }
     if (step === STEPS.TWO && account) {
       dispatch(getSafes(account));
     }
-  }, [step, dispatch, account]);
+  }, [step, dispatch, account, sign]);
+
+  useEffect(() => {
+    console.log({ flag });
+    if (flag === 145) {
+      dispatch(selectFlow(FLOWS.IMPORT));
+      dispatch(chooseStep(STEPS.THREE));
+      // goNext();
+    }
+  }, [flag, dispatch]);
 
   const onSubmit = async (values) => {
     dispatch(updateForm(values));
@@ -205,7 +226,7 @@ const Login = () => {
       try {
         await library
           .getSigner(account)
-          .signMessage(`sign your ${account} to create encryption key`)
+          .signMessage(MESSAGE_TO_SIGN)
           .then((signature) => {
             setSign(signature);
             goNext();
@@ -509,18 +530,37 @@ const Login = () => {
           style={{ minWidth: "130px" }}
         />
         <h3 className="title">We care for Your Privacy </h3>
-        <p className="subtitle mb-5 pb-5">
-          Please sign this message using your private key and authorize Parcel.
-        </p>
 
-        <Button
-          type="button"
-          onClick={signTerms}
-          large
-          className="mx-auto d-block"
-        >
-          I'm in
-        </Button>
+        {!hasAlreadySigned ? (
+          <React.Fragment>
+            <p className="subtitle mb-5 pb-5">
+              Please sign this message using your private key and authorize
+              Parcel.
+            </p>
+            <Button
+              type="button"
+              onClick={signTerms}
+              large
+              className="mx-auto d-block"
+            >
+              I'm in
+            </Button>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <p className="subtitle mb-5 pb-5">
+              You have already authorized Parcel. Simply click Next to continue.
+            </p>
+            <Button
+              type="button"
+              onClick={goNext}
+              large
+              className="mx-auto d-block"
+            >
+              Next
+            </Button>
+          </React.Fragment>
+        )}
       </StepDetails>
     );
   };
@@ -540,7 +580,6 @@ const Login = () => {
     dispatch(chooseSafe(safe));
     dispatch(setOwnerDetails(name, safe));
     dispatch(loginUser(safe));
-    goNext();
   };
   const handleRefetch = useCallback(() => {
     dispatch(getSafes(account, 1)); // 1 => get safes from gnosis api
