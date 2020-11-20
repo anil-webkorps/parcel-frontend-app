@@ -111,3 +111,11 @@ export const TransactionUrl = (hash) => {
   };
   return `https://${etherscanPrefixByChainId[chainId]}etherscan.io/tx/${hash}`;
 };
+
+export const minifyAddress = (address) => {
+  if (!address) return "";
+
+  return `${address.substring(0, 9)}...${address.substring(
+    address.length - 4
+  )}`;
+};

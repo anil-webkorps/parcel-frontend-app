@@ -1,8 +1,13 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 import CopyButton from "components/common/Copy";
 import SideNav from "components/SideNav";
-
+import {
+  makeSelectOwnerName,
+  makeSelectOwnerSafeAddress,
+} from "store/global/selectors";
+import { minifyAddress } from "components/common/Web3Utils";
 import {
   HeaderLink,
   NavBar,
@@ -14,6 +19,9 @@ import {
 } from "./styles";
 
 export default function DashboardHeader() {
+  const ownerName = useSelector(makeSelectOwnerName());
+  const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+
   return (
     <div>
       <NavBar className="dashboard">
@@ -26,19 +34,19 @@ export default function DashboardHeader() {
           </div>
           <NavGroup>
             <AccountAddress>
-              <p>0xb723aa10...B1B5</p>
+              <p>{minifyAddress(ownerSafeAddress)}</p>
               <Circle className="ml-2">
                 <CopyButton
                   id="address"
                   tooltip="address"
-                  value="0xb723aa10623b036aA72fa2e8a4a0d5eF77DBB1B5"
+                  value={ownerSafeAddress}
                 />
               </Circle>
             </AccountAddress>
             <Profile>
-              <Circle>T</Circle>
-              <div className="ml-3">
-                <div className="name">Tarun</div>
+              <Circle>P</Circle>
+              <div className="mx-3">
+                <div className="name">{ownerName}</div>
                 <div className="info">Account Info</div>
               </div>
             </Profile>

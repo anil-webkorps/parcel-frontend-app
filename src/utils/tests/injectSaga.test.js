@@ -49,8 +49,6 @@ describe("useInjectSaga hook", () => {
       </Provider>
     );
 
-    console.log({ injectors });
-
     expect(injectors.injectSaga).toHaveBeenCalledTimes(1);
     expect(injectors.injectSaga).toHaveBeenCalledWith("test", {
       saga: testSaga,

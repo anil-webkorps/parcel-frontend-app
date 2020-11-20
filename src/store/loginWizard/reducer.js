@@ -8,6 +8,7 @@ import {
   GET_SAFES_ERROR,
   SELECT_FLOW,
   FETCH_SAFES,
+  GET_PARCEL_SAFES,
 } from "./action-types";
 
 export const initialState = {
@@ -42,6 +43,7 @@ const reducer = (state = initialState, action) =>
 
       case GET_SAFES:
       case FETCH_SAFES:
+      case GET_PARCEL_SAFES:
         draft.loading = true;
         draft.error = false;
         break;

@@ -6,6 +6,7 @@ import {
   GET_SAFES,
   GET_SAFES_SUCCESS,
   GET_SAFES_ERROR,
+  GET_PARCEL_SAFES,
   FETCH_SAFES,
 } from "./action-types";
 
@@ -41,6 +42,14 @@ export function fetchSafes(owner) {
   return {
     type: FETCH_SAFES,
     owner,
+  };
+}
+
+export function getParcelSafes(owner, status = 1) {
+  return {
+    type: GET_PARCEL_SAFES,
+    owner,
+    status,
   };
 }
 

@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSelector } from "react-redux";
 import {
   faArrowRight,
   faExclamationTriangle,
@@ -8,6 +9,7 @@ import { format } from "date-fns";
 
 import { Info, Container, Assets, Payments, Status } from "./styles";
 import { Card } from "components/common/Card";
+import { makeSelectOwnerName } from "store/global/selectors";
 
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
@@ -16,6 +18,7 @@ import { SideNavContext } from "context/SideNavContext";
 
 export default function Dashboard() {
   const [toggled] = useContext(SideNavContext);
+  const ownerName = useSelector(makeSelectOwnerName());
   // eslint-disable-next-line
   const [tokenDetails, setTokenDetails] = useState([
     {
@@ -187,7 +190,7 @@ export default function Dashboard() {
       }}
     >
       <Info>
-        <div className="title">Hey Tarun,</div>
+        <div className="title">Hey {ownerName},</div>
         <div className="subtitle">We have a few things for you to look at</div>
       </Info>
       <Container>

@@ -8,7 +8,6 @@ import {
   faMinus,
   faPlus,
   faUser,
-  faWallet,
 } from "@fortawesome/free-solid-svg-icons";
 import { cryptoUtils } from "parcel-sdk";
 import { utils } from "ethers";
@@ -34,6 +33,7 @@ import {
   updateForm,
   selectFlow,
   getSafes,
+  getParcelSafes,
   fetchSafes,
   chooseSafe,
 } from "store/loginWizard/actions";
@@ -198,12 +198,15 @@ const Login = () => {
       dispatch(fetchSafes(account));
     }
     if (step === STEPS.TWO && account) {
-      dispatch(getSafes(account));
+      if (flow === FLOWS.IMPORT) {
+        dispatch(getSafes(account));
+      } else {
+        dispatch(getParcelSafes(account));
+      }
     }
-  }, [step, dispatch, account, sign]);
+  }, [step, dispatch, account, sign, flow]);
 
   useEffect(() => {
-    console.log({ flag });
     if (flag === 145) {
       dispatch(selectFlow(FLOWS.IMPORT));
       dispatch(chooseStep(STEPS.THREE));
@@ -567,14 +570,21 @@ const Login = () => {
 
   const safeDetails = useMemo(() => {
     return safes.reduce((details, safe) => {
-      // get name and balance from the api or from SC
+      if (flow === FLOWS.IMPORT) {
+        return details.concat({
+          safe,
+          name: "Gnosis Safe User",
+          balance: "1",
+        });
+      }
+
       return details.concat({
-        safe,
-        name: "Gnosis Safe User",
+        safe: safe.safeAddress,
+        name: cryptoUtils.decryptData(safe.name, sign),
         balance: "1",
       });
     }, []);
-  }, [safes]);
+  }, [safes, flow, sign]);
 
   const handleSelectSafe = (name, safe) => {
     dispatch(chooseSafe(safe));
@@ -582,8 +592,12 @@ const Login = () => {
     dispatch(loginUser(safe));
   };
   const handleRefetch = useCallback(() => {
-    dispatch(getSafes(account, 1)); // 1 => get safes from gnosis api
-  }, [dispatch, account]);
+    if (flow === FLOWS.IMPORT) {
+      dispatch(getSafes(account, 1)); // 1 => get safes from gnosis api
+    } else {
+      dispatch(getParcelSafes(account));
+    }
+  }, [dispatch, account, flow]);
 
   const renderSafes = () => {
     if (getSafesLoading)
@@ -592,7 +606,9 @@ const Login = () => {
       return (
         <div className="text-center my-5">
           <p className="mb-4">Oops, no safe found...</p>
-          <Button to="/">Sign Up</Button>
+          <Button to="/" style={{ maxWidth: "200px" }} className="mx-auto mb-5">
+            Sign Up
+          </Button>
 
           <RetryText onClick={handleRefetch}>Safe not loaded?</RetryText>
         </div>
@@ -616,7 +632,7 @@ const Login = () => {
                   <div className="val">{name}</div>
                 </div>
               </div>
-              <div className="details">
+              {/* <div className="details">
                 <div className="icon">
                   <FontAwesomeIcon icon={faWallet} color="#aaa" />
                 </div>
@@ -624,7 +640,7 @@ const Login = () => {
                   <div className="desc">Balance</div>
                   <div className="val">{balance} ETH</div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="bottom">
