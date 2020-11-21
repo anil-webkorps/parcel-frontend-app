@@ -8,5 +8,5 @@ export default styled.div`
   border-radius: 16px;
   opacity: 1;
   position: relative;
-  transition: all 0.5s linear;
+  transition: all 0.25s linear;
 `;

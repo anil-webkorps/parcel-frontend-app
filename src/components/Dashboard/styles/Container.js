@@ -13,17 +13,13 @@ export default styled.div`
   top: 180px;
   .account {
     grid-row: 1/5;
-    transition: all 0.5s linear;
-    width: 750px;
   }
 
   .status {
-    max-width: 530px;
   }
 
   .payments {
     grid-row: 2/5;
-    max-width: 530px;
   }
 
   .card-title {

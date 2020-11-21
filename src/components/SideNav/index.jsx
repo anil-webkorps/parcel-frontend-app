@@ -30,10 +30,7 @@ export default function Navbar() {
         />
       )}
 
-      <SideNav
-        onClick={handleToggle}
-        style={{ width: toggled ? "230px" : "0" }}
-      >
+      <SideNav onClick={handleToggle} style={{ width: toggled ? "15em" : "0" }}>
         {navItems.map(({ id, link, name, icon, ...rest }) => (
           <NavItem key={id} {...rest}>
             <FontAwesomeIcon icon={icon} color="#fff" />

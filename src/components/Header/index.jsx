@@ -44,18 +44,7 @@ function PlainHeader() {
             </HeaderLink>
           </div>
           <NavGroup>
-            {account ? (
-              <AccountAddress>
-                <p>
-                  <Account />
-                </p>
-                <Circle className="ml-2">
-                  <CopyButton id="address" tooltip="address" value={account} />
-                </Circle>
-              </AccountAddress>
-            ) : (
-              <ConnectButton>Connect</ConnectButton>
-            )}
+            {!account && <ConnectButton>Connect</ConnectButton>}
             {isLoginPage && renderSignUpButton()}
             {isSignupPage && renderLoginButton()}
           </NavGroup>

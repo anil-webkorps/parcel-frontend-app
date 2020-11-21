@@ -73,16 +73,12 @@ export default function Dashboard() {
   ]);
 
   const renderAccount = () => (
-    <div
-      className="account"
-      style={{
-        maxWidth: toggled ? "650px" : "750px",
-      }}
-    >
+    <div className="account">
       <Card
         className="p-4"
         style={{
           background: "#fff",
+          width: toggled ? "37em" : "45em",
         }}
       >
         <div className="d-flex justify-content-between align-items-center">
@@ -130,7 +126,7 @@ export default function Dashboard() {
     <div className="status">
       <Card
         className="p-4 d-flex justify-content-center align-items-center"
-        style={{ background: "#fff" }}
+        style={{ background: "#fff", width: toggled ? "30em" : "33em" }}
       >
         <Status>
           <FontAwesomeIcon
@@ -152,7 +148,10 @@ export default function Dashboard() {
 
   const renderPayments = () => (
     <div className="payments">
-      <Card className="p-4" style={{ background: "#fff" }}>
+      <Card
+        className="p-4"
+        style={{ background: "#fff", width: toggled ? "30em" : "33em" }}
+      >
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <div className="card-title">Upcoming Payments </div>
@@ -185,15 +184,29 @@ export default function Dashboard() {
     <div
       className="position-relative"
       style={{
-        marginLeft: toggled ? "150px" : "0",
         transition: "all 0.25s linear",
       }}
     >
       <Info>
-        <div className="title">Hey {ownerName},</div>
-        <div className="subtitle">We have a few things for you to look at</div>
+        <div
+          style={{
+            maxWidth: toggled ? "900px" : "1280px",
+            transition: "all 0.25s linear",
+          }}
+          className="mx-auto"
+        >
+          <div className="title">Hey {ownerName},</div>
+          <div className="subtitle">
+            We have a few things for you to look at
+          </div>
+        </div>
       </Info>
-      <Container>
+      <Container
+        style={{
+          maxWidth: toggled ? "900px" : "1280px",
+          transition: "all 0.25s linear",
+        }}
+      >
         {renderAccount()}
         {renderStatus()}
         {renderPayments()}

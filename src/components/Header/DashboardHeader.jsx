@@ -38,13 +38,15 @@ export default function DashboardHeader() {
               <Circle className="ml-2">
                 <CopyButton
                   id="address"
-                  tooltip="address"
+                  tooltip="safe address"
                   value={ownerSafeAddress}
                 />
               </Circle>
             </AccountAddress>
             <Profile>
-              <Circle>P</Circle>
+              <Circle>
+                {ownerName && ownerName.substring(0, 1).toUpperCase()}
+              </Circle>
               <div className="mx-3">
                 <div className="name">{ownerName}</div>
                 <div className="info">Account Info</div>
