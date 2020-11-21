@@ -7,7 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { format } from "date-fns";
 
-import { Info, Container, Assets, Payments, Status } from "./styles";
+import { Info, Container, Payments, Status } from "./styles";
 import { Card } from "components/common/Card";
 import { makeSelectOwnerName } from "store/global/selectors";
 
@@ -15,6 +15,7 @@ import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 import USDCIcon from "assets/icons/tokens/USDC-icon.png";
 import { SideNavContext } from "context/SideNavContext";
+import AccountCard from "./AccountCard";
 
 export default function Dashboard() {
   const [toggled] = useContext(SideNavContext);
@@ -71,56 +72,6 @@ export default function Dashboard() {
       date: new Date(),
     },
   ]);
-
-  const renderAccount = () => (
-    <div className="account">
-      <Card
-        className="p-4"
-        style={{
-          background: "#fff",
-          width: toggled ? "37em" : "45em",
-        }}
-      >
-        <div className="d-flex justify-content-between align-items-center">
-          <div>
-            <div className="card-title">Account</div>
-            <div className="card-subtitle">
-              Find overview of your wallets and manage payments
-            </div>
-          </div>
-          <div className="circle">
-            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
-          </div>
-        </div>
-
-        <div className="overview-cards">
-          <div className="overview-card">
-            <div className="overview-text">Total Balance</div>
-            <div className="overview-amount">$12,000</div>
-          </div>
-          <div className="overview-card">
-            <div className="overview-text">Interest Earned</div>
-            <div className="overview-amount">$2,000</div>
-          </div>
-        </div>
-        {tokenDetails.map(({ id, name, icon, usd, balance }) => (
-          <Assets key={id}>
-            <div className="d-flex align-items-center">
-              <img src={icon} alt="ether" width="30" />
-              <div>
-                <div className="token-balance">{balance}</div>
-                <div className="token-name">{name}</div>
-              </div>
-            </div>
-            <div className="token-usd">
-              <div className="token-usd-title">Total Value</div>
-              <div className="token-usd-amount">${usd}</div>
-            </div>
-          </Assets>
-        ))}
-      </Card>
-    </div>
-  );
 
   const renderStatus = () => (
     <div className="status">
@@ -207,7 +158,7 @@ export default function Dashboard() {
           transition: "all 0.25s linear",
         }}
       >
-        {renderAccount()}
+        <AccountCard />
         {renderStatus()}
         {renderPayments()}
       </Container>
