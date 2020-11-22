@@ -1,20 +1,11 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 
-import {
-  HeaderLink,
-  NavBar,
-  NavBarContent,
-  NavGroup,
-  AccountAddress,
-  Circle,
-} from "./styles";
-import CopyButton from "components/common/Copy";
+import { HeaderLink, NavBar, NavBarContent, NavGroup } from "./styles";
 
 import ConnectButton from "components/Connect";
 import DashboardHeader from "./DashboardHeader";
 import { useActiveWeb3React } from "hooks";
-import { Account } from "components/common/Web3Utils";
 import Button from "components/common/Button";
 
 function PlainHeader() {

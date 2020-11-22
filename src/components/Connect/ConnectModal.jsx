@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useWeb3React } from "@web3-react/core";
 
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
-// import LoadingSpinner from "components/common/loading-spinner";
+import Loading from "components/common/Loading";
 import { supportedWallets } from "constants/index";
 import { getErrorMessage } from "utils/web3-helpers";
 
@@ -43,7 +43,7 @@ const ConnectToWalletModal = (props) => {
               <div className="ml-3">{name}</div>
 
               {selectedConnector === connector && !error && !active && (
-                <span className="ml-4">Loading...</span>
+                <Loading className="ml-3" color="primary" />
               )}
             </Card>
           </div>

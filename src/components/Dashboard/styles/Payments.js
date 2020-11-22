@@ -12,7 +12,7 @@ export default styled.div`
     height: 56px;
     padding: 11px 14px 10px;
     opacity: 1;
-    border: solid 0.5px #7367f0;
+    border: solid 0.5px ${({ theme }) => theme.primary};
     border-radius: 10px;
     background-color: rgba(229, 229, 229, 0.4);
     font-size: 12px;

@@ -4,7 +4,7 @@ export default styled.div`
   width: 100%;
   height: 480px;
   padding: 22px 0 101px 0;
-  background-color: #7367f0;
+  background-color: ${({ theme }) => theme.primary};
 
   .title {
     max-width: 1280px;

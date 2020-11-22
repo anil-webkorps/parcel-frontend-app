@@ -8,7 +8,7 @@ import {
 export const initialState = {
   loading: false,
   error: false,
-  balances: [],
+  balances: null,
 };
 
 /* eslint-disable default-case, no-param-reassign */

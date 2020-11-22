@@ -12,5 +12,5 @@ export default styled.div`
   transition: all 0.25s linear;
   padding-top: 60px;
   box-shadow: 3px 3px 8px 0 rgba(0, 0, 0, 0.16);
-  background-color: #7367f0;
+  background-color: ${({ theme }) => theme.primary};
 `;

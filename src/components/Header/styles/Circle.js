@@ -6,7 +6,7 @@ export default styled.div`
   border-radius: 50%;
   padding: 13px 12px 11px;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-  background-color: #7367f0;
+  background-color: ${({ theme }) => theme.primary};
   display: flex;
   justify-content: center;
   align-items: center;

@@ -11,10 +11,7 @@ import { useInjectSaga } from "utils/injectSaga";
 import dashboardReducer from "store/dashboard/reducer";
 import dashboardSaga from "store/dashboard/saga";
 import { Card } from "components/common/Card";
-import {
-  makeSelectOwnerName,
-  makeSelectOwnerSafeAddress,
-} from "store/global/selectors";
+import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
@@ -24,8 +21,9 @@ import { getSafeBalances } from "store/dashboard/actions";
 import {
   makeSelectLoading,
   makeSelectBalances,
-  makeSelectError,
+  // makeSelectError,
 } from "store/dashboard/selectors";
+import Loading from "components/common/Loading";
 
 const dashboardKey = "dashboard";
 
@@ -35,9 +33,32 @@ const DEFAULT_TOKENS = {
   USDC: "USDC",
 };
 
+const defaultTokenDetails = [
+  {
+    id: 0,
+    name: DEFAULT_TOKENS.ETH,
+    icon: ETHIcon,
+    balance: "0.00",
+    usd: "0.00",
+  },
+  {
+    id: 1,
+    name: DEFAULT_TOKENS.DAI,
+    icon: DAIIcon,
+    balance: "0.00",
+    usd: "0.00",
+  },
+  {
+    id: 2,
+    name: DEFAULT_TOKENS.USDC,
+    icon: USDCIcon,
+    balance: "0.00",
+    usd: "0.00",
+  },
+];
+
 export default function AccountCard() {
   const [toggled] = useContext(SideNavContext);
-  const ownerName = useSelector(makeSelectOwnerName());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
   // Reducers
@@ -51,40 +72,18 @@ export default function AccountCard() {
   // Selectors
   const loading = useSelector(makeSelectLoading());
   const balances = useSelector(makeSelectBalances());
-  const error = useSelector(makeSelectError());
+  // const error = useSelector(makeSelectError());
 
-  // eslint-disable-next-line
   const [totalBalance, setTotalBalance] = useState("0.00");
+  // eslint-disable-next-line
   const [interestEarned, setInterestEarned] = useState("0.00");
-  const [tokenDetails, setTokenDetails] = useState([
-    {
-      id: 0,
-      name: DEFAULT_TOKENS.ETH,
-      icon: ETHIcon,
-      balance: "0.00",
-      usd: "0.00",
-    },
-    {
-      id: 1,
-      name: DEFAULT_TOKENS.DAI,
-      icon: DAIIcon,
-      balance: "0.00",
-      usd: "0.00",
-    },
-    {
-      id: 2,
-      name: DEFAULT_TOKENS.USDC,
-      icon: USDCIcon,
-      balance: "0.00",
-      usd: "0.00",
-    },
-  ]);
+  const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
 
   useEffect(() => {
-    if (ownerSafeAddress) {
+    if (ownerSafeAddress && !balances) {
       dispatch(getSafeBalances(ownerSafeAddress));
     }
-  }, [ownerSafeAddress, dispatch]);
+  }, [ownerSafeAddress, dispatch, balances]);
 
   useEffect(() => {
     if (balances && balances.length > 0) {
@@ -122,7 +121,7 @@ export default function AccountCard() {
         .filter(Boolean);
 
       if (allTokenDetails.length < 3) {
-        const zeroBalanceTokensToShow = tokenDetails.filter(
+        const zeroBalanceTokensToShow = defaultTokenDetails.filter(
           (token) => !seenTokens[token.name]
         );
         setTokenDetails([...allTokenDetails, ...zeroBalanceTokensToShow]);
@@ -161,35 +160,46 @@ export default function AccountCard() {
           </div>
         </div>
 
-        <div className="overview-cards">
-          <div className="overview-card">
-            <div className="overview-text">Total Balance</div>
-            <div className="overview-amount">${totalBalance}</div>
+        {loading ? (
+          <div
+            className="d-flex align-items-center justify-content-center"
+            style={{ height: "400px" }}
+          >
+            <Loading color="primary" width="50px" height="50px" />
           </div>
-          <div className="overview-card">
-            <div className="overview-text">Interest Earned</div>
-            <div className="overview-amount">${interestEarned}</div>
-          </div>
-        </div>
-        {tokenDetails.map(({ id, name, icon, usd, balance }) => (
-          <Assets key={id}>
-            <div className="d-flex align-items-center">
-              <img src={icon} alt="ether" width="30" />
-              <div>
-                <div className="token-balance">
-                  {parseFloat(balance).toFixed(2)}
+        ) : (
+          <React.Fragment>
+            <div className="overview-cards">
+              <div className="overview-card">
+                <div className="overview-text">Total Balance</div>
+                <div className="overview-amount">${totalBalance}</div>
+              </div>
+              <div className="overview-card">
+                <div className="overview-text">Interest Earned</div>
+                <div className="overview-amount">${interestEarned}</div>
+              </div>
+            </div>
+            {tokenDetails.map(({ id, name, icon, usd, balance }) => (
+              <Assets key={id}>
+                <div className="d-flex align-items-center">
+                  <img src={icon} alt="ether" width="30" />
+                  <div>
+                    <div className="token-balance">
+                      {parseFloat(balance).toFixed(2)}
+                    </div>
+                    <div className="token-name">{name}</div>
+                  </div>
                 </div>
-                <div className="token-name">{name}</div>
-              </div>
-            </div>
-            <div className="token-usd">
-              <div className="token-usd-title">Total Value</div>
-              <div className="token-usd-amount">
-                ${parseFloat(usd).toFixed(2)}
-              </div>
-            </div>
-          </Assets>
-        ))}
+                <div className="token-usd">
+                  <div className="token-usd-title">Total Value</div>
+                  <div className="token-usd-amount">
+                    ${parseFloat(usd).toFixed(2)}
+                  </div>
+                </div>
+              </Assets>
+            ))}
+          </React.Fragment>
+        )}
       </Card>
     </div>
   );

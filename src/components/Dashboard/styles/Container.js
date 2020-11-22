@@ -49,7 +49,7 @@ export default styled.div`
     height: 48px;
     padding: 12px;
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-    background-color: #7367f0;
+    background-color: ${({ theme }) => theme.primary};
     border-radius: 50%;
     display: flex;
     justify-content: center;
