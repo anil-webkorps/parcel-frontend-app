@@ -10,6 +10,7 @@ import RegisterPage from "pages/Register";
 import LoginPage from "pages/Login";
 import DashboardPage from "./Dashboard";
 import SideNavProvider from "context/SideNavContext";
+import MassPayoutPage from "./MassPayout";
 
 export default function App() {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
@@ -22,6 +23,7 @@ export default function App() {
             <Route exact path="/" component={LoginPage} />
             <Route exact path="/signup" component={RegisterPage} />
             <Route exact path="/dashboard" component={DashboardPage} />
+            <Route exact path="/mass" component={MassPayoutPage} />
           </Switch>
         </SideNavProvider>
         <GlobalStyle />
