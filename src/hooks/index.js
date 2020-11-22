@@ -5,3 +5,4 @@ export { default as useContract } from "./useContract";
 export { default as useTokenBalance } from "./useTokenBalance";
 export { default as useFetch } from "./useFetch";
 export { default as useLocalStorage } from "./useLocalStorage";
+export { default as useAuth } from "./useAuth";

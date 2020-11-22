@@ -13,7 +13,6 @@ import SideNavProvider from "context/SideNavContext";
 
 export default function App() {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
-
   return (
     <div className="app">
       <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>

@@ -129,7 +129,7 @@ const IMPORT_STEPS = {
 };
 
 const Login = () => {
-  const [sign, setSign] = useLocalStorage("SIGNATURE"); // eslint-disable-line
+  const [sign, setSign] = useLocalStorage("SIGNATURE");
   const [hasAlreadySigned, setHasAlreadySigned] = useState(false);
 
   const { active, account, library } = useActiveWeb3React();

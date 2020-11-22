@@ -12,7 +12,7 @@ import {
 } from "./action-types";
 
 export const initialState = {
-  step: 1,
+  step: 0,
   form: {},
   loading: false,
   safes: [],
