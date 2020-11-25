@@ -47,7 +47,7 @@ function PlainHeader() {
 export default function Header() {
   const location = useLocation();
 
-  if (location.pathname === "/dashboard") return <DashboardHeader />;
+  if (location.pathname.includes("/dashboard")) return <DashboardHeader />;
 
   return <PlainHeader />;
 }

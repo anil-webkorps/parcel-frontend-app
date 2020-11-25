@@ -144,7 +144,6 @@ export default function AccountCard() {
       <Card
         className="p-4"
         style={{
-          background: "#fff",
           width: toggled ? "37em" : "45em",
         }}
       >

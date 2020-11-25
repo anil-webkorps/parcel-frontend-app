@@ -21,7 +21,7 @@ export default function App() {
           <Switch>
             <Route exact path="/" component={LoginPage} />
             <Route exact path="/signup" component={RegisterPage} />
-            <Route exact path="/dashboard" component={DashboardPage} />
+            <Route path="/dashboard" component={DashboardPage} />
           </Switch>
         </SideNavProvider>
         <GlobalStyle />

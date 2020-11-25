@@ -13,7 +13,7 @@ export const lightTheme = {
     color: "#eee",
   },
   card: {
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#fff",
     color: "#363537",
     inner: {
       backgroundColor: "#fff",
@@ -70,7 +70,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   a {
-    &:hover, &:focus,   {
+    &:hover, &:focus {
       text-decoration: none;
       color: inherit;
       background: none;

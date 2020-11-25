@@ -14,7 +14,7 @@ export default function StatusCard() {
     <div className="status">
       <Card
         className="p-4 d-flex justify-content-center align-items-center"
-        style={{ background: "#fff", width: toggled ? "30em" : "33em" }}
+        style={{ width: toggled ? "30em" : "33em" }}
       >
         <Status>
           <FontAwesomeIcon

@@ -10,28 +10,21 @@ const CustomButton = ({
   href,
   iconOnly,
   loading,
-  style: propStyles,
+  style: propStyles = {},
   ...rest
 }) => {
-  if (to) {
-    return (
-      <Link to={to}>
-        <Button className={`w-100 ${className}`} style={propStyles} {...rest}>
-          {children}
-        </Button>
-      </Link>
-    );
-  } else if (href) {
-    return (
-      <a href={href} rel="noopenner noreferrer" target="_blank">
-        <Button className={className} style={propStyles} {...rest}>
-          {children}
-        </Button>
-      </a>
-    );
-  }
-
   if (iconOnly) {
+    if (to) {
+      return (
+        <Button
+          className={className}
+          style={{ border: "none", background: "none", ...propStyles }}
+          {...rest}
+        >
+          <Link to={to}>{children}</Link>
+        </Button>
+      );
+    }
     return (
       <Button
         className={className}
@@ -40,6 +33,22 @@ const CustomButton = ({
       >
         {children}
       </Button>
+    );
+  }
+
+  if (to) {
+    return (
+      <Button className={`w-100 ${className}`} style={propStyles} {...rest}>
+        <Link to={to}>{children}</Link>
+      </Button>
+    );
+  } else if (href) {
+    return (
+      <a href={href} rel="noopenner noreferrer" target="_blank">
+        <Button className={className} style={propStyles} {...rest}>
+          {children}
+        </Button>
+      </a>
     );
   }
 

@@ -673,7 +673,6 @@ const Login = () => {
         <Card
           className="mx-auto"
           style={{
-            backgroundColor: "#fff",
             maxWidth: "668px",
             minHeight: "580px",
           }}

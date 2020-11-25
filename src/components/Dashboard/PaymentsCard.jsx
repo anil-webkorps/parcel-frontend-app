@@ -42,10 +42,7 @@ export default function PaymentsCard() {
 
   return (
     <div className="payments">
-      <Card
-        className="p-4"
-        style={{ background: "#fff", width: toggled ? "30em" : "33em" }}
-      >
+      <Card className="p-4" style={{ width: toggled ? "30em" : "33em" }}>
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <div className="card-title">Upcoming Payments </div>
