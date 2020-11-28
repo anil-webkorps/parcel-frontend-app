@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLongArrowAltLeft,
@@ -8,7 +8,8 @@ import {
 import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useHistory } from "react-router-dom";
+import { cryptoUtils } from "parcel-sdk";
 
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
@@ -17,21 +18,26 @@ import Button from "components/common/Button";
 import { Input, ErrorMessage } from "components/common/Form";
 import addTeammateReducer from "store/add-teammate/reducer";
 import addDepartmentReducer from "store/add-department/reducer";
+import { useLocalStorage } from "hooks";
 import {
   chooseStep,
   updateForm,
   chooseDepartment,
   getDepartments,
+  // getDepartmentById,
+  addTeammate,
 } from "store/add-teammate/actions";
 import addTeammateSaga from "store/add-teammate/saga";
 import {
   makeSelectStep,
   makeSelectFormData,
   makeSelectChosenDepartment,
-  makeSelectPayCycleDate,
   makeSelectDepartments,
 } from "store/add-teammate/selectors";
-import { makeSelectFormData as makeSelectDepartmentFormData } from "store/add-department/selectors";
+import {
+  makeSelectFormData as makeSelectDepartmentFormData,
+  makeSelectDepartmentId,
+} from "store/add-department/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { numToOrd } from "utils/date-helpers";
@@ -70,7 +76,11 @@ const addTeammateKey = "addTeammate";
 const addDepartmentKey = "addDepartment";
 
 export default function AddTeammate() {
+  const [sign] = useLocalStorage("SIGNATURE");
   const [toggled] = useContext(SideNavContext);
+
+  const [success, setSuccess] = useState(false);
+
   const { register, errors, handleSubmit, reset, formState } = useForm({
     mode: "onChange",
   });
@@ -84,12 +94,14 @@ export default function AddTeammate() {
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
   const departmentFormData = useSelector(makeSelectDepartmentFormData());
+  const chosenDepartmentId = useSelector(makeSelectDepartmentId());
   const chosenDepartment = useSelector(makeSelectChosenDepartment());
-  const payCycleDate = useSelector(makeSelectPayCycleDate());
+  // const payCycleDate = useSelector(makeSelectPayCycleDate());
   const allDepartments = useSelector(makeSelectDepartments());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
   const location = useLocation();
+  const history = useHistory();
 
   useEffect(() => {
     reset({
@@ -111,24 +123,27 @@ export default function AddTeammate() {
     if (
       departmentFormData &&
       departmentFormData.name &&
-      departmentFormData.payCycleDate
+      departmentFormData.payCycleDate &&
+      chosenDepartmentId
     ) {
-      dispatch(chooseStep(STEPS.ZERO));
       dispatch(
-        chooseDepartment(
-          departmentFormData.name,
-          departmentFormData.payCycleDate
-        )
+        chooseDepartment({
+          departmentId: chosenDepartmentId,
+          name: departmentFormData.name,
+          payCycleDate: departmentFormData.payCycleDate,
+        })
       );
-    } else {
-      const searchParams = new URLSearchParams(location.search);
-      const department = searchParams.get("department");
-      if (department) {
-        dispatch(chooseStep(STEPS.ZERO));
-        dispatch(chooseDepartment(department, 1)); // TODO: Fetch the paycycle date for dept from BE
-      }
+      dispatch(chooseStep(STEPS.ZERO));
     }
-  }, [departmentFormData, dispatch, location]);
+    // else {
+    //   const searchParams = new URLSearchParams(location.search);
+    //   const departmentId = searchParams.get("departmentId");
+    //   if (departmentId) {
+    //     dispatch(chooseStep(STEPS.ZERO));
+    //     dispatch(chooseDepartment({})); // TODO: Fetch the paycycle date for dept from BE
+    //   }
+    // }
+  }, [departmentFormData, dispatch, chosenDepartmentId]);
 
   const onSubmit = (values) => {
     if (chosenDepartment) {
@@ -147,9 +162,42 @@ export default function AddTeammate() {
     dispatch(chooseStep(step + 1));
   };
 
-  const onSelectDepartment = (name, payCycleDate) => {
-    dispatch(chooseDepartment(name, payCycleDate));
+  const onSelectDepartment = (chosenDepartment) => {
+    dispatch(chooseDepartment(chosenDepartment));
     dispatch(chooseStep(STEPS.ZERO));
+    history.push(
+      `${location.pathname}?departmentId=${chosenDepartment.departmentId}`
+    );
+  };
+
+  const handleCreateTeammate = () => {
+    if (!sign || !ownerSafeAddress) return;
+
+    const encryptedEmployeeDetails = cryptoUtils.encryptData(
+      JSON.stringify({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        salaryAmount: formData.salary,
+        salaryToken: formData.currency,
+        payCycleDate: chosenDepartment && chosenDepartment.payCycleDate,
+        joiningDate: Date.now(),
+      }),
+      sign
+    );
+
+    const body = {
+      encryptedEmployeeDetails,
+      payCycleDate: chosenDepartment.payCycleDate,
+      safeAddress: ownerSafeAddress,
+      createdBy: ownerSafeAddress,
+      departmentId: chosenDepartment.departmentId,
+      departmentName: chosenDepartment.name,
+      joiningDate: Date.now(),
+    };
+
+    console.log({ body });
+    dispatch(addTeammate(body));
+    setSuccess(true);
   };
 
   const renderTeammateDetails = () => (
@@ -220,7 +268,7 @@ export default function AddTeammate() {
       </Row>
 
       <Heading>DEPARTMENT</Heading>
-      {!chosenDepartment && !payCycleDate ? (
+      {!chosenDepartment ? (
         <ChooseDepartment type="submit">
           <div>
             <div className="choose-title">Choose Department</div>
@@ -243,9 +291,10 @@ export default function AddTeammate() {
             <div className="text-left mb-2">
               <img src={GuyPng} alt="guy" width="40" />
             </div>
-            <Title className="mb-1 choosen-dept">{chosenDepartment}</Title>
+            <Title className="mb-1 choosen-dept">{chosenDepartment.name}</Title>
             <Heading className="choosen-dept">
-              PAYROLL DATE : {numToOrd(payCycleDate)} of Every Month
+              PAYROLL DATE : {numToOrd(chosenDepartment.payCycleDate)} of Every
+              Month
             </Heading>
           </div>
           <div className="choose-title">EDIT</div>
@@ -274,9 +323,7 @@ export default function AddTeammate() {
               <div
                 className="department-details"
                 key={department.departmentId}
-                onClick={() =>
-                  onSelectDepartment(department.name, department.payCycleDate)
-                }
+                onClick={() => onSelectDepartment(department)}
               >
                 <div className="small-card">
                   <img src={GuyPng} width="50px" alt="guy" />
@@ -318,14 +365,20 @@ export default function AddTeammate() {
         <Heading>The user will be paid as per department pay date.</Heading>
 
         <PayrollCard>
-          <div className="dept-name">{chosenDepartment}</div>
+          <div className="dept-name">{chosenDepartment.name}</div>
           <div className="dept-info">
-            PAYROLL DATE : {numToOrd(payCycleDate)} of Every Month
+            PAYROLL DATE : {numToOrd(chosenDepartment.payCycleDate)} of Every
+            Month
           </div>
           <div className="change-date mt-4">Change Payroll date </div>
         </PayrollCard>
 
-        <Button large type="submit" className="mt-5">
+        <Button
+          large
+          type="button"
+          onClick={handleCreateTeammate}
+          className="mt-5"
+        >
           Confirm
         </Button>
       </Card>
@@ -337,7 +390,7 @@ export default function AddTeammate() {
       case STEPS.ZERO:
         return `${formData.firstName} ${formData.lastName}`;
       case STEPS.ONE:
-        return `${chosenDepartment}`;
+        return `${chosenDepartment.name}`;
       default:
         return null;
     }
@@ -394,14 +447,26 @@ export default function AddTeammate() {
           transition: "all 0.25s linear",
         }}
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
+        {!success ? (
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <StepsCard>
+              {step > STEPS.ZERO && renderDoneSteps()}
+              {step === STEPS.ZERO && renderTeammateDetails()}
+              {step === STEPS.ONE && renderChooseDepartment()}
+              {step === STEPS.TWO && renderPaydate()}
+            </StepsCard>
+          </form>
+        ) : (
           <StepsCard>
-            {step > STEPS.ZERO && renderDoneSteps()}
-            {step === STEPS.ZERO && renderTeammateDetails()}
-            {step === STEPS.ONE && renderChooseDepartment()}
-            {step === STEPS.TWO && renderPaydate()}
+            <Card className="add-teammate">
+              <Title className="mb-4">Teammate Saved!</Title>
+
+              <Button large type="submit" className="mt-5">
+                Add More Teammates
+              </Button>
+            </Card>
           </StepsCard>
-        </form>
+        )}
       </Container>
     </div>
   );

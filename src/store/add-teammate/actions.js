@@ -4,6 +4,9 @@ import {
   GET_DEPARTMENTS,
   GET_DEPARTMENTS_SUCCESS,
   GET_DEPARTMENTS_ERROR,
+  GET_DEPARTMENT_BY_ID,
+  GET_DEPARTMENT_BY_ID_SUCCESS,
+  GET_DEPARTMENT_BY_ID_ERROR,
   ADD_TEAMMATE,
   ADD_TEAMMATE_SUCCESS,
   ADD_TEAMMATE_ERROR,
@@ -23,11 +26,15 @@ export function updateForm(formData) {
     formData,
   };
 }
-export function chooseDepartment(name, payCycleDate) {
+export function chooseDepartment({
+  name,
+  payCycleDate,
+  departmentId,
+  employees = 0,
+}) {
   return {
     type: CHOOSE_DEPARTMENT,
-    name,
-    payCycleDate,
+    chosenDepartment: { name, payCycleDate, departmentId, employees },
   };
 }
 
@@ -53,9 +60,49 @@ export function getDepartmentsError(error) {
   };
 }
 
-export function addTeammate() {
+export function getDepartmentById(safeAddress, departmentId) {
+  return {
+    type: GET_DEPARTMENT_BY_ID,
+    safeAddress,
+    departmentId,
+  };
+}
+
+export function getDepartmentByIdSuccess(chosenDepartment, log) {
+  return {
+    type: GET_DEPARTMENT_BY_ID_SUCCESS,
+    chosenDepartment,
+    log,
+  };
+}
+
+export function getDepartmentByIdError(error) {
+  return {
+    type: GET_DEPARTMENT_BY_ID_ERROR,
+    error,
+  };
+}
+
+export function addTeammate({
+  encryptedEmployeeDetails,
+  payCycleDate,
+  safeAddress,
+  createdBy,
+  departmentId,
+  departmentName,
+  joiningDate,
+}) {
   return {
     type: ADD_TEAMMATE,
+    body: {
+      encryptedEmployeeDetails,
+      payCycleDate,
+      safeAddress,
+      createdBy,
+      departmentId,
+      departmentName,
+      joiningDate,
+    },
   };
 }
 

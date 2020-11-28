@@ -9,6 +9,9 @@ import {
   ADD_TEAMMATE_ERROR,
   ADD_TEAMMATE_SUCCESS,
   CHOOSE_DEPARTMENT,
+  GET_DEPARTMENT_BY_ID,
+  GET_DEPARTMENT_BY_ID_SUCCESS,
+  GET_DEPARTMENT_BY_ID_ERROR,
 } from "./action-types";
 
 export const initialState = {
@@ -34,12 +37,13 @@ const reducer = (state = initialState, action) =>
         break;
 
       case CHOOSE_DEPARTMENT:
-        draft.chosenDepartment = action.name;
+        draft.chosenDepartment = action.chosenDepartment;
         draft.payCycleDate = action.payCycleDate;
         break;
 
       case GET_DEPARTMENTS:
       case ADD_TEAMMATE:
+      case GET_DEPARTMENT_BY_ID:
         draft.loading = true;
         draft.error = false;
         break;
@@ -56,6 +60,11 @@ const reducer = (state = initialState, action) =>
         break;
 
       case ADD_TEAMMATE_SUCCESS:
+        draft.loading = false;
+        break;
+
+      case GET_DEPARTMENT_BY_ID_SUCCESS:
+        draft.chosenDepartment = action.chosenDepartment;
         draft.loading = false;
         break;
     }
