@@ -2,3 +2,8 @@ export { default as Container } from "./Container";
 export { default as Title } from "./Title";
 export { default as Heading } from "./Heading";
 export { default as ChooseDepartment } from "./ChooseDepartment";
+export { default as StepsCard } from "./StepsCard";
+export { default as PayrollCard } from "./PayrollCard";
+export { default as DoneCard } from "./DoneCard";
+export { default as Text } from "./Text";
+export { default as DepartmentCard } from "./DepartmentCard";

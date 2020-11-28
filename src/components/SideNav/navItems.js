@@ -1,8 +1,8 @@
 import {
   faHome,
-  faChartPie,
+  // faChartPie,
   faMoneyBill,
-  faFolderOpen,
+  // faFolderOpen,
   faUserCircle,
   faQuestionCircle,
 } from "@fortawesome/free-solid-svg-icons";

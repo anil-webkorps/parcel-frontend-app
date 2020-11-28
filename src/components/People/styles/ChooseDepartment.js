@@ -1,6 +1,7 @@
 import styled from "styled-components/macro";
 
-export default styled.div`
+export default styled.button`
+  background: #fff;
   width: 100%;
   min-height: 120px;
   padding: 16px;

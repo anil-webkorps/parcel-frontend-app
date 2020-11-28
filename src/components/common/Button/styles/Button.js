@@ -41,4 +41,9 @@ export default styled.button`
       color: white;
     }
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;

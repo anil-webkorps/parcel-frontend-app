@@ -38,9 +38,11 @@ const CustomButton = ({
 
   if (to) {
     return (
-      <Button className={`w-100 ${className}`} style={propStyles} {...rest}>
-        <Link to={to}>{children}</Link>
-      </Button>
+      <Link to={to}>
+        <Button className={`w-100 ${className}`} style={propStyles} {...rest}>
+          {children}
+        </Button>
+      </Link>
     );
   } else if (href) {
     return (

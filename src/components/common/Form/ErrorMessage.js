@@ -5,7 +5,6 @@ import { Error } from "./styles";
 
 const ErrorMessage = ({ errors, name, ...rest }) => {
   if (isEmpty(errors)) return null;
-  console.log({ errors });
   return (
     <>
       <Error name={name} {...rest}>
