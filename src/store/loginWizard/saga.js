@@ -8,7 +8,7 @@ import { getSafesSuccess, getSafesError } from "./actions";
 import request from "utils/request";
 import {
   getSafesEndpoint,
-  fetchSafesEndPoint,
+  fetchSafesEndpoint,
   getParcelSafesEndpoint,
 } from "constants/endpoints";
 
@@ -51,7 +51,7 @@ export function* getParcelSafes(action) {
 }
 
 export function* fetchSafes(action) {
-  const requestURL = `${fetchSafesEndPoint}?owner=${action.owner}`;
+  const requestURL = `${fetchSafesEndpoint}?owner=${action.owner}`;
   const options = {
     method: "GET",
   };

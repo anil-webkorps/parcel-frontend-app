@@ -8,7 +8,7 @@ import { REGISTER_USER } from "./action-types";
 import { registerUserSuccess, registerUserError } from "./actions";
 import request from "utils/request";
 // import { makeSelectUsername } from "containers/HomePage/selectors";
-import { registerEndPoint } from "constants/endpoints";
+import { registerEndpoint } from "constants/endpoints";
 
 /**
  * Github repos request/response handler
@@ -16,7 +16,7 @@ import { registerEndPoint } from "constants/endpoints";
 export function* registerUser(action) {
   // Select username from store
   // const username = yield select(makeSelectUsername());
-  const requestURL = registerEndPoint;
+  const requestURL = registerEndpoint;
   const options = {
     method: "POST",
     body: JSON.stringify(action.body),

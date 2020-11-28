@@ -1,41 +1,39 @@
 import produce from "immer";
 import {
-  UPDATE_FORM,
-  ADD_DEPARTMENT,
-  ADD_DEPARTMENT_ERROR,
-  ADD_DEPARTMENT_SUCCESS,
+  GET_ALL_TEAMMATES,
+  GET_ALL_TEAMMATES_SUCCESS,
+  GET_ALL_TEAMMATES_ERROR,
+  GET_TEAMMATES_BY_DEPARTMENT,
+  GET_TEAMMATES_BY_DEPARTMENT_SUCCESS,
+  GET_TEAMMATES_BY_DEPARTMENT_ERROR,
 } from "./action-types";
 
 export const initialState = {
-  form: {},
   loading: false,
   error: false,
-  departmentId: "",
-  log: "",
+  teammates: [],
 };
 
 /* eslint-disable default-case, no-param-reassign */
 const reducer = (state = initialState, action) =>
   produce(state, (draft) => {
     switch (action.type) {
-      case UPDATE_FORM:
-        draft.form = { ...draft.form, ...action.formData };
-        break;
-
-      case ADD_DEPARTMENT:
+      case GET_ALL_TEAMMATES:
+      case GET_TEAMMATES_BY_DEPARTMENT:
         draft.loading = true;
         draft.error = false;
         break;
 
-      case ADD_DEPARTMENT_ERROR:
+      case GET_ALL_TEAMMATES_ERROR:
+      case GET_TEAMMATES_BY_DEPARTMENT_ERROR:
         draft.loading = false;
         draft.error = action.error;
         break;
 
-      case ADD_DEPARTMENT_SUCCESS:
+      case GET_ALL_TEAMMATES_SUCCESS:
+      case GET_TEAMMATES_BY_DEPARTMENT_SUCCESS:
         draft.loading = false;
-        draft.departmentId = action.departmentId;
-        draft.log = action.log;
+        draft.teammates = action.teammates;
         break;
     }
   });

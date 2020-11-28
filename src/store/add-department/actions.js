@@ -12,15 +12,21 @@ export function updateForm(formData) {
   };
 }
 
-export function addDepartment() {
+export function addDepartment({ name, safeAddress, createdBy, payCycleDate }) {
   return {
     type: ADD_DEPARTMENT,
+    name,
+    safeAddress,
+    createdBy,
+    payCycleDate,
   };
 }
 
-export function addDepartmentSuccess() {
+export function addDepartmentSuccess(departmentId, log) {
   return {
     type: ADD_DEPARTMENT_SUCCESS,
+    departmentId,
+    log,
   };
 }
 

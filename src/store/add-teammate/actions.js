@@ -31,9 +31,10 @@ export function chooseDepartment(name, payCycleDate) {
   };
 }
 
-export function getDepartments() {
+export function getDepartments(safeAddress) {
   return {
     type: GET_DEPARTMENTS,
+    safeAddress,
   };
 }
 

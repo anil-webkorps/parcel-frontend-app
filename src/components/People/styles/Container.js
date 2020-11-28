@@ -106,5 +106,13 @@ export default styled.div`
     align-items: center;
     cursor: pointer;
     margin: 16px auto;
+
+    &.circle-grey {
+      width: 44px;
+      height: 44px;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
   }
 `;

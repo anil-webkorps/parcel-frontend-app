@@ -5,11 +5,17 @@ const ROOT_BE_URL =
     ? "http://localhost:2000"
     : "https://api.parcel.money";
 
-export const registerEndPoint = `${ROOT_BE_URL}/api/v1/users/create`;
-export const fetchSafesEndPoint = `${ROOT_BE_URL}/api/v1/users/fetch-safes`;
+export const registerEndpoint = `${ROOT_BE_URL}/api/v1/users/create`;
+export const fetchSafesEndpoint = `${ROOT_BE_URL}/api/v1/users/fetch-safes`;
 export const getSafesEndpoint = `${ROOT_BE_URL}/api/v1/users/get-safes`;
 export const getParcelSafesEndpoint = `${ROOT_BE_URL}/api/v1/users/get-parcel-safes`;
 export const loginEndpoint = `${ROOT_BE_URL}/api/v1/users/login`;
+export const getAllTeammatesEndpoint = `${ROOT_BE_URL}/api/v1/people/get`;
+export const getTeammatesByDepartmentIdEndPoint = `${ROOT_BE_URL}/api/v1/people/getByDepartment`;
+export const createDepartmentEndpoint = `${ROOT_BE_URL}/api/v1/departments/create`;
+export const createTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/create`;
+export const getAllDepartmentsEndpoint = `${ROOT_BE_URL}/api/v1/departments/get`;
+
 export const gnosisSafeTransactionEndpoint =
   process.env.REACT_APP_NETWORK_NAME === networkNames.MAINNET
     ? `https://safe-transaction.gnosis.io/api/v1/safes/`

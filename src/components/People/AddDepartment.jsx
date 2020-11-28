@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLongArrowAltLeft } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
@@ -13,10 +13,18 @@ import { Card } from "components/common/Card";
 import Button from "components/common/Button";
 import { Input, ErrorMessage } from "components/common/Form";
 import addDepartmentReducer from "store/add-department/reducer";
-import { updateForm } from "store/add-department/actions";
-import { makeSelectFormData } from "store/add-department/selectors";
+import { addDepartment, updateForm } from "store/add-department/actions";
+import addDepartmentSaga from "store/add-department/saga";
+import {
+  makeSelectFormData,
+  makeSelectDepartmentId,
+  makeSelectLoading,
+} from "store/add-department/selectors";
 import { useInjectReducer } from "utils/injectReducer";
+import { useInjectSaga } from "utils/injectSaga";
+
 import { numToOrd } from "utils/date-helpers";
+import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 
 import GuyPng from "assets/icons/guy.png";
 
@@ -60,17 +68,31 @@ export default function AddDepartment() {
   const { register, errors, handleSubmit } = useForm();
 
   useInjectReducer({ key: addDepartmentKey, reducer: addDepartmentReducer });
+  useInjectSaga({ key: addDepartmentKey, saga: addDepartmentSaga });
 
   const dispatch = useDispatch();
   const formData = useSelector(makeSelectFormData());
+  const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const newDepartmentId = useSelector(makeSelectDepartmentId());
+  const loading = useSelector(makeSelectLoading());
 
   const history = useHistory();
+
+  useEffect(() => {
+    if (newDepartmentId) setSuccess(true);
+  }, [newDepartmentId]);
 
   const onSubmit = (values) => {
     dispatch(updateForm({ ...formData, name: values.departmentName }));
     // dispatch async action to create dept
-
-    setSuccess(true);
+    dispatch(
+      addDepartment({
+        name: values.departmentName,
+        payCycleDate: formData.payCycleDate,
+        createdBy: ownerSafeAddress,
+        safeAddress: ownerSafeAddress,
+      })
+    );
   };
 
   const handleDayClick = (day) => {
@@ -122,7 +144,13 @@ export default function AddDepartment() {
         month.
       </Text>
 
-      <Button large type="submit" className="mt-3" disabled={!selectedDay}>
+      <Button
+        large
+        type="submit"
+        className="mt-3"
+        disabled={!selectedDay}
+        loading={loading}
+      >
         Add Department
       </Button>
     </Card>
@@ -159,7 +187,7 @@ export default function AddDepartment() {
           </Link>
         </Col>
         <Col lg="7" sm="12">
-          <Link to={`/dashboard/people/new?department=${formData.name}`}>
+          <Link to={`/dashboard/people/new?departmentId=${newDepartmentId}`}>
             <Button large type="submit" className="mt-3">
               Add Teammates
             </Button>

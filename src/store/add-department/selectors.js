@@ -13,6 +13,12 @@ const makeSelectFormData = () =>
     (addDepartmentState) => addDepartmentState.form
   );
 
+const makeSelectDepartmentId = () =>
+  createSelector(
+    selectAddDepartment,
+    (addDepartmentState) => addDepartmentState.departmentId
+  );
+
 const makeSelectLoading = () =>
   createSelector(
     selectAddDepartment,
@@ -28,6 +34,7 @@ const makeSelectError = () =>
 export {
   selectAddDepartment,
   makeSelectFormData,
+  makeSelectDepartmentId,
   makeSelectLoading,
   makeSelectError,
 };

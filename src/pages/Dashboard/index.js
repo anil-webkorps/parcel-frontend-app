@@ -21,7 +21,12 @@ const DashboardPage = ({ match }) => {
       />
       <Route
         exact
-        path={`${match.path}/people/all`}
+        path={`${match.path}/people/view`}
+        component={ViewTeammates}
+      />
+      <Route
+        exact
+        path={`${match.path}/people/view/:departmentId`}
         component={ViewTeammates}
       />
     </Authenticated>

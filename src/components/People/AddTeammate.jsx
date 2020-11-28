@@ -21,16 +21,21 @@ import {
   chooseStep,
   updateForm,
   chooseDepartment,
+  getDepartments,
 } from "store/add-teammate/actions";
+import addTeammateSaga from "store/add-teammate/saga";
 import {
   makeSelectStep,
   makeSelectFormData,
   makeSelectChosenDepartment,
   makeSelectPayCycleDate,
+  makeSelectDepartments,
 } from "store/add-teammate/selectors";
 import { makeSelectFormData as makeSelectDepartmentFormData } from "store/add-department/selectors";
 import { useInjectReducer } from "utils/injectReducer";
+import { useInjectSaga } from "utils/injectSaga";
 import { numToOrd } from "utils/date-helpers";
+import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 
 import GuyPng from "assets/icons/guy.png";
 
@@ -42,6 +47,7 @@ import {
   StepsCard,
   PayrollCard,
   DoneCard,
+  Departments,
 } from "./styles";
 
 const STEPS = {
@@ -72,12 +78,16 @@ export default function AddTeammate() {
   useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
   useInjectReducer({ key: addDepartmentKey, reducer: addDepartmentReducer });
 
+  useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
+
   const dispatch = useDispatch();
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
   const departmentFormData = useSelector(makeSelectDepartmentFormData());
   const chosenDepartment = useSelector(makeSelectChosenDepartment());
   const payCycleDate = useSelector(makeSelectPayCycleDate());
+  const allDepartments = useSelector(makeSelectDepartments());
+  const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
   const location = useLocation();
 
@@ -90,6 +100,12 @@ export default function AddTeammate() {
       currency: formData.currency || "",
     });
   }, [reset, formData]);
+
+  useEffect(() => {
+    if (step === STEPS.ONE) {
+      dispatch(getDepartments(ownerSafeAddress));
+    }
+  }, [step, ownerSafeAddress, dispatch]);
 
   useEffect(() => {
     if (
@@ -129,6 +145,11 @@ export default function AddTeammate() {
 
   const onAddNewDepartmentClick = () => {
     dispatch(chooseStep(step + 1));
+  };
+
+  const onSelectDepartment = (name, payCycleDate) => {
+    dispatch(chooseDepartment(name, payCycleDate));
+    dispatch(chooseStep(STEPS.ZERO));
   };
 
   const renderTeammateDetails = () => (
@@ -247,6 +268,23 @@ export default function AddTeammate() {
       <Card className="choose-department">
         <Title>Choose Department</Title>
         <Heading>You can choose from existing department or add new.</Heading>
+        <Departments>
+          {allDepartments &&
+            allDepartments.map((department) => (
+              <div
+                className="department-details"
+                key={department.departmentId}
+                onClick={() =>
+                  onSelectDepartment(department.name, department.payCycleDate)
+                }
+              >
+                <div className="small-card">
+                  <img src={GuyPng} width="50px" alt="guy" />
+                </div>
+                <div className="department-name">{department.name}</div>
+              </div>
+            ))}
+        </Departments>
         <Link to="/dashboard/department/new">
           <Button
             type="button"

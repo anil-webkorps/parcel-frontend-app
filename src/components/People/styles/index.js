@@ -7,3 +7,5 @@ export { default as PayrollCard } from "./PayrollCard";
 export { default as DoneCard } from "./DoneCard";
 export { default as Text } from "./Text";
 export { default as DepartmentCard } from "./DepartmentCard";
+export { default as Table } from "./Table";
+export { default as Departments } from "./Departments";
