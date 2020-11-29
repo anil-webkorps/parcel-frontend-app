@@ -23,6 +23,7 @@ import {
   updateForm,
   chooseDepartment,
   addTeammate,
+  getDepartmentById,
 } from "store/add-teammate/actions";
 import addTeammateSaga from "store/add-teammate/saga";
 import {
@@ -31,10 +32,7 @@ import {
   makeSelectChosenDepartment,
 } from "store/add-teammate/selectors";
 import viewDepartmentsReducer from "store/view-departments/reducer";
-import {
-  getDepartments,
-  getDepartmentById,
-} from "store/view-departments/actions";
+import { getDepartments } from "store/view-departments/actions";
 import viewDepartmentsSaga from "store/view-departments/saga";
 import { makeSelectDepartments } from "store/view-departments/selectors";
 import { useInjectReducer } from "utils/injectReducer";

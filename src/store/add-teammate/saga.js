@@ -1,8 +1,16 @@
-import { call, put, takeLatest } from "redux-saga/effects";
-import { ADD_TEAMMATE } from "./action-types";
-import { addTeammateSuccess, addTeammateError } from "./actions";
+import { call, put, fork, takeLatest } from "redux-saga/effects";
+import { ADD_TEAMMATE, GET_DEPARTMENT_BY_ID } from "./action-types";
+import {
+  addTeammateSuccess,
+  addTeammateError,
+  getDepartmentByIdSuccess,
+  getDepartmentByIdError,
+} from "./actions";
 import request from "utils/request";
-import { createTeammateEndpoint } from "constants/endpoints";
+import {
+  createTeammateEndpoint,
+  getDepartmentByIdEndpoint,
+} from "constants/endpoints";
 
 export function* createTeammate({ body }) {
   const requestURL = `${createTeammateEndpoint}`;
@@ -35,6 +43,34 @@ export function* createTeammate({ body }) {
   }
 }
 
-export default function* watchAddTeammate() {
+export function* getDepartmentById(action) {
+  const requestURL = `${getDepartmentByIdEndpoint}?safeAddress=${action.safeAddress}&departmentId=${action.departmentId}`;
+  const options = {
+    method: "GET",
+  };
+
+  try {
+    const result = yield call(request, requestURL, options);
+    if (result.flag !== 200) {
+      // Error in payload
+      yield put(getDepartmentByIdError(result.log));
+    } else {
+      yield put(getDepartmentByIdSuccess(result.department, result.log));
+    }
+  } catch (err) {
+    yield put(getDepartmentByIdError(err));
+  }
+}
+
+function* watchAddTeammate() {
   yield takeLatest(ADD_TEAMMATE, createTeammate);
+}
+
+function* watchGetDepartmentById() {
+  yield takeLatest(GET_DEPARTMENT_BY_ID, getDepartmentById);
+}
+
+export default function* addTeammate() {
+  yield fork(watchAddTeammate);
+  yield fork(watchGetDepartmentById);
 }
