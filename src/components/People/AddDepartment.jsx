@@ -13,7 +13,11 @@ import { Card } from "components/common/Card";
 import Button from "components/common/Button";
 import { Input, ErrorMessage } from "components/common/Form";
 import addDepartmentReducer from "store/add-department/reducer";
-import { addDepartment, updateForm } from "store/add-department/actions";
+import {
+  addDepartment,
+  addDepartmentSuccess,
+  updateForm,
+} from "store/add-department/actions";
 import addDepartmentSaga from "store/add-department/saga";
 import {
   makeSelectFormData,
@@ -28,7 +32,8 @@ import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 
 import GuyPng from "assets/icons/guy.png";
 
-import { Container, Title, Heading, Text, DepartmentCard } from "./styles";
+import { Container, Title, Heading, Text, Summary, ActionItem } from "./styles";
+import { Circle } from "components/Header/styles";
 import "react-day-picker/lib/style.css";
 
 const dateStyles = `
@@ -79,6 +84,12 @@ export default function AddDepartment() {
   const history = useHistory();
 
   useEffect(() => {
+    // reset departmentId and log when component mounts
+    dispatch(addDepartmentSuccess("", ""));
+    setSuccess(false);
+  }, [dispatch]);
+
+  useEffect(() => {
     if (newDepartmentId) setSuccess(true);
   }, [newDepartmentId]);
 
@@ -100,6 +111,10 @@ export default function AddDepartment() {
       updateForm({ ...formData, payCycleDate: new Date(day).getDate() })
     );
     setSelectedDay(day);
+  };
+
+  const goBack = () => {
+    history.goBack();
   };
 
   const renderAddDepartment = () => (
@@ -160,7 +175,7 @@ export default function AddDepartment() {
     <Card className="add-department">
       <Title className="mb-2">Department Saved</Title>
       <Heading>Wow! You have a department on-board</Heading>
-      <DepartmentCard>
+      <Summary>
         <div className="left">
           <img src={GuyPng} alt="guy" width="80" />
         </div>
@@ -176,7 +191,7 @@ export default function AddDepartment() {
             </div>
           </div>
         </div>
-      </DepartmentCard>
+      </Summary>
 
       <Row>
         <Col lg="5" sm="12">
@@ -212,15 +227,15 @@ export default function AddDepartment() {
           }}
           className="mx-auto"
         >
-          <Button className="secondary" onClick={() => history.goBack()}>
-            <span>
-              <FontAwesomeIcon
-                icon={faLongArrowAltLeft}
-                color="#333"
-                className="mr-2"
-              />
-            </span>
-            <span>Back</span>
+          <Button iconOnly className="p-0" onClick={goBack}>
+            <ActionItem>
+              <Circle>
+                <FontAwesomeIcon icon={faLongArrowAltLeft} color="#fff" />
+              </Circle>
+              <div className="mx-3">
+                <div className="name">Back</div>
+              </div>
+            </ActionItem>
           </Button>
         </div>
       </Info>

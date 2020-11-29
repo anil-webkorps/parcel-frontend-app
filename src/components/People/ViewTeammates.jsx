@@ -4,10 +4,13 @@ import {
   faEdit,
   faEye,
   faLongArrowAltLeft,
+  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
+import { show } from "redux-modal";
+
 // import { Col, Row } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
 
 import { Info } from "components/Dashboard/styles";
@@ -27,9 +30,14 @@ import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import { numToOrd } from "utils/date-helpers";
-
-import { Container, Table } from "./styles";
 import Loading from "components/common/Loading";
+
+import { Container, Table, ActionItem } from "./styles";
+import { Circle } from "components/Header/styles";
+import TeammateDetailsModal, {
+  MODAL_NAME as TEAMMATE_DETAILS_MODAL,
+} from "./TeammateDetailsModal";
+
 const { TableBody, TableHead, TableRow } = Table;
 
 const viewTeammatesKey = "viewTeammates";
@@ -42,6 +50,7 @@ export default function ViewTeammate() {
 
   const dispatch = useDispatch();
   const params = useParams();
+  const history = useHistory();
 
   const teammates = useSelector(makeSelectTeammates());
   const loading = useSelector(makeSelectLoading());
@@ -59,9 +68,17 @@ export default function ViewTeammate() {
     }
   }, [dispatch, params, ownerSafeAddress]);
 
-  const getDecryptedName = (name) => {
+  const getDecryptedDetails = (data) => {
     if (!sign) return "";
-    return cryptoUtils.decryptData(name, sign);
+    return JSON.parse(cryptoUtils.decryptData(data, sign));
+  };
+
+  const goBack = () => {
+    history.goBack();
+  };
+
+  const showDetails = (props) => {
+    dispatch(show(TEAMMATE_DETAILS_MODAL, { ...props }));
   };
 
   return (
@@ -78,20 +95,41 @@ export default function ViewTeammate() {
           }}
           className="mx-auto"
         >
-          <div className="d-flex">
-            <Button className="secondary">
-              <span>
-                <FontAwesomeIcon
-                  icon={faLongArrowAltLeft}
-                  color="#333"
-                  className="mr-2"
-                />
-              </span>
-              <span>Back</span>
-            </Button>
-            <div className="title mx-3 mt-2 mb-0" style={{ fontSize: "20px" }}>
-              All Employees
+          <div className="d-flex justify-content-between align-items-center">
+            <div className="d-flex align-items-center">
+              <Button iconOnly className="p-0" onClick={goBack}>
+                <ActionItem>
+                  <Circle>
+                    <FontAwesomeIcon icon={faLongArrowAltLeft} color="#fff" />
+                  </Circle>
+                  <div className="mx-3">
+                    <div className="name">Back</div>
+                  </div>
+                </ActionItem>
+              </Button>
+              <div className="title mx-3 my-0" style={{ fontSize: "20px" }}>
+                All Employees
+              </div>
             </div>
+
+            <Button
+              iconOnly
+              className="p-0"
+              to={
+                params && params.departmentId
+                  ? `/dashboard/people/new?departmentId=${params.departmentId}`
+                  : `/dashboard/people/new`
+              }
+            >
+              <ActionItem>
+                <Circle>
+                  <FontAwesomeIcon icon={faPlus} color="#fff" />
+                </Circle>
+                <div className="mx-3">
+                  <div className="name">Add Employee</div>
+                </div>
+              </ActionItem>
+            </Button>
           </div>
         </div>
       </Info>
@@ -115,22 +153,50 @@ export default function ViewTeammate() {
                 <Loading color="primary" width="50px" height="50px" />
               </div>
             ) : teammates.length > 0 ? (
-              teammates.map(({ data, departmentName, payCycleDate }) => (
-                <TableRow>
-                  <div>{getDecryptedName(data)}</div>
-                  <div>{departmentName}</div>
-                  <div>{numToOrd(payCycleDate)} of every month</div>
-                  <div>2.0 ETH</div>
-                  <div className="d-flex justify-content-end">
-                    <div className="circle circle-grey mr-3">
-                      <FontAwesomeIcon icon={faEye} color="#7367f0" />
+              teammates.map(({ data, departmentName, payCycleDate }) => {
+                const {
+                  firstName,
+                  lastName,
+                  salaryAmount,
+                  salaryToken,
+                } = getDecryptedDetails(data);
+                return (
+                  <TableRow>
+                    <div>
+                      {firstName} {lastName}
                     </div>
-                    <div className="circle circle-grey">
-                      <FontAwesomeIcon icon={faEdit} color="#7367f0" />
+                    <div>{departmentName}</div>
+                    <div>{numToOrd(payCycleDate)} of every month</div>
+                    <div>
+                      {salaryAmount} {salaryToken}
                     </div>
-                  </div>
-                </TableRow>
-              ))
+                    <div className="d-flex justify-content-end">
+                      <Button
+                        iconOnly
+                        onClick={() =>
+                          showDetails({
+                            firstName,
+                            lastName,
+                            salary: salaryAmount,
+                            currency: salaryToken,
+                            departmentName,
+                            payCycleDate,
+                          })
+                        }
+                        className="p-0"
+                      >
+                        <div className="circle circle-grey mr-3">
+                          <FontAwesomeIcon icon={faEye} color="#7367f0" />
+                        </div>
+                      </Button>
+
+                      <div className="circle circle-grey">
+                        <FontAwesomeIcon icon={faEdit} color="#7367f0" />
+                      </div>
+                    </div>
+                  </TableRow>
+                );
+              })
             ) : (
               <div
                 className="d-flex align-items-center justify-content-center"
@@ -142,6 +208,7 @@ export default function ViewTeammate() {
           </TableBody>
         </div>
       </Container>
+      <TeammateDetailsModal />
     </div>
   );
 }

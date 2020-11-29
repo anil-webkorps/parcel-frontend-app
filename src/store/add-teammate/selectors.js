@@ -30,6 +30,11 @@ const makeSelectDepartments = () =>
     selectAddTeammate,
     (addTeammateState) => addTeammateState.departments
   );
+const makeSelectTotalEmployees = () =>
+  createSelector(
+    selectAddTeammate,
+    (addTeammateState) => addTeammateState.totalEmployees
+  );
 
 const makeSelectChosenDepartment = () =>
   createSelector(
@@ -54,6 +59,7 @@ export {
   makeSelectStep,
   makeSelectFormData,
   makeSelectDepartments,
+  makeSelectTotalEmployees,
   makeSelectChosenDepartment,
   makeSelectPayCycleDate,
   makeSelectLoading,

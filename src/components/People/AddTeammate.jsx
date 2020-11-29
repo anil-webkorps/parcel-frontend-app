@@ -17,14 +17,13 @@ import { Card } from "components/common/Card";
 import Button from "components/common/Button";
 import { Input, ErrorMessage } from "components/common/Form";
 import addTeammateReducer from "store/add-teammate/reducer";
-import addDepartmentReducer from "store/add-department/reducer";
 import { useLocalStorage } from "hooks";
 import {
   chooseStep,
   updateForm,
   chooseDepartment,
   getDepartments,
-  // getDepartmentById,
+  getDepartmentById,
   addTeammate,
 } from "store/add-teammate/actions";
 import addTeammateSaga from "store/add-teammate/saga";
@@ -34,10 +33,6 @@ import {
   makeSelectChosenDepartment,
   makeSelectDepartments,
 } from "store/add-teammate/selectors";
-import {
-  makeSelectFormData as makeSelectDepartmentFormData,
-  makeSelectDepartmentId,
-} from "store/add-department/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { numToOrd } from "utils/date-helpers";
@@ -54,7 +49,11 @@ import {
   PayrollCard,
   DoneCard,
   Departments,
+  Summary,
+  ActionItem,
 } from "./styles";
+
+import { Circle } from "components/Header/styles";
 
 const STEPS = {
   ZERO: 0,
@@ -73,7 +72,6 @@ const ADD_TEAMMATE_STEPS = {
 };
 
 const addTeammateKey = "addTeammate";
-const addDepartmentKey = "addDepartment";
 
 export default function AddTeammate() {
   const [sign] = useLocalStorage("SIGNATURE");
@@ -86,17 +84,13 @@ export default function AddTeammate() {
   });
 
   useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
-  useInjectReducer({ key: addDepartmentKey, reducer: addDepartmentReducer });
 
   useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
 
   const dispatch = useDispatch();
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
-  const departmentFormData = useSelector(makeSelectDepartmentFormData());
-  const chosenDepartmentId = useSelector(makeSelectDepartmentId());
   const chosenDepartment = useSelector(makeSelectChosenDepartment());
-  // const payCycleDate = useSelector(makeSelectPayCycleDate());
   const allDepartments = useSelector(makeSelectDepartments());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
@@ -120,30 +114,19 @@ export default function AddTeammate() {
   }, [step, ownerSafeAddress, dispatch]);
 
   useEffect(() => {
-    if (
-      departmentFormData &&
-      departmentFormData.name &&
-      departmentFormData.payCycleDate &&
-      chosenDepartmentId
-    ) {
-      dispatch(
-        chooseDepartment({
-          departmentId: chosenDepartmentId,
-          name: departmentFormData.name,
-          payCycleDate: departmentFormData.payCycleDate,
-        })
-      );
+    if (!chosenDepartment) dispatch(chooseStep(STEPS.ZERO));
+  }, [dispatch, chosenDepartment]);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const departmentId = searchParams.get("departmentId");
+    if (departmentId) {
       dispatch(chooseStep(STEPS.ZERO));
+      dispatch(getDepartmentById(ownerSafeAddress, departmentId)); // TODO: Fetch the paycycle date for dept from BE
+    } else {
+      dispatch(chooseDepartment(null));
     }
-    // else {
-    //   const searchParams = new URLSearchParams(location.search);
-    //   const departmentId = searchParams.get("departmentId");
-    //   if (departmentId) {
-    //     dispatch(chooseStep(STEPS.ZERO));
-    //     dispatch(chooseDepartment({})); // TODO: Fetch the paycycle date for dept from BE
-    //   }
-    // }
-  }, [departmentFormData, dispatch, chosenDepartmentId]);
+  }, [dispatch, location, ownerSafeAddress]);
 
   const onSubmit = (values) => {
     if (chosenDepartment) {
@@ -170,6 +153,34 @@ export default function AddTeammate() {
     );
   };
 
+  const goBack = () => {
+    history.goBack();
+  };
+
+  const resetAll = () => {
+    reset({
+      firstName: "",
+      lastName: "",
+      address: "",
+      salary: "",
+      currency: "",
+    });
+    dispatch(updateForm(null));
+    setSuccess(false);
+    dispatch(chooseStep(STEPS.ZERO));
+    dispatch(chooseDepartment(null));
+  };
+
+  const onAddMoreTeammates = () => {
+    resetAll();
+    history.push(location.pathname);
+  };
+
+  const onViewAllClick = () => {
+    resetAll();
+    history.push("/dashboard/people/view");
+  };
+
   const handleCreateTeammate = () => {
     if (!sign || !ownerSafeAddress) return;
 
@@ -179,7 +190,7 @@ export default function AddTeammate() {
         lastName: formData.lastName,
         salaryAmount: formData.salary,
         salaryToken: formData.currency,
-        payCycleDate: chosenDepartment && chosenDepartment.payCycleDate,
+        payCycleDate: chosenDepartment.payCycleDate,
         joiningDate: Date.now(),
       }),
       sign
@@ -305,7 +316,7 @@ export default function AddTeammate() {
         large
         type="submit"
         className="mt-5"
-        disabled={!chosenDepartment || !formState.isValid}
+        disabled={!formState.isValid}
       >
         Add Employee
       </Button>
@@ -360,28 +371,30 @@ export default function AddTeammate() {
 
   const renderPaydate = () => {
     return (
-      <Card className="paydate">
-        <Title>Department Paydate</Title>
-        <Heading>The user will be paid as per department pay date.</Heading>
+      chosenDepartment && (
+        <Card className="paydate">
+          <Title>Department Paydate</Title>
+          <Heading>The user will be paid as per department pay date.</Heading>
 
-        <PayrollCard>
-          <div className="dept-name">{chosenDepartment.name}</div>
-          <div className="dept-info">
-            PAYROLL DATE : {numToOrd(chosenDepartment.payCycleDate)} of Every
-            Month
-          </div>
-          <div className="change-date mt-4">Change Payroll date </div>
-        </PayrollCard>
+          <PayrollCard>
+            <div className="dept-name">{chosenDepartment.name}</div>
+            <div className="dept-info">
+              PAYROLL DATE : {numToOrd(chosenDepartment.payCycleDate)} of Every
+              Month
+            </div>
+            <div className="change-date mt-4">Change Payroll date </div>
+          </PayrollCard>
 
-        <Button
-          large
-          type="button"
-          onClick={handleCreateTeammate}
-          className="mt-5"
-        >
-          Confirm
-        </Button>
-      </Card>
+          <Button
+            large
+            type="button"
+            onClick={handleCreateTeammate}
+            className="mt-5"
+          >
+            Confirm
+          </Button>
+        </Card>
+      )
     );
   };
 
@@ -390,7 +403,7 @@ export default function AddTeammate() {
       case STEPS.ZERO:
         return `${formData.firstName} ${formData.lastName}`;
       case STEPS.ONE:
-        return `${chosenDepartment.name}`;
+        return chosenDepartment && `${chosenDepartment.name}`;
       default:
         return null;
     }
@@ -428,15 +441,15 @@ export default function AddTeammate() {
           }}
           className="mx-auto"
         >
-          <Button className="secondary">
-            <span>
-              <FontAwesomeIcon
-                icon={faLongArrowAltLeft}
-                color="#333"
-                className="mr-2"
-              />
-            </span>
-            <span>Back</span>
+          <Button iconOnly className="p-0" onClick={goBack}>
+            <ActionItem>
+              <Circle>
+                <FontAwesomeIcon icon={faLongArrowAltLeft} color="#fff" />
+              </Circle>
+              <div className="mx-3">
+                <div className="name">Back</div>
+              </div>
+            </ActionItem>
           </Button>
         </div>
       </Info>
@@ -459,11 +472,55 @@ export default function AddTeammate() {
         ) : (
           <StepsCard>
             <Card className="add-teammate">
-              <Title className="mb-4">Teammate Saved!</Title>
+              <Title className="mb-2">Teammate Saved!</Title>
+              <Heading>Wow! You have a new champ on-board</Heading>
+              <Summary style={{ marginBottom: "13em" }}>
+                <div className="left">
+                  <img src={GuyPng} alt="guy" width="80" />
+                </div>
+                <div className="right">
+                  <div className="mb-3">
+                    <div className="section-title mb-1">Name</div>
+                    <div className="section-desc">
+                      {formData.firstName} {formData.lastName}
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <div className="section-title mb-1">Department</div>
+                    <div className="section-desc">{chosenDepartment.name}</div>
+                  </div>
+                  <div className="mb-3">
+                    <div className="section-title mb-1">Pay Date</div>
+                    <div className="section-desc">
+                      {numToOrd(chosenDepartment.payCycleDate)} of every month
+                    </div>
+                  </div>
+                  <div>
+                    <div className="section-title mb-1">Pay Amount</div>
+                    <div className="section-desc">
+                      {formData.salary} {formData.currency}
+                    </div>
+                  </div>
+                </div>
+              </Summary>
 
-              <Button large type="submit" className="mt-5">
-                Add More Teammates
-              </Button>
+              <Row>
+                <Col lg="5" sm="12" className="pr-0">
+                  <Button
+                    large
+                    type="button"
+                    onClick={onViewAllClick}
+                    className="secondary"
+                  >
+                    View All
+                  </Button>
+                </Col>
+                <Col lg="7" sm="12">
+                  <Button large type="button" onClick={onAddMoreTeammates}>
+                    Add More Teammates
+                  </Button>
+                </Col>
+              </Row>
             </Card>
           </StepsCard>
         )}

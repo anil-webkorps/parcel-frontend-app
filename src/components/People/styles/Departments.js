@@ -3,7 +3,7 @@ import styled from "styled-components/macro";
 export default styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(132px, 1fr));
-  grid-gap: 10px;
+  grid-gap: 20px 10px;
 
   .department-details {
     &:hover {

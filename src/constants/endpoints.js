@@ -22,6 +22,7 @@ export const getTeammatesByDepartmentIdEndPoint = `${ROOT_BE_URL}/api/v1/people/
 // DEPARTMENT
 export const createDepartmentEndpoint = `${ROOT_BE_URL}/api/v1/departments/create`;
 export const getAllDepartmentsEndpoint = `${ROOT_BE_URL}/api/v1/departments/get`;
+export const getDepartmentByIdEndpoint = `${ROOT_BE_URL}/api/v1/departments/getByDepartmentId`;
 
 // GNOSIS
 export const gnosisSafeTransactionEndpoint =

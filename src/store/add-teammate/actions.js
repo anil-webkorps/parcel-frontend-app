@@ -26,15 +26,10 @@ export function updateForm(formData) {
     formData,
   };
 }
-export function chooseDepartment({
-  name,
-  payCycleDate,
-  departmentId,
-  employees = 0,
-}) {
+export function chooseDepartment(chosenDepartment) {
   return {
     type: CHOOSE_DEPARTMENT,
-    chosenDepartment: { name, payCycleDate, departmentId, employees },
+    chosenDepartment,
   };
 }
 
@@ -45,10 +40,11 @@ export function getDepartments(safeAddress) {
   };
 }
 
-export function getDepartmentsSuccess(departments, log) {
+export function getDepartmentsSuccess(departments, totalEmployees, log) {
   return {
     type: GET_DEPARTMENTS_SUCCESS,
     departments,
+    totalEmployees,
     log,
   };
 }

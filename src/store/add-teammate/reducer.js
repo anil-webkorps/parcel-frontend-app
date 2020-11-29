@@ -22,6 +22,7 @@ export const initialState = {
   error: false,
   chosenDepartment: null,
   payCycleDate: "",
+  totalEmployees: 0,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -33,7 +34,8 @@ const reducer = (state = initialState, action) =>
         break;
 
       case UPDATE_FORM:
-        draft.form = { ...draft.form, ...action.formData };
+        if (action.formData) draft.form = { ...draft.form, ...action.formData };
+        else draft.form = {};
         break;
 
       case CHOOSE_DEPARTMENT:
@@ -51,10 +53,12 @@ const reducer = (state = initialState, action) =>
       case GET_DEPARTMENTS_SUCCESS:
         draft.loading = false;
         draft.departments = action.departments;
+        draft.totalEmployees = action.totalEmployees;
         break;
 
       case GET_DEPARTMENTS_ERROR:
       case ADD_TEAMMATE_ERROR:
+      case GET_DEPARTMENT_BY_ID_ERROR:
         draft.loading = false;
         draft.error = action.error;
         break;
