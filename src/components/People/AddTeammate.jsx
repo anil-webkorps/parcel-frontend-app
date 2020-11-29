@@ -22,8 +22,6 @@ import {
   chooseStep,
   updateForm,
   chooseDepartment,
-  getDepartments,
-  getDepartmentById,
   addTeammate,
 } from "store/add-teammate/actions";
 import addTeammateSaga from "store/add-teammate/saga";
@@ -31,8 +29,14 @@ import {
   makeSelectStep,
   makeSelectFormData,
   makeSelectChosenDepartment,
-  makeSelectDepartments,
 } from "store/add-teammate/selectors";
+import viewDepartmentsReducer from "store/view-departments/reducer";
+import {
+  getDepartments,
+  getDepartmentById,
+} from "store/view-departments/actions";
+import viewDepartmentsSaga from "store/view-departments/saga";
+import { makeSelectDepartments } from "store/view-departments/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { numToOrd } from "utils/date-helpers";
@@ -72,6 +76,7 @@ const ADD_TEAMMATE_STEPS = {
 };
 
 const addTeammateKey = "addTeammate";
+const viewDepartmentsKey = "viewDepartments";
 
 export default function AddTeammate() {
   const [sign] = useLocalStorage("SIGNATURE");
@@ -84,6 +89,12 @@ export default function AddTeammate() {
   });
 
   useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
+  useInjectReducer({
+    key: viewDepartmentsKey,
+    reducer: viewDepartmentsReducer,
+  });
+
+  useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
 
   useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
 

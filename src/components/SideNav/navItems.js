@@ -22,8 +22,8 @@ const navItems = [
   // },
   {
     id: 2,
-    link: "/dashboard/payroll",
-    name: "Payroll",
+    link: "/dashboard/payments",
+    name: "Payments",
     icon: faMoneyBill,
   },
   {

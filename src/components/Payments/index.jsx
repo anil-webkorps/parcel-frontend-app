@@ -8,14 +8,14 @@ import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
-import viewDepartmentsReducer from "store/view-departments/reducer";
-import { getDepartments } from "store/view-departments/actions";
-import viewDepartmentsSaga from "store/view-departments/saga";
+import addTeammateReducer from "store/add-teammate/reducer";
+import { getDepartments } from "store/add-teammate/actions";
+import addTeammateSaga from "store/add-teammate/saga";
 import {
   makeSelectDepartments,
   makeSelectTotalEmployees,
   makeSelectLoading,
-} from "store/view-departments/selectors";
+} from "store/add-teammate/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { numToOrd } from "utils/date-helpers";
@@ -28,19 +28,16 @@ import { Container, AllEmployees } from "./styles";
 import { Circle } from "components/Header/styles";
 import { format } from "date-fns";
 
-const viewDepartmentsKey = "viewDepartments";
+const addTeammateKey = "addTeammate";
 
 export default function People() {
   // Normal users and New users have different UI at first
   const [isNormalUser, setIsNormalUser] = useState();
   const [toggled] = useContext(SideNavContext);
 
-  useInjectReducer({
-    key: viewDepartmentsKey,
-    reducer: viewDepartmentsReducer,
-  });
+  useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
 
-  useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
+  useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
 
   const dispatch = useDispatch();
   const allDepartments = useSelector(makeSelectDepartments());
