@@ -199,6 +199,7 @@ export default function AddTeammate() {
         lastName: formData.lastName,
         salaryAmount: formData.salary,
         salaryToken: formData.currency,
+        address: formData.address,
         payCycleDate: chosenDepartment.payCycleDate,
         joiningDate: Date.now(),
       }),

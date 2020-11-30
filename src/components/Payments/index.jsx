@@ -1,62 +1,155 @@
 import React, { useContext, useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLongArrowAltRight, faPlus } from "@fortawesome/free-solid-svg-icons";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faLongArrowAltRight, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
+import { cryptoUtils } from "parcel-sdk";
 
+import { useLocalStorage } from "hooks";
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
-import addTeammateReducer from "store/add-teammate/reducer";
-import { getDepartments } from "store/add-teammate/actions";
-import addTeammateSaga from "store/add-teammate/saga";
+import viewDepartmentsReducer from "store/view-departments/reducer";
+import { getDepartments } from "store/view-departments/actions";
+import viewDepartmentsSaga from "store/view-departments/saga";
+import viewTeammatesSaga from "store/view-teammates/saga";
+
+import viewTeammatesReducer from "store/view-teammates/reducer";
+import { getAllTeammates } from "store/view-teammates/actions";
 import {
   makeSelectDepartments,
   makeSelectTotalEmployees,
-  makeSelectLoading,
-} from "store/add-teammate/selectors";
+  makeSelectLoading as makeSelectDepartmentsLoading,
+} from "store/view-departments/selectors";
+import {
+  makeSelectTeammates,
+  makeSelectLoading as makeSelectTeammatesLoading,
+} from "store/view-teammates/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { numToOrd } from "utils/date-helpers";
+// import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
-import Loading from "components/common/Loading";
+// import Loading from "components/common/Loading";
 
-import GuyPng from "assets/icons/guy.png";
+// import GuyPng from "assets/icons/guy.png";
 
-import { Container, AllEmployees } from "./styles";
-import { Circle } from "components/Header/styles";
-import { format } from "date-fns";
+import { Container, Table } from "./styles";
+// import { Circle } from "components/Header/styles";
+import { minifyAddress } from "components/common/Web3Utils";
 
-const addTeammateKey = "addTeammate";
+const { TableBody, TableHead, TableRow } = Table;
+const viewTeammatesKey = "viewTeammates";
+const viewDepartmentsKey = "viewDepartments";
+
+const TABS = {
+  PEOPLE: "1",
+  DEPARTMENT: "2",
+};
+
+const navStyles = `
+  .nav-tabs {
+    box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
+    border-bottom: solid 1px #f2f2f2;
+    background-color: #ffffff;
+  }
+
+  .nav-link {
+    font-size: 20px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.2;
+    letter-spacing: normal;
+    text-align: left;
+    color: #aaaaaa;
+    cursor: pointer;
+    opacity: 0.4;
+    padding-bottom: 15px;
+    padding-top: 15px;
+  }
+
+  .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    border-bottom: 5px solid #7367f0;
+  }
+
+  .nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
+    border: none;
+    border-bottom: 5px solid #7367f0;
+    opacity: 1;
+  }
+
+  .nav-link.active {
+    opacity: 1;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.2;
+    letter-spacing: normal;
+    text-align: left;
+    color: #373737;
+  }
+`;
 
 export default function People() {
-  // Normal users and New users have different UI at first
-  const [isNormalUser, setIsNormalUser] = useState();
+  const [sign] = useLocalStorage("SIGNATURE");
   const [toggled] = useContext(SideNavContext);
+  const [activeTab, setActiveTab] = useState(TABS.PEOPLE);
 
-  useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
+  const toggle = (tab) => {
+    if (activeTab !== tab) setActiveTab(tab);
+  };
 
-  useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
+  useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
+  useInjectReducer({
+    key: viewDepartmentsKey,
+    reducer: viewDepartmentsReducer,
+  });
+
+  useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
+  useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
 
   const dispatch = useDispatch();
   const allDepartments = useSelector(makeSelectDepartments());
   const totalEmployees = useSelector(makeSelectTotalEmployees()); // eslint-disable-line
-  const loading = useSelector(makeSelectLoading());
+  const loadingDepartments = useSelector(makeSelectDepartmentsLoading()); // eslint-disable-line
+  const loadingTeammates = useSelector(makeSelectTeammatesLoading()); // eslint-disable-line
+  const teammates = useSelector(makeSelectTeammates());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
-  useEffect(() => {
-    dispatch(getDepartments(ownerSafeAddress));
-  }, [dispatch, ownerSafeAddress]);
+  const { register, handleSubmit } = useForm();
 
   useEffect(() => {
-    if (allDepartments && allDepartments.length > 0) {
-      setIsNormalUser(true);
+    if (!teammates || !teammates.length) {
+      dispatch(getAllTeammates(ownerSafeAddress));
     }
-  }, [allDepartments]);
+    if (!allDepartments || !allDepartments.length) {
+      dispatch(getDepartments(ownerSafeAddress));
+    }
+  }, [dispatch, ownerSafeAddress, teammates, allDepartments]);
 
-  const renderForNewUser = () => {
-    return (
+  const getDecryptedDetails = (data) => {
+    if (!sign) return "";
+    return JSON.parse(cryptoUtils.decryptData(data, sign));
+  };
+
+  const onSubmit = (values) => {
+    const selectedIndexes = Object.values(values)
+      .filter(Boolean)
+      .map((v) => JSON.parse(v));
+    console.log({ selectedIndexes });
+  };
+
+  return (
+    <div
+      className="position-relative"
+      style={{
+        transition: "all 0.25s linear",
+      }}
+    >
       <div>
         <Info>
           <div
@@ -66,9 +159,9 @@ export default function People() {
             }}
             className="mx-auto"
           >
-            <div className="title">People</div>
+            <div className="title">Payments</div>
             <div className="subtitle">
-              You can add teams and manage people payroll
+              You can instantly pay or manage team payrolls
             </div>
           </div>
         </Info>
@@ -79,146 +172,100 @@ export default function People() {
           }}
         >
           <div className="new-user">
-            <Card className="p-4" style={{ minHeight: "532px" }}>
-              <div className="card-title">
-                Hassle-Free team and People management
-              </div>
-              <div className="card-subtitle">
-                Add team members, set-up your teams and their payroll. Enjoy a
-                hassle free payroll management
-              </div>
-
-              <Button
-                iconOnly
-                className="d-block mx-auto"
-                to="/dashboard/people/new"
-              >
-                <div className="circle">
-                  <FontAwesomeIcon icon={faPlus} color="#fff" />
-                </div>
-                <div className="add-now">Add Now</div>
-              </Button>
+            <style>{navStyles}</style>
+            <Card style={{ minHeight: "532px" }} className="pt-3">
+              <Nav tabs>
+                <NavItem className="px-3">
+                  <NavLink
+                    className={`${activeTab === TABS.PEOPLE ? "active" : ""}`}
+                    onClick={() => toggle(TABS.PEOPLE)}
+                  >
+                    People
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink
+                    className={`${
+                      activeTab === TABS.DEPARTMENT ? "active" : ""
+                    }`}
+                    onClick={() => toggle(TABS.DEPARTMENT)}
+                  >
+                    Department
+                  </NavLink>
+                </NavItem>
+              </Nav>
+              <TabContent activeTab={activeTab}>
+                <TabPane tabId={TABS.PEOPLE}>
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                    <TableHead>
+                      <div className="form-check d-flex">
+                        <input
+                          className="form-check-input position-static mr-3"
+                          type="checkbox"
+                          id="allCheckbox"
+                          value="all"
+                        />
+                        <div>Employee Name</div>
+                      </div>
+                      <div>Department</div>
+                      <div>Pay Token</div>
+                      <div>Pay Amount</div>
+                      <div>Address</div>
+                      <div></div>
+                    </TableHead>
+                    <TableBody>
+                      {teammates.length > 0 &&
+                        teammates.map(({ data, departmentName }, idx) => {
+                          const {
+                            firstName,
+                            lastName,
+                            salaryAmount,
+                            salaryToken,
+                            address,
+                          } = getDecryptedDetails(data);
+                          return (
+                            <TableRow key={address}>
+                              <div className="form-check d-flex">
+                                <input
+                                  className="form-check-input position-static mr-3"
+                                  type="checkbox"
+                                  id={`checkbox${idx}`}
+                                  ref={register}
+                                  name={`checkbox${idx}`}
+                                  value={JSON.stringify({
+                                    address,
+                                    salaryToken,
+                                    salaryAmount,
+                                  })}
+                                />
+                                <div>
+                                  {firstName} {lastName}
+                                </div>
+                              </div>
+                              <div>{departmentName}</div>
+                              <div>{salaryToken}</div>
+                              <div>
+                                {salaryAmount} {salaryToken} (US${salaryAmount})
+                              </div>
+                              <div>{minifyAddress(address)}</div>
+                              <div className="text-right">
+                                <Button type="button">PAY</Button>
+                              </div>
+                            </TableRow>
+                          );
+                        })}
+                    </TableBody>
+                    <Button>Submit</Button>
+                  </form>
+                </TabPane>
+                <TabPane tabId={TABS.DEPARTMENT}>
+                  <div className="p-4">Departments</div>
+                </TabPane>
+              </TabContent>
             </Card>
           </div>
         </Container>
       </div>
-    );
-  };
-
-  const renderForNormalUser = () => {
-    return (
-      <div>
-        <Info>
-          <div
-            style={{
-              maxWidth: toggled ? "900px" : "1280px",
-              transition: "all 0.25s linear",
-            }}
-            className="mx-auto"
-          >
-            <div className="title">Your Teams</div>
-            <div className="subtitle">Manage Teams and People within them.</div>
-            <AllEmployees>
-              <div>
-                <div className="all-employees-title mb-4">All Employees</div>
-                <div className="all-employees-subtitle mb-2">
-                  Total - <span>{40} Employees</span>
-                </div>
-                <div className="all-employees-subtitle">
-                  Last updated : {format(Date.now(), "dd MMM yyyy")}
-                </div>
-              </div>
-              <div>
-                <Button iconOnly className="p-0" to="/dashboard/people/view">
-                  <Circle>
-                    <FontAwesomeIcon icon={faLongArrowAltRight} color="#fff" />
-                  </Circle>
-                </Button>
-              </div>
-            </AllEmployees>
-          </div>
-        </Info>
-        <Container
-          className="show-departments"
-          style={{
-            maxWidth: toggled ? "900px" : "1280px",
-            transition: "all 0.25s linear",
-          }}
-        >
-          <div
-            className="department-cards"
-            style={{
-              gridTemplateColumns: toggled
-                ? "repeat(3, 1fr)"
-                : "repeat(4, 1fr)",
-            }}
-          >
-            {allDepartments.map(
-              ({ departmentId, name, payCycleDate, employees }) => (
-                <Link
-                  to={`/dashboard/people/view/${departmentId}`}
-                  key={departmentId}
-                >
-                  <Card className="department-card">
-                    <div className="upper">
-                      <div className="d-flex justify-content-between">
-                        <img src={GuyPng} alt="guy" width="50px" />
-                        <div className="circle circle-grey">
-                          <FontAwesomeIcon
-                            icon={faLongArrowAltRight}
-                            color="#7367f0"
-                          />
-                        </div>
-                      </div>
-                      <div className="mt-2">{name}</div>
-                    </div>
-
-                    <div className="line" />
-                    <div className="lower">
-                      <div className="mb-3">Employees : {employees}</div>
-                      <div>
-                        Paydate : {numToOrd(payCycleDate)} of every month
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              )
-            )}
-            <Link to={`/dashboard/department/new`}>
-              <Card className="department-card d-flex justify-content-center align-items-center">
-                <Button iconOnly className="d-block mx-auto">
-                  <div className="circle">
-                    <FontAwesomeIcon icon={faPlus} color="#fff" />
-                  </div>
-                  <div className="add-now">Add Department</div>
-                </Button>
-              </Card>
-            </Link>
-          </div>
-        </Container>
-      </div>
-    );
-  };
-
-  return (
-    <div
-      className="position-relative"
-      style={{
-        transition: "all 0.25s linear",
-      }}
-    >
-      {loading ? (
-        <div
-          className="d-flex align-items-center justify-content-center"
-          style={{ height: "200px" }}
-        >
-          <Loading color="primary" width="50px" height="50px" />
-        </div>
-      ) : isNormalUser ? (
-        renderForNormalUser()
-      ) : (
-        renderForNewUser()
-      )}
     </div>
   );
 }

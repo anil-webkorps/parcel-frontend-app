@@ -6,6 +6,7 @@ import People from "components/People";
 import AddTeammate from "components/People/AddTeammate";
 import AddDepartment from "components/People/AddDepartment";
 import ViewTeammates from "components/People/ViewTeammates";
+import Payments from "components/Payments";
 import Authenticated from "components/hoc/Authenticated";
 
 const DashboardPage = ({ match }) => {
@@ -28,6 +29,11 @@ const DashboardPage = ({ match }) => {
         exact
         path={`${match.path}/people/view/:departmentId`}
         component={ViewTeammates}
+      />
+      <Route
+        exact
+        path={`${match.path}/payments`}
+        component={Payments}
       />
     </Authenticated>
   );

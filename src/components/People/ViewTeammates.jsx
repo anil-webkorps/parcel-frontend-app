@@ -159,9 +159,10 @@ export default function ViewTeammate() {
                   lastName,
                   salaryAmount,
                   salaryToken,
+                  address,
                 } = getDecryptedDetails(data);
                 return (
-                  <TableRow>
+                  <TableRow key={address}>
                     <div>
                       {firstName} {lastName}
                     </div>

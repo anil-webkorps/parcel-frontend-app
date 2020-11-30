@@ -2,14 +2,13 @@ import styled from "styled-components/macro";
 
 export const TableHead = styled.div`
   width: 100%;
-  box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
-  border: solid 1px #f2f2f2;
+  // box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
+  border-bottom: solid 1px #f2f2f2;
   background-color: #ffffff;
   padding: 21px 40px;
-  border-radius: 20px 20px 0 0;
 
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 16.666%);
 
   font-size: 14px;
   font-weight: 600;
@@ -28,9 +27,9 @@ export const TableHead = styled.div`
 
 export const TableBody = styled.div`
   width: 100%;
-  min-height: 604px;
-  box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
-  border: solid 1px #f2f2f2;
+  min-height: 400px;
+  // box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
+  // border: solid 1px #f2f2f2;
   background-color: #ffffff;
   border-radius: 0 0 20px 20px;
 `;
@@ -38,13 +37,14 @@ export const TableBody = styled.div`
 export const TableRow = styled.div`
   margin: 16px;
   min-height: 52px;
-  padding: 8px 28px;
+  padding: 8px 24px;
   border-radius: 8px;
   box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.04);
   border: solid 0.5px #f2f2f2;
   background-color: #ffffff;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  // grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, 16.666%);
   align-items: center;
 `;
 
