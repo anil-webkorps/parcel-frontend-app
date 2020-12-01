@@ -272,15 +272,15 @@ export default function People() {
   };
 
   const handleCheckAll = (e) => {
-    setIsCheckedAll(!isCheckedAll);
-
     if (checked.every((check) => check)) {
       // deselect all
       setChecked(new Array(checked.length).fill(false));
+      setIsCheckedAll(false);
       setSelectedRows([]);
     } else {
       // select all
       setChecked(new Array(checked.length).fill(true));
+      setIsCheckedAll(true);
       if (teammates.length > 0) {
         const allRows = teammates.map(({ data }) => getDecryptedDetails(data));
         setSelectedRows(allRows);
@@ -425,9 +425,11 @@ export default function People() {
                             <div className="text-right">
                               {checked.filter(Boolean).length <= 1 && (
                                 <Button
-                                  type="button"
+                                  type="submit"
                                   iconOnly
-                                  disabled={!checked[idx]}
+                                  disabled={
+                                    !checked[idx] || loadingTx || isNoneChecked
+                                  }
                                 >
                                   <span className="pay-text">PAY</span>
                                 </Button>
@@ -443,33 +445,35 @@ export default function People() {
                 </TabPane>
               </TabContent>
 
-              <PaymentSummary>
-                <div className="payment-info">
-                  <div>
-                    <div className="payment-title">Total Selected</div>
-                    <div className="payment-subtitle">36 people</div>
+              {!isNoneChecked && (
+                <PaymentSummary>
+                  <div className="payment-info">
+                    <div>
+                      <div className="payment-title">Total Selected</div>
+                      <div className="payment-subtitle">36 people</div>
+                    </div>
+                    <div>
+                      <div className="payment-title">Total Amount</div>
+                      <div className="payment-subtitle">US$ 10000</div>
+                    </div>
+                    <div>
+                      <div className="payment-title">Balance after payment</div>
+                      <div className="payment-subtitle">US$ 100</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="payment-title">Total Amount</div>
-                    <div className="payment-subtitle">US$ 10000</div>
-                  </div>
-                  <div>
-                    <div className="payment-title">Balance after payment</div>
-                    <div className="payment-subtitle">US$ 100</div>
-                  </div>
-                </div>
 
-                <div className="pay-button">
-                  <Button
-                    type="submit"
-                    large
-                    loading={loadingTx}
-                    disabled={loadingTx || isNoneChecked}
-                  >
-                    Pay Now
-                  </Button>
-                </div>
-              </PaymentSummary>
+                  <div className="pay-button">
+                    <Button
+                      type="submit"
+                      large
+                      loading={loadingTx}
+                      disabled={loadingTx || isNoneChecked}
+                    >
+                      Pay Now
+                    </Button>
+                  </div>
+                </PaymentSummary>
+              )}
             </Card>
           </form>
         </Container>
