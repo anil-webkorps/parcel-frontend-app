@@ -2,7 +2,6 @@ import styled from "styled-components/macro";
 
 export const TableHead = styled.div`
   width: 100%;
-  // box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
   border-bottom: solid 1px #f2f2f2;
   background-color: #ffffff;
   padding: 21px 40px;
@@ -28,8 +27,6 @@ export const TableHead = styled.div`
 export const TableBody = styled.div`
   width: 100%;
   min-height: 400px;
-  // box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
-  // border: solid 1px #f2f2f2;
   background-color: #ffffff;
   border-radius: 0 0 20px 20px;
 `;
@@ -43,9 +40,19 @@ export const TableRow = styled.div`
   border: solid 0.5px #f2f2f2;
   background-color: #ffffff;
   display: grid;
-  // grid-template-columns: repeat(6, 1fr);
   grid-template-columns: repeat(6, 16.666%);
   align-items: center;
+
+  .pay-text {
+    font-size: 14px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.29;
+    letter-spacing: normal;
+    text-align: center;
+    color: ${({ theme }) => theme.primary};
+  }
 `;
 
 const Table = { TableHead, TableBody, TableRow };
