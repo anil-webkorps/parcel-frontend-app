@@ -26,7 +26,6 @@ import GuyPng from "assets/icons/guy.png";
 
 import { Container, AllEmployees } from "./styles";
 import { Circle } from "components/Header/styles";
-import { format } from "date-fns";
 
 const viewDepartmentsKey = "viewDepartments";
 
@@ -44,7 +43,7 @@ export default function People() {
 
   const dispatch = useDispatch();
   const allDepartments = useSelector(makeSelectDepartments());
-  const totalEmployees = useSelector(makeSelectTotalEmployees()); // eslint-disable-line
+  const totalEmployees = useSelector(makeSelectTotalEmployees());
   const loading = useSelector(makeSelectLoading());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
@@ -121,24 +120,25 @@ export default function People() {
           >
             <div className="title">Your Teams</div>
             <div className="subtitle">Manage Teams and People within them.</div>
-            <AllEmployees>
-              <div>
-                <div className="all-employees-title mb-4">All Employees</div>
-                <div className="all-employees-subtitle mb-2">
-                  Total - <span>{40} Employees</span>
+            <Button large iconOnly className="p-0" to="/dashboard/people/view">
+              <AllEmployees>
+                <div>
+                  <div className="all-employees-title mb-4">All Employees</div>
+                  <div className="all-employees-subtitle mb-2">
+                    Total Employees : <span>{totalEmployees}</span>
+                  </div>
+                  <div className="all-employees-subtitle">
+                    Total Departments :{" "}
+                    <span>{allDepartments.length || 0}</span>
+                  </div>
                 </div>
-                <div className="all-employees-subtitle">
-                  Last updated : {format(Date.now(), "dd MMM yyyy")}
-                </div>
-              </div>
-              <div>
-                <Button iconOnly className="p-0" to="/dashboard/people/view">
+                <div>
                   <Circle>
                     <FontAwesomeIcon icon={faLongArrowAltRight} color="#fff" />
                   </Circle>
-                </Button>
-              </div>
-            </AllEmployees>
+                </div>
+              </AllEmployees>
+            </Button>
           </div>
         </Info>
         <Container

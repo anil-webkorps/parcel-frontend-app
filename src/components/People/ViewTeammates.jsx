@@ -153,7 +153,7 @@ export default function ViewTeammate() {
                 <Loading color="primary" width="50px" height="50px" />
               </div>
             ) : teammates.length > 0 ? (
-              teammates.map(({ data, departmentName, payCycleDate }) => {
+              teammates.map(({ data, departmentName, payCycleDate }, idx) => {
                 const {
                   firstName,
                   lastName,
@@ -162,7 +162,7 @@ export default function ViewTeammate() {
                   address,
                 } = getDecryptedDetails(data);
                 return (
-                  <TableRow key={address}>
+                  <TableRow key={`${address}-${idx}`}>
                     <div>
                       {firstName} {lastName}
                     </div>
@@ -182,6 +182,7 @@ export default function ViewTeammate() {
                             currency: salaryToken,
                             departmentName,
                             payCycleDate,
+                            address,
                           })
                         }
                         className="p-0"

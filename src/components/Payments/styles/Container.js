@@ -13,52 +13,53 @@ export default styled.div`
     grid-row: 1/5;
   }
 
-  &.show-departments {
-    top: 400px;
+  .department-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 0 20px;
+    margin: 40px;
 
-    .department-cards {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-gap: 14px;
+    .department-card {
+      cursor: pointer;
+      width: 100%;
+      min-height: 200px;
+      box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+      border: solid 1px #f2f2f2;
+      background-color: #ffffff;
 
-      .department-card {
-        cursor: pointer;
-        width: 298px;
-        min-height: 200px;
-        box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
-        border-radius: 12px;
+      &:hover {
+        opacity: 0.7;
+      }
+
+      .upper {
+        padding: 16px;
+        font-size: 16px;
+        font-weight: bold;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: 1.19;
+        letter-spacing: normal;
+        text-align: left;
+        color: #373737;
+      }
+
+      .lower {
+        padding: 16px;
+        font-size: 14px;
+        font-weight: 300;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: 1.29;
+        letter-spacing: normal;
+        text-align: left;
+        color: #373737;
+      }
+
+      .line {
+        width: 100%;
+        height: 0;
         border: solid 1px #f2f2f2;
-        background-color: #ffffff;
-
-        .upper {
-          padding: 16px;
-          font-size: 16px;
-          font-weight: bold;
-          font-stretch: normal;
-          font-style: normal;
-          line-height: 1.19;
-          letter-spacing: normal;
-          text-align: left;
-          color: #373737;
-        }
-
-        .lower {
-          padding: 16px;
-          font-size: 14px;
-          font-weight: 300;
-          font-stretch: normal;
-          font-style: normal;
-          line-height: 1.29;
-          letter-spacing: normal;
-          text-align: left;
-          color: #373737;
-        }
-
-        .line {
-          width: 100%;
-          height: 0;
-          border: solid 1px #f2f2f2;
-        }
       }
     }
   }

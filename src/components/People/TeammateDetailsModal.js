@@ -1,7 +1,6 @@
 import React from "react";
-import { Modal, ModalHeader, ModalBody } from "reactstrap";
+import { Modal, ModalHeader } from "reactstrap";
 import { connectModal as reduxModal } from "redux-modal";
-import { format } from "date-fns";
 
 import CopyButton from "components/common/Copy";
 import { minifyAddress } from "components/common/Web3Utils";
@@ -84,15 +83,8 @@ function TeammateDetailsModal(props) {
               </Circle>
             </div>
           </div>
-          <div className="mb-3">
-            <div className="section-title mb-1">Joining Date</div>
-            <div className="section-desc">
-              {format(Date.now(), "dd MMM yyyy")}
-            </div>
-          </div>
         </div>
       </Summary>
-      <ModalBody></ModalBody>
     </Modal>
   );
 }

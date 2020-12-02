@@ -1,6 +1,9 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import { faLongArrowAltRight, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faLongArrowAltLeft,
+  faLongArrowAltRight,
+} from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { cryptoUtils } from "parcel-sdk";
@@ -16,10 +19,12 @@ import viewDepartmentsSaga from "store/view-departments/saga";
 import viewTeammatesSaga from "store/view-teammates/saga";
 
 import viewTeammatesReducer from "store/view-teammates/reducer";
-import { getAllTeammates } from "store/view-teammates/actions";
+import {
+  getAllTeammates,
+  getTeammatesByDepartment,
+} from "store/view-teammates/actions";
 import {
   makeSelectDepartments,
-  makeSelectTotalEmployees,
   makeSelectLoading as makeSelectDepartmentsLoading,
 } from "store/view-departments/selectors";
 import {
@@ -35,20 +40,19 @@ import addresses from "constants/addresses";
 import GnosisSafeABI from "constants/abis/GnosisSafe.json";
 import ERC20ABI from "constants/abis/ERC20.json";
 import MultiSendABI from "constants/abis/MultiSend.json";
-// import { numToOrd } from "utils/date-helpers";
+import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import {
   joinHexData,
   getHexDataLength,
   standardizeTransaction,
 } from "utils/tx-helpers";
-// import Loading from "components/common/Loading";
+import { minifyAddress } from "components/common/Web3Utils";
+import Loading from "components/common/Loading";
 
-// import GuyPng from "assets/icons/guy.png";
+import GuyPng from "assets/icons/guy.png";
 
 import { Container, Table, PaymentSummary } from "./styles";
-// import { Circle } from "components/Header/styles";
-import { minifyAddress } from "components/common/Web3Utils";
 
 const { TableBody, TableHead, TableRow } = Table;
 const viewTeammatesKey = "viewTeammates";
@@ -112,10 +116,6 @@ const navStyles = `
   }
 `;
 
-// [{
-//   name, department, token, amount, address
-// }]
-
 export default function People() {
   const { account, library } = useActiveWeb3React();
   // const [listOfTeammates, setListOfTeammates] = useState([]);
@@ -127,6 +127,7 @@ export default function People() {
   const [loadingTx, setLoadingTx] = useState(false);
   const [txHash, setTxHash] = useState(""); // eslint-disable-line
   const [selectedRows, setSelectedRows] = useState([]);
+  const [departmentStep, setDepartmentStep] = useState(0);
 
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -143,7 +144,6 @@ export default function People() {
 
   const dispatch = useDispatch();
   const allDepartments = useSelector(makeSelectDepartments());
-  const totalEmployees = useSelector(makeSelectTotalEmployees()); // eslint-disable-line
   const loadingDepartments = useSelector(makeSelectDepartmentsLoading()); // eslint-disable-line
   const loadingTeammates = useSelector(makeSelectTeammatesLoading()); // eslint-disable-line
   const teammates = useSelector(makeSelectTeammates());
@@ -155,13 +155,17 @@ export default function People() {
   const multiSend = useContract(MULTISEND_ADDRESS, MultiSendABI);
 
   useEffect(() => {
-    if (!teammates || !teammates.length) {
+    // reset to initial state
+    setSelectedRows([]);
+    setChecked([]);
+    setIsCheckedAll(false);
+    if (activeTab === TABS.PEOPLE) {
       dispatch(getAllTeammates(ownerSafeAddress));
-    }
-    if (!allDepartments || !allDepartments.length) {
+    } else {
+      setDepartmentStep(0);
       dispatch(getDepartments(ownerSafeAddress));
     }
-  }, [dispatch, ownerSafeAddress, teammates, allDepartments]);
+  }, [dispatch, ownerSafeAddress, activeTab]);
 
   useEffect(() => {
     if (teammates && teammates.length > 0) {
@@ -306,6 +310,123 @@ export default function People() {
     }
   };
 
+  const handleSelectDepartment = (departmentId) => {
+    if (ownerSafeAddress && departmentId) {
+      dispatch(getTeammatesByDepartment(ownerSafeAddress, departmentId));
+      setDepartmentStep(departmentStep + 1);
+    }
+  };
+  const goBackToDepartments = () => {
+    setDepartmentStep(departmentStep - 1);
+  };
+
+  const renderPayTable = () => {
+    return (
+      <div>
+        <TableHead>
+          <div className="form-check d-flex">
+            <input
+              className="form-check-input position-static mr-3"
+              type="checkbox"
+              id="allCheckbox"
+              checked={isCheckedAll}
+              onChange={handleCheckAll}
+            />
+            <div>Employee Name</div>
+          </div>
+          <div>Department</div>
+          <div>Pay Token</div>
+          <div>Pay Amount</div>
+          <div>Address</div>
+          <div></div>
+        </TableHead>
+        <TableBody>
+          {teammates.length > 0 &&
+            teammates.map(({ data, departmentName }, idx) => {
+              const {
+                firstName,
+                lastName,
+                salaryAmount,
+                salaryToken,
+                address,
+              } = getDecryptedDetails(data);
+              return (
+                <TableRow key={`${address}-${idx}`}>
+                  <div className="form-check d-flex">
+                    <input
+                      className="form-check-input position-static mr-3"
+                      type="checkbox"
+                      id={`checkbox${idx}`}
+                      name={`checkbox${idx}`}
+                      checked={checked[idx] || false}
+                      onChange={(e) => {
+                        const teammateDetails = {
+                          firstName,
+                          lastName,
+                          salaryToken,
+                          salaryAmount,
+                          address,
+                        };
+                        handleChecked(e, teammateDetails, idx);
+                      }}
+                    />
+                    <div>
+                      {firstName} {lastName}
+                    </div>
+                  </div>
+                  <div>{departmentName}</div>
+                  <div>{salaryToken}</div>
+                  <div>
+                    {salaryAmount} {salaryToken} (US${salaryAmount})
+                  </div>
+                  <div>{minifyAddress(address)}</div>
+                  <div className="text-right">
+                    {checked.filter(Boolean).length <= 1 && (
+                      <Button
+                        type="submit"
+                        iconOnly
+                        disabled={!checked[idx] || loadingTx || isNoneChecked}
+                        className="py-0"
+                      >
+                        <span className="pay-text">PAY</span>
+                      </Button>
+                    )}
+                  </div>
+                </TableRow>
+              );
+            })}
+        </TableBody>
+      </div>
+    );
+  };
+
+  const renderPaymentSummary = () => {
+    return (
+      <PaymentSummary>
+        <div className="payment-info">
+          <div>
+            <div className="payment-title">Total Selected</div>
+            <div className="payment-subtitle">36 people</div>
+          </div>
+          <div>
+            <div className="payment-title">Total Amount</div>
+            <div className="payment-subtitle">US$ 10000</div>
+          </div>
+          <div>
+            <div className="payment-title">Balance after payment</div>
+            <div className="payment-subtitle">US$ 100</div>
+          </div>
+        </div>
+
+        <div className="pay-button">
+          <Button type="submit" large loading={loadingTx} disabled={loadingTx}>
+            Pay Now
+          </Button>
+        </div>
+      </PaymentSummary>
+    );
+  };
+
   return (
     <div
       style={{
@@ -358,122 +479,78 @@ export default function People() {
               </Nav>
               <TabContent activeTab={activeTab}>
                 <TabPane tabId={TABS.PEOPLE}>
-                  <TableHead>
-                    <div className="form-check d-flex">
-                      <input
-                        className="form-check-input position-static mr-3"
-                        type="checkbox"
-                        id="allCheckbox"
-                        checked={isCheckedAll}
-                        onChange={handleCheckAll}
-                      />
-                      <div>Employee Name</div>
+                  {loadingTeammates ? (
+                    <div
+                      className="d-flex align-items-center justify-content-center"
+                      style={{ height: "400px" }}
+                    >
+                      <Loading color="primary" width="50px" height="50px" />
                     </div>
-                    <div>Department</div>
-                    <div>Pay Token</div>
-                    <div>Pay Amount</div>
-                    <div>Address</div>
-                    <div></div>
-                  </TableHead>
-                  <TableBody>
-                    {teammates.length > 0 &&
-                      teammates.map(({ data, departmentName }, idx) => {
-                        const {
-                          firstName,
-                          lastName,
-                          salaryAmount,
-                          salaryToken,
-                          address,
-                        } = getDecryptedDetails(data);
-                        return (
-                          <TableRow key={address}>
-                            <div className="form-check d-flex">
-                              <input
-                                className="form-check-input position-static mr-3"
-                                type="checkbox"
-                                id={`checkbox${idx}`}
-                                name={`checkbox${idx}`}
-                                // data-value={JSON.stringify({
-                                //   firstName,
-                                //   lastName,
-                                //   salaryAmount,
-                                //   salaryToken,
-                                //   address,
-                                // })}
-                                checked={checked[idx] || false}
-                                onChange={(e) => {
-                                  const teammateDetails = {
-                                    firstName,
-                                    lastName,
-                                    salaryToken,
-                                    salaryAmount,
-                                    address,
-                                  };
-                                  handleChecked(e, teammateDetails, idx);
-                                }}
-                              />
-                              <div>
-                                {firstName} {lastName}
-                              </div>
-                            </div>
-                            <div>{departmentName}</div>
-                            <div>{salaryToken}</div>
-                            <div>
-                              {salaryAmount} {salaryToken} (US${salaryAmount})
-                            </div>
-                            <div>{minifyAddress(address)}</div>
-                            <div className="text-right">
-                              {checked.filter(Boolean).length <= 1 && (
-                                <Button
-                                  type="submit"
-                                  iconOnly
-                                  disabled={
-                                    !checked[idx] || loadingTx || isNoneChecked
-                                  }
-                                >
-                                  <span className="pay-text">PAY</span>
-                                </Button>
-                              )}
-                            </div>
-                          </TableRow>
-                        );
-                      })}
-                  </TableBody>
+                  ) : (
+                    renderPayTable()
+                  )}
                 </TabPane>
                 <TabPane tabId={TABS.DEPARTMENT}>
-                  <div className="p-4">Departments</div>
+                  {loadingDepartments || loadingTeammates ? (
+                    <div
+                      className="d-flex align-items-center justify-content-center"
+                      style={{ height: "400px" }}
+                    >
+                      <Loading color="primary" width="50px" height="50px" />
+                    </div>
+                  ) : departmentStep === 0 ? (
+                    <div className="department-cards">
+                      {allDepartments.map(
+                        ({ departmentId, name, payCycleDate, employees }) => (
+                          <Card
+                            className="department-card mb-4"
+                            key={departmentId}
+                            onClick={() => handleSelectDepartment(departmentId)}
+                          >
+                            <div className="upper">
+                              <div className="d-flex justify-content-between">
+                                <img src={GuyPng} alt="guy" width="40px" />
+                                <div className="circle circle-grey">
+                                  <FontAwesomeIcon
+                                    icon={faLongArrowAltRight}
+                                    color="#7367f0"
+                                  />
+                                </div>
+                              </div>
+                              <div className="mt-2">{name}</div>
+                            </div>
+
+                            <div className="line" />
+                            <div className="lower">
+                              <div className="mb-3">
+                                Employees : {employees}
+                              </div>
+                              <div>
+                                Paydate : {numToOrd(payCycleDate)} of every
+                                month
+                              </div>
+                            </div>
+                          </Card>
+                        )
+                      )}
+                    </div>
+                  ) : (
+                    <div>
+                      <Button iconOnly onClick={goBackToDepartments}>
+                        <div className="circle">
+                          <FontAwesomeIcon
+                            icon={faLongArrowAltLeft}
+                            color="#fff"
+                          />
+                        </div>
+                      </Button>
+                      {renderPayTable()}
+                    </div>
+                  )}
                 </TabPane>
               </TabContent>
 
-              {!isNoneChecked && (
-                <PaymentSummary>
-                  <div className="payment-info">
-                    <div>
-                      <div className="payment-title">Total Selected</div>
-                      <div className="payment-subtitle">36 people</div>
-                    </div>
-                    <div>
-                      <div className="payment-title">Total Amount</div>
-                      <div className="payment-subtitle">US$ 10000</div>
-                    </div>
-                    <div>
-                      <div className="payment-title">Balance after payment</div>
-                      <div className="payment-subtitle">US$ 100</div>
-                    </div>
-                  </div>
-
-                  <div className="pay-button">
-                    <Button
-                      type="submit"
-                      large
-                      loading={loadingTx}
-                      disabled={loadingTx || isNoneChecked}
-                    >
-                      Pay Now
-                    </Button>
-                  </div>
-                </PaymentSummary>
-              )}
+              {!isNoneChecked && renderPaymentSummary()}
             </Card>
           </form>
         </Container>
