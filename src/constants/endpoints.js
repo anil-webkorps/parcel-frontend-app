@@ -17,12 +17,15 @@ export const loginEndpoint = `${ROOT_BE_URL}/api/v1/users/login`;
 // TEAMMATE
 export const getAllTeammatesEndpoint = `${ROOT_BE_URL}/api/v1/people/get`;
 export const createTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/create`;
-export const getTeammatesByDepartmentIdEndPoint = `${ROOT_BE_URL}/api/v1/people/getByDepartment`;
+export const getTeammatesByDepartmentIdEndpoint = `${ROOT_BE_URL}/api/v1/people/getByDepartment`;
 
 // DEPARTMENT
 export const createDepartmentEndpoint = `${ROOT_BE_URL}/api/v1/departments/create`;
 export const getAllDepartmentsEndpoint = `${ROOT_BE_URL}/api/v1/departments/get`;
 export const getDepartmentByIdEndpoint = `${ROOT_BE_URL}/api/v1/departments/getByDepartmentId`;
+
+// TOKEN PRICES
+export const getTokenPricesEndpoint = `${ROOT_BE_URL}/api/v1/tokenPrices/usd`;
 
 // GNOSIS
 export const gnosisSafeTransactionEndpoint =

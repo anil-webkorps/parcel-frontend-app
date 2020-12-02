@@ -9,7 +9,7 @@ import {
 import request from "utils/request";
 import {
   getAllTeammatesEndpoint,
-  getTeammatesByDepartmentIdEndPoint,
+  getTeammatesByDepartmentIdEndpoint,
 } from "constants/endpoints";
 
 function* fetchAllTeammates(action) {
@@ -34,7 +34,7 @@ function* fetchAllTeammates(action) {
 }
 
 function* fetchTeammatesByDepartmentId(action) {
-  const requestURL = `${getTeammatesByDepartmentIdEndPoint}?safeAddress=${action.safeAddress}&departmentId=${action.departmentId}`;
+  const requestURL = `${getTeammatesByDepartmentIdEndpoint}?safeAddress=${action.safeAddress}&departmentId=${action.departmentId}`;
   const options = {
     method: "GET",
   };

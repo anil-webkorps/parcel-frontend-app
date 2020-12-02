@@ -31,6 +31,14 @@ import {
   makeSelectTeammates,
   makeSelectLoading as makeSelectTeammatesLoading,
 } from "store/view-teammates/selectors";
+import marketRatesReducer from "store/market-rates/reducer";
+import { getMarketRates } from "store/market-rates/actions";
+import { makeSelectPrices } from "store/market-rates/selectors";
+import marketRatesSaga from "store/market-rates/saga";
+import dashboardReducer from "store/dashboard/reducer";
+import { getSafeBalances } from "store/dashboard/actions";
+import { makeSelectBalances } from "store/dashboard/selectors";
+import dashboardSaga from "store/dashboard/saga";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { EthersAdapter } from "contract-proxy-kit";
@@ -52,17 +60,21 @@ import Loading from "components/common/Loading";
 
 import GuyPng from "assets/icons/guy.png";
 
-import { Container, Table, PaymentSummary } from "./styles";
+import { Container, Table, PaymentSummary, TokenBalance } from "./styles";
 
 const { TableBody, TableHead, TableRow } = Table;
+
+// reducer/saga keys
 const viewTeammatesKey = "viewTeammates";
 const viewDepartmentsKey = "viewDepartments";
+const marketRatesKey = "marketRates";
+const dashboardKey = "dashboard";
 
 const { DAI_ADDRESS, MULTISEND_ADDRESS } = addresses;
 
 const tokenNameToAddress = {
   DAI: DAI_ADDRESS,
-  // add other tokens here
+  // add other tokens and addresses here
 };
 
 const TABS = {
@@ -128,6 +140,7 @@ export default function People() {
   const [txHash, setTxHash] = useState(""); // eslint-disable-line
   const [selectedRows, setSelectedRows] = useState([]);
   const [departmentStep, setDepartmentStep] = useState(0);
+  const [payTokenBalance, setPayTokenBalance] = useState(0); // for now, this is DAI
 
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -138,9 +151,13 @@ export default function People() {
     key: viewDepartmentsKey,
     reducer: viewDepartmentsReducer,
   });
+  useInjectReducer({ key: marketRatesKey, reducer: marketRatesReducer });
+  useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
 
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
   useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
+  useInjectSaga({ key: marketRatesKey, saga: marketRatesSaga });
+  useInjectSaga({ key: dashboardKey, saga: dashboardSaga });
 
   const dispatch = useDispatch();
   const allDepartments = useSelector(makeSelectDepartments());
@@ -148,11 +165,36 @@ export default function People() {
   const loadingTeammates = useSelector(makeSelectTeammatesLoading()); // eslint-disable-line
   const teammates = useSelector(makeSelectTeammates());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
-
+  const prices = useSelector(makeSelectPrices());
+  const balances = useSelector(makeSelectBalances());
   // contracts
   const proxyContract = useContract(ownerSafeAddress, GnosisSafeABI, true);
   const dai = useContract(DAI_ADDRESS, ERC20ABI, true);
   const multiSend = useContract(MULTISEND_ADDRESS, MultiSendABI);
+
+  useEffect(() => {
+    dispatch(getMarketRates());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(getSafeBalances(ownerSafeAddress));
+  }, [dispatch, ownerSafeAddress]);
+
+  useEffect(() => {
+    const DAI = "DAI"; // change this to support other tokens
+    if (balances && prices) {
+      let tokenBalanceObj;
+      for (let i = 0; i < balances.length; i++) {
+        if (balances[i].token && balances[i].token.symbol === DAI)
+          tokenBalanceObj = balances[i];
+      }
+      if (tokenBalanceObj)
+        setPayTokenBalance(
+          (tokenBalanceObj.balance / 10 ** tokenBalanceObj.token.decimals) *
+            prices[DAI]
+        );
+    }
+  }, [balances, prices]);
 
   useEffect(() => {
     // reset to initial state
@@ -314,10 +356,32 @@ export default function People() {
     if (ownerSafeAddress && departmentId) {
       dispatch(getTeammatesByDepartment(ownerSafeAddress, departmentId));
       setDepartmentStep(departmentStep + 1);
+      setSelectedRows([]);
     }
   };
+
   const goBackToDepartments = () => {
     setDepartmentStep(departmentStep - 1);
+  };
+
+  const getSelectedCount = () => {
+    return checked.filter(Boolean).length;
+  };
+
+  const getTotalAmountToPay = () => {
+    if (prices) {
+      console.log({ selectedRows });
+      return selectedRows.reduce(
+        (total, { salaryAmount, salaryToken }) =>
+          (total += prices[salaryToken] * salaryAmount),
+        0
+      );
+    }
+
+    return selectedRows.reduce(
+      (total, { salaryAmount }) => (total += Number(salaryAmount)),
+      0
+    );
   };
 
   const renderPayTable = () => {
@@ -377,7 +441,8 @@ export default function People() {
                   <div>{departmentName}</div>
                   <div>{salaryToken}</div>
                   <div>
-                    {salaryAmount} {salaryToken} (US${salaryAmount})
+                    {salaryAmount} {salaryToken} (US$
+                    {prices ? prices[salaryToken] * salaryAmount : 0})
                   </div>
                   <div>{minifyAddress(address)}</div>
                   <div className="text-right">
@@ -406,15 +471,19 @@ export default function People() {
         <div className="payment-info">
           <div>
             <div className="payment-title">Total Selected</div>
-            <div className="payment-subtitle">36 people</div>
+            <div className="payment-subtitle">{getSelectedCount()} people</div>
           </div>
           <div>
             <div className="payment-title">Total Amount</div>
-            <div className="payment-subtitle">US$ 10000</div>
+            <div className="payment-subtitle">US$ {getTotalAmountToPay()}</div>
           </div>
           <div>
             <div className="payment-title">Balance after payment</div>
-            <div className="payment-subtitle">US$ 100</div>
+            <div className="payment-subtitle">
+              {payTokenBalance - getTotalAmountToPay() > 0
+                ? `US$ ${payTokenBalance - getTotalAmountToPay()}`
+                : `Insufficient Balance`}
+            </div>
           </div>
         </div>
 
@@ -442,9 +511,19 @@ export default function People() {
             }}
             className="mx-auto"
           >
-            <div className="title">Payments</div>
-            <div className="subtitle">
-              You can instantly pay or manage team payrolls
+            <div className="d-flex justify-content-between align-items-center">
+              <div>
+                <div className="title">Payments</div>
+                <div className="subtitle">
+                  You can instantly pay or manage team payrolls
+                </div>
+              </div>
+              <TokenBalance>
+                <div className="balance-value">
+                  US$ {parseFloat(payTokenBalance).toFixed(2)}
+                </div>
+                <div className="balance-text">Your DAI balance</div>
+              </TokenBalance>
             </div>
           </div>
         </Info>
