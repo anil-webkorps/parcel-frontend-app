@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { cryptoUtils } from "parcel-sdk";
 import { BigNumber } from "@ethersproject/bignumber";
+import { Col, Row } from "reactstrap";
 
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
@@ -55,12 +56,20 @@ import {
   getHexDataLength,
   standardizeTransaction,
 } from "utils/tx-helpers";
-import { minifyAddress } from "components/common/Web3Utils";
+import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 
 import GuyPng from "assets/icons/guy.png";
 
-import { Container, Table, PaymentSummary, TokenBalance } from "./styles";
+import {
+  Container,
+  Table,
+  PaymentSummary,
+  TokenBalance,
+  Title,
+  Heading,
+  Text,
+} from "./styles";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -70,7 +79,7 @@ const viewDepartmentsKey = "viewDepartments";
 const marketRatesKey = "marketRates";
 const dashboardKey = "dashboard";
 
-const { DAI_ADDRESS, MULTISEND_ADDRESS } = addresses;
+const { DAI_ADDRESS, MULTISEND_ADDRESS, ZERO_ADDRESS } = addresses;
 
 const tokenNameToAddress = {
   DAI: DAI_ADDRESS,
@@ -130,17 +139,19 @@ const navStyles = `
 
 export default function People() {
   const { account, library } = useActiveWeb3React();
-  // const [listOfTeammates, setListOfTeammates] = useState([]);
-  const [checked, setChecked] = useState([]);
-  const [isCheckedAll, setIsCheckedAll] = useState(false);
+
   const [sign] = useLocalStorage("SIGNATURE");
   const [toggled] = useContext(SideNavContext);
+
+  const [checked, setChecked] = useState([]);
+  const [isCheckedAll, setIsCheckedAll] = useState(false);
   const [activeTab, setActiveTab] = useState(TABS.PEOPLE);
   const [loadingTx, setLoadingTx] = useState(false);
   const [txHash, setTxHash] = useState(""); // eslint-disable-line
   const [selectedRows, setSelectedRows] = useState([]);
   const [departmentStep, setDepartmentStep] = useState(0);
   const [payTokenBalance, setPayTokenBalance] = useState(0); // for now, this is DAI
+  const [success, setSuccess] = useState(false);
 
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -268,10 +279,10 @@ export default function People() {
       const data = dataHash;
       const operation = 1; // DELEGATECALL
       const gasPrice = 0; // If 0, then no refund to relayer
-      const gasToken = "0x0000000000000000000000000000000000000000"; // ETH
+      const gasToken = ZERO_ADDRESS; // ETH
       const txGasEstimate = 0;
       const baseGasEstimate = 0;
-      const executor = "0x0000000000000000000000000000000000000000";
+      const executor = ZERO_ADDRESS;
 
       // (r, s, v) where v is 1 means this signature is approved by the address encoded in value r
       // For a single user, we auto generate the signature without prompting the user
@@ -303,6 +314,7 @@ export default function People() {
 
         setTxHash(tx.hash);
         setLoadingTx(false);
+        setSuccess(true);
       } catch (err) {
         setLoadingTx(false);
         console.error(err);
@@ -496,7 +508,7 @@ export default function People() {
     );
   };
 
-  return (
+  return !success ? (
     <div
       style={{
         transition: "all 0.25s linear",
@@ -634,6 +646,46 @@ export default function People() {
           </form>
         </Container>
       </div>
+    </div>
+  ) : (
+    <div
+      style={{
+        transition: "all 0.25s linear",
+      }}
+    >
+      <Info />
+      <Container
+        style={{
+          maxWidth: toggled ? "900px" : "1280px",
+          transition: "all 0.25s linear",
+        }}
+      >
+        <Card className="payment-success">
+          <Title className="mb-2" style={{ marginTop: "300px" }}>
+            Payment Processed
+          </Title>
+          <Heading>
+            We’ve processed the payment of {getSelectedCount()} people You can
+            track the status of your payment in the accounting section.{" "}
+          </Heading>
+          <Text>
+            <TransactionUrl hash={txHash} />
+          </Text>
+
+          <Row style={{ marginTop: "150px" }}>
+            <Col lg="6" sm="12" className="pr-0">
+              <Button large type="button" className="secondary" to="/dashboard">
+                Back to Dashboard
+              </Button>
+            </Col>
+            <Col lg="6" sm="12">
+              <Button large type="button">
+                Track Status
+              </Button>
+            </Col>
+          </Row>
+        </Card>
+      </Container>
     </div>
   );
 }

@@ -100,7 +100,7 @@ export const Balance = () => {
   return !!balance ? parseFloat(formatEther(balance)).toPrecision(4) : null;
 };
 
-export const TransactionUrl = (hash) => {
+export const TransactionUrl = ({ hash }) => {
   const { chainId } = useActiveWeb3React();
 
   const etherscanPrefixByChainId = {
@@ -109,7 +109,15 @@ export const TransactionUrl = (hash) => {
     4: `${networkNames.RINKEBY.toLowerCase()}.`,
     42: `${networkNames.KOVAN.toLowerCase()}.`,
   };
-  return `https://${etherscanPrefixByChainId[chainId]}etherscan.io/tx/${hash}`;
+  return (
+    <a
+      href={`https://${etherscanPrefixByChainId[chainId]}etherscan.io/tx/${hash}`}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      View Transaction
+    </a>
+  );
 };
 
 export const minifyAddress = (address) => {
