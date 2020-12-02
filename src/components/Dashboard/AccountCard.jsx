@@ -80,10 +80,10 @@ export default function AccountCard() {
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
 
   useEffect(() => {
-    if (ownerSafeAddress && !balances) {
+    if (ownerSafeAddress) {
       dispatch(getSafeBalances(ownerSafeAddress));
     }
-  }, [ownerSafeAddress, dispatch, balances]);
+  }, [ownerSafeAddress, dispatch]);
 
   useEffect(() => {
     if (balances && balances.length > 0) {
