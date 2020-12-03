@@ -152,7 +152,7 @@ export default function ViewTeammate() {
               >
                 <Loading color="primary" width="50px" height="50px" />
               </div>
-            ) : teammates.length > 0 ? (
+            ) : teammates && teammates.length > 0 ? (
               teammates.map(({ data, departmentName, payCycleDate }, idx) => {
                 const {
                   firstName,

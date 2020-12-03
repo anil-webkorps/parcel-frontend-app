@@ -129,7 +129,9 @@ export default function People() {
                   </div>
                   <div className="all-employees-subtitle">
                     Total Departments :{" "}
-                    <span>{allDepartments.length || 0}</span>
+                    <span>
+                      {(allDepartments && allDepartments.length) || 0}
+                    </span>
                   </div>
                 </div>
                 <div>
@@ -156,37 +158,38 @@ export default function People() {
                 : "repeat(4, 1fr)",
             }}
           >
-            {allDepartments.map(
-              ({ departmentId, name, payCycleDate, employees }) => (
-                <Link
-                  to={`/dashboard/people/view/${departmentId}`}
-                  key={departmentId}
-                >
-                  <Card className="department-card">
-                    <div className="upper">
-                      <div className="d-flex justify-content-between">
-                        <img src={GuyPng} alt="guy" width="50px" />
-                        <div className="circle circle-grey">
-                          <FontAwesomeIcon
-                            icon={faLongArrowAltRight}
-                            color="#7367f0"
-                          />
+            {allDepartments &&
+              allDepartments.map(
+                ({ departmentId, name, payCycleDate, employees }) => (
+                  <Link
+                    to={`/dashboard/people/view/${departmentId}`}
+                    key={departmentId}
+                  >
+                    <Card className="department-card">
+                      <div className="upper">
+                        <div className="d-flex justify-content-between">
+                          <img src={GuyPng} alt="guy" width="50px" />
+                          <div className="circle circle-grey">
+                            <FontAwesomeIcon
+                              icon={faLongArrowAltRight}
+                              color="#7367f0"
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-2">{name}</div>
+                      </div>
+
+                      <div className="line" />
+                      <div className="lower">
+                        <div className="mb-3">Employees : {employees}</div>
+                        <div>
+                          Paydate : {numToOrd(payCycleDate)} of every month
                         </div>
                       </div>
-                      <div className="mt-2">{name}</div>
-                    </div>
-
-                    <div className="line" />
-                    <div className="lower">
-                      <div className="mb-3">Employees : {employees}</div>
-                      <div>
-                        Paydate : {numToOrd(payCycleDate)} of every month
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              )
-            )}
+                    </Card>
+                  </Link>
+                )
+              )}
             <Link to={`/dashboard/department/new`}>
               <Card className="department-card d-flex justify-content-center align-items-center">
                 <Button iconOnly className="d-block mx-auto">

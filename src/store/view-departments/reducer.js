@@ -9,7 +9,7 @@ export const initialState = {
   step: 0,
   form: {},
   loading: false,
-  departments: [],
+  departments: undefined,
   error: false,
   totalEmployees: 0,
 };

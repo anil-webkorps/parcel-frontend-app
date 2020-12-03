@@ -9,7 +9,9 @@ import { Assets } from "./styles";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import dashboardReducer from "store/dashboard/reducer";
+import marketRatesReducer from "store/market-rates/reducer";
 import dashboardSaga from "store/dashboard/saga";
+import marketRatesSaga from "store/market-rates/saga";
 import { Card } from "components/common/Card";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 
@@ -23,9 +25,12 @@ import {
   makeSelectBalances,
   // makeSelectError,
 } from "store/dashboard/selectors";
+import { makeSelectPrices } from "store/market-rates/selectors";
 import Loading from "components/common/Loading";
+import { getMarketRates } from "store/market-rates/actions";
 
 const dashboardKey = "dashboard";
+const marketRatesKey = "marketRates";
 
 const DEFAULT_TOKENS = {
   ETH: "ETH",
@@ -63,15 +68,18 @@ export default function AccountCard() {
 
   // Reducers
   useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
+  useInjectReducer({ key: marketRatesKey, reducer: marketRatesReducer });
 
   // Sagas
   useInjectSaga({ key: dashboardKey, saga: dashboardSaga });
+  useInjectSaga({ key: marketRatesKey, saga: marketRatesSaga });
 
   const dispatch = useDispatch();
 
   // Selectors
   const loading = useSelector(makeSelectLoading());
   const balances = useSelector(makeSelectBalances());
+  const prices = useSelector(makeSelectPrices());
   // const error = useSelector(makeSelectError());
 
   const [totalBalance, setTotalBalance] = useState("0.00");
@@ -84,9 +92,12 @@ export default function AccountCard() {
       dispatch(getSafeBalances(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
+  useEffect(() => {
+    dispatch(getMarketRates());
+  }, [dispatch]);
 
   useEffect(() => {
-    if (balances && balances.length > 0) {
+    if (balances && balances.length > 0 && prices) {
       const seenTokens = {};
       const allTokenDetails = balances
         .map((bal, idx) => {
@@ -103,7 +114,9 @@ export default function AccountCard() {
               name: bal.token && bal.token.symbol,
               icon: bal.token.logoUri,
               balance,
-              usd: bal.balanceUsd,
+              usd: bal.token
+                ? balance * prices[bal.token.symbol]
+                : balance * prices["ETH"],
             };
           }
           // eth
@@ -129,7 +142,7 @@ export default function AccountCard() {
         setTokenDetails(allTokenDetails.split(0, 3));
       }
     }
-  }, [balances]);
+  }, [balances, prices]);
 
   useEffect(() => {
     const total = tokenDetails.reduce(

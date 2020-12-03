@@ -11,7 +11,7 @@ import {
 export const initialState = {
   loading: false,
   error: false,
-  teammates: [],
+  teammates: undefined,
 };
 
 /* eslint-disable default-case, no-param-reassign */

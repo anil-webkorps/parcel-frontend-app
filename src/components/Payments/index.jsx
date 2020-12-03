@@ -339,7 +339,7 @@ export default function People() {
       // select all
       setChecked(new Array(checked.length).fill(true));
       setIsCheckedAll(true);
-      if (teammates.length > 0) {
+      if (teammates && teammates.length > 0) {
         const allRows = teammates.map(({ data }) => getDecryptedDetails(data));
         setSelectedRows(allRows);
       }
@@ -397,6 +397,16 @@ export default function People() {
   };
 
   const renderPayTable = () => {
+    if (!teammates.length)
+      return (
+        <div
+          className="d-flex align-items-center justify-content-center"
+          style={{ height: "300px" }}
+        >
+          No Teammates Found!
+        </div>
+      );
+
     return (
       <div>
         <TableHead>
@@ -477,6 +487,52 @@ export default function People() {
     );
   };
 
+  const renderDepartments = () => {
+    if (!allDepartments.length) {
+      return (
+        <div
+          className="d-flex align-items-center justify-content-center"
+          style={{ height: "400px" }}
+        >
+          No Departments Found!
+        </div>
+      );
+    }
+    return (
+      <div className="department-cards">
+        {allDepartments &&
+          allDepartments.map(
+            ({ departmentId, name, payCycleDate, employees }) => (
+              <Card
+                className="department-card mb-4"
+                key={departmentId}
+                onClick={() => handleSelectDepartment(departmentId)}
+              >
+                <div className="upper">
+                  <div className="d-flex justify-content-between">
+                    <img src={GuyPng} alt="guy" width="40px" />
+                    <div className="circle circle-grey">
+                      <FontAwesomeIcon
+                        icon={faLongArrowAltRight}
+                        color="#7367f0"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-2">{name}</div>
+                </div>
+
+                <div className="line" />
+                <div className="lower">
+                  <div className="mb-3">Employees : {employees}</div>
+                  <div>Paydate : {numToOrd(payCycleDate)} of every month</div>
+                </div>
+              </Card>
+            )
+          )}
+      </div>
+    );
+  };
+
   const renderPaymentSummary = () => {
     return (
       <PaymentSummary>
@@ -493,7 +549,9 @@ export default function People() {
             <div className="payment-title">Balance after payment</div>
             <div className="payment-subtitle">
               {payTokenBalance - getTotalAmountToPay() > 0
-                ? `US$ ${payTokenBalance - getTotalAmountToPay()}`
+                ? `US$ ${parseFloat(
+                    payTokenBalance - getTotalAmountToPay()
+                  ).toFixed(2)}`
                 : `Insufficient Balance`}
             </div>
           </div>
@@ -570,74 +628,43 @@ export default function People() {
               </Nav>
               <TabContent activeTab={activeTab}>
                 <TabPane tabId={TABS.PEOPLE}>
-                  {loadingTeammates ? (
+                  {loadingTeammates && (
                     <div
                       className="d-flex align-items-center justify-content-center"
                       style={{ height: "400px" }}
                     >
                       <Loading color="primary" width="50px" height="50px" />
                     </div>
-                  ) : (
-                    renderPayTable()
                   )}
+                  {!loadingTeammates && teammates && renderPayTable()}
                 </TabPane>
                 <TabPane tabId={TABS.DEPARTMENT}>
-                  {loadingDepartments || loadingTeammates ? (
+                  {(loadingDepartments || loadingTeammates) && (
                     <div
                       className="d-flex align-items-center justify-content-center"
                       style={{ height: "400px" }}
                     >
                       <Loading color="primary" width="50px" height="50px" />
                     </div>
-                  ) : departmentStep === 0 ? (
-                    <div className="department-cards">
-                      {allDepartments.map(
-                        ({ departmentId, name, payCycleDate, employees }) => (
-                          <Card
-                            className="department-card mb-4"
-                            key={departmentId}
-                            onClick={() => handleSelectDepartment(departmentId)}
-                          >
-                            <div className="upper">
-                              <div className="d-flex justify-content-between">
-                                <img src={GuyPng} alt="guy" width="40px" />
-                                <div className="circle circle-grey">
-                                  <FontAwesomeIcon
-                                    icon={faLongArrowAltRight}
-                                    color="#7367f0"
-                                  />
-                                </div>
-                              </div>
-                              <div className="mt-2">{name}</div>
-                            </div>
-
-                            <div className="line" />
-                            <div className="lower">
-                              <div className="mb-3">
-                                Employees : {employees}
-                              </div>
-                              <div>
-                                Paydate : {numToOrd(payCycleDate)} of every
-                                month
-                              </div>
-                            </div>
-                          </Card>
-                        )
-                      )}
-                    </div>
-                  ) : (
-                    <div>
-                      <Button iconOnly onClick={goBackToDepartments}>
-                        <div className="circle">
-                          <FontAwesomeIcon
-                            icon={faLongArrowAltLeft}
-                            color="#fff"
-                          />
-                        </div>
-                      </Button>
-                      {renderPayTable()}
-                    </div>
                   )}
+
+                  {!loadingTeammates &&
+                    !loadingDepartments &&
+                    (departmentStep === 0 ? (
+                      allDepartments && renderDepartments()
+                    ) : (
+                      <div>
+                        <Button iconOnly onClick={goBackToDepartments}>
+                          <div className="circle">
+                            <FontAwesomeIcon
+                              icon={faLongArrowAltLeft}
+                              color="#fff"
+                            />
+                          </div>
+                        </Button>
+                        {teammates && renderPayTable()}
+                      </div>
+                    ))}
                 </TabPane>
               </TabContent>
 
