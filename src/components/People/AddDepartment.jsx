@@ -84,14 +84,14 @@ export default function AddDepartment() {
   const history = useHistory();
 
   useEffect(() => {
+    if (newDepartmentId) setSuccess(true);
+  }, [newDepartmentId]);
+
+  useEffect(() => {
     // reset departmentId and log when component mounts
     dispatch(addDepartmentSuccess("", ""));
     setSuccess(false);
   }, [dispatch]);
-
-  useEffect(() => {
-    if (newDepartmentId) setSuccess(true);
-  }, [newDepartmentId]);
 
   const onSubmit = (values) => {
     dispatch(updateForm({ ...formData, name: values.departmentName }));
