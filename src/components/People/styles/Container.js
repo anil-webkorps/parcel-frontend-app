@@ -65,7 +65,7 @@ export default styled.div`
 
   .card-title {
     max-width: 240px;
-    margin: 225px auto 20px;
+    margin: 0 auto 20px;
     font-size: 20px;
     font-weight: bold;
     font-stretch: normal;

@@ -60,6 +60,7 @@ import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 
 import GuyPng from "assets/icons/guy.png";
+import HumansPng from "assets/images/humans.png";
 
 import {
   Container,
@@ -688,7 +689,10 @@ export default function People() {
         }}
       >
         <Card className="payment-success">
-          <Title className="mb-2" style={{ marginTop: "300px" }}>
+          <div className="text-center">
+            <img src={HumansPng} alt="humans" className="w-100" />
+          </div>
+          <Title className="mb-2" style={{ marginTop: "40px" }}>
             Payment Processed
           </Title>
           <Heading>

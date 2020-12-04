@@ -23,6 +23,7 @@ import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 
 import GuyPng from "assets/icons/guy.png";
+import HumansPng from "assets/images/humans.png";
 
 import { Container, AllEmployees } from "./styles";
 import { Circle } from "components/Header/styles";
@@ -82,6 +83,9 @@ export default function People() {
         >
           <div className="new-user">
             <Card className="p-4" style={{ minHeight: "532px" }}>
+              <div className="text-center">
+                <img src={HumansPng} alt="humans" />
+              </div>
               <div className="card-title">
                 Hassle-Free team and People management
               </div>
