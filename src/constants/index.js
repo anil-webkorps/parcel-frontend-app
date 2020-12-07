@@ -16,3 +16,10 @@ export const supportedWallets = [
 export const DEFAULT_GAS_PRICE = "100000000000"; // 100 gwei
 
 export const MESSAGE_TO_SIGN = "I hereby sign and authorize Parcel.";
+
+export const tokens = {
+  DAI: "DAI",
+  USDC: "USDC",
+  USDT: "USDT",
+  ETH: "ETH",
+};

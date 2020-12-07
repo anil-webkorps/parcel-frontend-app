@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { cryptoUtils } from "parcel-sdk";
 import { BigNumber } from "@ethersproject/bignumber";
-import { Col, Row } from "reactstrap";
+import { addDays, format } from "date-fns";
 
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
@@ -45,32 +45,27 @@ import { useInjectSaga } from "utils/injectSaga";
 import { EthersAdapter } from "contract-proxy-kit";
 import { ethers } from "ethers";
 import { useActiveWeb3React, useContract, useLocalStorage } from "hooks";
+import { tokens } from "constants/index";
 import addresses from "constants/addresses";
 import GnosisSafeABI from "constants/abis/GnosisSafe.json";
 import ERC20ABI from "constants/abis/ERC20.json";
 import MultiSendABI from "constants/abis/MultiSend.json";
+import UniswapABI from "constants/abis/Uniswap.json";
 import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import {
   joinHexData,
   getHexDataLength,
   standardizeTransaction,
+  getAmountInWei,
 } from "utils/tx-helpers";
-import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
+import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 
 import GuyPng from "assets/icons/guy.png";
-import HumansPng from "assets/images/humans.png";
 
-import {
-  Container,
-  Table,
-  PaymentSummary,
-  TokenBalance,
-  Title,
-  Heading,
-  Text,
-} from "./styles";
+import { Container, Table, PaymentSummary, TokenBalance } from "./styles";
+import TransactionSuccess from "./TransactionSuccess";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -80,10 +75,17 @@ const viewDepartmentsKey = "viewDepartments";
 const marketRatesKey = "marketRates";
 const dashboardKey = "dashboard";
 
-const { DAI_ADDRESS, MULTISEND_ADDRESS, ZERO_ADDRESS } = addresses;
+const {
+  DAI_ADDRESS,
+  MULTISEND_ADDRESS,
+  ZERO_ADDRESS,
+  USDC_ADDRESS,
+  UNISWAP_ROUTER_ADDRESS,
+  WETH_ADDRESS,
+} = addresses;
 
 const tokenNameToAddress = {
-  DAI: DAI_ADDRESS,
+  [tokens.DAI]: DAI_ADDRESS,
   // add other tokens and addresses here
 };
 
@@ -179,10 +181,13 @@ export default function People() {
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const prices = useSelector(makeSelectPrices());
   const balances = useSelector(makeSelectBalances());
+
   // contracts
   const proxyContract = useContract(ownerSafeAddress, GnosisSafeABI, true);
   const dai = useContract(DAI_ADDRESS, ERC20ABI, true);
+  const usdc = useContract(USDC_ADDRESS, ERC20ABI, true); // eslint-disable-line
   const multiSend = useContract(MULTISEND_ADDRESS, MultiSendABI);
+  const uniswapRouter = useContract(UNISWAP_ROUTER_ADDRESS, UniswapABI);
 
   useEffect(() => {
     dispatch(getMarketRates());
@@ -193,17 +198,16 @@ export default function People() {
   }, [dispatch, ownerSafeAddress]);
 
   useEffect(() => {
-    const DAI = "DAI"; // change this to support other tokens
     if (balances && prices) {
       let tokenBalanceObj;
       for (let i = 0; i < balances.length; i++) {
-        if (balances[i].token && balances[i].token.symbol === DAI)
+        if (balances[i].token && balances[i].token.symbol === tokens.DAI)
           tokenBalanceObj = balances[i];
       }
       if (tokenBalanceObj)
         setPayTokenBalance(
           (tokenBalanceObj.balance / 10 ** tokenBalanceObj.token.decimals) *
-            prices[DAI]
+            prices[tokens.DAI]
         );
     }
   }, [balances, prices]);
@@ -254,6 +258,44 @@ export default function People() {
     ]);
   };
 
+  const getUniswapTransactions = (tokenName, tokenAmount, toAddress) => {
+    // TODO: come up with a better solution for max amount in
+    // should calculate max amount needed for the swap from uniswap
+    const amountIn = BigNumber.from(
+      ethers.utils.parseEther(String(Number.MAX_SAFE_INTEGER))
+    );
+
+    const amountOut = getAmountInWei(tokenName, tokenAmount);
+    const uniswapData = uniswapRouter.interface.encodeFunctionData(
+      "swapTokensForExactTokens",
+      [
+        BigNumber.from(amountOut),
+        BigNumber.from(amountIn),
+        [DAI_ADDRESS, WETH_ADDRESS, USDC_ADDRESS],
+        toAddress,
+        format(addDays(Date.now(), 1), "t"),
+      ]
+    );
+
+    return [
+      {
+        operation: 0, // CALL
+        to: DAI_ADDRESS,
+        value: 0,
+        data: dai.interface.encodeFunctionData("approve", [
+          UNISWAP_ROUTER_ADDRESS,
+          BigNumber.from(amountIn),
+        ]),
+      },
+      {
+        operation: 0, // CALL
+        to: UNISWAP_ROUTER_ADDRESS,
+        value: 0,
+        data: uniswapData,
+      },
+    ];
+  };
+
   const handleMassPayout = async (selectedTeammates) => {
     if (account && library) {
       const ethLibAdapter = new EthersAdapter({
@@ -261,16 +303,32 @@ export default function People() {
         signer: library.getSigner(account),
       });
 
-      const transactions = selectedTeammates.map(
-        ({ address, salaryToken, salaryAmount }) => ({
-          operation: 0, // CALL
-          to: tokenNameToAddress[salaryToken],
-          value: 0,
-          data: dai.interface.encodeFunctionData("transfer", [
-            address,
-            BigNumber.from(salaryAmount).mul(BigNumber.from(String(10 ** 18))),
-          ]),
-        })
+      // If input and output tokens are different, swap using uniswap
+      // If input and output tokens are same, simply call transfer
+      const transactions = selectedTeammates.reduce(
+        (tx, { address, salaryToken, salaryAmount }) => {
+          if (salaryToken !== tokens.DAI) {
+            // replace tokens.DAI with whatever input token is chosen
+            tx.push(
+              ...getUniswapTransactions(salaryToken, salaryAmount, address)
+            );
+            return tx;
+          }
+
+          tx.push({
+            operation: 0, // CALL
+            to: tokenNameToAddress[salaryToken],
+            value: 0,
+            data: dai.interface.encodeFunctionData("transfer", [
+              address,
+              BigNumber.from(salaryAmount).mul(
+                BigNumber.from(String(10 ** 18))
+              ),
+            ]),
+          });
+          return tx;
+        },
+        []
       );
 
       const dataHash = encodeMultiSendCallData(transactions, ethLibAdapter);
@@ -383,7 +441,6 @@ export default function People() {
 
   const getTotalAmountToPay = () => {
     if (prices) {
-      console.log({ selectedRows });
       return selectedRows.reduce(
         (total, { salaryAmount, salaryToken }) =>
           (total += prices[salaryToken] * salaryAmount),
@@ -676,47 +733,6 @@ export default function People() {
       </div>
     </div>
   ) : (
-    <div
-      style={{
-        transition: "all 0.25s linear",
-      }}
-    >
-      <Info />
-      <Container
-        style={{
-          maxWidth: toggled ? "900px" : "1280px",
-          transition: "all 0.25s linear",
-        }}
-      >
-        <Card className="payment-success">
-          <div className="text-center">
-            <img src={HumansPng} alt="humans" className="w-100" />
-          </div>
-          <Title className="mb-2" style={{ marginTop: "40px" }}>
-            Payment Processed
-          </Title>
-          <Heading>
-            We’ve processed the payment of {getSelectedCount()} people You can
-            track the status of your payment in the accounting section.{" "}
-          </Heading>
-          <Text>
-            <TransactionUrl hash={txHash} />
-          </Text>
-
-          <Row style={{ marginTop: "150px" }}>
-            <Col lg="6" sm="12" className="pr-0">
-              <Button large type="button" className="secondary" to="/dashboard">
-                Back to Dashboard
-              </Button>
-            </Col>
-            <Col lg="6" sm="12">
-              <Button large type="button">
-                Track Status
-              </Button>
-            </Col>
-          </Row>
-        </Card>
-      </Container>
-    </div>
+    <TransactionSuccess txHash={txHash} selectedCount={getSelectedCount()} />
   );
 }
