@@ -2,6 +2,7 @@ import {
   CHOOSE_STEP,
   UPDATE_FORM,
   ADD_TEAMMATE,
+  SELECT_FLOW,
   ADD_TEAMMATE_SUCCESS,
   ADD_TEAMMATE_ERROR,
   CHOOSE_DEPARTMENT,
@@ -23,6 +24,14 @@ export function updateForm(formData) {
     formData,
   };
 }
+
+export function selectFlow(flow) {
+  return {
+    type: SELECT_FLOW,
+    flow,
+  };
+}
+
 export function chooseDepartment(chosenDepartment) {
   return {
     type: CHOOSE_DEPARTMENT,

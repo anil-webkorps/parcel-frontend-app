@@ -165,4 +165,11 @@ export default styled.div`
       padding: 0;
     }
   }
+
+  .sample-csv {
+    font-size: 14px;
+    font-weight: bold;
+    color: ${({ theme }) => theme.primary};
+    text-align: left;
+  }
 `;

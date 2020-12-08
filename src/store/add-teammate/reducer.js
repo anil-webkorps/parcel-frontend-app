@@ -2,6 +2,7 @@ import produce from "immer";
 import {
   CHOOSE_STEP,
   UPDATE_FORM,
+  SELECT_FLOW,
   ADD_TEAMMATE,
   ADD_TEAMMATE_ERROR,
   ADD_TEAMMATE_SUCCESS,
@@ -20,6 +21,7 @@ export const initialState = {
   chosenDepartment: null,
   payCycleDate: "",
   totalEmployees: 0,
+  flow: "", // SINGLE or BULK,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -33,6 +35,10 @@ const reducer = (state = initialState, action) =>
       case UPDATE_FORM:
         if (action.formData) draft.form = { ...draft.form, ...action.formData };
         else draft.form = {};
+        break;
+
+      case SELECT_FLOW:
+        draft.flow = action.flow;
         break;
 
       case CHOOSE_DEPARTMENT:

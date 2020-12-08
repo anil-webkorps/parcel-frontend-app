@@ -1,6 +1,7 @@
 export const CHOOSE_STEP = "parcel/addTeammate/CHOOSE_STEP";
 export const UPDATE_FORM = "parcel/addTeammate/UPDATE_FORM";
 export const CHOOSE_DEPARTMENT = "parcel/addTeammate/CHOOSE_DEPARTMENT";
+export const SELECT_FLOW = "parcel/addTeammate/SELECT_FLOW";
 
 export const GET_DEPARTMENT_BY_ID =
   "parcel/viewDepartments/GET_DEPARTMENT_BY_ID";

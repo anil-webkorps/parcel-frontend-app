@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
+import csv from "csv";
 
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
@@ -24,12 +25,14 @@ import {
   chooseDepartment,
   addTeammate,
   getDepartmentById,
+  selectFlow,
 } from "store/add-teammate/actions";
 import addTeammateSaga from "store/add-teammate/saga";
 import {
   makeSelectStep,
   makeSelectFormData,
   makeSelectChosenDepartment,
+  makeSelectFlow,
 } from "store/add-teammate/selectors";
 import viewDepartmentsReducer from "store/view-departments/reducer";
 import { getDepartments } from "store/view-departments/actions";
@@ -39,6 +42,7 @@ import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import Dropzone from "components/common/Dropzone";
 
 import GuyPng from "assets/icons/guy.png";
 
@@ -53,6 +57,7 @@ import {
   Departments,
   Summary,
   ActionItem,
+  ChooseAddOption,
 } from "./styles";
 
 import { Circle } from "components/Header/styles";
@@ -67,11 +72,42 @@ const STEPS = {
   SIX: 6,
 };
 
-const ADD_TEAMMATE_STEPS = {
+const FLOWS = {
+  SINGLE: "SINGLE",
+  BULK: "BULK",
+};
+
+// const getStepsByFlow = (flow) => {
+//   switch (flow) {
+//     case FLOWS.SINGLE:
+//       return ADD_SINGLE_TEAMMATE_STEPS;
+//     case FLOWS.BULK:
+//       return ADD_BULK_TEAMMATE_STEPS;
+//     default:
+//       return ADD_SINGLE_TEAMMATE_STEPS;
+//   }
+// };
+
+// const getStepsCountByFlow = (flow) => {
+//   switch (flow) {
+//     case FLOWS.SINGLE:
+//       return Object.keys(ADD_SINGLE_TEAMMATE_STEPS).length - 1;
+//     case FLOWS.BULK:
+//       return Object.keys(ADD_BULK_TEAMMATE_STEPS).length - 1;
+//     default:
+//       return Object.keys(ADD_BULK_TEAMMATE_STEPS).length - 1;
+//   }
+// };
+const ADD_SINGLE_TEAMMATE_STEPS = {
   [STEPS.ZERO]: "Add Teammate",
   [STEPS.ONE]: "Choose Department",
   [STEPS.TWO]: "Payroll Details",
 };
+
+// const ADD_BULK_TEAMMATE_STEPS = {
+//   [STEPS.ZERO]: "Upload via CSV",
+//   [STEPS.ONE]: "Review and Confirm",
+// };
 
 const addTeammateKey = "addTeammate";
 const viewDepartmentsKey = "viewDepartments";
@@ -81,6 +117,7 @@ export default function AddTeammate() {
   const [toggled] = useContext(SideNavContext);
 
   const [success, setSuccess] = useState(false);
+  const [csvData, setCSVData] = useState();
 
   const { register, errors, handleSubmit, reset, formState } = useForm({
     mode: "onChange",
@@ -102,6 +139,7 @@ export default function AddTeammate() {
   const chosenDepartment = useSelector(makeSelectChosenDepartment());
   const allDepartments = useSelector(makeSelectDepartments());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const flow = useSelector(makeSelectFlow());
 
   const location = useLocation();
   const history = useHistory();
@@ -131,7 +169,7 @@ export default function AddTeammate() {
     const departmentId = searchParams.get("departmentId");
     if (departmentId) {
       dispatch(chooseStep(STEPS.ZERO));
-      dispatch(getDepartmentById(ownerSafeAddress, departmentId)); // TODO: Fetch the paycycle date for dept from BE
+      dispatch(getDepartmentById(ownerSafeAddress, departmentId));
     } else {
       dispatch(chooseDepartment(null));
     }
@@ -219,6 +257,10 @@ export default function AddTeammate() {
     console.log({ body });
     dispatch(addTeammate(body));
     setSuccess(true);
+  };
+
+  const handleSelectFlow = (flow) => {
+    dispatch(selectFlow(flow));
   };
 
   const renderTeammateDetails = () => (
@@ -420,19 +462,194 @@ export default function AddTeammate() {
   };
 
   const renderDoneSteps = () => {
-    return Object.keys(ADD_TEAMMATE_STEPS).map(
+    return Object.keys(ADD_SINGLE_TEAMMATE_STEPS).map(
       (stepNo) =>
         stepNo < step && (
           <DoneCard
             onClick={() => dispatch(chooseStep(parseInt(stepNo)))}
             key={stepNo}
           >
-            <Title className="grey">{ADD_TEAMMATE_STEPS[stepNo]}</Title>
+            <Title className="grey">{ADD_SINGLE_TEAMMATE_STEPS[stepNo]}</Title>
             <Heading className="grey">
               {renderStepCompletedText(stepNo)}
             </Heading>
           </DoneCard>
         )
+    );
+  };
+
+  const renderAddTeammateOptions = () => (
+    <Card className="add-teammate">
+      <Title className="mb-2">Add Teammate</Title>
+      <Heading className="mb-4">Choose an option for adding teammates</Heading>
+
+      <ChooseAddOption onClick={() => handleSelectFlow(FLOWS.BULK)}>
+        <div className="d-flex justify-content-between upper">
+          <div>
+            <div className="choose-title">Upload via CSV</div>
+            <div className="choose-subtitle">
+              Add multiple employees quickly
+            </div>
+          </div>
+          <div className="p-0">
+            <div
+              className="circle p-0 m-0"
+              style={{ width: "36px", height: "36px" }}
+            >
+              <FontAwesomeIcon icon={faLongArrowAltRight} color="#fff" />
+            </div>
+          </div>
+        </div>
+        <div className="line"></div>
+        <div className="lower">
+          <div className="choose-subtitle">
+            We recommend you upload the employee data as per our format.
+          </div>
+          <div className="text-left mt-4">
+            <a className="sample-csv" href="/">
+              👉 Download Format CSV
+            </a>
+          </div>
+        </div>
+      </ChooseAddOption>
+
+      <ChooseAddOption onClick={() => handleSelectFlow(FLOWS.SINGLE)}>
+        <div className="d-flex justify-content-between upper">
+          <div>
+            <div className="choose-title">Add one employee</div>
+            <div className="choose-subtitle">Quickly add one employee</div>
+          </div>
+          <div className="p-0">
+            <div
+              className="circle p-0 m-0"
+              style={{ width: "36px", height: "36px" }}
+            >
+              <FontAwesomeIcon icon={faLongArrowAltRight} color="#fff" />
+            </div>
+          </div>
+        </div>
+        <div className="line"></div>
+        <div className="lower mt-3">
+          <div className="choose-subtitle">Steps include:</div>
+          <div className="choose-subtitle">
+            Teammate salary details, Department details, Wallet address
+          </div>
+        </div>
+      </ChooseAddOption>
+    </Card>
+  );
+
+  const renderAddSingleTeammate = () => {
+    if (!success)
+      return (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <StepsCard>
+            {step > STEPS.ZERO && renderDoneSteps()}
+            {step === STEPS.ZERO && renderTeammateDetails()}
+            {step === STEPS.ONE && renderChooseDepartment()}
+            {step === STEPS.TWO && renderPaydate()}
+          </StepsCard>
+        </form>
+      );
+
+    return (
+      <StepsCard>
+        <Card className="add-teammate">
+          <Title className="mb-2">Teammate Saved!</Title>
+          <Heading>Wow! You have a new champ on-board</Heading>
+          <Summary style={{ marginBottom: "13em" }}>
+            <div className="left">
+              <img src={GuyPng} alt="guy" width="80" />
+            </div>
+            <div className="right">
+              <div className="mb-3">
+                <div className="section-title mb-1">Name</div>
+                <div className="section-desc">
+                  {formData.firstName} {formData.lastName}
+                </div>
+              </div>
+              <div className="mb-3">
+                <div className="section-title mb-1">Department</div>
+                <div className="section-desc">{chosenDepartment.name}</div>
+              </div>
+              <div className="mb-3">
+                <div className="section-title mb-1">Pay Date</div>
+                <div className="section-desc">
+                  {numToOrd(chosenDepartment.payCycleDate)} of every month
+                </div>
+              </div>
+              <div>
+                <div className="section-title mb-1">Pay Amount</div>
+                <div className="section-desc">
+                  {formData.salary} {formData.currency}
+                </div>
+              </div>
+            </div>
+          </Summary>
+
+          <Row>
+            <Col lg="5" sm="12" className="pr-0">
+              <Button
+                large
+                type="button"
+                onClick={onViewAllClick}
+                className="secondary"
+              >
+                View All
+              </Button>
+            </Col>
+            <Col lg="7" sm="12">
+              <Button large type="button" onClick={onAddMoreTeammates}>
+                Add More Teammates
+              </Button>
+            </Col>
+          </Row>
+        </Card>
+      </StepsCard>
+    );
+  };
+
+  const handleDrop = (e) => {
+    console.log(e);
+    const reader = new FileReader();
+    reader.onload = () => {
+      csv.parse(reader.result, (err, data) => {
+        console.log(data);
+        setCSVData(data.slice(1));
+      });
+    };
+
+    reader.readAsBinaryString(e[0]);
+  };
+
+  const renderAddBulkTeammate = () => {
+    return (
+      <Card className="add-teammate">
+        <Title className="mb-2">Upload via CSV</Title>
+        <Heading>Add multiple employees quickly</Heading>
+        <div className="text-left mt-4">
+          <a className="sample-csv" href="/">
+            👉 Download Format CSV
+          </a>
+        </div>
+
+        <Dropzone onDrop={handleDrop} />
+
+        {csvData &&
+          csvData.map((arr) => (
+            <div className="d-flex mx-2">
+              {arr.map((item) => (
+                <div>{item}</div>
+              ))}
+            </div>
+          ))}
+
+        <Row>
+          <Button large type="button" onClick={onAddMoreTeammates}>
+            Upload CSV
+          </Button>
+        </Row>
+      </Card>
     );
   };
 
@@ -470,70 +687,9 @@ export default function AddTeammate() {
           transition: "all 0.25s linear",
         }}
       >
-        {!success ? (
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <StepsCard>
-              {step > STEPS.ZERO && renderDoneSteps()}
-              {step === STEPS.ZERO && renderTeammateDetails()}
-              {step === STEPS.ONE && renderChooseDepartment()}
-              {step === STEPS.TWO && renderPaydate()}
-            </StepsCard>
-          </form>
-        ) : (
-          <StepsCard>
-            <Card className="add-teammate">
-              <Title className="mb-2">Teammate Saved!</Title>
-              <Heading>Wow! You have a new champ on-board</Heading>
-              <Summary style={{ marginBottom: "13em" }}>
-                <div className="left">
-                  <img src={GuyPng} alt="guy" width="80" />
-                </div>
-                <div className="right">
-                  <div className="mb-3">
-                    <div className="section-title mb-1">Name</div>
-                    <div className="section-desc">
-                      {formData.firstName} {formData.lastName}
-                    </div>
-                  </div>
-                  <div className="mb-3">
-                    <div className="section-title mb-1">Department</div>
-                    <div className="section-desc">{chosenDepartment.name}</div>
-                  </div>
-                  <div className="mb-3">
-                    <div className="section-title mb-1">Pay Date</div>
-                    <div className="section-desc">
-                      {numToOrd(chosenDepartment.payCycleDate)} of every month
-                    </div>
-                  </div>
-                  <div>
-                    <div className="section-title mb-1">Pay Amount</div>
-                    <div className="section-desc">
-                      {formData.salary} {formData.currency}
-                    </div>
-                  </div>
-                </div>
-              </Summary>
-
-              <Row>
-                <Col lg="5" sm="12" className="pr-0">
-                  <Button
-                    large
-                    type="button"
-                    onClick={onViewAllClick}
-                    className="secondary"
-                  >
-                    View All
-                  </Button>
-                </Col>
-                <Col lg="7" sm="12">
-                  <Button large type="button" onClick={onAddMoreTeammates}>
-                    Add More Teammates
-                  </Button>
-                </Col>
-              </Row>
-            </Card>
-          </StepsCard>
-        )}
+        {!flow && renderAddTeammateOptions()}
+        {flow === FLOWS.SINGLE && renderAddSingleTeammate()}
+        {flow === FLOWS.BULK && renderAddBulkTeammate()}
       </Container>
     </div>
   );
