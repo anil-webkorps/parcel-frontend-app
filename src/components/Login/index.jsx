@@ -60,6 +60,7 @@ import registerSaga from "store/register/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import { loginUser } from "store/login/actions";
 import { registerUser } from "store/register/actions";
+import Loading from "components/common/Loading";
 
 import {
   Background,
@@ -131,6 +132,7 @@ const IMPORT_STEPS = {
 const Login = () => {
   const [sign, setSign] = useLocalStorage("SIGNATURE");
   const [hasAlreadySigned, setHasAlreadySigned] = useState(false);
+  const [loadingAccount, setLoadingAccount] = useState(true);
 
   const { active, account, library } = useActiveWeb3React();
 
@@ -153,7 +155,6 @@ const Login = () => {
   const flow = useSelector(makeSelectFlow());
   const chosenSafeAddress = useSelector(makeSelectChosenSafeAddress());
   const flag = useSelector(makeSelectFlag());
-  // const loading = useSelector(makeSelectLoading());
 
   // Form
   const { register, handleSubmit, errors, reset, control } = useForm();
@@ -176,8 +177,17 @@ const Login = () => {
   );
 
   useEffect(() => {
-    if (!active) dispatch(chooseStep(STEPS.ZERO));
-  }, [active, dispatch, step]);
+    let timer;
+    if (!active) {
+      timer = setTimeout(() => {
+        dispatch(chooseStep(STEPS.ZERO));
+        setLoadingAccount(false);
+      }, 300);
+    }
+    if (active) setLoadingAccount(false);
+
+    return () => clearTimeout(timer);
+  }, [active, dispatch]);
 
   useEffect(() => {
     reset({
@@ -305,31 +315,38 @@ const Login = () => {
           <br />
           Please connect your Ethereum wallet to proceed.
         </div>
-        {!active ? (
-          <ConnectButton large className="mx-auto d-block" />
-        ) : (
-          <div className="row">
-            <div className="col-6">
-              <Button
-                type="button"
-                large
-                className="secondary"
-                onClick={() => handleSelectFlow(FLOWS.IMPORT)}
-              >
-                Import Existing Safe
-              </Button>
-            </div>
-            <div className="col-6">
-              <Button
-                type="button"
-                large
-                onClick={() => handleSelectFlow(FLOWS.LOGIN)}
-              >
-                Login
-              </Button>
-            </div>
+        {loadingAccount && (
+          <div className="d-flex align-items-center justify-content-center mt-5">
+            <Loading color="primary" width="50px" height="50px" />
           </div>
         )}
+
+        {!loadingAccount &&
+          (!active ? (
+            <ConnectButton large className="mx-auto d-block" />
+          ) : (
+            <div className="row">
+              <div className="col-6">
+                <Button
+                  type="button"
+                  large
+                  className="secondary"
+                  onClick={() => handleSelectFlow(FLOWS.IMPORT)}
+                >
+                  Import Existing Safe
+                </Button>
+              </div>
+              <div className="col-6">
+                <Button
+                  type="button"
+                  large
+                  onClick={() => handleSelectFlow(FLOWS.LOGIN)}
+                >
+                  Login
+                </Button>
+              </div>
+            </div>
+          ))}
       </InnerCard>
     </div>
   );

@@ -43,6 +43,7 @@ import { useInjectSaga } from "utils/injectSaga";
 import { registerUser } from "store/register/actions";
 import { cryptoUtils } from "parcel-sdk";
 import { MESSAGE_TO_SIGN } from "constants/index";
+import Loading from "components/common/Loading";
 
 const registerKey = "register";
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS } = addresses;
@@ -105,6 +106,7 @@ const Register = () => {
   const [sign, setSign] = useLocalStorage("SIGNATURE");
   const [loadingTx, setLoadingTx] = useState(false);
   const [createSafeLoading, setCreateSafeLoading] = useState(false);
+  const [loadingAccount, setLoadingAccount] = useState(true);
 
   const { active, account, library } = useActiveWeb3React();
 
@@ -147,9 +149,20 @@ const Register = () => {
   );
 
   useEffect(() => {
-    if (active && step === STEPS.ZERO) dispatch(chooseStep(step + 1));
-    if (!active) dispatch(chooseStep(STEPS.ZERO));
-  }, [active, dispatch, step]);
+    let timer;
+    if (!active) {
+      timer = setTimeout(() => {
+        dispatch(chooseStep(STEPS.ZERO));
+        setLoadingAccount(false);
+      }, 300);
+    }
+    if (active) {
+      dispatch(chooseStep(STEPS.ONE));
+      setLoadingAccount(false);
+    }
+
+    return () => clearTimeout(timer);
+  }, [active, dispatch]);
 
   useEffect(() => {
     reset({
@@ -354,20 +367,29 @@ const Register = () => {
     history,
   ]);
 
-  const renderConnect = () => (
-    <div>
-      <Image minHeight="323px" />
-      <InnerCard height="257px">
-        <h2 className="text-center">Welcome to Parcel</h2>
-        <div className="mb-4 text-center">
-          Your one stop for crypto payroll management.
-          <br />
-          Please connect your Ethereum wallet to proceed.
-        </div>
-        <ConnectButton large className="mx-auto d-block" />
-      </InnerCard>
-    </div>
-  );
+  const renderConnect = () => {
+    return (
+      <div>
+        <Image minHeight="323px" />
+        <InnerCard height="257px">
+          <h2 className="text-center">Welcome to Parcel</h2>
+          <div className="mb-4 text-center">
+            Your one stop for crypto payroll management.
+            <br />
+            Please connect your Ethereum wallet to proceed.
+          </div>
+          {loadingAccount && (
+            <div className="d-flex align-items-center justify-content-center">
+              <Loading color="primary" width="50px" height="50px" />
+            </div>
+          )}
+          {!loadingAccount && (
+            <ConnectButton large className="mx-auto d-block" />
+          )}
+        </InnerCard>
+      </div>
+    );
+  };
 
   const renderStepHeader = () => {
     const steps = getStepsByFlow(formData.flow);

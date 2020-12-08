@@ -2,7 +2,7 @@ import produce from "immer";
 import { CHOOSE_STEP, UPDATE_FORM } from "./action-types";
 
 export const initialState = {
-  step: 1,
+  step: 0,
   form: {},
 };
 
