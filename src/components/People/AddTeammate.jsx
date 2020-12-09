@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
-import csv from "csv";
 
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
@@ -43,6 +42,7 @@ import { useInjectSaga } from "utils/injectSaga";
 import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Dropzone from "components/common/Dropzone";
+import { minifyAddress } from "components/common/Web3Utils";
 
 import GuyPng from "assets/icons/guy.png";
 
@@ -58,9 +58,12 @@ import {
   Summary,
   ActionItem,
   ChooseAddOption,
+  Table,
 } from "./styles";
 
 import { Circle } from "components/Header/styles";
+
+const { TableBody, TableHead, TableRow } = Table;
 
 const STEPS = {
   ZERO: 0,
@@ -103,11 +106,6 @@ const ADD_SINGLE_TEAMMATE_STEPS = {
   [STEPS.ONE]: "Choose Department",
   [STEPS.TWO]: "Payroll Details",
 };
-
-// const ADD_BULK_TEAMMATE_STEPS = {
-//   [STEPS.ZERO]: "Upload via CSV",
-//   [STEPS.ONE]: "Review and Confirm",
-// };
 
 const addTeammateKey = "addTeammate";
 const viewDepartmentsKey = "viewDepartments";
@@ -174,6 +172,10 @@ export default function AddTeammate() {
       dispatch(chooseDepartment(null));
     }
   }, [dispatch, location, ownerSafeAddress]);
+
+  useEffect(() => {
+    dispatch(selectFlow("")); // back to options screen
+  }, [dispatch]);
 
   const onSubmit = (values) => {
     if (chosenDepartment) {
@@ -261,6 +263,30 @@ export default function AddTeammate() {
 
   const handleSelectFlow = (flow) => {
     dispatch(selectFlow(flow));
+  };
+
+  const handleDrop = (data) => {
+    if (!data || data.length === 0) return;
+    const formattedData = data.reduce((formatted, arr, i) => {
+      return [
+        ...formatted,
+        {
+          firstName: arr[0],
+          lastName: arr[1],
+          address: arr[2],
+          salaryAmount: arr[3],
+          salaryToken: arr[4],
+          departmentName: arr[5],
+          payCycleDate: arr[6],
+        },
+      ];
+    }, []);
+    console.log({ formattedData });
+    setCSVData(formattedData);
+  };
+
+  const onAddBulkTeammates = () => {
+    console.log("bulk");
   };
 
   const renderTeammateDetails = () => (
@@ -506,9 +532,7 @@ export default function AddTeammate() {
             We recommend you upload the employee data as per our format.
           </div>
           <div className="text-left mt-4">
-            <a className="sample-csv" href="/">
-              👉 Download Format CSV
-            </a>
+            <div className="sample-csv">👉 Download Format CSV</div>
           </div>
         </div>
       </ChooseAddOption>
@@ -609,46 +633,84 @@ export default function AddTeammate() {
     );
   };
 
-  const handleDrop = (e) => {
-    console.log(e);
-    const reader = new FileReader();
-    reader.onload = () => {
-      csv.parse(reader.result, (err, data) => {
-        console.log(data);
-        setCSVData(data.slice(1));
-      });
-    };
-
-    reader.readAsBinaryString(e[0]);
-  };
-
   const renderAddBulkTeammate = () => {
+    const hasCsvData = csvData && csvData.length > 0;
     return (
-      <Card className="add-teammate">
+      <Card
+        className="add-teammate-bulk position-relative"
+        style={{ width: hasCsvData ? "960px" : "480px" }}
+      >
         <Title className="mb-2">Upload via CSV</Title>
         <Heading>Add multiple employees quickly</Heading>
         <div className="text-left mt-4">
-          <a className="sample-csv" href="/">
+          <a
+            className="sample-csv"
+            href="https://drive.google.com/file/d/1hej7TII_7mEDc8bETwtRghTq6hh-ozQj/view?usp=sharing"
+            rel="noreferrer noopener"
+            target="_blank"
+          >
             👉 Download Format CSV
           </a>
         </div>
 
-        <Dropzone onDrop={handleDrop} />
+        <div className="mb-5 mt-4">
+          <Dropzone
+            onDrop={handleDrop}
+            style={{ minHeight: hasCsvData ? "auto" : "350px" }}
+          />
+        </div>
 
-        {csvData &&
-          csvData.map((arr) => (
-            <div className="d-flex mx-2">
-              {arr.map((item) => (
-                <div>{item}</div>
-              ))}
-            </div>
-          ))}
+        {hasCsvData && (
+          <div className="mb-4">
+            <TableHead>
+              <div>Employee Name</div>
+              <div>Address</div>
+              <div>Disbursement</div>
+              <div>Department Name</div>
+              <div>Payroll Cycle</div>
+            </TableHead>
 
-        <Row>
-          <Button large type="button" onClick={onAddMoreTeammates}>
-            Upload CSV
-          </Button>
-        </Row>
+            <TableBody
+              style={{ minHeight: "100px", height: "300px", overflow: "auto" }}
+            >
+              {csvData.map(
+                (
+                  {
+                    firstName,
+                    lastName,
+                    address,
+                    salaryAmount,
+                    salaryToken,
+                    departmentName,
+                    payCycleDate,
+                  },
+                  idx
+                ) => (
+                  <TableRow key={`${address}-${idx}`}>
+                    <div>
+                      {firstName} {lastName}
+                    </div>
+                    <div>{minifyAddress(address)}</div>
+                    <div>
+                      {salaryAmount} {salaryToken}
+                    </div>
+                    <div>{departmentName}</div>
+                    <div>{numToOrd(payCycleDate)} of every month</div>
+                  </TableRow>
+                )
+              )}
+            </TableBody>
+          </div>
+        )}
+
+        <Button
+          large
+          type="button"
+          onClick={onAddBulkTeammates}
+          disabled={!hasCsvData}
+        >
+          Confirm
+        </Button>
       </Card>
     );
   };

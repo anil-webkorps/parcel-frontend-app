@@ -1,5 +1,7 @@
 import styled from "styled-components/macro";
 
+const defaultColumns = 5;
+
 export const TableHead = styled.div`
   width: 100%;
   box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
@@ -9,7 +11,8 @@ export const TableHead = styled.div`
   border-radius: 20px 20px 0 0;
 
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: ${({ col }) =>
+    `repeat(${col || defaultColumns}, 1fr)`};
 
   font-size: 14px;
   font-weight: 600;
@@ -44,7 +47,8 @@ export const TableRow = styled.div`
   border: solid 0.5px #f2f2f2;
   background-color: #ffffff;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: ${({ col }) =>
+    `repeat(${col || defaultColumns}, 1fr)`};
   align-items: center;
 `;
 

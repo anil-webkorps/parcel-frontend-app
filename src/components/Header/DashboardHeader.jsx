@@ -28,7 +28,7 @@ export default function DashboardHeader() {
         <NavBarContent>
           <div className="d-flex justify-content-center align-items-center">
             <SideNav />
-            <HeaderLink to="/" className="dashboard-link">
+            <HeaderLink to="/dashboard" className="dashboard-link">
               Parcel
             </HeaderLink>
           </div>

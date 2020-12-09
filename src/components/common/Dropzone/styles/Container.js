@@ -21,12 +21,15 @@ export default styled.div`
   padding: 20px;
   border-width: 2px;
   border-radius: 2px;
-  border-color: ${(props) => getColor(props)};
+  // border-color: ${(props) => getColor(props)};
+  border-color: ${({ theme }) => theme.primary};
   border-style: dashed;
   background-color: #fafafa;
   color: #bdbdbd;
   outline: none;
   transition: border 0.24s ease-in-out;
+  justify-content: center;
+  align-items: center;
 
   &:hover {
     cursor: pointer;

@@ -1,12 +1,23 @@
 import React, { useCallback } from "react";
+import csv from "csv";
 import { useDropzone } from "react-dropzone";
+
 import { Container } from "./styles";
 
 export default function Basic(props) {
   const onDrop = useCallback(
     (acceptedFiles) => {
       // Do something with the files
-      props.onDrop(acceptedFiles);
+      console.log(acceptedFiles);
+      const reader = new FileReader();
+      reader.onload = () => {
+        csv.parse(reader.result, (err, data) => {
+          console.log(data);
+          props.onDrop(data.slice(1));
+        });
+      };
+
+      reader.readAsBinaryString(acceptedFiles[0]);
     },
     [props]
   );
@@ -21,21 +32,24 @@ export default function Basic(props) {
   } = useDropzone({ maxFiles: 1, accept: ".csv", onDrop });
 
   const files = acceptedFiles.map((file) => (
-    <div key={file.path}>
+    <span key={file.path}>
       {file.path} - {file.size} bytes
-    </div>
+    </span>
   ));
 
   return (
-    <section className="container">
+    <section>
       <Container
         {...getRootProps({ isDragActive, isDragAccept, isDragReject })}
+        style={props.style}
       >
         <input {...getInputProps()} />
         {files && files.length > 0 ? (
-          <div>{files}</div>
+          <div className="text-center">Uploaded Successfully - {files}</div>
         ) : (
-          <p>Drag 'n' drop a .csv file here, or click to select file</p>
+          <p className="text-center">
+            Drag and drop a .csv file here, or click here to select a file
+          </p>
         )}
       </Container>
     </section>
