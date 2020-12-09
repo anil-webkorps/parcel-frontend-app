@@ -15,7 +15,7 @@ import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
-import { Input, ErrorMessage } from "components/common/Form";
+import { Input, ErrorMessage, Select } from "components/common/Form";
 import addTeammateReducer from "store/add-teammate/reducer";
 import { useLocalStorage } from "hooks";
 import {
@@ -80,27 +80,6 @@ const FLOWS = {
   BULK: "BULK",
 };
 
-// const getStepsByFlow = (flow) => {
-//   switch (flow) {
-//     case FLOWS.SINGLE:
-//       return ADD_SINGLE_TEAMMATE_STEPS;
-//     case FLOWS.BULK:
-//       return ADD_BULK_TEAMMATE_STEPS;
-//     default:
-//       return ADD_SINGLE_TEAMMATE_STEPS;
-//   }
-// };
-
-// const getStepsCountByFlow = (flow) => {
-//   switch (flow) {
-//     case FLOWS.SINGLE:
-//       return Object.keys(ADD_SINGLE_TEAMMATE_STEPS).length - 1;
-//     case FLOWS.BULK:
-//       return Object.keys(ADD_BULK_TEAMMATE_STEPS).length - 1;
-//     default:
-//       return Object.keys(ADD_BULK_TEAMMATE_STEPS).length - 1;
-//   }
-// };
 const ADD_SINGLE_TEAMMATE_STEPS = {
   [STEPS.ZERO]: "Add Teammate",
   [STEPS.ONE]: "Choose Department",
@@ -309,7 +288,6 @@ export default function AddTeammate() {
             type="text"
             name="lastName"
             register={register}
-            required={`Last Name is required`}
             placeholder="Last Name"
           />
           <ErrorMessage name="lastName" errors={errors} />
@@ -346,11 +324,14 @@ export default function AddTeammate() {
           <ErrorMessage name="salary" errors={errors} />
         </Col>
         <Col lg="6" sm="12">
-          <Input
+          <Select
             name="currency"
             register={register}
             required={`Token is required`}
-            placeholder="Select Token"
+            options={[
+              { name: "DAI", value: "DAI" },
+              { name: "USDC", value: "USDC" },
+            ]}
           />
           <ErrorMessage name="currency" errors={errors} />
         </Col>
