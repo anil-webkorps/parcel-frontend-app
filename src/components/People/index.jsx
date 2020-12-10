@@ -1,6 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLongArrowAltRight, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faLongArrowAltRight,
+  faPlus,
+  faUsers,
+} from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -22,7 +26,6 @@ import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 
-import GuyPng from "assets/icons/guy.png";
 import HumansPng from "assets/images/humans.png";
 
 import { Container, AllEmployees } from "./styles";
@@ -172,7 +175,12 @@ export default function People() {
                     <Card className="department-card">
                       <div className="upper">
                         <div className="d-flex justify-content-between">
-                          <img src={GuyPng} alt="guy" width="50px" />
+                          <FontAwesomeIcon
+                            icon={faUsers}
+                            color="#373737"
+                            style={{ width: "50px" }}
+                            size="2x"
+                          />
                           <div className="circle circle-grey">
                             <FontAwesomeIcon
                               icon={faLongArrowAltRight}

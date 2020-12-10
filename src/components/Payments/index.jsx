@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLongArrowAltLeft,
   faLongArrowAltRight,
+  faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
@@ -62,8 +63,6 @@ import {
 import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 
-import GuyPng from "assets/icons/guy.png";
-
 import { Container, Table, PaymentSummary, TokenBalance } from "./styles";
 import TransactionSuccess from "./TransactionSuccess";
 
@@ -86,6 +85,7 @@ const {
 
 const tokenNameToAddress = {
   [tokens.DAI]: DAI_ADDRESS,
+  [tokens.USDC]: USDC_ADDRESS,
   // add other tokens and addresses here
 };
 
@@ -296,6 +296,7 @@ export default function People() {
     ];
   };
 
+  // TODO: move this functionality to a custom hook
   const handleMassPayout = async (selectedTeammates) => {
     if (account && library) {
       const ethLibAdapter = new EthersAdapter({
@@ -568,7 +569,7 @@ export default function People() {
               >
                 <div className="upper">
                   <div className="d-flex justify-content-between">
-                    <img src={GuyPng} alt="guy" width="40px" />
+                    <FontAwesomeIcon icon={faUsers} color="#373737" size="2x" />
                     <div className="circle circle-grey">
                       <FontAwesomeIcon
                         icon={faLongArrowAltRight}

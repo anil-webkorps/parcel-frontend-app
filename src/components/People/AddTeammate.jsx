@@ -4,6 +4,8 @@ import {
   faLongArrowAltLeft,
   faLongArrowAltRight,
   faPlus,
+  faUsers,
+  faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
@@ -46,8 +48,6 @@ import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Dropzone from "components/common/Dropzone";
 import { minifyAddress } from "components/common/Web3Utils";
-
-import GuyPng from "assets/icons/guy.png";
 
 import {
   Container,
@@ -446,7 +446,7 @@ export default function AddTeammate() {
         <ChooseDepartment onClick={onChangeDepartmentClicked}>
           <div>
             <div className="text-left mb-2">
-              <img src={GuyPng} alt="guy" width="40" />
+              <FontAwesomeIcon icon={faUsers} color="#373737" size="2x" />
             </div>
             <Title className="mb-1 choosen-dept">{chosenDepartment.name}</Title>
             <Heading className="choosen-dept">
@@ -483,7 +483,7 @@ export default function AddTeammate() {
                 onClick={() => onSelectDepartment(department)}
               >
                 <div className="small-card">
-                  <img src={GuyPng} width="50px" alt="guy" />
+                  <FontAwesomeIcon icon={faUsers} color="#373737" size="2x" />
                 </div>
                 <div className="department-name">{department.name}</div>
               </div>
@@ -651,7 +651,12 @@ export default function AddTeammate() {
           <Heading>Wow! You have a new champ on-board</Heading>
           <Summary style={{ marginBottom: "13em" }}>
             <div className="left">
-              <img src={GuyPng} alt="guy" width="80" />
+              <FontAwesomeIcon
+                icon={faUserCircle}
+                color="#fff"
+                size="3x"
+                style={{ margin: "auto", width: "80px" }}
+              />
             </div>
             <div className="right">
               <div className="mb-3">

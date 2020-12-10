@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLongArrowAltLeft } from "@fortawesome/free-solid-svg-icons";
+import { faLongArrowAltLeft, faUsers } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
@@ -29,8 +29,6 @@ import { useInjectSaga } from "utils/injectSaga";
 
 import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
-
-import GuyPng from "assets/icons/guy.png";
 
 import { Container, Title, Heading, Text, Summary, ActionItem } from "./styles";
 import { Circle } from "components/Header/styles";
@@ -177,7 +175,7 @@ export default function AddDepartment() {
       <Heading>Wow! You have a department on-board</Heading>
       <Summary>
         <div className="left">
-          <img src={GuyPng} alt="guy" width="80" />
+          <FontAwesomeIcon icon={faUsers} color="#fff" size="3x" />
         </div>
         <div className="right">
           <div className="mb-4">
