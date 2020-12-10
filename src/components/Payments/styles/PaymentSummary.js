@@ -1,17 +1,17 @@
 import styled from "styled-components/macro";
 
 export default styled.div`
-  width: 100%;
+  width: 95%;
   height: 75px;
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: 6em;
   padding: 12px 27px 12px 45px;
-  box-shadow: 0 -3px 3px 0 rgba(0, 0, 0, 0.16);
+  box-shadow: 0 -3px 3px 0 rgba(0, 0, 0, 0.06);
   background-color: #ffffff;
 
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
 
   .payment-info {
