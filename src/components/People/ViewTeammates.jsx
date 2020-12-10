@@ -91,7 +91,7 @@ export default function ViewTeammate() {
       <Info>
         <div
           style={{
-            maxWidth: "1280px",
+            maxWidth: "1200px",
           }}
           className="mx-auto"
         >

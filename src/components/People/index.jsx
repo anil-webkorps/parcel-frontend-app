@@ -64,7 +64,7 @@ export default function People() {
         <Info>
           <div
             style={{
-              maxWidth: toggled ? "900px" : "1280px",
+              maxWidth: toggled ? "900px" : "1200px",
               transition: "all 0.25s linear",
             }}
             className="mx-auto"
@@ -77,7 +77,7 @@ export default function People() {
         </Info>
         <Container
           style={{
-            maxWidth: toggled ? "900px" : "1280px",
+            maxWidth: toggled ? "900px" : "1200px",
             transition: "all 0.25s linear",
           }}
         >
@@ -117,7 +117,7 @@ export default function People() {
         <Info>
           <div
             style={{
-              maxWidth: toggled ? "900px" : "1280px",
+              maxWidth: toggled ? "900px" : "1200px",
               transition: "all 0.25s linear",
             }}
             className="mx-auto"
@@ -150,7 +150,7 @@ export default function People() {
         <Container
           className="show-departments"
           style={{
-            maxWidth: toggled ? "900px" : "1280px",
+            maxWidth: toggled ? "900px" : "1200px",
             transition: "all 0.25s linear",
           }}
         >

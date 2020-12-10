@@ -5,6 +5,7 @@ import {
   // faFolderOpen,
   faUserCircle,
   faQuestionCircle,
+  faReceipt,
 } from "@fortawesome/free-solid-svg-icons";
 
 const navItems = [
@@ -32,16 +33,16 @@ const navItems = [
     name: "People",
     icon: faUserCircle,
   },
-  // {
-  //   id: 4,
-  //   link: "/dashboard",
-  //   name: "Treasury",
-  //   icon: faFolderOpen,
-  // },
+  {
+    id: 4,
+    link: "/dashboard/transactions",
+    name: "Transactions",
+    icon: faReceipt,
+  },
   {
     id: 5,
     link: "/dashboard",
-    name: "For Support",
+    name: "Support",
     icon: faQuestionCircle,
     style: { position: "absolute", top: "78%", minWidth: "100px" },
   },

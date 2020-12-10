@@ -2,7 +2,7 @@ import styled from "styled-components/macro";
 
 export default styled.div`
   display: grid;
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
   grid-template-columns: 1fr 1fr;
   grid-gap: 24px;

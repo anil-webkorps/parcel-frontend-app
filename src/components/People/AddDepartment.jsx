@@ -222,7 +222,7 @@ export default function AddDepartment() {
       <Info>
         <div
           style={{
-            maxWidth: toggled ? "900px" : "1280px",
+            maxWidth: toggled ? "900px" : "1200px",
             transition: "all 0.25s linear",
           }}
           className="mx-auto"
@@ -242,7 +242,7 @@ export default function AddDepartment() {
 
       <Container
         style={{
-          maxWidth: toggled ? "900px" : "1280px",
+          maxWidth: toggled ? "900px" : "1200px",
           transition: "all 0.25s linear",
         }}
       >

@@ -1,44 +1,49 @@
-import React, { useContext } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes, faBars } from "@fortawesome/free-solid-svg-icons";
+// import { faTimes, faBars } from "@fortawesome/free-solid-svg-icons";
 
-import { SideNavContext } from "context/SideNavContext";
+// import { SideNavContext } from "context/SideNavContext";
 import navItems from "./navItems";
 
 import { NavItem, SideNav, Version } from "./styles";
 
 export default function Navbar() {
-  const [toggled, handleToggle] = useContext(SideNavContext);
-  return (
-    <div style={{ position: "absolute", left: "2%" }}>
-      {toggled ? (
-        <FontAwesomeIcon
-          onClick={handleToggle}
-          icon={faTimes}
-          color="#fff"
-          className="mr-3"
-          style={{ cursor: "pointer" }}
-        />
-      ) : (
-        <FontAwesomeIcon
-          onClick={handleToggle}
-          icon={faBars}
-          color="#fff"
-          className="mr-3"
-          style={{ cursor: "pointer" }}
-        />
-      )}
+  useEffect(() => {
+    const sidebar = document.getElementById("sidebar");
 
-      <SideNav onClick={handleToggle} style={{ width: toggled ? "15em" : "0" }}>
+    window.onscroll = function () {
+      sidebar.style.top = `${
+        80 - window.scrollY > 0 ? 80 - window.scrollY : 0
+      }px`;
+
+      makeSticky();
+    };
+
+    function makeSticky() {
+      if (window.scrollY > 0) {
+        sidebar.classList.add("sticky");
+      } else {
+        sidebar.classList.remove("sticky");
+      }
+    }
+  }, []);
+
+  return (
+    <div>
+      <SideNav id="sidebar">
         {navItems.map(({ id, link, name, icon, ...rest }) => (
           <NavItem key={id} {...rest}>
-            <FontAwesomeIcon icon={icon} color="#fff" />
-            <Link to={link}>{name}</Link>
+            <Link to={link}>
+              <div className="icon">
+                <FontAwesomeIcon icon={icon} color="#fff" />
+              </div>
+              <div className="name">{name}</div>
+            </Link>
           </NavItem>
         ))}
 
-        <Version>Version 1.0</Version>
+        <Version>v1.0</Version>
       </SideNav>
     </div>
   );

@@ -7,7 +7,7 @@ export default styled.div`
   background-color: ${({ theme }) => theme.primary};
 
   .title {
-    max-width: 1280px;
+    max-width: 1200px;
     margin: 40px auto 0;
     font-size: 28px;
     font-weight: bold;
@@ -20,7 +20,7 @@ export default styled.div`
   }
 
   .subtitle {
-    max-width: 1280px;
+    max-width: 1200px;
     margin: 10px auto;
     font-size: 16px;
     font-weight: 300;

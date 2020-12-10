@@ -5,7 +5,7 @@ export default styled.div`
   left: 0;
   right: 0;
   top: 85%;
-  max-width: 136px;
+  max-width: 50px;
   height: 31px;
   margin: 0 auto;
   padding: 9px 37px;
