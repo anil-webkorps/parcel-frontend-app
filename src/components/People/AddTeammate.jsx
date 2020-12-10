@@ -25,6 +25,7 @@ import {
   addTeammate,
   getDepartmentById,
   selectFlow,
+  addBulkTeammates,
 } from "store/add-teammate/actions";
 import addTeammateSaga from "store/add-teammate/saga";
 import {
@@ -32,6 +33,8 @@ import {
   makeSelectFormData,
   makeSelectChosenDepartment,
   makeSelectFlow,
+  makeSelectSuccess,
+  makeSelectLoading,
 } from "store/add-teammate/selectors";
 import viewDepartmentsReducer from "store/view-departments/reducer";
 import { getDepartments } from "store/view-departments/actions";
@@ -117,6 +120,8 @@ export default function AddTeammate() {
   const allDepartments = useSelector(makeSelectDepartments());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const flow = useSelector(makeSelectFlow());
+  const addBulkSuccess = useSelector(makeSelectSuccess());
+  const loading = useSelector(makeSelectLoading());
 
   const location = useLocation();
   const history = useHistory();
@@ -155,6 +160,14 @@ export default function AddTeammate() {
   useEffect(() => {
     dispatch(selectFlow("")); // back to options screen
   }, [dispatch]);
+
+  useEffect(() => {
+    if (addBulkSuccess && success) {
+      setCSVData(null);
+      setSuccess(false);
+      history.push("/dashboard/people/view");
+    }
+  }, [addBulkSuccess, history, success]);
 
   const onSubmit = (values) => {
     if (chosenDepartment) {
@@ -260,12 +273,86 @@ export default function AddTeammate() {
         },
       ];
     }, []);
-    console.log({ formattedData });
     setCSVData(formattedData);
   };
 
   const onAddBulkTeammates = () => {
-    console.log("bulk");
+    if (!sign || !ownerSafeAddress) return;
+
+    console.log({ csvData });
+
+    let index = 0;
+    const uniqueDepartmentsHashmap = csvData.reduce(
+      (hashmap, { departmentName }) => {
+        if (!hashmap[departmentName]) {
+          hashmap[departmentName] = index;
+          index++;
+        }
+        return hashmap;
+      },
+      {}
+    );
+
+    console.log({ uniqueDepartmentsHashmap });
+
+    const finalData = Object.keys(uniqueDepartmentsHashmap)
+      .reduce((data, uniqueDepartmentName) => {
+        for (let i = 0; i < csvData.length; i++) {
+          const {
+            firstName,
+            lastName,
+            salaryAmount,
+            salaryToken,
+            address,
+            // payCycleDate,
+            departmentName,
+          } = csvData[i];
+
+          const encryptedEmployeeDetails = cryptoUtils.encryptData(
+            JSON.stringify({
+              firstName,
+              lastName,
+              salaryAmount,
+              salaryToken,
+              address,
+              // payCycleDate,
+            }),
+            sign
+          );
+
+          const uniqueIndex = uniqueDepartmentsHashmap[uniqueDepartmentName];
+          // this index is for each department. ex: 0 = HR, 1 = Engineering etc.
+
+          if (departmentName === uniqueDepartmentName) {
+            if (!data[uniqueIndex]) {
+              data[uniqueIndex] = {
+                departmentName,
+                peopleDetails: [
+                  {
+                    encryptedEmployeeDetails,
+                  },
+                ],
+              };
+            } else
+              data[uniqueIndex].peopleDetails.push({
+                encryptedEmployeeDetails,
+              });
+          }
+        }
+        return data;
+      }, [])
+      .filter(Boolean);
+
+    console.log({ finalData });
+
+    dispatch(
+      addBulkTeammates({
+        safeAddress: ownerSafeAddress,
+        createdBy: ownerSafeAddress,
+        data: finalData,
+      })
+    );
+    setSuccess(true);
   };
 
   const renderTeammateDetails = () => (
@@ -688,7 +775,8 @@ export default function AddTeammate() {
           large
           type="button"
           onClick={onAddBulkTeammates}
-          disabled={!hasCsvData}
+          disabled={!hasCsvData || loading}
+          loading={loading}
         >
           Confirm
         </Button>

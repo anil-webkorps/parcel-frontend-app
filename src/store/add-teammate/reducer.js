@@ -6,6 +6,9 @@ import {
   ADD_TEAMMATE,
   ADD_TEAMMATE_ERROR,
   ADD_TEAMMATE_SUCCESS,
+  ADD_BULK_TEAMMATE,
+  ADD_BULK_TEAMMATE_ERROR,
+  ADD_BULK_TEAMMATE_SUCCESS,
   CHOOSE_DEPARTMENT,
   GET_DEPARTMENT_BY_ID,
   GET_DEPARTMENT_BY_ID_SUCCESS,
@@ -22,6 +25,7 @@ export const initialState = {
   payCycleDate: "",
   totalEmployees: 0,
   flow: "", // SINGLE or BULK,
+  success: false,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -47,12 +51,15 @@ const reducer = (state = initialState, action) =>
         break;
 
       case ADD_TEAMMATE:
+      case ADD_BULK_TEAMMATE:
       case GET_DEPARTMENT_BY_ID:
         draft.loading = true;
         draft.error = false;
+        draft.success = false;
         break;
 
       case ADD_TEAMMATE_ERROR:
+      case ADD_BULK_TEAMMATE_ERROR:
       case GET_DEPARTMENT_BY_ID_ERROR:
         draft.loading = false;
         draft.error = action.error;
@@ -60,6 +67,11 @@ const reducer = (state = initialState, action) =>
 
       case ADD_TEAMMATE_SUCCESS:
         draft.loading = false;
+        break;
+
+      case ADD_BULK_TEAMMATE_SUCCESS:
+        draft.loading = false;
+        draft.success = true;
         break;
 
       case GET_DEPARTMENT_BY_ID_SUCCESS:

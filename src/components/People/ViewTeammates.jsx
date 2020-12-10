@@ -74,7 +74,7 @@ export default function ViewTeammate() {
   };
 
   const goBack = () => {
-    history.goBack();
+    history.push("/dashboard/people");
   };
 
   const showDetails = (props) => {

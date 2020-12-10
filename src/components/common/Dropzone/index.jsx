@@ -8,11 +8,9 @@ export default function Basic(props) {
   const onDrop = useCallback(
     (acceptedFiles) => {
       // Do something with the files
-      console.log(acceptedFiles);
       const reader = new FileReader();
       reader.onload = () => {
         csv.parse(reader.result, (err, data) => {
-          console.log(data);
           props.onDrop(data.slice(1));
         });
       };

@@ -24,12 +24,6 @@ export default styled.div`
     }
   }
 
-  option {
-    padding: 3em;
-    height: 30px;
-    background: #ffffff;
-  }
-
   .custom-arrow {
     background: #f2f2f2;
     border: solid 0.5px #aaaaaa;
@@ -47,21 +41,5 @@ export default styled.div`
       transform: translate(-50%, -50%);
       top: 50%;
     }
-    // &::before,
-    // &::after {
-    //   content: "";
-    //   position: absolute;
-    //   width: 0;
-    //   height: 0;
-    //   left: 50%;
-    //   transform: translate(-50%, -50%);
-    //   top: 50%;
-    // }
-
-    // &::before {
-    //   border-left: 0.55em solid transparent;
-    //   border-right: 0.55em solid transparent;
-    //   border-top: 0.55em solid #373737;
-    // }
   }
 `;

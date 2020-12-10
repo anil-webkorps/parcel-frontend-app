@@ -1,10 +1,13 @@
 import {
   CHOOSE_STEP,
   UPDATE_FORM,
-  ADD_TEAMMATE,
   SELECT_FLOW,
+  ADD_TEAMMATE,
   ADD_TEAMMATE_SUCCESS,
   ADD_TEAMMATE_ERROR,
+  ADD_BULK_TEAMMATE,
+  ADD_BULK_TEAMMATE_SUCCESS,
+  ADD_BULK_TEAMMATE_ERROR,
   CHOOSE_DEPARTMENT,
   GET_DEPARTMENT_BY_ID,
   GET_DEPARTMENT_BY_ID_SUCCESS,
@@ -71,6 +74,28 @@ export function addTeammateSuccess() {
 export function addTeammateError(error) {
   return {
     type: ADD_TEAMMATE_ERROR,
+    error,
+  };
+}
+
+export function addBulkTeammates({ safeAddress, createdBy, data }) {
+  return {
+    type: ADD_BULK_TEAMMATE,
+    createdBy,
+    safeAddress,
+    data,
+  };
+}
+
+export function addBulkTeammatesSuccess() {
+  return {
+    type: ADD_BULK_TEAMMATE_SUCCESS,
+  };
+}
+
+export function addBulkTeammatesError(error) {
+  return {
+    type: ADD_BULK_TEAMMATE_ERROR,
     error,
   };
 }

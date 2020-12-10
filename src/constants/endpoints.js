@@ -17,6 +17,7 @@ export const loginEndpoint = `${ROOT_BE_URL}/api/v1/users/login`;
 // TEAMMATE
 export const getAllTeammatesEndpoint = `${ROOT_BE_URL}/api/v1/people/get`;
 export const createTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/create`;
+export const createBulkTeammatesEndpoint = `${ROOT_BE_URL}/api/v1/people/add-multiple`;
 export const getTeammatesByDepartmentIdEndpoint = `${ROOT_BE_URL}/api/v1/people/getByDepartment`;
 
 // DEPARTMENT

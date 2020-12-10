@@ -27,6 +27,12 @@ const makeSelectLoading = () =>
     (addTeammateState) => addTeammateState.loading
   );
 
+const makeSelectSuccess = () =>
+  createSelector(
+    selectAddTeammate,
+    (addTeammateState) => addTeammateState.success
+  );
+
 const makeSelectChosenDepartment = () =>
   createSelector(
     selectAddTeammate,
@@ -44,6 +50,7 @@ export {
   makeSelectStep,
   makeSelectFlow,
   makeSelectFormData,
+  makeSelectSuccess,
   makeSelectChosenDepartment,
   makeSelectLoading,
   makeSelectError,

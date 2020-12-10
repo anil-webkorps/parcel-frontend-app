@@ -13,3 +13,9 @@ export const GET_DEPARTMENT_BY_ID_ERROR =
 export const ADD_TEAMMATE = "parcel/addTeammate/ADD_TEAMMATE";
 export const ADD_TEAMMATE_SUCCESS = "parcel/addTeammate/ADD_TEAMMATE_SUCCESS";
 export const ADD_TEAMMATE_ERROR = "parcel/addTeammate/ADD_TEAMMATE_ERROR";
+
+export const ADD_BULK_TEAMMATE = "parcel/addTeammate/ADD_BULK_TEAMMATE";
+export const ADD_BULK_TEAMMATE_SUCCESS =
+  "parcel/addTeammate/ADD_BULK_TEAMMATE_SUCCESS";
+export const ADD_BULK_TEAMMATE_ERROR =
+  "parcel/addTeammate/ADD_BULK_TEAMMATE_ERROR";

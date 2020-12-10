@@ -218,11 +218,16 @@ export default function People() {
       }}
     >
       {loading ? (
-        <div
-          className="d-flex align-items-center justify-content-center"
-          style={{ height: "200px" }}
-        >
-          <Loading color="primary" width="50px" height="50px" />
+        <div>
+          <Info></Info>
+          <Container className="show-departments">
+            <div
+              className="d-flex align-items-center justify-content-center"
+              style={{ height: "300px" }}
+            >
+              <Loading color="primary" width="50px" height="50px" />
+            </div>
+          </Container>
         </div>
       ) : isNormalUser ? (
         renderForNormalUser()
