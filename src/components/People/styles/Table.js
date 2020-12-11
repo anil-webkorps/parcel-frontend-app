@@ -31,11 +31,12 @@ export const TableHead = styled.div`
 
 export const TableBody = styled.div`
   width: 100%;
-  min-height: 604px;
   box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
   border: solid 1px #f2f2f2;
   background-color: #ffffff;
   border-radius: 0 0 20px 20px;
+  height: 604px;
+  overflow: auto;
 `;
 
 export const TableRow = styled.div`
@@ -50,6 +51,22 @@ export const TableRow = styled.div`
   grid-template-columns: ${({ col }) =>
     `repeat(${col || defaultColumns}, 1fr)`};
   align-items: center;
+
+  a {
+    color: ${({ theme }) => theme.primary};
+  }
+
+  .purple-text {
+    font-size: 14px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.29;
+    letter-spacing: normal;
+    text-align: center;
+    color: ${({ theme }) => theme.primary};
+    cursor: pointer;
+  }
 `;
 
 const Table = { TableHead, TableBody, TableRow };

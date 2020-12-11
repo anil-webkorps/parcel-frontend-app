@@ -9,7 +9,7 @@ import { TransactionUrl } from "components/common/Web3Utils";
 import HumansPng from "assets/images/humans.png";
 
 import { Container, Title, Heading, Text } from "./styles";
-export default function TransactionSuccess({ txHash, selectedCount }) {
+export default function TransactionSubmitted({ txHash, selectedCount }) {
   return (
     <div
       style={{
@@ -23,11 +23,11 @@ export default function TransactionSuccess({ txHash, selectedCount }) {
             <img src={HumansPng} alt="humans" className="w-100" />
           </div>
           <Title className="mb-2" style={{ marginTop: "40px" }}>
-            Payment Processed
+            Transaction Submitted
           </Title>
           <Heading>
-            We’ve processed the payment of {selectedCount} people. You can track
-            the status of your payment in the accounting section.{" "}
+            We are processing the payment of {selectedCount} people. You can
+            track the status of your payment in the transactions section.{" "}
           </Heading>
           <Text>
             <TransactionUrl hash={txHash} />
@@ -40,7 +40,7 @@ export default function TransactionSuccess({ txHash, selectedCount }) {
               </Button>
             </Col>
             <Col lg="6" sm="12">
-              <Button large type="button">
+              <Button large type="button" to="/dashboard/transactions">
                 Track Status
               </Button>
             </Col>

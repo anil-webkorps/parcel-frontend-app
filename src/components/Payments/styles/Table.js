@@ -26,9 +26,10 @@ export const TableHead = styled.div`
 
 export const TableBody = styled.div`
   width: 100%;
-  min-height: 400px;
+  height: 400px;
   background-color: #ffffff;
   border-radius: 0 0 20px 20px;
+  overflow: auto;
 `;
 
 export const TableRow = styled.div`

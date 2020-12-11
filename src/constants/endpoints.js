@@ -25,6 +25,10 @@ export const createDepartmentEndpoint = `${ROOT_BE_URL}/api/v1/departments/creat
 export const getAllDepartmentsEndpoint = `${ROOT_BE_URL}/api/v1/departments/get`;
 export const getDepartmentByIdEndpoint = `${ROOT_BE_URL}/api/v1/departments/getByDepartmentId`;
 
+// TRANSACTIONS
+export const createTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/create`;
+export const getTransactionsEndpoint = `${ROOT_BE_URL}/api/v1/transactions/get`;
+
 // TOKEN PRICES
 export const getTokenPricesEndpoint = `${ROOT_BE_URL}/api/v1/tokenPrices/usd`;
 

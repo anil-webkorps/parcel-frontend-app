@@ -100,7 +100,7 @@ export const Balance = () => {
   return !!balance ? parseFloat(formatEther(balance)).toPrecision(4) : null;
 };
 
-export const TransactionUrl = ({ hash }) => {
+export const TransactionUrl = ({ hash, children }) => {
   const { chainId } = useActiveWeb3React();
 
   const etherscanPrefixByChainId = {
@@ -115,7 +115,7 @@ export const TransactionUrl = ({ hash }) => {
       rel="noopener noreferrer"
       target="_blank"
     >
-      View Transaction
+      {children || `View Transaction`}
     </a>
   );
 };

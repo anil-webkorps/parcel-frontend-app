@@ -33,6 +33,9 @@ import {
   makeSelectTeammates,
   makeSelectLoading as makeSelectTeammatesLoading,
 } from "store/view-teammates/selectors";
+import transactionsReducer from "store/transactions/reducer";
+import transactionsSaga from "store/transactions/saga";
+import { addTransaction } from "store/transactions/actions";
 import marketRatesReducer from "store/market-rates/reducer";
 import { getMarketRates } from "store/market-rates/actions";
 import { makeSelectPrices } from "store/market-rates/selectors";
@@ -64,7 +67,7 @@ import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 
 import { Container, Table, PaymentSummary, TokenBalance } from "./styles";
-import TransactionSuccess from "./TransactionSuccess";
+import TransactionSubmitted from "./TransactionSubmitted";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -73,6 +76,7 @@ const viewTeammatesKey = "viewTeammates";
 const viewDepartmentsKey = "viewDepartments";
 const marketRatesKey = "marketRates";
 const dashboardKey = "dashboard";
+const transactionsKey = "transactions";
 
 const {
   DAI_ADDRESS,
@@ -154,7 +158,7 @@ export default function People() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [departmentStep, setDepartmentStep] = useState(0);
   const [payTokenBalance, setPayTokenBalance] = useState(0); // for now, this is DAI
-  const [success, setSuccess] = useState(false);
+  const [submittedTx, setSubmittedTx] = useState(false);
 
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -167,11 +171,13 @@ export default function People() {
   });
   useInjectReducer({ key: marketRatesKey, reducer: marketRatesReducer });
   useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
+  useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
 
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
   useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
   useInjectSaga({ key: marketRatesKey, saga: marketRatesSaga });
   useInjectSaga({ key: dashboardKey, saga: dashboardSaga });
+  useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
 
   const dispatch = useDispatch();
   const allDepartments = useSelector(makeSelectDepartments());
@@ -369,12 +375,32 @@ export default function People() {
           autoApprovedSignature,
           { gasLimit: "300000", gasPrice: "10000000000" }
         );
-
-        await tx.wait();
-
         setTxHash(tx.hash);
         setLoadingTx(false);
-        setSuccess(true);
+        setSubmittedTx(true);
+
+        if (sign) {
+          const to = cryptoUtils.encryptData(
+            JSON.stringify(selectedTeammates),
+            sign
+          );
+          // const to = selectedTeammates;
+
+          dispatch(
+            addTransaction({
+              to,
+              safeAddress: ownerSafeAddress,
+              createdBy: ownerSafeAddress,
+              transactionHash: tx.hash,
+              tokenValue: totalAmountToPay,
+              tokenCurrency: tokens.DAI,
+              fiatValue: totalAmountToPay,
+              addresses: selectedTeammates.map(({ address }) => address),
+            })
+          );
+        }
+
+        await tx.wait();
       } catch (err) {
         setLoadingTx(false);
         console.error(err);
@@ -440,7 +466,7 @@ export default function People() {
     return checked.filter(Boolean).length;
   };
 
-  const getTotalAmountToPay = () => {
+  const totalAmountToPay = useMemo(() => {
     if (prices) {
       return selectedRows.reduce(
         (total, { salaryAmount, salaryToken }) =>
@@ -453,7 +479,7 @@ export default function People() {
       (total, { salaryAmount }) => (total += Number(salaryAmount)),
       0
     );
-  };
+  }, [prices, selectedRows]);
 
   const renderPayTable = () => {
     if (!teammates.length)
@@ -602,15 +628,15 @@ export default function People() {
           </div>
           <div>
             <div className="payment-title">Total Amount</div>
-            <div className="payment-subtitle">US$ {getTotalAmountToPay()}</div>
+            <div className="payment-subtitle">US$ {totalAmountToPay}</div>
           </div>
           <div>
             <div className="payment-title">Balance after payment</div>
             <div className="payment-subtitle">
-              {payTokenBalance - getTotalAmountToPay() > 0
-                ? `US$ ${parseFloat(
-                    payTokenBalance - getTotalAmountToPay()
-                  ).toFixed(2)}`
+              {payTokenBalance - totalAmountToPay > 0
+                ? `US$ ${parseFloat(payTokenBalance - totalAmountToPay).toFixed(
+                    2
+                  )}`
                 : `Insufficient Balance`}
             </div>
           </div>
@@ -625,7 +651,7 @@ export default function People() {
     );
   };
 
-  return !success ? (
+  return !submittedTx ? (
     <div
       style={{
         transition: "all 0.25s linear",
@@ -734,6 +760,6 @@ export default function People() {
       </div>
     </div>
   ) : (
-    <TransactionSuccess txHash={txHash} selectedCount={getSelectedCount()} />
+    <TransactionSubmitted txHash={txHash} selectedCount={getSelectedCount()} />
   );
 }

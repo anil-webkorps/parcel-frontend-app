@@ -5,7 +5,13 @@ import copy from "copy-to-clipboard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
 
-export default function CopyButton({ id, value, tooltip, ...passThrough }) {
+export default function CopyButton({
+  id,
+  value,
+  tooltip,
+  color = "#fff",
+  ...passThrough
+}) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -29,7 +35,7 @@ export default function CopyButton({ id, value, tooltip, ...passThrough }) {
         id={id}
         onClick={onClickCopy}
         icon={faCopy}
-        color="#fff"
+        color={color}
         {...passThrough}
       />
       <UncontrolledTooltip placement="top" target={id}>
