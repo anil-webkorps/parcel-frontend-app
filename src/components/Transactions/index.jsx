@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faDownload,
   faLink,
   faLongArrowAltLeft,
-  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { format } from "date-fns";
 import { cryptoUtils } from "parcel-sdk";
 import { useSelector, useDispatch } from "react-redux";
+import { CSVLink } from "react-csv";
 
 import { useLocalStorage } from "hooks";
 import Button from "components/common/Button";
@@ -104,133 +105,158 @@ export default function Transactions() {
     }
   };
 
-  const renderTransactions = () => (
-    <div
-      className="position-relative"
-      style={{
-        transition: "all 0.25s linear",
-      }}
-    >
-      <Info>
-        <div
-          style={{
-            maxWidth: "1200px",
-          }}
-          className="mx-auto"
-        >
-          <div className="d-flex justify-content-between align-items-center">
-            <div className="d-flex align-items-center">
-              <div>
-                <div className="title">Transactions</div>
-                <div className="subtitle">
-                  Track your transaction status here
+  const renderTransactions = () => {
+    let csvData = [];
+    if (transactions && transactions.length > 0) {
+      transactions.map(({ to, transactionHash, transactionId, createdOn }) => {
+        const paidTeammates = getDecryptedDetails(to);
+        for (let i = 0; i < paidTeammates.length; i++) {
+          csvData.push({
+            ...paidTeammates[i],
+            transactionHash,
+            createdOn: format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss"),
+            transactionId,
+          });
+        }
+        return csvData;
+      });
+    }
+    return (
+      <div
+        className="position-relative"
+        style={{
+          transition: "all 0.25s linear",
+        }}
+      >
+        <Info>
+          <div
+            style={{
+              maxWidth: "1200px",
+            }}
+            className="mx-auto"
+          >
+            <div className="d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center">
+                <div>
+                  <div className="title">Transactions</div>
+                  <div className="subtitle">
+                    Track your transaction status here
+                  </div>
                 </div>
               </div>
+
+              <CSVLink
+                data={csvData}
+                filename={`transactions-${format(
+                  Date.now(),
+                  "dd/MM/yyyy-HH:mm:ss"
+                )}.csv`}
+              >
+                <Button iconOnly className="p-0">
+                  <ActionItem>
+                    <Circle>
+                      <FontAwesomeIcon icon={faDownload} color="#fff" />
+                    </Circle>
+                    <div className="mx-3">
+                      <div className="name">Export as CSV</div>
+                    </div>
+                  </ActionItem>
+                </Button>
+              </CSVLink>
             </div>
-
-            <Button iconOnly className="p-0">
-              <ActionItem>
-                <Circle>
-                  <FontAwesomeIcon icon={faPlus} color="#fff" />
-                </Circle>
-                <div className="mx-3">
-                  <div className="name">Export</div>
-                </div>
-              </ActionItem>
-            </Button>
           </div>
-        </div>
-      </Info>
+        </Info>
 
-      <Container>
-        <div>
-          <TableHead>
-            <div>Transaction Hash</div>
-            <div>Total Amount</div>
-            <div>Date & Time</div>
-            <div>Status</div>
-            <div></div>
-          </TableHead>
+        <Container>
+          <div>
+            <TableHead>
+              <div>Transaction Hash</div>
+              <div>Total Amount</div>
+              <div>Date & Time</div>
+              <div>Status</div>
+              <div></div>
+            </TableHead>
 
-          <TableBody>
-            {loading ? (
-              <div
-                className="d-flex align-items-center justify-content-center"
-                style={{ height: "400px" }}
-              >
-                <Loading color="primary" width="50px" height="50px" />
-              </div>
-            ) : transactions && transactions.length > 0 ? (
-              transactions.map(
-                (
-                  {
-                    transactionId,
-                    addresses,
-                    transactionHash,
-                    safeAddress,
-                    to,
-                    tokenValue,
-                    tokenCurrency,
-                    fiatValue,
-                    fiatCurrency,
-                    transactionFees,
-                    status,
-                    createdOn,
-                  },
-                  idx
-                ) => {
-                  return (
-                    <TableRow key={`${transactionId}-${idx}`}>
-                      <div>
-                        <TransactionUrl hash={transactionHash}>
-                          {minifyAddress(transactionHash)}
-                        </TransactionUrl>
-                      </div>
-                      <div>
-                        {tokenValue} {tokenCurrency} (US ${fiatValue})
-                      </div>
-                      <div>
-                        {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}
-                      </div>
-                      <div>{displayStatus(status)}</div>
-                      <div
-                        className="d-flex justify-content-end purple-text"
-                        onClick={() =>
-                          setSelectedTransaction({
-                            transactionId,
-                            addresses,
-                            transactionHash,
-                            safeAddress,
-                            to,
-                            tokenValue,
-                            tokenCurrency,
-                            fiatValue,
-                            fiatCurrency,
-                            transactionFees,
-                            status,
-                            createdOn,
-                          })
-                        }
-                      >
-                        VIEW
-                      </div>
-                    </TableRow>
-                  );
-                }
-              )
-            ) : (
-              <div
-                className="d-flex align-items-center justify-content-center"
-                style={{ height: "400px" }}
-              >
-                No transactions found!
-              </div>
-            )}
-          </TableBody>
-        </div>
-      </Container>
-    </div>
-  );
+            <TableBody>
+              {loading ? (
+                <div
+                  className="d-flex align-items-center justify-content-center"
+                  style={{ height: "400px" }}
+                >
+                  <Loading color="primary" width="50px" height="50px" />
+                </div>
+              ) : transactions && transactions.length > 0 ? (
+                transactions.map(
+                  (
+                    {
+                      transactionId,
+                      addresses,
+                      transactionHash,
+                      safeAddress,
+                      to,
+                      tokenValue,
+                      tokenCurrency,
+                      fiatValue,
+                      fiatCurrency,
+                      transactionFees,
+                      status,
+                      createdOn,
+                    },
+                    idx
+                  ) => {
+                    return (
+                      <TableRow key={`${transactionId}-${idx}`}>
+                        <div>
+                          <TransactionUrl hash={transactionHash}>
+                            {minifyAddress(transactionHash)}
+                          </TransactionUrl>
+                        </div>
+                        <div>
+                          {tokenValue} {tokenCurrency} (US ${fiatValue})
+                        </div>
+                        <div>
+                          {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}
+                        </div>
+                        <div>{displayStatus(status)}</div>
+                        <div
+                          className="d-flex justify-content-end purple-text"
+                          onClick={() =>
+                            setSelectedTransaction({
+                              transactionId,
+                              addresses,
+                              transactionHash,
+                              safeAddress,
+                              to,
+                              tokenValue,
+                              tokenCurrency,
+                              fiatValue,
+                              fiatCurrency,
+                              transactionFees,
+                              status,
+                              createdOn,
+                            })
+                          }
+                        >
+                          VIEW
+                        </div>
+                      </TableRow>
+                    );
+                  }
+                )
+              ) : (
+                <div
+                  className="d-flex align-items-center justify-content-center"
+                  style={{ height: "400px" }}
+                >
+                  No transactions found!
+                </div>
+              )}
+            </TableBody>
+          </div>
+        </Container>
+      </div>
+    );
+  };
 
   const renderTransactionDetails = ({
     transactionId,
@@ -243,7 +269,6 @@ export default function Transactions() {
     createdOn,
   }) => {
     const paidTeammates = getDecryptedDetails(to);
-    console.log({ paidTeammates });
 
     return (
       <div
