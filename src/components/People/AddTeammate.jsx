@@ -446,7 +446,11 @@ export default function AddTeammate() {
         <ChooseDepartment onClick={onChangeDepartmentClicked}>
           <div>
             <div className="text-left mb-2">
-              <FontAwesomeIcon icon={faUsers} color="#373737" size="2x" />
+              <FontAwesomeIcon
+                icon={faUsers}
+                color="rgba(55, 55, 55, 0.3)"
+                size="2x"
+              />
             </div>
             <Title className="mb-1 choosen-dept">{chosenDepartment.name}</Title>
             <Heading className="choosen-dept">
@@ -483,7 +487,11 @@ export default function AddTeammate() {
                 onClick={() => onSelectDepartment(department)}
               >
                 <div className="small-card">
-                  <FontAwesomeIcon icon={faUsers} color="#373737" size="2x" />
+                  <FontAwesomeIcon
+                    icon={faUsers}
+                    color="rgba(55, 55, 55, 0.3)"
+                    size="2x"
+                  />
                 </div>
                 <div className="department-name">{department.name}</div>
               </div>

@@ -595,7 +595,11 @@ export default function People() {
               >
                 <div className="upper">
                   <div className="d-flex justify-content-between">
-                    <FontAwesomeIcon icon={faUsers} color="#373737" size="2x" />
+                    <FontAwesomeIcon
+                      icon={faUsers}
+                      color="#rgba(55, 55, 55, 0.3)"
+                      size="2x"
+                    />
                     <div className="circle circle-grey">
                       <FontAwesomeIcon
                         icon={faLongArrowAltRight}

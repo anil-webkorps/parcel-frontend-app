@@ -177,7 +177,7 @@ export default function People() {
                         <div className="d-flex justify-content-between">
                           <FontAwesomeIcon
                             icon={faUsers}
-                            color="#373737"
+                            color="rgba(55, 55, 55, 0.3)"
                             style={{ width: "50px" }}
                             size="2x"
                           />
