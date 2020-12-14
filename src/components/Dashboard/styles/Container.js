@@ -6,7 +6,7 @@ export default styled.div`
   margin: 0 auto;
   grid-template-columns: 1fr 1fr;
   grid-gap: 24px;
-  grid-template-rows: repeat(4, minmax(130px, auto));
+  grid-template-rows: repeat(4, minmax(100px, auto));
   position: absolute;
   left: 0;
   right: 0;

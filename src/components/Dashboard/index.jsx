@@ -7,7 +7,7 @@ import { makeSelectOwnerName } from "store/global/selectors";
 import { SideNavContext } from "context/SideNavContext";
 import AccountCard from "./AccountCard";
 import PaymentsCard from "./PaymentsCard";
-import StatusCard from "./StatusCard";
+import QuickTransferCard from "./QuickTransferCard";
 
 export default function Dashboard() {
   const [toggled] = useContext(SideNavContext);
@@ -41,7 +41,7 @@ export default function Dashboard() {
         }}
       >
         <AccountCard />
-        <StatusCard />
+        <QuickTransferCard />
         <PaymentsCard />
       </Container>
     </div>

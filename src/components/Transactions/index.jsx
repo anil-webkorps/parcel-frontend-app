@@ -26,11 +26,12 @@ import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
+import StatusText from "./StatusText";
 
 import { Table, ActionItem } from "../People/styles";
 import { Circle } from "components/Header/styles";
 import { Info } from "components/Dashboard/styles";
-import { StatusCircle, Container, Detail } from "./styles";
+import { Container, Detail } from "./styles";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -63,46 +64,6 @@ export default function Transactions() {
   const getDecryptedDetails = (data) => {
     if (!sign) return "";
     return JSON.parse(cryptoUtils.decryptData(data, sign));
-  };
-
-  const displayStatus = (status) => {
-    switch (status) {
-      case 0:
-        return (
-          <div
-            className="d-flex justify-content-between align-items-center"
-            style={{ width: "110px" }}
-          >
-            <div>Completed</div>
-            <StatusCircle color="#3bd800" />
-          </div>
-        );
-
-      case 1:
-        return (
-          <div
-            className="d-flex justify-content-between align-items-center"
-            style={{ width: "110px" }}
-          >
-            <div>Pending</div>
-            <StatusCircle color="#f7e72e" />
-          </div>
-        );
-
-      case 2:
-        return (
-          <div
-            className="d-flex justify-content-between align-items-center"
-            style={{ width: "110px" }}
-          >
-            <div>Failed</div>
-            <StatusCircle color="#f71ea3" />
-          </div>
-        );
-
-      default:
-        return null;
-    }
   };
 
   const renderTransactions = () => {
@@ -217,7 +178,9 @@ export default function Transactions() {
                         <div>
                           {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}
                         </div>
-                        <div>{displayStatus(status)}</div>
+                        <div>
+                          <StatusText status={status} />
+                        </div>
                         <div
                           className="d-flex justify-content-end purple-text"
                           onClick={() =>
@@ -422,7 +385,9 @@ export default function Transactions() {
               </Detail>
               <Detail style={{ width: "300px" }}>
                 <div className="title">Status</div>
-                <div className="desc">{displayStatus(status)}</div>
+                <div className="desc">
+                  <StatusText status={status} />
+                </div>
               </Detail>
             </div>
           </Card>
