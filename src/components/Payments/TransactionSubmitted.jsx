@@ -6,7 +6,7 @@ import { Card } from "components/common/Card";
 import Button from "components/common/Button";
 
 import { TransactionUrl } from "components/common/Web3Utils";
-import HumansPng from "assets/images/humans.png";
+import TransactionSubmittedPng from "assets/images/transaction-submitted.png";
 
 import { Container, Title, Heading, Text } from "./styles";
 export default function TransactionSubmitted({ txHash, selectedCount }) {
@@ -20,7 +20,7 @@ export default function TransactionSubmitted({ txHash, selectedCount }) {
       <Container>
         <Card className="payment-success">
           <div className="text-center">
-            <img src={HumansPng} alt="humans" className="w-100" />
+            <img src={TransactionSubmittedPng} alt="submitted" width="150" />
           </div>
           <Title className="mb-2" style={{ marginTop: "40px" }}>
             Transaction Submitted

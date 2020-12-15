@@ -9,6 +9,7 @@ import Header from "components/Header";
 import RegisterPage from "pages/Register";
 import LoginPage from "pages/Login";
 import DashboardPage from "./Dashboard";
+import NotFoundPage from "./NotFound";
 import SideNavProvider from "context/SideNavContext";
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
             <Route exact path="/" component={LoginPage} />
             <Route exact path="/signup" component={RegisterPage} />
             <Route path="/dashboard" component={DashboardPage} />
+            <Route component={NotFoundPage} />
           </Switch>
         </SideNavProvider>
         <GlobalStyle />

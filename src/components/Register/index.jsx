@@ -429,7 +429,7 @@ const Register = () => {
         <Img
           src={CompanyPng}
           alt="company"
-          className="my-2"
+          className="my-3"
           width="130px"
           style={{ minWidth: "130px" }}
         />
@@ -442,7 +442,7 @@ const Register = () => {
           placeholder="Awesome Company Inc"
         />
         <ErrorMessage name="name" errors={errors} />
-        <Button large type="submit" className="mt-3">
+        <Button large type="submit" className="mt-4">
           Proceed
         </Button>
       </StepDetails>
@@ -455,7 +455,7 @@ const Register = () => {
         <Img
           src={CompanyPng}
           alt="company"
-          className="my-2"
+          className="my-3"
           width="130px"
           style={{ minWidth: "130px" }}
         />
@@ -471,7 +471,7 @@ const Register = () => {
         <Button
           large
           type="submit"
-          className="mt-3"
+          className="mt-4"
           loading={createSafeLoading}
           disabled={createSafeLoading}
         >
@@ -653,7 +653,7 @@ const Register = () => {
         <Img
           src={CompanyPng}
           alt="individual"
-          className="my-2"
+          className="my-3"
           width="130px"
           style={{ minWidth: "130px" }}
         />
@@ -679,8 +679,14 @@ const Register = () => {
             type="radio"
             id={`flow-company`}
             value={FLOWS.COMPANY}
-            label={"I have a Company"}
+            label={
+              <span>
+                I have a Company{" "}
+                <span style={{ fontSize: "12px" }}>(coming soon)</span>
+              </span>
+            }
             labelStyle={{ minWidth: "260px" }}
+            disabled
           />
         </div>
 

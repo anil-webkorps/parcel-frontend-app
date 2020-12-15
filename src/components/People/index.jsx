@@ -26,7 +26,7 @@ import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 
-import HumansPng from "assets/images/humans.png";
+import TeamMembersPng from "assets/images/team-members.png";
 
 import { Container, AllEmployees } from "./styles";
 import { Circle } from "components/Header/styles";
@@ -87,7 +87,7 @@ export default function People() {
           <div className="new-user">
             <Card className="p-4" style={{ minHeight: "532px" }}>
               <div className="text-center">
-                <img src={HumansPng} alt="humans" />
+                <img src={TeamMembersPng} alt="humans" width="400px" />
               </div>
               <div className="card-title">
                 Hassle-Free team and People management
