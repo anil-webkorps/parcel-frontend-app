@@ -6,8 +6,13 @@ import { CustomSelect } from "./styles";
 
 const SelectField = ({ name, register, required, options, ...rest }) => (
   <CustomSelect>
-    <select name={name} ref={register({ required })} {...rest}>
-      <option value="" selected disabled>
+    <select
+      defaultValue={""}
+      name={name}
+      ref={register({ required })}
+      {...rest}
+    >
+      <option value="" disabled>
         Select Token
       </option>
       {options &&

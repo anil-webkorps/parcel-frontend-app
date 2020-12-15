@@ -89,7 +89,8 @@ export default styled.div`
     color: #373737;
   }
 
-  .add-teammate {
+  .add-teammate,
+  .quick-transfer {
     width: 488px;
     min-height: 656px;
     margin: 0 auto;

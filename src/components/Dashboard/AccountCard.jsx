@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch } from "react-redux";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -167,9 +168,11 @@ export default function AccountCard() {
               Find overview of your wallets and manage payments
             </div>
           </div>
-          <div className="circle">
-            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
-          </div>
+          <Link to="/dashboard">
+            <div className="circle">
+              <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+            </div>
+          </Link>
         </div>
 
         {loading ? (

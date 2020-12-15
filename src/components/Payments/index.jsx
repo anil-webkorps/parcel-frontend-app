@@ -8,8 +8,6 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { cryptoUtils } from "parcel-sdk";
-import { BigNumber } from "@ethersproject/bignumber";
-import { addDays, format } from "date-fns";
 
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
@@ -46,23 +44,10 @@ import { makeSelectBalances } from "store/dashboard/selectors";
 import dashboardSaga from "store/dashboard/saga";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { EthersAdapter } from "contract-proxy-kit";
-import { ethers } from "ethers";
-import { useActiveWeb3React, useContract, useLocalStorage } from "hooks";
+import { useLocalStorage, useMassPayout } from "hooks";
 import { tokens } from "constants/index";
-import addresses from "constants/addresses";
-import GnosisSafeABI from "constants/abis/GnosisSafe.json";
-import ERC20ABI from "constants/abis/ERC20.json";
-import MultiSendABI from "constants/abis/MultiSend.json";
-import UniswapABI from "constants/abis/Uniswap.json";
 import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
-import {
-  joinHexData,
-  getHexDataLength,
-  standardizeTransaction,
-  getAmountInWei,
-} from "utils/tx-helpers";
 import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 
@@ -77,21 +62,6 @@ const viewDepartmentsKey = "viewDepartments";
 const marketRatesKey = "marketRates";
 const dashboardKey = "dashboard";
 const transactionsKey = "transactions";
-
-const {
-  DAI_ADDRESS,
-  MULTISEND_ADDRESS,
-  ZERO_ADDRESS,
-  USDC_ADDRESS,
-  UNISWAP_ROUTER_ADDRESS,
-  WETH_ADDRESS,
-} = addresses;
-
-const tokenNameToAddress = {
-  [tokens.DAI]: DAI_ADDRESS,
-  [tokens.USDC]: USDC_ADDRESS,
-  // add other tokens and addresses here
-};
 
 const TABS = {
   PEOPLE: "1",
@@ -145,16 +115,15 @@ const navStyles = `
 `;
 
 export default function People() {
-  const { account, library } = useActiveWeb3React();
-
   const [sign] = useLocalStorage("SIGNATURE");
   const [toggled] = useContext(SideNavContext);
 
   const [checked, setChecked] = useState([]);
   const [isCheckedAll, setIsCheckedAll] = useState(false);
   const [activeTab, setActiveTab] = useState(TABS.PEOPLE);
-  const [loadingTx, setLoadingTx] = useState(false);
-  const [txHash, setTxHash] = useState(""); // eslint-disable-line
+  // const [loadingTx, setLoadingTx] = useState(false);
+  // const [txHash, setTxHash] = useState("");
+  const { loadingTx, txHash, recievers, massPayout } = useMassPayout();
   const [selectedRows, setSelectedRows] = useState([]);
   const [departmentStep, setDepartmentStep] = useState(0);
   const [payTokenBalance, setPayTokenBalance] = useState(0); // for now, this is DAI
@@ -187,13 +156,6 @@ export default function People() {
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const prices = useSelector(makeSelectPrices());
   const balances = useSelector(makeSelectBalances());
-
-  // contracts
-  const proxyContract = useContract(ownerSafeAddress, GnosisSafeABI, true);
-  const dai = useContract(DAI_ADDRESS, ERC20ABI, true);
-  const usdc = useContract(USDC_ADDRESS, ERC20ABI, true); // eslint-disable-line
-  const multiSend = useContract(MULTISEND_ADDRESS, MultiSendABI);
-  const uniswapRouter = useContract(UNISWAP_ROUTER_ADDRESS, UniswapABI);
 
   useEffect(() => {
     dispatch(getMarketRates());
@@ -237,6 +199,44 @@ export default function People() {
     }
   }, [teammates]);
 
+  const totalAmountToPay = useMemo(() => {
+    if (prices) {
+      return selectedRows.reduce(
+        (total, { salaryAmount, salaryToken }) =>
+          (total += prices[salaryToken] * salaryAmount),
+        0
+      );
+    }
+
+    return selectedRows.reduce(
+      (total, { salaryAmount }) => (total += Number(salaryAmount)),
+      0
+    );
+  }, [prices, selectedRows]);
+
+  useEffect(() => {
+    if (txHash) {
+      setSubmittedTx(true);
+      if (sign && recievers && ownerSafeAddress && totalAmountToPay) {
+        const to = cryptoUtils.encryptData(JSON.stringify(recievers), sign);
+        // const to = selectedTeammates;
+
+        dispatch(
+          addTransaction({
+            to,
+            safeAddress: ownerSafeAddress,
+            createdBy: ownerSafeAddress,
+            transactionHash: txHash,
+            tokenValue: totalAmountToPay,
+            tokenCurrency: tokens.DAI,
+            fiatValue: totalAmountToPay,
+            addresses: recievers.map(({ address }) => address),
+          })
+        );
+      }
+    }
+  }, [txHash, sign, recievers, dispatch, ownerSafeAddress, totalAmountToPay]);
+
   const isNoneChecked = useMemo(() => checked.every((check) => !check), [
     checked,
   ]);
@@ -246,166 +246,8 @@ export default function People() {
     return JSON.parse(cryptoUtils.decryptData(data, sign));
   };
 
-  const encodeMultiSendCallData = (transactions, ethLibAdapter) => {
-    const standardizedTxs = transactions.map(standardizeTransaction);
-
-    return multiSend.interface.encodeFunctionData("multiSend", [
-      joinHexData(
-        standardizedTxs.map((tx) =>
-          ethLibAdapter.abiEncodePacked(
-            { type: "uint8", value: tx.operation },
-            { type: "address", value: tx.to },
-            { type: "uint256", value: tx.value },
-            { type: "uint256", value: getHexDataLength(tx.data) },
-            { type: "bytes", value: tx.data }
-          )
-        )
-      ),
-    ]);
-  };
-
-  const getUniswapTransactions = (tokenName, tokenAmount, toAddress) => {
-    // TODO: come up with a better solution for max amount in
-    // should calculate max amount needed for the swap from uniswap
-    const amountIn = BigNumber.from(
-      ethers.utils.parseEther(String(Number.MAX_SAFE_INTEGER))
-    );
-
-    const amountOut = getAmountInWei(tokenName, tokenAmount);
-    const uniswapData = uniswapRouter.interface.encodeFunctionData(
-      "swapTokensForExactTokens",
-      [
-        BigNumber.from(amountOut),
-        BigNumber.from(amountIn),
-        [DAI_ADDRESS, WETH_ADDRESS, USDC_ADDRESS],
-        toAddress,
-        format(addDays(Date.now(), 1), "t"),
-      ]
-    );
-
-    return [
-      {
-        operation: 0, // CALL
-        to: DAI_ADDRESS,
-        value: 0,
-        data: dai.interface.encodeFunctionData("approve", [
-          UNISWAP_ROUTER_ADDRESS,
-          BigNumber.from(amountIn),
-        ]),
-      },
-      {
-        operation: 0, // CALL
-        to: UNISWAP_ROUTER_ADDRESS,
-        value: 0,
-        data: uniswapData,
-      },
-    ];
-  };
-
-  // TODO: move this functionality to a custom hook
   const handleMassPayout = async (selectedTeammates) => {
-    if (account && library) {
-      const ethLibAdapter = new EthersAdapter({
-        ethers,
-        signer: library.getSigner(account),
-      });
-
-      // If input and output tokens are different, swap using uniswap
-      // If input and output tokens are same, simply call transfer
-      const transactions = selectedTeammates.reduce(
-        (tx, { address, salaryToken, salaryAmount }) => {
-          if (salaryToken !== tokens.DAI) {
-            // replace tokens.DAI with whatever input token is chosen
-            tx.push(
-              ...getUniswapTransactions(salaryToken, salaryAmount, address)
-            );
-            return tx;
-          }
-
-          tx.push({
-            operation: 0, // CALL
-            to: tokenNameToAddress[salaryToken],
-            value: 0,
-            data: dai.interface.encodeFunctionData("transfer", [
-              address,
-              BigNumber.from(salaryAmount).mul(
-                BigNumber.from(String(10 ** 18))
-              ),
-            ]),
-          });
-          return tx;
-        },
-        []
-      );
-
-      const dataHash = encodeMultiSendCallData(transactions, ethLibAdapter);
-
-      // Set parameters of execTransaction()
-      const valueWei = 0;
-      const data = dataHash;
-      const operation = 1; // DELEGATECALL
-      const gasPrice = 0; // If 0, then no refund to relayer
-      const gasToken = ZERO_ADDRESS; // ETH
-      const txGasEstimate = 0;
-      const baseGasEstimate = 0;
-      const executor = ZERO_ADDRESS;
-
-      // (r, s, v) where v is 1 means this signature is approved by the address encoded in value r
-      // For a single user, we auto generate the signature without prompting the user
-      const autoApprovedSignature = ethLibAdapter.abiEncodePacked(
-        { type: "uint256", value: account }, // r
-        { type: "uint256", value: 0 }, // s
-        { type: "uint8", value: 1 } // v
-      );
-
-      try {
-        setLoadingTx(true);
-        setTxHash("");
-
-        const tx = await proxyContract.execTransaction(
-          MULTISEND_ADDRESS,
-          valueWei,
-          data,
-          operation,
-          txGasEstimate,
-          baseGasEstimate,
-          gasPrice,
-          gasToken,
-          executor,
-          autoApprovedSignature,
-          { gasLimit: "300000", gasPrice: "10000000000" }
-        );
-        setTxHash(tx.hash);
-        setLoadingTx(false);
-        setSubmittedTx(true);
-
-        if (sign) {
-          const to = cryptoUtils.encryptData(
-            JSON.stringify(selectedTeammates),
-            sign
-          );
-          // const to = selectedTeammates;
-
-          dispatch(
-            addTransaction({
-              to,
-              safeAddress: ownerSafeAddress,
-              createdBy: ownerSafeAddress,
-              transactionHash: tx.hash,
-              tokenValue: totalAmountToPay,
-              tokenCurrency: tokens.DAI,
-              fiatValue: totalAmountToPay,
-              addresses: selectedTeammates.map(({ address }) => address),
-            })
-          );
-        }
-
-        await tx.wait();
-      } catch (err) {
-        setLoadingTx(false);
-        console.error(err);
-      }
-    }
+    await massPayout(selectedTeammates);
   };
 
   const onSubmit = async (e) => {
@@ -465,21 +307,6 @@ export default function People() {
   const getSelectedCount = () => {
     return checked.filter(Boolean).length;
   };
-
-  const totalAmountToPay = useMemo(() => {
-    if (prices) {
-      return selectedRows.reduce(
-        (total, { salaryAmount, salaryToken }) =>
-          (total += prices[salaryToken] * salaryAmount),
-        0
-      );
-    }
-
-    return selectedRows.reduce(
-      (total, { salaryAmount }) => (total += Number(salaryAmount)),
-      0
-    );
-  }, [prices, selectedRows]);
 
   const renderPayTable = () => {
     if (!teammates.length)
