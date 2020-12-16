@@ -147,65 +147,68 @@ export default function Transactions() {
                   <Loading color="primary" width="50px" height="50px" />
                 </div>
               ) : transactions && transactions.length > 0 ? (
-                transactions.map(
-                  (
-                    {
-                      transactionId,
-                      addresses,
-                      transactionHash,
-                      safeAddress,
-                      to,
-                      tokenValue,
-                      tokenCurrency,
-                      fiatValue,
-                      fiatCurrency,
-                      transactionFees,
-                      status,
-                      createdOn,
-                    },
-                    idx
-                  ) => {
-                    return (
-                      <TableRow key={`${transactionId}-${idx}`}>
-                        <div>
-                          <TransactionUrl hash={transactionHash}>
-                            {minifyAddress(transactionHash)}
-                          </TransactionUrl>
-                        </div>
-                        <div>
-                          {tokenValue} {tokenCurrency} (US ${fiatValue})
-                        </div>
-                        <div>
-                          {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}
-                        </div>
-                        <div>
-                          <StatusText status={status} />
-                        </div>
-                        <div
-                          className="d-flex justify-content-end purple-text"
-                          onClick={() =>
-                            setSelectedTransaction({
-                              transactionId,
-                              addresses,
-                              transactionHash,
-                              safeAddress,
-                              to,
-                              tokenValue,
-                              tokenCurrency,
-                              fiatValue,
-                              fiatCurrency,
-                              transactionFees,
-                              status,
-                              createdOn,
-                            })
-                          }
-                        >
-                          VIEW
-                        </div>
-                      </TableRow>
-                    );
-                  }
-                )
+                transactions
+                  .slice()
+                  .reverse()
+                  .map(
+                    (
+                      {
+                        transactionId,
+                        addresses,
+                        transactionHash,
+                        safeAddress,
+                        to,
+                        tokenValue,
+                        tokenCurrency,
+                        fiatValue,
+                        fiatCurrency,
+                        transactionFees,
+                        status,
+                        createdOn,
+                      },
+                      idx
+                    ) => {
+                      return (
+                        <TableRow key={`${transactionId}-${idx}`}>
+                          <div>
+                            <TransactionUrl hash={transactionHash}>
+                              {minifyAddress(transactionHash)}
+                            </TransactionUrl>
+                          </div>
+                          <div>
+                            {tokenValue} {tokenCurrency} (US ${fiatValue})
+                          </div>
+                          <div>
+                            {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}
+                          </div>
+                          <div>
+                            <StatusText status={status} />
+                          </div>
+                          <div
+                            className="d-flex justify-content-end purple-text"
+                            onClick={() =>
+                              setSelectedTransaction({
+                                transactionId,
+                                addresses,
+                                transactionHash,
+                                safeAddress,
+                                to,
+                                tokenValue,
+                                tokenCurrency,
+                                fiatValue,
+                                fiatCurrency,
+                                transactionFees,
+                                status,
+                                createdOn,
+                              })
+                            }
+                          >
+                            VIEW
+                          </div>
+                        </TableRow>
+                      );
+                    }
+                  )
               ) : (
                 <div
                   className="d-flex align-items-center justify-content-center"
