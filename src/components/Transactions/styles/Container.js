@@ -37,12 +37,11 @@ export default styled.div`
       text-align: left;
       color: #373737;
     }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-gap: 16px 10px;
-    }
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 16px 10px;
   }
 
   .circle {

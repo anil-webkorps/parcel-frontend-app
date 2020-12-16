@@ -17,6 +17,7 @@ export function addTransaction({
   fiatValue,
   addresses,
   fiatCurrency = "USD",
+  transactionMode = 0, // 0 = mass payout, 1 = quick transfer
 }) {
   return {
     type: ADD_TRANSACTION,
@@ -30,6 +31,7 @@ export function addTransaction({
       fiatValue,
       addresses,
       fiatCurrency,
+      transactionMode,
     },
   };
 }

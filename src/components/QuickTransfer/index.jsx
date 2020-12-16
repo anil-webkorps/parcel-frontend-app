@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLongArrowAltLeft } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
@@ -6,14 +6,18 @@ import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { BigNumber } from "@ethersproject/bignumber";
+import { cryptoUtils } from "parcel-sdk";
 
 import TransactionSubmitted from "components/Payments/TransactionSubmitted";
 import { Info } from "components/Dashboard/styles";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
 import Img from "components/common/Img";
-import { Input, ErrorMessage, Select } from "components/common/Form";
-import { useMassPayout } from "hooks";
+import { Input, ErrorMessage, Select, TextArea } from "components/common/Form";
+import { useMassPayout, useLocalStorage } from "hooks";
+import transactionsReducer from "store/transactions/reducer";
+import transactionsSaga from "store/transactions/saga";
+import { addTransaction } from "store/transactions/actions";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import dashboardReducer from "store/dashboard/reducer";
@@ -30,6 +34,7 @@ import {
 import { makeSelectPrices } from "store/market-rates/selectors";
 import Loading from "components/common/Loading";
 import { getMarketRates } from "store/market-rates/actions";
+import { tokens } from "constants/index";
 
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
@@ -46,6 +51,7 @@ import { Circle } from "components/Header/styles";
 
 const dashboardKey = "dashboard";
 const marketRatesKey = "marketRates";
+const transactionsKey = "transactions";
 
 const DEFAULT_TOKENS = {
   ETH: "ETH",
@@ -78,6 +84,8 @@ const defaultTokenDetails = [
 ];
 
 export default function QuickTransfer() {
+  const [sign] = useLocalStorage("SIGNATURE");
+
   const { txHash, loadingTx, massPayout } = useMassPayout();
   const [submittedTx, setSubmittedTx] = useState(false);
   const [selectedTokenDetails, setSelectedTokenDetails] = useState();
@@ -86,14 +94,17 @@ export default function QuickTransfer() {
     DEFAULT_TOKENS.DAI
   );
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
+  const [payoutDetails, setPayoutDetails] = useState(null);
 
   // Reducers
   useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
   useInjectReducer({ key: marketRatesKey, reducer: marketRatesReducer });
+  useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
 
   // Sagas
   useInjectSaga({ key: dashboardKey, saga: dashboardSaga });
   useInjectSaga({ key: marketRatesKey, saga: marketRatesSaga });
+  useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
 
   const { register, errors, handleSubmit, formState } = useForm({
     mode: "onChange",
@@ -123,6 +134,49 @@ export default function QuickTransfer() {
   useEffect(() => {
     dispatch(getMarketRates());
   }, [dispatch]);
+
+  const totalAmountToPay = useMemo(() => {
+    if (prices && payoutDetails && payoutDetails.length > 0) {
+      return payoutDetails.reduce(
+        (total, { salaryAmount, salaryToken }) =>
+          (total += prices[salaryToken] * salaryAmount),
+        0
+      );
+    }
+
+    return 0;
+  }, [prices, payoutDetails]);
+
+  useEffect(() => {
+    if (txHash) {
+      setSubmittedTx(true);
+      if (sign && payoutDetails && ownerSafeAddress && totalAmountToPay) {
+        const to = cryptoUtils.encryptData(JSON.stringify(payoutDetails), sign);
+        // const to = selectedTeammates;
+
+        dispatch(
+          addTransaction({
+            to,
+            safeAddress: ownerSafeAddress,
+            createdBy: ownerSafeAddress,
+            transactionHash: txHash,
+            tokenValue: totalAmountToPay,
+            tokenCurrency: tokens.DAI,
+            fiatValue: totalAmountToPay,
+            addresses: payoutDetails.map(({ address }) => address),
+            transactionMode: 1, // quick transfer
+          })
+        );
+      }
+    }
+  }, [
+    txHash,
+    sign,
+    payoutDetails,
+    dispatch,
+    ownerSafeAddress,
+    totalAmountToPay,
+  ]);
 
   const getDefaultIconIfPossible = (tokenSymbol) => {
     switch (tokenSymbol) {
@@ -184,18 +238,17 @@ export default function QuickTransfer() {
     }
   }, [balances, prices]);
 
-  useEffect(() => {
-    if (txHash) setSubmittedTx(true);
-  }, [txHash]);
-
   const onSubmit = async (values) => {
-    await massPayout([
+    const payoutDetails = [
       {
         address: values.address,
         salaryAmount: values.amount,
         salaryToken: values.currency,
+        description: values.description || "",
       },
-    ]);
+    ];
+    setPayoutDetails(payoutDetails);
+    await massPayout(payoutDetails);
   };
 
   const goBack = () => {
@@ -270,10 +323,23 @@ export default function QuickTransfer() {
         </Col>
       </Row>
 
+      <Heading>DESCRIPTION (Optional)</Heading>
+      <Row className="mb-3">
+        <Col lg="12">
+          <TextArea
+            name="description"
+            register={register}
+            placeholder="Paid 500 DAI to John Doe..."
+            rows="5"
+            cols="50"
+          />
+        </Col>
+      </Row>
+
       <Button
         large
         type="submit"
-        style={{ marginTop: "200px" }}
+        style={{ marginTop: "50px" }}
         disabled={!formState.isValid || loadingTx}
         loading={loadingTx}
       >

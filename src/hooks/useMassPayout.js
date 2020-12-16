@@ -6,9 +6,10 @@
  * [{address: String, salaryToken: String, salaryAmount: String}]
  */
 
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { BigNumber } from "@ethersproject/bignumber";
+import { parseEther } from "@ethersproject/units";
 import { addDays, format } from "date-fns";
 import { EthersAdapter } from "contract-proxy-kit";
 import { ethers } from "ethers";
@@ -21,12 +22,20 @@ import {
   getAmountInWei,
 } from "utils/tx-helpers";
 import addresses from "constants/addresses";
-import { tokens } from "constants/index";
+import { DEFAULT_GAS_PRICE, tokens } from "constants/index";
 import GnosisSafeABI from "constants/abis/GnosisSafe.json";
 import ERC20ABI from "constants/abis/ERC20.json";
 import MultiSendABI from "constants/abis/MultiSend.json";
 import UniswapABI from "constants/abis/Uniswap.json";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import { getGasPrice } from "store/gas/actions";
+import gasPriceSaga from "store/gas/saga";
+import gasPriceReducer from "store/gas/reducer";
+import { useInjectReducer } from "utils/injectReducer";
+import { useInjectSaga } from "utils/injectSaga";
+import { makeSelectAverageGasPrice } from "store/gas/selectors";
+
+const gasPriceKey = "gas";
 
 const {
   DAI_ADDRESS,
@@ -50,7 +59,14 @@ export default function useMassPayout() {
   const [txHash, setTxHash] = useState("");
   const [recievers, setRecievers] = useState();
 
+  useInjectReducer({ key: gasPriceKey, reducer: gasPriceReducer });
+
+  useInjectSaga({ key: gasPriceKey, saga: gasPriceSaga });
+
+  const dispatch = useDispatch();
+
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const averageGasPrice = useSelector(makeSelectAverageGasPrice());
 
   // contracts
   const proxyContract = useContract(ownerSafeAddress, GnosisSafeABI, true);
@@ -58,6 +74,12 @@ export default function useMassPayout() {
   const usdc = useContract(USDC_ADDRESS, ERC20ABI, true); // eslint-disable-line
   const multiSend = useContract(MULTISEND_ADDRESS, MultiSendABI);
   const uniswapRouter = useContract(UNISWAP_ROUTER_ADDRESS, UniswapABI);
+
+  useEffect(() => {
+    if (!averageGasPrice)
+      // get gas prices
+      dispatch(getGasPrice());
+  }, [dispatch, averageGasPrice]);
 
   const encodeMultiSendCallData = (transactions, ethLibAdapter) => {
     const standardizedTxs = transactions.map(standardizeTransaction);
@@ -83,16 +105,14 @@ export default function useMassPayout() {
   const getUniswapTransactions = (tokenName, tokenAmount, toAddress) => {
     // TODO: come up with a better solution for max amount in
     // should calculate max amount needed for the swap from uniswap
-    const amountIn = BigNumber.from(
-      ethers.utils.parseEther(String(Number.MAX_SAFE_INTEGER))
-    );
+    const amountIn = parseEther(String(Number.MAX_SAFE_INTEGER));
 
     const amountOut = getAmountInWei(tokenName, tokenAmount);
     const uniswapData = uniswapRouter.interface.encodeFunctionData(
       "swapTokensForExactTokens",
       [
-        BigNumber.from(amountOut),
-        BigNumber.from(amountIn),
+        amountOut,
+        amountIn,
         [DAI_ADDRESS, WETH_ADDRESS, USDC_ADDRESS],
         toAddress,
         format(addDays(Date.now(), 1), "t"),
@@ -106,7 +126,7 @@ export default function useMassPayout() {
         value: 0,
         data: dai.interface.encodeFunctionData("approve", [
           UNISWAP_ROUTER_ADDRESS,
-          BigNumber.from(amountIn),
+          amountIn,
         ]),
       },
       {
@@ -179,6 +199,19 @@ export default function useMassPayout() {
         setLoadingTx(true);
         setTxHash("");
 
+        const gasLimit = await proxyContract.estimateGas.execTransaction(
+          MULTISEND_ADDRESS,
+          valueWei,
+          data,
+          operation,
+          txGasEstimate,
+          baseGasEstimate,
+          gasPrice,
+          gasToken,
+          executor,
+          autoApprovedSignature
+        );
+
         const tx = await proxyContract.execTransaction(
           MULTISEND_ADDRESS,
           valueWei,
@@ -190,7 +223,10 @@ export default function useMassPayout() {
           gasToken,
           executor,
           autoApprovedSignature,
-          { gasLimit: "300000", gasPrice: "10000000000" }
+          {
+            gasLimit: Math.floor(gasLimit.toNumber() * 2.75), // giving a little higher gas limit just in case
+            gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
+          }
         );
         setTxHash(tx.hash);
         setLoadingTx(false);

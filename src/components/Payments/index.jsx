@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLongArrowAltLeft,
@@ -9,7 +9,6 @@ import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { cryptoUtils } from "parcel-sdk";
 
 import { Info } from "components/Dashboard/styles";
-import { SideNavContext } from "context/SideNavContext";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
 import viewDepartmentsReducer from "store/view-departments/reducer";
@@ -116,7 +115,6 @@ const navStyles = `
 
 export default function People() {
   const [sign] = useLocalStorage("SIGNATURE");
-  const [toggled] = useContext(SideNavContext);
 
   const [checked, setChecked] = useState([]);
   const [isCheckedAll, setIsCheckedAll] = useState(false);
@@ -488,7 +486,7 @@ export default function People() {
         <Info>
           <div
             style={{
-              maxWidth: toggled ? "900px" : "1200px",
+              maxWidth: "1200px",
               transition: "all 0.25s linear",
             }}
             className="mx-auto"
@@ -511,7 +509,7 @@ export default function People() {
         </Info>
         <Container
           style={{
-            maxWidth: toggled ? "900px" : "1200px",
+            maxWidth: "1200px",
             transition: "all 0.25s linear",
           }}
         >

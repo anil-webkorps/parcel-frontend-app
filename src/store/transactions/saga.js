@@ -24,6 +24,7 @@ function* addTransaction({ body }) {
     fiatValue,
     addresses,
     fiatCurrency,
+    transactionMode,
   } = body;
   const options = {
     method: "POST",
@@ -37,6 +38,7 @@ function* addTransaction({ body }) {
       fiatValue,
       addresses,
       fiatCurrency,
+      transactionMode,
     }),
     headers: {
       "content-type": "application/json",

@@ -13,7 +13,8 @@ export const supportedWallets = [
   // Add other wallets and connectors here
 ];
 
-export const DEFAULT_GAS_PRICE = "100000000000"; // 100 gwei
+export const DEFAULT_GAS_PRICE = "10000000000"; // 100 gwei
+export const ONE_GWEI = "100000000";
 
 export const MESSAGE_TO_SIGN = "I hereby sign and authorize Parcel.";
 

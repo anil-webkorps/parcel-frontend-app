@@ -165,6 +165,7 @@ export default function Transactions() {
                         transactionFees,
                         status,
                         createdOn,
+                        transactionMode,
                       },
                       idx
                     ) => {
@@ -200,6 +201,7 @@ export default function Transactions() {
                                 transactionFees,
                                 status,
                                 createdOn,
+                                transactionMode,
                               })
                             }
                           >
@@ -233,8 +235,10 @@ export default function Transactions() {
     transactionFees,
     status,
     createdOn,
+    transactionMode,
   }) => {
     const paidTeammates = getDecryptedDetails(to);
+    const isQuickTransfer = transactionMode === 1;
 
     return (
       <div
@@ -282,12 +286,19 @@ export default function Transactions() {
               right: "0",
             }}
           >
-            <TableHead col={3} style={{ width: "683px" }} className="mx-auto">
-              <div>Full Name</div>
-              <div>Disbursement</div>
-              <div>Address</div>
-            </TableHead>
-
+            {!isQuickTransfer ? (
+              <TableHead col={3} style={{ width: "683px" }} className="mx-auto">
+                <div>Full Name</div>
+                <div>Disbursement</div>
+                <div>Address</div>
+              </TableHead>
+            ) : (
+              <TableHead
+                col={1}
+                style={{ width: "683px" }}
+                className="mx-auto"
+              ></TableHead>
+            )}
             <TableBody
               className="mx-auto"
               style={{
@@ -302,10 +313,39 @@ export default function Transactions() {
                   ({
                     firstName,
                     lastName,
+                    description,
                     address,
                     salaryAmount,
                     salaryToken,
                   }) => {
+                    if (isQuickTransfer)
+                      return (
+                        <div>
+                          <div className="grid my-4 mx-4">
+                            <Detail>
+                              <div className="title">Paid To</div>
+                              <div className="desc">
+                                {minifyAddress(address)}
+                              </div>
+                            </Detail>
+                            <Detail>
+                              <div className="title">Disbursement</div>
+                              <div className="desc">
+                                {salaryAmount} {salaryToken}
+                              </div>
+                            </Detail>
+                          </div>
+                          <div className="d-flex mx-4">
+                            <Detail className="w-100">
+                              <div className="title">Description</div>
+                              <div className="desc">
+                                {description || `No description given...`}
+                              </div>
+                            </Detail>
+                          </div>
+                        </div>
+                      );
+
                     return (
                       <TableRow col={3} key={`${transactionId}-${address}`}>
                         <div>
