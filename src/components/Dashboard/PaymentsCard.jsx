@@ -30,7 +30,8 @@ import { TransactionUrl } from "components/common/Web3Utils";
 import StatusText from "components/Transactions/StatusText";
 
 import TeamMembersPng from "assets/images/team-members.png";
-import { GreyCard, TransactionDetails } from "./styles";
+import TeamPng from "assets/images/user-team.png";
+import { GreyCard, TransactionDetails, TeammateCard } from "./styles";
 
 const transactionsKey = "transactions";
 const viewTeammatesKey = "viewTeammates";
@@ -92,7 +93,7 @@ export default function PaymentsCard() {
   useEffect(() => {
     if (transactions && transactions.length > 0) {
       setState(STATES.TRANSACTION_EXECUTED);
-      const [latestTx] = transactions;
+      const latestTx = transactions[transactions.length - 1];
       const transactionData = {
         amountPaid: latestTx.fiatValue,
         currency: latestTx.fiatCurrency,
@@ -112,7 +113,7 @@ export default function PaymentsCard() {
       case STATES.EMPTY_STATE:
         return `Add Team Members`;
       case STATES.TEAMMATES_ADDED:
-        return `Send Money to Teammates`;
+        return `Your Teammates`;
       case STATES.TRANSACTION_EXECUTED:
         return `Transaction Status`;
       default:
@@ -125,9 +126,22 @@ export default function PaymentsCard() {
       case STATES.EMPTY_STATE:
         return `To send money to your teammates`;
       case STATES.TEAMMATES_ADDED:
-        return `To see latest transactions here`;
+        return `Teammates you recently added`;
       case STATES.TRANSACTION_EXECUTED:
         return `Most recent transaction`;
+      default:
+        return null;
+    }
+  };
+
+  const getLinkByState = () => {
+    switch (state) {
+      case STATES.EMPTY_STATE:
+        return `/dashboard/people`;
+      case STATES.TEAMMATES_ADDED:
+        return `/dashboard/people`;
+      case STATES.TRANSACTION_EXECUTED:
+        return `/dashboard/transactions`;
       default:
         return null;
     }
@@ -141,7 +155,7 @@ export default function PaymentsCard() {
             <div className="card-title">{renderStepTitle()}</div>
             <div className="card-subtitle">{renderStepSubtitle()}</div>
           </div>
-          <Link to="/dashboard/payments">
+          <Link to={getLinkByState()}>
             <div className="circle">
               <FontAwesomeIcon icon={faArrowRight} color="#fff" />
             </div>
@@ -203,14 +217,23 @@ export default function PaymentsCard() {
           </GreyCard>
         )}
 
-        {!loading && state === STATES.TEAMMATES_ADDED && (
-          <GreyCard>
-            <img src={TeamMembersPng} alt="teams" width="320" />
-            <div className="card-subtitle text-center">
-              You can add team members to set-up your teams and their payroll.
-            </div>
-          </GreyCard>
-        )}
+        {!loading &&
+          state === STATES.TEAMMATES_ADDED &&
+          teammates &&
+          teammates.slice(0, 3).map((teammate) => {
+            const { firstName, lastName } = getDecryptedDetails(teammate.data);
+            return (
+              <TeammateCard key={teammate.data}>
+                <img src={TeamPng} alt="teams" width="32" />
+                <div className="ml-3">
+                  <div className="team-title">
+                    {firstName} {lastName}
+                  </div>
+                  <div className="team-subtitle">{teammate.departmentName}</div>
+                </div>
+              </TeammateCard>
+            );
+          })}
       </Card>
     </div>
   );
