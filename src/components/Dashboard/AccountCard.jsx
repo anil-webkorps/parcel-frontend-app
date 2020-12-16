@@ -97,6 +97,17 @@ export default function AccountCard() {
     dispatch(getMarketRates());
   }, [dispatch]);
 
+  const getDefaultIconIfPossible = (tokenSymbol) => {
+    switch (tokenSymbol) {
+      case "DAI":
+        return DAIIcon;
+      case "USDC":
+        return USDCIcon;
+      default:
+        return null;
+    }
+  };
+
   useEffect(() => {
     if (balances && balances.length > 0 && prices) {
       const seenTokens = {};
@@ -109,11 +120,12 @@ export default function AccountCard() {
               .toString();
             // mark as seen
             seenTokens[bal.token.symbol] = true;
+            const tokenIcon = getDefaultIconIfPossible(bal.token.symbol);
 
             return {
               id: idx,
               name: bal.token && bal.token.symbol,
-              icon: bal.token.logoUri,
+              icon: tokenIcon ? tokenIcon : bal.token.logoUri,
               balance,
               usd: bal.token
                 ? balance * prices[bal.token.symbol]
@@ -140,7 +152,7 @@ export default function AccountCard() {
         );
         setTokenDetails([...allTokenDetails, ...zeroBalanceTokensToShow]);
       } else {
-        setTokenDetails(allTokenDetails.split(0, 3));
+        setTokenDetails(allTokenDetails.slice(0, 3));
       }
     }
   }, [balances, prices]);
