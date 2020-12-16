@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLongArrowAltLeft,
   faLongArrowAltRight,
-  faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
@@ -50,6 +49,7 @@ import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
+import TeamPng from "assets/images/user-team.png";
 
 import { Container, Table, PaymentSummary, TokenBalance } from "./styles";
 import TransactionSubmitted from "./TransactionSubmitted";
@@ -422,11 +422,7 @@ export default function People() {
               >
                 <div className="upper">
                   <div className="d-flex justify-content-between">
-                    <FontAwesomeIcon
-                      icon={faUsers}
-                      color="#rgba(55, 55, 55, 0.3)"
-                      size="2x"
-                    />
+                    <img src={TeamPng} alt={name} width="50" />
                     <div className="circle circle-grey">
                       <FontAwesomeIcon
                         icon={faLongArrowAltRight}

@@ -1,12 +1,11 @@
 import React from "react";
 import { Modal, ModalHeader } from "reactstrap";
 import { connectModal as reduxModal } from "redux-modal";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserCircle } from "@fortawesome/free-solid-svg-icons";
 
 import CopyButton from "components/common/Copy";
 import { minifyAddress } from "components/common/Web3Utils";
 import { numToOrd } from "utils/date-helpers";
+import TeamPng from "assets/images/user-team.png";
 
 import { Title, Heading, Summary } from "./styles";
 import { Circle } from "components/Header/styles";
@@ -42,12 +41,7 @@ function TeammateDetailsModal(props) {
       </ModalHeader>
       <Summary className="mb-3 mx-auto" style={{ maxWidth: "420px" }}>
         <div className="left">
-          <FontAwesomeIcon
-            icon={faUserCircle}
-            color="#fff"
-            size="3x"
-            style={{ width: "80px", margin: "auto" }}
-          />
+          <img src={TeamPng} alt="teammate" width="80" />
         </div>
         <div className="right">
           <div className="mb-3">

@@ -8,8 +8,13 @@ export default styled.div`
   align-items: center;
 
   &:hover {
-    opacity: 0.6;
     transition: 0.3s;
+    background-color: #665dca;
+    opacity: 0.8;
+  }
+
+  &.active {
+    background-color: #665dca;
   }
 
   a:focus {

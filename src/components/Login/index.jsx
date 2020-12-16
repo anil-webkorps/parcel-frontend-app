@@ -7,7 +7,6 @@ import {
   faLock,
   faMinus,
   faPlus,
-  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { cryptoUtils } from "parcel-sdk";
 import { utils } from "ethers";
@@ -61,6 +60,7 @@ import { useInjectSaga } from "utils/injectSaga";
 import { loginUser } from "store/login/actions";
 import { registerUser } from "store/register/actions";
 import Loading from "components/common/Loading";
+import TeamPng from "assets/images/user-team.png";
 
 import {
   Background,
@@ -642,7 +642,7 @@ const Login = () => {
             <div className="top">
               <div className="details">
                 <div className="icon">
-                  <FontAwesomeIcon icon={faUser} color="#aaa" />
+                  <img src={TeamPng} alt="user" width="50" />
                 </div>
                 <div className="info">
                   <div className="desc">Name</div>

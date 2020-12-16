@@ -1,10 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faLongArrowAltRight,
-  faPlus,
-  faUsers,
-} from "@fortawesome/free-solid-svg-icons";
+import { faLongArrowAltRight, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -27,6 +23,7 @@ import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 
 import TeamMembersPng from "assets/images/team-members.png";
+import TeamPng from "assets/images/user-team.png";
 
 import { Container, AllEmployees } from "./styles";
 import { Circle } from "components/Header/styles";
@@ -175,12 +172,7 @@ export default function People() {
                     <Card className="department-card">
                       <div className="upper">
                         <div className="d-flex justify-content-between">
-                          <FontAwesomeIcon
-                            icon={faUsers}
-                            color="rgba(55, 55, 55, 0.3)"
-                            style={{ width: "50px" }}
-                            size="2x"
-                          />
+                          <img src={TeamPng} alt={name} width="50" />
                           <div className="circle circle-grey">
                             <FontAwesomeIcon
                               icon={faLongArrowAltRight}

@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useLocation } from "react-router-dom";
 // import { faTimes, faBars } from "@fortawesome/free-solid-svg-icons";
 
 // import { SideNavContext } from "context/SideNavContext";
@@ -9,6 +10,7 @@ import navItems from "./navItems";
 import { NavItem, SideNav, Version } from "./styles";
 
 export default function Navbar() {
+  const location = useLocation();
   useEffect(() => {
     const sidebar = document.getElementById("sidebar");
 
@@ -33,7 +35,11 @@ export default function Navbar() {
     <div>
       <SideNav id="sidebar">
         {navItems.map(({ id, link, name, icon, ...rest }) => (
-          <NavItem key={id} {...rest}>
+          <NavItem
+            key={id}
+            className={location.pathname === link ? "active" : ""}
+            {...rest}
+          >
             <Link to={link}>
               <div className="icon">
                 <FontAwesomeIcon icon={icon} color="#fff" />

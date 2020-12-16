@@ -4,8 +4,6 @@ import {
   faLongArrowAltLeft,
   faLongArrowAltRight,
   faPlus,
-  faUsers,
-  faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
@@ -48,6 +46,7 @@ import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Dropzone from "components/common/Dropzone";
 import { minifyAddress } from "components/common/Web3Utils";
+import TeamPng from "assets/images/user-team.png";
 
 import {
   Container,
@@ -446,11 +445,7 @@ export default function AddTeammate() {
         <ChooseDepartment onClick={onChangeDepartmentClicked}>
           <div>
             <div className="text-left mb-2">
-              <FontAwesomeIcon
-                icon={faUsers}
-                color="rgba(55, 55, 55, 0.3)"
-                size="2x"
-              />
+              <img src={TeamPng} alt={chosenDepartment.name} width="50" />
             </div>
             <Title className="mb-1 choosen-dept">{chosenDepartment.name}</Title>
             <Heading className="choosen-dept">
@@ -487,11 +482,7 @@ export default function AddTeammate() {
                 onClick={() => onSelectDepartment(department)}
               >
                 <div className="small-card">
-                  <FontAwesomeIcon
-                    icon={faUsers}
-                    color="rgba(55, 55, 55, 0.3)"
-                    size="2x"
-                  />
+                  <img src={TeamPng} alt={department.name} width="50" />
                 </div>
                 <div className="department-name">{department.name}</div>
               </div>
@@ -659,12 +650,7 @@ export default function AddTeammate() {
           <Heading>Wow! You have a new champ on-board</Heading>
           <Summary style={{ marginBottom: "13em" }}>
             <div className="left">
-              <FontAwesomeIcon
-                icon={faUserCircle}
-                color="#fff"
-                size="3x"
-                style={{ margin: "auto", width: "80px" }}
-              />
+              <img src={TeamPng} alt="teammate" width="80" />
             </div>
             <div className="right">
               <div className="mb-3">
