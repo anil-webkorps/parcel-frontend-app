@@ -49,6 +49,7 @@ import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 import TeamPng from "assets/images/user-team.png";
+import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 
 import { Container, Table, PaymentSummary, TokenBalance } from "./styles";
 import TransactionSubmitted from "./TransactionSubmitted";
@@ -124,7 +125,8 @@ export default function People() {
   const { loadingTx, txHash, recievers, massPayout } = useMassPayout();
   const [selectedRows, setSelectedRows] = useState([]);
   const [departmentStep, setDepartmentStep] = useState(0);
-  const [payTokenBalance, setPayTokenBalance] = useState(0); // for now, this is DAI
+  const [payTokenBalanceInUSD, setPayTokenBalanceInUSD] = useState(0); // for now, this is DAI
+  const [payTokenBalance, setPayTokenBalance] = useState(0);
   const [submittedTx, setSubmittedTx] = useState(false);
 
   const toggle = (tab) => {
@@ -170,11 +172,15 @@ export default function People() {
         if (balances[i].token && balances[i].token.symbol === tokens.DAI)
           tokenBalanceObj = balances[i];
       }
-      if (tokenBalanceObj)
-        setPayTokenBalance(
+      if (tokenBalanceObj) {
+        setPayTokenBalanceInUSD(
           (tokenBalanceObj.balance / 10 ** tokenBalanceObj.token.decimals) *
             prices[tokens.DAI]
         );
+        setPayTokenBalance(
+          tokenBalanceObj.balance / 10 ** tokenBalanceObj.token.decimals
+        );
+      }
     }
   }, [balances, prices]);
 
@@ -311,7 +317,7 @@ export default function People() {
       return (
         <div
           className="d-flex align-items-center justify-content-center"
-          style={{ height: "300px" }}
+          style={{ height: "400px" }}
         >
           No Teammates Found!
         </div>
@@ -398,7 +404,7 @@ export default function People() {
   };
 
   const renderDepartments = () => {
-    if (!allDepartments.length) {
+    if (!allDepartments || !allDepartments.length) {
       return (
         <div
           className="d-flex align-items-center justify-content-center"
@@ -458,10 +464,10 @@ export default function People() {
           <div>
             <div className="payment-title">Balance after payment</div>
             <div className="payment-subtitle">
-              {payTokenBalance - totalAmountToPay > 0
-                ? `US$ ${parseFloat(payTokenBalance - totalAmountToPay).toFixed(
-                    2
-                  )}`
+              {payTokenBalanceInUSD - totalAmountToPay > 0
+                ? `US$ ${parseFloat(
+                    payTokenBalanceInUSD - totalAmountToPay
+                  ).toFixed(2)}`
                 : `Insufficient Balance`}
             </div>
           </div>
@@ -499,10 +505,18 @@ export default function People() {
                 </div>
               </div>
               <TokenBalance>
-                <div className="balance-value">
-                  US$ {parseFloat(payTokenBalance).toFixed(2)}
+                <div className="token-icon">
+                  <img src={DAIIcon} alt="token" width="45" />
                 </div>
-                <div className="balance-text">Your DAI balance</div>
+                <div className="balance-info">
+                  <div className="balance-text">Paying from DAI</div>
+                  <div className="balance-value">
+                    {parseFloat(payTokenBalance).toFixed(2)} DAI (US$
+                    {parseFloat(payTokenBalanceInUSD).toFixed(2)})
+                  </div>
+                </div>
+                <div className="separator"></div>
+                <div className="change-text">CHANGE</div>
               </TokenBalance>
             </div>
           </div>
@@ -561,7 +575,7 @@ export default function People() {
                   {!loadingTeammates &&
                     !loadingDepartments &&
                     (departmentStep === 0 ? (
-                      allDepartments && renderDepartments()
+                      renderDepartments()
                     ) : (
                       <div>
                         <Button iconOnly onClick={goBackToDepartments}>

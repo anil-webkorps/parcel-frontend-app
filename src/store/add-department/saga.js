@@ -14,9 +14,9 @@ function* addDepartment(action) {
       createdBy: action.createdBy,
       payCycleDate: action.payCycleDate,
     }),
-    headers: {
-      "content-type": "application/json",
-    },
+    // headers: {
+    //   "content-type": "application/json",
+    // },
   };
 
   try {

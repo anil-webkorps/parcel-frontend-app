@@ -27,6 +27,7 @@ export function* loginUser(action) {
       // Error in payload
       yield put(loginUserError(result.log));
     } else {
+      localStorage.setItem("token", result.access_token);
       yield put(loginUserSuccess(result.transactionHash, result.log));
       yield put(push("/dashboard"));
     }

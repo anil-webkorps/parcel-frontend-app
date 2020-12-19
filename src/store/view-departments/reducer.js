@@ -6,8 +6,6 @@ import {
 } from "./action-types";
 
 export const initialState = {
-  step: 0,
-  form: {},
   loading: false,
   departments: undefined,
   error: false,

@@ -10,6 +10,7 @@ import { reducer as modal } from "redux-modal";
 
 import globalReducer from "./global/reducer";
 import themeReducer from "./theme/reducer";
+import authReducer from "./auth/reducer";
 import history from "utils/history";
 
 // Config for redux-persist
@@ -27,6 +28,7 @@ export default function createReducer(injectedReducers = {}) {
     global: globalReducer,
     router: connectRouter(history),
     theme: themeReducer,
+    auth: authReducer,
     modal,
     ...injectedReducers,
   });

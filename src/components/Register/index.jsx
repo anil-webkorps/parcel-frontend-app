@@ -61,6 +61,7 @@ const STEPS = {
 
 const FLOWS = {
   COMPANY: "COMPANY",
+  INDIVIDUAL_WITH_COMPANY: "INDIVIDUAL_WITH_COMPANY", // a temporary flow for company, till multi owner is supported
   INDIVIDUAL: "INDIVIDUAL",
 };
 
@@ -69,6 +70,7 @@ const getStepsByFlow = (flow) => {
     case FLOWS.COMPANY:
       return COMPANY_REGISTER_STEPS;
     case FLOWS.INDIVIDUAL:
+    case FLOWS.INDIVIDUAL_WITH_COMPANY:
       return INDIVIDUAL_REGISTER_STEPS;
     default:
       return COMPANY_REGISTER_STEPS;
@@ -80,6 +82,7 @@ const getStepsCountByFlow = (flow) => {
     case FLOWS.COMPANY:
       return Object.keys(COMPANY_REGISTER_STEPS).length - 1;
     case FLOWS.INDIVIDUAL:
+    case FLOWS.INDIVIDUAL_WITH_COMPANY:
       return Object.keys(INDIVIDUAL_REGISTER_STEPS).length - 1;
     default:
       return Object.keys(COMPANY_REGISTER_STEPS).length - 1;
@@ -183,7 +186,9 @@ const Register = () => {
     dispatch(updateForm(values));
     // const lastStep = getStepsCountByFlow(formData.flow);
     if (
-      ((formData.flow === FLOWS.INDIVIDUAL && step === STEPS.TWO) ||
+      (((formData.flow === FLOWS.INDIVIDUAL ||
+        formData.flow === FLOWS.INDIVIDUAL_WITH_COMPANY) &&
+        step === STEPS.TWO) ||
         (formData.flow === FLOWS.COMPANY && step === STEPS.FOUR)) &&
       !formData.referralId
     ) {
@@ -481,6 +486,38 @@ const Register = () => {
     );
   };
 
+  const renderIndividualWithCompanyName = () => {
+    return (
+      <StepDetails>
+        <Img
+          src={CompanyPng}
+          alt="company"
+          className="my-3"
+          width="130px"
+          style={{ minWidth: "130px" }}
+        />
+        <h3 className="title">What is your Company Name</h3>
+        <p className="subtitle">You’ll be know by this name on Parcel.</p>
+        <Input
+          name="name"
+          register={register}
+          required={`Individual Name is required`}
+          placeholder="John Doe"
+        />
+        <ErrorMessage name="name" errors={errors} />
+        <Button
+          large
+          type="submit"
+          className="mt-4"
+          loading={createSafeLoading}
+          disabled={createSafeLoading}
+        >
+          Create Safe and Proceed
+        </Button>
+      </StepDetails>
+    );
+  };
+
   const renderOwnerDetails = () => {
     return (
       <StepDetails>
@@ -678,15 +715,9 @@ const Register = () => {
             register={register}
             type="radio"
             id={`flow-company`}
-            value={FLOWS.COMPANY}
-            label={
-              <span>
-                I have a Company{" "}
-                <span style={{ fontSize: "12px" }}>(coming soon)</span>
-              </span>
-            }
+            value={FLOWS.INDIVIDUAL_WITH_COMPANY} // Change this later to FLOWS.COMPANY
+            label={"I have a Company"}
             labelStyle={{ minWidth: "260px" }}
-            disabled
           />
         </div>
 
@@ -710,6 +741,8 @@ const Register = () => {
 
       case STEPS.TWO: {
         if (formData.flow === FLOWS.COMPANY) return renderCompanyName();
+        else if (formData.flow === FLOWS.INDIVIDUAL_WITH_COMPANY)
+          return renderIndividualWithCompanyName();
         else return renderIndividualName();
       }
 

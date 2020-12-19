@@ -41,10 +41,10 @@ const navItems = [
   },
   {
     id: 5,
-    link: "/dashboard",
+    link: "/dashboard/support",
     name: "Support",
     icon: faQuestionCircle,
-    style: { position: "absolute", top: "78%", minWidth: "100px" },
+    style: { position: "absolute", top: "75%", minWidth: "100px" },
   },
 ];
 

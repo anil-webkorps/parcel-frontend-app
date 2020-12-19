@@ -16,5 +16,15 @@ function checkStatus(response) {
 }
 
 export default function request(url, options) {
-  return fetch(url, options).then(checkStatus).then(parseJSON);
+  const token = localStorage.getItem("token");
+  const finalOptions = {
+    ...options,
+    headers: {
+      "content-type": "application/json",
+      Authorization: token ? `Bearer ${token}` : "",
+      ...options.headers,
+    },
+  };
+  console.log({ finalOptions });
+  return fetch(url, finalOptions).then(checkStatus).then(parseJSON);
 }

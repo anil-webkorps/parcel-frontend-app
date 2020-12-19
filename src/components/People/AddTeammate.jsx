@@ -247,7 +247,6 @@ export default function AddTeammate() {
       joiningDate: Date.now(),
     };
 
-    console.log({ body });
     dispatch(addTeammate(body));
     setSuccess(true);
   };
@@ -278,8 +277,6 @@ export default function AddTeammate() {
   const onAddBulkTeammates = () => {
     if (!sign || !ownerSafeAddress) return;
 
-    console.log({ csvData });
-
     let index = 0;
     const uniqueDepartmentsHashmap = csvData.reduce(
       (hashmap, { departmentName }) => {
@@ -291,8 +288,6 @@ export default function AddTeammate() {
       },
       {}
     );
-
-    console.log({ uniqueDepartmentsHashmap });
 
     const finalData = Object.keys(uniqueDepartmentsHashmap)
       .reduce((data, uniqueDepartmentName) => {
@@ -341,8 +336,6 @@ export default function AddTeammate() {
         return data;
       }, [])
       .filter(Boolean);
-
-    console.log({ finalData });
 
     dispatch(
       addBulkTeammates({

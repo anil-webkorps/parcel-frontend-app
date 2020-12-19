@@ -32,6 +32,7 @@ export function* registerUser(action) {
       // Error in payload
       yield put(registerUserError(result.log));
     } else {
+      localStorage.setItem("token", result.access_token);
       yield put(registerUserSuccess(result.transactionHash, result.log));
       if (action.redirect) yield put(push("/dashboard"));
     }

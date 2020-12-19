@@ -91,6 +91,7 @@ const STEPS = {
 const FLOWS = {
   IMPORT: "IMPORT",
   LOGIN: "LOGIN",
+  IMPORT_INDIVIDUAL: "IMPORT_INDIVIDUAL",
 };
 
 const getStepsByFlow = (flow) => {
@@ -99,6 +100,8 @@ const getStepsByFlow = (flow) => {
       return IMPORT_STEPS;
     case FLOWS.LOGIN:
       return LOGIN_STEPS;
+    case FLOWS.IMPORT_INDIVIDUAL:
+      return IMPORT_INDIVIDUAL_STEPS;
     default:
       return LOGIN_STEPS;
   }
@@ -110,6 +113,8 @@ const getStepsCountByFlow = (flow) => {
       return Object.keys(IMPORT_STEPS).length - 1;
     case FLOWS.LOGIN:
       return Object.keys(LOGIN_STEPS).length - 1;
+    case FLOWS.IMPORT_INDIVIDUAL:
+      return Object.keys(IMPORT_INDIVIDUAL_STEPS).length - 1;
     default:
       return Object.keys(LOGIN_STEPS).length - 1;
   }
@@ -129,10 +134,18 @@ const IMPORT_STEPS = {
   [STEPS.FIVE]: "Threshold",
 };
 
+const IMPORT_INDIVIDUAL_STEPS = {
+  [STEPS.ZERO]: "Connect",
+  [STEPS.ONE]: "Privacy",
+  [STEPS.TWO]: "Choose Safe",
+  [STEPS.THREE]: "Company Name",
+};
+
 const Login = () => {
   const [sign, setSign] = useLocalStorage("SIGNATURE");
   const [hasAlreadySigned, setHasAlreadySigned] = useState(false);
   const [loadingAccount, setLoadingAccount] = useState(true);
+  const [finalSubmitted, setFinalSubmitted] = useState(false);
 
   const { active, account, library } = useActiveWeb3React();
 
@@ -208,7 +221,7 @@ const Login = () => {
       dispatch(fetchSafes(account));
     }
     if (step === STEPS.TWO && account) {
-      if (flow === FLOWS.IMPORT) {
+      if (flow === FLOWS.IMPORT || flow === FLOWS.IMPORT_INDIVIDUAL) {
         dispatch(getSafes(account));
       } else {
         dispatch(getParcelSafes(account));
@@ -217,8 +230,19 @@ const Login = () => {
   }, [step, dispatch, account, sign, flow]);
 
   useEffect(() => {
+    if (finalSubmitted) {
+      signup(1); // one owner
+    }
+  }, [finalSubmitted]); //eslint-disable-line
+
+  useEffect(() => {
+    // when an address is clicked in import flow,
+    // the login api is called, and it returns
+    // 145 => user not registered with parcel
+    // In this case, we take them through the register flow (with existing safe)
     if (flag === 145) {
-      dispatch(selectFlow(FLOWS.IMPORT));
+      // dispatch(selectFlow(FLOWS.IMPORT));
+      dispatch(selectFlow(FLOWS.IMPORT_INDIVIDUAL)); // remove this line later
       dispatch(chooseStep(STEPS.THREE));
       // goNext();
     }
@@ -229,6 +253,12 @@ const Login = () => {
 
     if (flow === FLOWS.IMPORT && step === getStepsCountByFlow(FLOWS.IMPORT)) {
       await signup(values.threshold);
+    } else if (
+      flow === FLOWS.IMPORT_INDIVIDUAL &&
+      step === getStepsCountByFlow(FLOWS.IMPORT_INDIVIDUAL)
+    ) {
+      setFinalSubmitted(true);
+      // await signup(1); // only one owner
     } else {
       goNext();
     }
@@ -261,11 +291,22 @@ const Login = () => {
   const signup = async (_threshold) => {
     // let body;
     if (gnosisSafeMasterContract && proxyFactory && account) {
-      const ownerAddresses = formData.owners.map(({ owner }) => owner);
-      const encryptedOwners = formData.owners.map(({ name, owner }) => ({
-        name: cryptoUtils.encryptData(name, sign),
-        owner,
-      }));
+      const ownerAddresses =
+        formData.owners && formData.owners.length
+          ? formData.owners.map(({ owner }) => owner)
+          : [account];
+      const encryptedOwners =
+        formData.owners && formData.owners.length
+          ? formData.owners.map(({ name, owner }) => ({
+              name: cryptoUtils.encryptData(name, sign),
+              owner,
+            }))
+          : [
+              {
+                name: cryptoUtils.encryptData(formData.name, sign),
+                owner: account,
+              },
+            ];
 
       const threshold = formData.threshold
         ? parseInt(formData.threshold)
@@ -331,7 +372,7 @@ const Login = () => {
                   type="button"
                   large
                   className="secondary"
-                  onClick={() => handleSelectFlow(FLOWS.IMPORT)}
+                  onClick={() => handleSelectFlow(FLOWS.IMPORT_INDIVIDUAL)}
                 >
                   Import Existing Safe
                 </Button>
@@ -385,7 +426,7 @@ const Login = () => {
         <Img
           src={CompanyPng}
           alt="company"
-          className="my-2"
+          className="my-4"
           width="130px"
           style={{ minWidth: "130px" }}
         />
@@ -398,7 +439,7 @@ const Login = () => {
           placeholder="Awesome Company Inc"
         />
         <ErrorMessage name="name" errors={errors} />
-        <Button large type="submit" className="mt-3">
+        <Button large type="submit" className="mt-4">
           Proceed
         </Button>
       </StepDetails>
@@ -587,7 +628,7 @@ const Login = () => {
 
   const safeDetails = useMemo(() => {
     return safes.reduce((details, safe) => {
-      if (flow === FLOWS.IMPORT) {
+      if (flow === FLOWS.IMPORT || flow === FLOWS.IMPORT_INDIVIDUAL) {
         return details.concat({
           safe,
           name: "Gnosis Safe User",
@@ -609,7 +650,7 @@ const Login = () => {
     dispatch(loginUser(safe));
   };
   const handleRefetch = useCallback(() => {
-    if (flow === FLOWS.IMPORT) {
+    if (flow === FLOWS.IMPORT || flow === FLOWS.IMPORT_INDIVIDUAL) {
       dispatch(getSafes(account, 1)); // 1 => get safes from gnosis api
     } else {
       dispatch(getParcelSafes(account));
@@ -684,6 +725,41 @@ const Login = () => {
     );
   };
 
+  const renderSteps = () => {
+    switch (step) {
+      case STEPS.ZERO: {
+        return renderConnect();
+      }
+
+      case STEPS.ONE: {
+        return renderPrivacy();
+      }
+
+      case STEPS.TWO: {
+        return renderSafes();
+      }
+
+      case STEPS.THREE: {
+        if (flow === FLOWS.IMPORT) return renderOwnerDetails();
+        if (flow === FLOWS.IMPORT_INDIVIDUAL) return renderCompanyName();
+        return null;
+      }
+
+      case STEPS.FOUR: {
+        if (flow === FLOWS.IMPORT) return renderCompanyName();
+        return null;
+      }
+
+      case STEPS.FIVE: {
+        if (flow === FLOWS.IMPORT) return renderThreshold();
+        return null;
+      }
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <Background withImage minHeight="92vh" className="py-3">
       <Container>
@@ -695,14 +771,7 @@ const Login = () => {
           }}
         >
           {step !== STEPS.ZERO && renderStepHeader()}
-          <form onSubmit={handleSubmit(onSubmit)}>
-            {step === STEPS.ZERO && renderConnect()}
-            {step === STEPS.ONE && renderPrivacy()}
-            {step === STEPS.TWO && renderSafes()}
-            {step === STEPS.THREE && renderOwnerDetails()}
-            {step === STEPS.FOUR && renderCompanyName()}
-            {step === STEPS.FIVE && renderThreshold()}
-          </form>
+          <form onSubmit={handleSubmit(onSubmit)}>{renderSteps()}</form>
         </Card>
       </Container>
     </Background>

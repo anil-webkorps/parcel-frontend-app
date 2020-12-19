@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
 import { utils } from "ethers";
 
 import { MESSAGE_TO_SIGN } from "constants/index";
@@ -20,21 +19,23 @@ export default function useAuth() {
     return false;
   };
 
-  const history = useHistory();
   useEffect(() => {
     // TODO: Redirect to login page if the account is undefined
     // account is loaded with a delay, so we can't directly redirect if account === undefined
-    // Potential fix: Inside store, set account = "". Once account loads, overwrite it.
-    // account = "" (loading) / "0x..." (success) / undefined (error, redirect to login)
+    // Potential fix: check for account after timeout. if still undefined, log out
     if (account) {
       const isAuthenticated = checkValidSignature(sign, account);
-      if (!isAuthenticated) {
-        history.push("/"); // login
-      } else {
+      // if (!isAuthenticated) {
+      //   history.push("/"); // login
+      // } else {
+      //   setIsAuthenticated(true);
+      // }
+      const accessToken = localStorage.getItem("token");
+      if (isAuthenticated && accessToken) {
         setIsAuthenticated(true);
       }
     }
-  }, [history, sign, account]);
+  }, [sign, account]);
 
   return isAuthenticated;
 }
