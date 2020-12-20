@@ -25,6 +25,5 @@ export default function request(url, options) {
       ...options.headers,
     },
   };
-  console.log({ finalOptions });
   return fetch(url, finalOptions).then(checkStatus).then(parseJSON);
 }

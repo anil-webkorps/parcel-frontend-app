@@ -1,7 +1,3 @@
-/**
- * Gets the repositories of the user from Github
- */
-
 import { call, put, takeLatest } from "redux-saga/effects";
 import { push } from "connected-react-router";
 import { REGISTER_USER } from "./action-types";
@@ -10,9 +6,6 @@ import request from "utils/request";
 // import { makeSelectUsername } from "containers/HomePage/selectors";
 import { registerEndpoint } from "constants/endpoints";
 
-/**
- * Github repos request/response handler
- */
 export function* registerUser(action) {
   // Select username from store
   // const username = yield select(makeSelectUsername());

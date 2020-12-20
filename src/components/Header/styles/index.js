@@ -6,3 +6,4 @@ export { default as Logo } from "./Logo";
 export { default as AccountAddress } from "./AccountAddress";
 export { default as Circle } from "./Circle";
 export { default as Profile } from "./Profile";
+export { default as ProfileMenu } from "./ProfileMenu";

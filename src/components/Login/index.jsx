@@ -203,6 +203,10 @@ const Login = () => {
   }, [active, dispatch]);
 
   useEffect(() => {
+    dispatch(chooseStep(STEPS.ZERO)); // start from beginning, when component mounts
+  }, [dispatch]);
+
+  useEffect(() => {
     reset({
       owners: [{ name: "", owner: account }],
       ...formData,

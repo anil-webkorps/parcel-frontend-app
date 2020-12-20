@@ -17,7 +17,13 @@ export default styled.div`
   text-align: center;
   color: #ffffff;
   min-width: 200px;
-  margin-left: 20px;
+  z-index: 2;
+  cursor: pointer;
+
+  &:hover {
+    border-radius: 32px 32px 0 0;
+    padding: 4px;
+  }
 
   .name {
     font-size: 14px;
