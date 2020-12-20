@@ -31,6 +31,7 @@ import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import { numToOrd } from "utils/date-helpers";
 import Loading from "components/common/Loading";
+import { getDefaultIconIfPossible } from "constants/index";
 
 import { Container, Table, ActionItem } from "./styles";
 import { Circle } from "components/Header/styles";
@@ -169,6 +170,11 @@ export default function ViewTeammate() {
                     <div>{departmentName}</div>
                     <div>{numToOrd(payCycleDate)} of every month</div>
                     <div>
+                      <img
+                        src={getDefaultIconIfPossible(salaryToken)}
+                        alt={salaryToken}
+                        width="16"
+                      />{" "}
                       {salaryAmount} {salaryToken}
                     </div>
                     <div className="d-flex justify-content-end">

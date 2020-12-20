@@ -1,14 +1,15 @@
 /*
  * useMassPayout hook
- * This abstracts away the mass payout functionality
- * the massPayout function takes an array of objects, `recievers` with the keys:
+ * the massPayout function takes two params:
+ * an array of objects, `recievers` with the keys:
  * address, salaryToken("DAI"/"USDC" etc), salaryAmount(in ETH, "10"/"500" etc.)
+ * and the token to pay them from ("DAI"/"USDC" etc)
  * [{address: String, salaryToken: String, salaryAmount: String}]
  */
 
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { BigNumber } from "@ethersproject/bignumber";
+// import { BigNumber } from "@ethersproject/bignumber";
 import { parseEther } from "@ethersproject/units";
 import { addDays, format } from "date-fns";
 import { EthersAdapter } from "contract-proxy-kit";
@@ -34,6 +35,7 @@ import gasPriceReducer from "store/gas/reducer";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectAverageGasPrice } from "store/gas/selectors";
+import { getConfigByTokenNames } from "utils/massPayout";
 
 const gasPriceKey = "gas";
 
@@ -42,15 +44,9 @@ const {
   MULTISEND_ADDRESS,
   ZERO_ADDRESS,
   USDC_ADDRESS,
+  USDT_ADDRESS,
   UNISWAP_ROUTER_ADDRESS,
-  WETH_ADDRESS,
 } = addresses;
-
-const tokenNameToAddress = {
-  [tokens.DAI]: DAI_ADDRESS,
-  [tokens.USDC]: USDC_ADDRESS,
-  // add other tokens and addresses here
-};
 
 export default function useMassPayout() {
   const { account, library } = useActiveWeb3React();
@@ -70,8 +66,11 @@ export default function useMassPayout() {
 
   // contracts
   const proxyContract = useContract(ownerSafeAddress, GnosisSafeABI, true);
+  const [tokenFrom, setTokenFrom] = useState(tokens.DAI); // eslint-disable-line
   const dai = useContract(DAI_ADDRESS, ERC20ABI, true);
+  // const erc20 = useContract(tokenNameToAddress[tokenFrom], ERC20ABI, true);
   const usdc = useContract(USDC_ADDRESS, ERC20ABI, true); // eslint-disable-line
+  const usdt = useContract(USDT_ADDRESS, ERC20ABI, true); // eslint-disable-line
   const multiSend = useContract(MULTISEND_ADDRESS, MultiSendABI);
   const uniswapRouter = useContract(UNISWAP_ROUTER_ADDRESS, UniswapABI);
 
@@ -99,21 +98,44 @@ export default function useMassPayout() {
     ]);
   };
 
+  const getERC20ContractByName = (name) => {
+    switch (name) {
+      case tokens.DAI:
+        return dai;
+      case tokens.USDC:
+        return usdc;
+      case tokens.USDT:
+        return usdt;
+      default:
+        return dai;
+    }
+  };
+
   // if the tokens are different, add two transactions:
   // 1. approve uniswap router to spend the token (eg DAI)
   // 2. swap the input token for the output token using uniswap
-  const getUniswapTransactions = (tokenName, tokenAmount, toAddress) => {
+  const getUniswapTransactions = (
+    tokenTo,
+    tokenAmount,
+    toAddress,
+    tokenFrom
+  ) => {
     // TODO: come up with a better solution for max amount in
     // should calculate max amount needed for the swap from uniswap
     const amountIn = parseEther(String(Number.MAX_SAFE_INTEGER));
 
-    const amountOut = getAmountInWei(tokenName, tokenAmount);
+    const amountOut = getAmountInWei(tokenTo, tokenAmount);
+
+    const { functionName, path } = getConfigByTokenNames(tokenTo, tokenFrom);
+    const erc20 = getERC20ContractByName(tokenFrom);
+    if (!functionName || !path.length) return [];
+
     const uniswapData = uniswapRouter.interface.encodeFunctionData(
-      "swapTokensForExactTokens",
+      functionName,
       [
         amountOut,
         amountIn,
-        [DAI_ADDRESS, WETH_ADDRESS, USDC_ADDRESS],
+        path,
         toAddress,
         format(addDays(Date.now(), 1), "t"),
       ]
@@ -122,9 +144,9 @@ export default function useMassPayout() {
     return [
       {
         operation: 0, // CALL
-        to: DAI_ADDRESS,
+        to: erc20.address,
         value: 0,
-        data: dai.interface.encodeFunctionData("approve", [
+        data: erc20.interface.encodeFunctionData("approve", [
           UNISWAP_ROUTER_ADDRESS,
           amountIn,
         ]),
@@ -138,8 +160,9 @@ export default function useMassPayout() {
     ];
   };
 
-  const massPayout = async (recievers) => {
+  const massPayout = async (recievers, tokenFrom) => {
     setRecievers(recievers);
+    setTokenFrom(tokenFrom);
 
     if (account && library) {
       const ethLibAdapter = new EthersAdapter({
@@ -147,27 +170,32 @@ export default function useMassPayout() {
         signer: library.getSigner(account),
       });
 
+      const erc20 = getERC20ContractByName(tokenFrom);
+
       // If input and output tokens are different, swap using uniswap
       // If input and output tokens are same, simply call transfer
       const transactions = recievers.reduce(
         (tx, { address, salaryToken, salaryAmount }) => {
-          if (salaryToken !== tokens.DAI) {
-            // replace tokens.DAI with whatever input token is chosen
+          if (salaryToken !== tokenFrom) {
             tx.push(
-              ...getUniswapTransactions(salaryToken, salaryAmount, address)
+              ...getUniswapTransactions(
+                salaryToken,
+                salaryAmount,
+                address,
+                tokenFrom
+              )
             );
             return tx;
           }
 
+          const transferAmount = getAmountInWei(salaryToken, salaryAmount);
           tx.push({
             operation: 0, // CALL
-            to: tokenNameToAddress[salaryToken],
+            to: erc20.address,
             value: 0,
-            data: dai.interface.encodeFunctionData("transfer", [
+            data: erc20.interface.encodeFunctionData("transfer", [
               address,
-              BigNumber.from(salaryAmount).mul(
-                BigNumber.from(String(10 ** 18))
-              ),
+              transferAmount,
             ]),
           });
           return tx;

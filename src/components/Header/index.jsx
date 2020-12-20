@@ -7,6 +7,7 @@ import ConnectButton from "components/Connect";
 import DashboardHeader from "./DashboardHeader";
 import { useActiveWeb3React } from "hooks";
 import Button from "components/common/Button";
+import ParcelSvg from "assets/icons/parcel.svg";
 
 function PlainHeader() {
   const location = useLocation();
@@ -31,7 +32,7 @@ function PlainHeader() {
         <NavBarContent>
           <div className="d-flex justify-content-center align-items-center">
             <HeaderLink to="/" className="dashboard-link">
-              Parcel
+              <img src={ParcelSvg} alt="parcel" width="160" />
             </HeaderLink>
           </div>
           <NavGroup>

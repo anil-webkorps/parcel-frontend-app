@@ -2,18 +2,24 @@ import React, { useEffect, useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLongArrowAltLeft } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { BigNumber } from "@ethersproject/bignumber";
 import { cryptoUtils } from "parcel-sdk";
+import { show } from "redux-modal";
 
 import TransactionSubmitted from "components/Payments/TransactionSubmitted";
 import { Info } from "components/Dashboard/styles";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
 import Img from "components/common/Img";
-import { Input, ErrorMessage, Select, TextArea } from "components/common/Form";
+import {
+  Input,
+  ErrorMessage,
+  TextArea,
+  SelectTokenDropdown,
+} from "components/common/Form";
 import { useMassPayout, useLocalStorage } from "hooks";
 import transactionsReducer from "store/transactions/reducer";
 import transactionsSaga from "store/transactions/saga";
@@ -34,11 +40,19 @@ import {
 import { makeSelectPrices } from "store/market-rates/selectors";
 import Loading from "components/common/Loading";
 import { getMarketRates } from "store/market-rates/actions";
-import { tokens } from "constants/index";
+import {
+  tokens,
+  getDefaultIconIfPossible,
+  defaultTokenDetails,
+} from "constants/index";
+import SelectTokenModal, {
+  MODAL_NAME as SELECT_TOKEN_MODAL,
+} from "components/Payments/SelectTokenModal";
 
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
-import DAIIcon from "assets/icons/tokens/DAI-icon.png";
-import USDCIcon from "assets/icons/tokens/USDC-icon.png";
+// import DAIIcon from "assets/icons/tokens/DAI-icon.png";
+// import USDCIcon from "assets/icons/tokens/USDC-icon.png";
+// import USDTIcon from "assets/icons/tokens/USDT-icon.png";
 import {
   Container,
   Title,
@@ -53,36 +67,6 @@ const dashboardKey = "dashboard";
 const marketRatesKey = "marketRates";
 const transactionsKey = "transactions";
 
-const DEFAULT_TOKENS = {
-  ETH: "ETH",
-  DAI: "DAI",
-  USDC: "USDC",
-};
-
-const defaultTokenDetails = [
-  {
-    id: 0,
-    name: DEFAULT_TOKENS.ETH,
-    icon: ETHIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
-  {
-    id: 1,
-    name: DEFAULT_TOKENS.DAI,
-    icon: DAIIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
-  {
-    id: 2,
-    name: DEFAULT_TOKENS.USDC,
-    icon: USDCIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
-];
-
 export default function QuickTransfer() {
   const [sign] = useLocalStorage("SIGNATURE");
 
@@ -90,9 +74,7 @@ export default function QuickTransfer() {
   const [submittedTx, setSubmittedTx] = useState(false);
   const [selectedTokenDetails, setSelectedTokenDetails] = useState();
   // eslint-disable-next-line
-  const [selectedTokenName, setSelectedTokenName] = useState(
-    DEFAULT_TOKENS.DAI
-  );
+  const [selectedTokenName, setSelectedTokenName] = useState(tokens.DAI);
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
   const [payoutDetails, setPayoutDetails] = useState(null);
 
@@ -106,7 +88,7 @@ export default function QuickTransfer() {
   useInjectSaga({ key: marketRatesKey, saga: marketRatesSaga });
   useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
 
-  const { register, errors, handleSubmit, formState } = useForm({
+  const { register, errors, handleSubmit, formState, control } = useForm({
     mode: "onChange",
   });
 
@@ -120,9 +102,10 @@ export default function QuickTransfer() {
   const prices = useSelector(makeSelectPrices());
 
   useEffect(() => {
-    setSelectedTokenDetails(
-      tokenDetails.filter(({ name }) => name === selectedTokenName)[0]
-    );
+    if (selectedTokenName)
+      setSelectedTokenDetails(
+        tokenDetails.filter(({ name }) => name === selectedTokenName)[0]
+      );
   }, [tokenDetails, selectedTokenName]);
 
   useEffect(() => {
@@ -150,7 +133,13 @@ export default function QuickTransfer() {
   useEffect(() => {
     if (txHash) {
       setSubmittedTx(true);
-      if (sign && payoutDetails && ownerSafeAddress && totalAmountToPay) {
+      if (
+        sign &&
+        payoutDetails &&
+        ownerSafeAddress &&
+        totalAmountToPay &&
+        selectedTokenDetails
+      ) {
         const to = cryptoUtils.encryptData(JSON.stringify(payoutDetails), sign);
         // const to = selectedTeammates;
 
@@ -161,7 +150,7 @@ export default function QuickTransfer() {
             createdBy: ownerSafeAddress,
             transactionHash: txHash,
             tokenValue: totalAmountToPay,
-            tokenCurrency: tokens.DAI,
+            tokenCurrency: selectedTokenDetails.name,
             fiatValue: totalAmountToPay,
             addresses: payoutDetails.map(({ address }) => address),
             transactionMode: 1, // quick transfer
@@ -176,18 +165,8 @@ export default function QuickTransfer() {
     dispatch,
     ownerSafeAddress,
     totalAmountToPay,
+    selectedTokenDetails,
   ]);
-
-  const getDefaultIconIfPossible = (tokenSymbol) => {
-    switch (tokenSymbol) {
-      case "DAI":
-        return DAIIcon;
-      case "USDC":
-        return USDCIcon;
-      default:
-        return null;
-    }
-  };
 
   useEffect(() => {
     if (balances && balances.length > 0 && prices) {
@@ -215,10 +194,10 @@ export default function QuickTransfer() {
           }
           // eth
           else if (bal.balance) {
-            seenTokens[DEFAULT_TOKENS.ETH] = true;
+            seenTokens[tokens.ETH] = true;
             return {
               id: idx,
-              name: "ETH",
+              name: tokens.ETH,
               icon: ETHIcon,
               balance: bal.balance / 10 ** 18,
               usd: bal.balanceUsd,
@@ -233,7 +212,7 @@ export default function QuickTransfer() {
         );
         setTokenDetails([...allTokenDetails, ...zeroBalanceTokensToShow]);
       } else {
-        setTokenDetails(allTokenDetails.slice(0, 3));
+        setTokenDetails(allTokenDetails);
       }
     }
   }, [balances, prices]);
@@ -243,42 +222,54 @@ export default function QuickTransfer() {
       {
         address: values.address,
         salaryAmount: values.amount,
-        salaryToken: values.currency,
+        salaryToken: values.currency.value,
         description: values.description || "",
       },
     ];
     setPayoutDetails(payoutDetails);
-    await massPayout(payoutDetails);
+    await massPayout(payoutDetails, selectedTokenDetails.name);
   };
 
   const goBack = () => {
     history.goBack();
   };
 
+  const showTokenModal = () => {
+    dispatch(
+      show(SELECT_TOKEN_MODAL, {
+        selectedTokenDetails,
+        setSelectedTokenDetails,
+      })
+    );
+  };
+
   const renderTransferDetails = () => (
     <Card className="quick-transfer">
       <Title className="mb-4">Quick Fund Transfer</Title>
       <Heading>PAYING FROM</Heading>
-      <ShowToken>
-        {loading && <Loading color="#7367f0" />}
 
-        {!loading && selectedTokenDetails && (
-          <React.Fragment>
-            <div>
-              <Img
-                src={selectedTokenDetails.icon}
-                alt="token icon"
-                width="36"
-              />
+      {loading && (
+        <ShowToken>
+          <Loading color="#7367f0" />
+        </ShowToken>
+      )}
+
+      {!loading && selectedTokenDetails && (
+        <ShowToken onClick={showTokenModal}>
+          <div>
+            <Img src={selectedTokenDetails.icon} alt="token icon" width="36" />
+          </div>
+          <div className="token-balance">
+            <div className="value">
+              {selectedTokenDetails.balance
+                ? parseFloat(selectedTokenDetails.balance).toFixed(2)
+                : "0.00"}
             </div>
-            <div className="token-balance">
-              <div className="value">{selectedTokenDetails.balance}</div>
-              <div className="name">{selectedTokenDetails.name}</div>
-            </div>
-            <div className="change">Change</div>
-          </React.Fragment>
-        )}
-      </ShowToken>
+            <div className="name">{selectedTokenDetails.name}</div>
+          </div>
+          <div className="change">Change</div>
+        </ShowToken>
+      )}
 
       <Heading>PAYING TO</Heading>
       <Row className="mb-3">
@@ -310,7 +301,7 @@ export default function QuickTransfer() {
           <ErrorMessage name="amount" errors={errors} />
         </Col>
         <Col lg="6" sm="12">
-          <Select
+          {/* <Select
             name="currency"
             register={register}
             required={`Token is required`}
@@ -318,6 +309,12 @@ export default function QuickTransfer() {
               { name: "DAI", value: "DAI" },
               { name: "USDC", value: "USDC" },
             ]}
+          /> */}
+          <Controller
+            name="currency"
+            control={control}
+            rules={{ required: true }}
+            as={SelectTokenDropdown}
           />
           <ErrorMessage name="currency" errors={errors} />
         </Col>
@@ -392,6 +389,7 @@ export default function QuickTransfer() {
       >
         {renderQuickTransfer()}
       </Container>
+      <SelectTokenModal />
     </div>
   ) : (
     <TransactionSubmitted txHash={txHash} selectedCount={1} />

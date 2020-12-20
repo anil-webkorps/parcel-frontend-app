@@ -41,7 +41,7 @@ export const getAmountInWei = (tokenName, tokenAmount) => {
     case tokens.USDC:
       return BigNumber.from(tokenAmount).mul(BigNumber.from(String(10 ** 6)));
     case tokens.USDT:
-      return BigNumber.from(tokenAmount).mul(BigNumber.from(String(10 ** 18)));
+      return BigNumber.from(tokenAmount).mul(BigNumber.from(String(10 ** 6)));
 
     default:
       return 0;

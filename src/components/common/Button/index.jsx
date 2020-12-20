@@ -62,7 +62,7 @@ const CustomButton = ({
     >
       {children}
       {loading && (
-        <img src={LoadingSvg} alt="loading" width="20" className="ml-2" />
+        <img src={LoadingSvg} alt="loading" width="16" className="ml-2" />
       )}
     </Button>
   );

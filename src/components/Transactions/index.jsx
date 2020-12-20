@@ -27,6 +27,7 @@ import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
 import StatusText from "./StatusText";
+import { getDefaultIconIfPossible } from "constants/index";
 
 import { Table, ActionItem } from "../People/styles";
 import { Circle } from "components/Header/styles";
@@ -59,6 +60,9 @@ export default function Transactions() {
 
   const goBack = () => {
     setSelectedTransaction(null);
+    if (ownerSafeAddress) {
+      dispatch(viewTransactions(ownerSafeAddress));
+    }
   };
 
   const getDecryptedDetails = (data) => {
@@ -69,18 +73,38 @@ export default function Transactions() {
   const renderTransactions = () => {
     let csvData = [];
     if (transactions && transactions.length > 0) {
-      transactions.map(({ to, transactionHash, transactionId, createdOn }) => {
-        const paidTeammates = getDecryptedDetails(to);
-        for (let i = 0; i < paidTeammates.length; i++) {
-          csvData.push({
-            ...paidTeammates[i],
-            transactionHash,
-            createdOn: format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss"),
-            transactionId,
-          });
+      transactions.map(
+        ({
+          to,
+          transactionHash,
+          transactionId,
+          transactionFees,
+          createdOn,
+        }) => {
+          const paidTeammates = getDecryptedDetails(to);
+          for (let i = 0; i < paidTeammates.length; i++) {
+            const {
+              firstName,
+              lastName,
+              salaryAmount,
+              salaryToken,
+              address,
+            } = paidTeammates[i];
+            csvData.push({
+              "First Name": firstName,
+              "Last Name": lastName,
+              "Salary Token": salaryToken,
+              "Salary Amount": salaryAmount,
+              Address: address,
+              "Transaction Hash": transactionHash,
+              "Created On": format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss"),
+              "Transaction ID": transactionId,
+              "Transaction fees": parseFloat(transactionFees).toFixed(5),
+            });
+          }
+          return csvData;
         }
-        return csvData;
-      });
+      );
     }
     return (
       <div
@@ -177,6 +201,11 @@ export default function Transactions() {
                             </TransactionUrl>
                           </div>
                           <div>
+                            <img
+                              src={getDefaultIconIfPossible(tokenCurrency)}
+                              alt={tokenCurrency}
+                              width="16"
+                            />{" "}
                             {tokenValue} {tokenCurrency} (US ${fiatValue})
                           </div>
                           <div>
@@ -331,6 +360,11 @@ export default function Transactions() {
                             <Detail>
                               <div className="title">Disbursement</div>
                               <div className="desc">
+                                <img
+                                  src={getDefaultIconIfPossible(salaryToken)}
+                                  alt={salaryToken}
+                                  width="16"
+                                />{" "}
                                 {salaryAmount} {salaryToken}
                               </div>
                             </Detail>
@@ -352,6 +386,11 @@ export default function Transactions() {
                           {firstName} {lastName}
                         </div>
                         <div>
+                          <img
+                            src={getDefaultIconIfPossible(salaryToken)}
+                            alt={salaryToken}
+                            width="16"
+                          />{" "}
                           {salaryAmount} {salaryToken}
                         </div>
                         <div>{minifyAddress(address)}</div>
@@ -417,7 +456,7 @@ export default function Transactions() {
               <Detail style={{ width: "300px" }}>
                 <div className="title">Transaction Fees</div>
                 <div className="desc">
-                  {parseFloat(transactionFees).toFixed(2)} ETH
+                  {parseFloat(transactionFees).toFixed(5)} ETH
                 </div>
               </Detail>
               <Detail style={{ width: "300px" }}>

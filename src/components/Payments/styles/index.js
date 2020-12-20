@@ -5,3 +5,4 @@ export { default as PaymentSummary } from "./PaymentSummary";
 export { default as TokenBalance } from "./TokenBalance";
 export { default as Heading } from "./Heading";
 export { default as Title } from "./Title";
+export { default as TokenCard } from "./TokenCard";

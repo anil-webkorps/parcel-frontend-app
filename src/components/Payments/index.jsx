@@ -7,6 +7,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { cryptoUtils } from "parcel-sdk";
+import { show } from "redux-modal";
+import { BigNumber } from "@ethersproject/bignumber";
 
 import { Info } from "components/Dashboard/styles";
 import { Card } from "components/common/Card";
@@ -43,16 +45,23 @@ import dashboardSaga from "store/dashboard/saga";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { useLocalStorage, useMassPayout } from "hooks";
-import { tokens } from "constants/index";
 import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 import TeamPng from "assets/images/user-team.png";
-import DAIIcon from "assets/icons/tokens/DAI-icon.png";
+import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 
+import {
+  tokens,
+  getDefaultIconIfPossible,
+  defaultTokenDetails,
+} from "constants/index";
 import { Container, Table, PaymentSummary, TokenBalance } from "./styles";
 import TransactionSubmitted from "./TransactionSubmitted";
+import SelectTokenModal, {
+  MODAL_NAME as SELECT_TOKEN_MODAL,
+} from "./SelectTokenModal";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -126,8 +135,10 @@ export default function People() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [departmentStep, setDepartmentStep] = useState(0);
   const [payTokenBalanceInUSD, setPayTokenBalanceInUSD] = useState(0); // for now, this is DAI
-  const [payTokenBalance, setPayTokenBalance] = useState(0);
+  // const [payTokenBalance, setPayTokenBalance] = useState(0);
   const [submittedTx, setSubmittedTx] = useState(false);
+  const [selectedTokenDetails, setSelectedTokenDetails] = useState();
+  const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
 
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -166,6 +177,12 @@ export default function People() {
   }, [dispatch, ownerSafeAddress]);
 
   useEffect(() => {
+    setSelectedTokenDetails(
+      tokenDetails.filter(({ name }) => name === tokens.DAI)[0]
+    );
+  }, [tokenDetails]);
+
+  useEffect(() => {
     if (balances && prices) {
       let tokenBalanceObj;
       for (let i = 0; i < balances.length; i++) {
@@ -177,9 +194,9 @@ export default function People() {
           (tokenBalanceObj.balance / 10 ** tokenBalanceObj.token.decimals) *
             prices[tokens.DAI]
         );
-        setPayTokenBalance(
-          tokenBalanceObj.balance / 10 ** tokenBalanceObj.token.decimals
-        );
+        // setPayTokenBalance(
+        //   tokenBalanceObj.balance / 10 ** tokenBalanceObj.token.decimals
+        // );
       }
     }
   }, [balances, prices]);
@@ -221,7 +238,13 @@ export default function People() {
   useEffect(() => {
     if (txHash) {
       setSubmittedTx(true);
-      if (sign && recievers && ownerSafeAddress && totalAmountToPay) {
+      if (
+        sign &&
+        recievers &&
+        ownerSafeAddress &&
+        totalAmountToPay &&
+        selectedTokenDetails
+      ) {
         const to = cryptoUtils.encryptData(JSON.stringify(recievers), sign);
         // const to = selectedTeammates;
 
@@ -232,14 +255,71 @@ export default function People() {
             createdBy: ownerSafeAddress,
             transactionHash: txHash,
             tokenValue: totalAmountToPay,
-            tokenCurrency: tokens.DAI,
+            tokenCurrency: selectedTokenDetails.name,
             fiatValue: totalAmountToPay,
             addresses: recievers.map(({ address }) => address),
           })
         );
       }
     }
-  }, [txHash, sign, recievers, dispatch, ownerSafeAddress, totalAmountToPay]);
+  }, [
+    txHash,
+    sign,
+    recievers,
+    dispatch,
+    ownerSafeAddress,
+    totalAmountToPay,
+    selectedTokenDetails,
+  ]);
+
+  useEffect(() => {
+    if (balances && balances.length > 0 && prices) {
+      const seenTokens = {};
+      const allTokenDetails = balances
+        .map((bal, idx) => {
+          // erc20
+          if (bal.token && bal.tokenAddress) {
+            const balance = BigNumber.from(bal.balance)
+              .div(BigNumber.from(String(10 ** bal.token.decimals)))
+              .toString();
+            // mark as seen
+            seenTokens[bal.token.symbol] = true;
+            const tokenIcon = getDefaultIconIfPossible(bal.token.symbol);
+
+            return {
+              id: idx,
+              name: bal.token && bal.token.symbol,
+              icon: tokenIcon ? tokenIcon : bal.token.logoUri,
+              balance,
+              usd: bal.token
+                ? balance * prices[bal.token.symbol]
+                : balance * prices["ETH"],
+            };
+          }
+          // eth
+          else if (bal.balance) {
+            seenTokens[tokens.ETH] = true;
+            return {
+              id: idx,
+              name: tokens.ETH,
+              icon: ETHIcon,
+              balance: bal.balance / 10 ** 18,
+              usd: bal.balanceUsd,
+            };
+          } else return "";
+        })
+        .filter(Boolean);
+
+      if (allTokenDetails.length < 3) {
+        const zeroBalanceTokensToShow = defaultTokenDetails.filter(
+          (token) => !seenTokens[token.name]
+        );
+        setTokenDetails([...allTokenDetails, ...zeroBalanceTokensToShow]);
+      } else {
+        setTokenDetails(allTokenDetails);
+      }
+    }
+  }, [balances, prices]);
 
   const isNoneChecked = useMemo(() => checked.every((check) => !check), [
     checked,
@@ -251,7 +331,7 @@ export default function People() {
   };
 
   const handleMassPayout = async (selectedTeammates) => {
-    await massPayout(selectedTeammates);
+    await massPayout(selectedTeammates, selectedTokenDetails.name);
   };
 
   const onSubmit = async (e) => {
@@ -312,6 +392,15 @@ export default function People() {
     return checked.filter(Boolean).length;
   };
 
+  const showTokenModal = () => {
+    dispatch(
+      show(SELECT_TOKEN_MODAL, {
+        selectedTokenDetails,
+        setSelectedTokenDetails,
+      })
+    );
+  };
+
   const renderPayTable = () => {
     if (!teammates.length)
       return (
@@ -337,7 +426,7 @@ export default function People() {
             <div>Employee Name</div>
           </div>
           <div>Department</div>
-          <div>Pay Token</div>
+          {/* <div>Pay Token</div> */}
           <div>Pay Amount</div>
           <div>Address</div>
           <div></div>
@@ -377,8 +466,13 @@ export default function People() {
                     </div>
                   </div>
                   <div>{departmentName}</div>
-                  <div>{salaryToken}</div>
+                  {/* <div>{salaryToken}</div> */}
                   <div>
+                    <img
+                      src={getDefaultIconIfPossible(salaryToken)}
+                      alt={salaryToken}
+                      width="16"
+                    />{" "}
                     {salaryAmount} {salaryToken} (US$
                     {prices ? prices[salaryToken] * salaryAmount : 0})
                   </div>
@@ -504,20 +598,37 @@ export default function People() {
                   You can instantly pay or manage team payrolls
                 </div>
               </div>
-              <TokenBalance>
-                <div className="token-icon">
-                  <img src={DAIIcon} alt="token" width="45" />
-                </div>
-                <div className="balance-info">
-                  <div className="balance-text">Paying from DAI</div>
-                  <div className="balance-value">
-                    {parseFloat(payTokenBalance).toFixed(2)} DAI (US$
-                    {parseFloat(payTokenBalanceInUSD).toFixed(2)})
+              {!selectedTokenDetails && (
+                <TokenBalance>
+                  <div className="d-flex align-items-center justify-content-center">
+                    <Loading color="primary" width="50px" height="50px" />
                   </div>
-                </div>
-                <div className="separator"></div>
-                <div className="change-text">CHANGE</div>
-              </TokenBalance>
+                </TokenBalance>
+              )}
+              {selectedTokenDetails && (
+                <TokenBalance onClick={showTokenModal}>
+                  <div className="token-icon">
+                    <img
+                      src={selectedTokenDetails.icon}
+                      alt="token"
+                      width="45"
+                    />
+                  </div>
+                  <div className="balance-info">
+                    <div className="balance-text">
+                      Paying from {selectedTokenDetails.name}
+                    </div>
+                    <div className="balance-value">
+                      {parseFloat(selectedTokenDetails.balance).toFixed(2)}{" "}
+                      {selectedTokenDetails.name} (US$
+                      {parseFloat(selectedTokenDetails.usd).toFixed(2)})
+                    </div>
+                  </div>
+                  <div className="separator"></div>
+                  <div className="change-text">CHANGE</div>
+                </TokenBalance>
+              )}
+              <SelectTokenModal />
             </div>
           </div>
         </Info>

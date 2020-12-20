@@ -14,6 +14,7 @@ import { logoutUser } from "store/logout/actions";
 import logoutSaga from "store/logout/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import LogoutPng from "assets/icons/logout.png";
+import ParcelSvg from "assets/icons/parcel.svg";
 
 import {
   HeaderLink,
@@ -48,7 +49,7 @@ export default function DashboardHeader() {
           <div className="d-flex justify-content-center align-items-center">
             <SideNav />
             <HeaderLink to="/dashboard" className="dashboard-link">
-              Parcel
+              <img src={ParcelSvg} alt="parcel" width="160" />
             </HeaderLink>
           </div>
           <NavGroup>
@@ -83,7 +84,7 @@ export default function DashboardHeader() {
                   <li onClick={logout}>
                     <div className="option">Logout</div>
                     <div>
-                      <img src={LogoutPng} alt="logout" width="20" />
+                      <img src={LogoutPng} alt="logout" width="16" />
                     </div>
                   </li>
                 </ul>

@@ -7,7 +7,7 @@ export const TableHead = styled.div`
   padding: 21px 40px;
 
   display: grid;
-  grid-template-columns: repeat(6, 16.666%);
+  grid-template-columns: repeat(5, 20%);
 
   font-size: 14px;
   font-weight: 600;
@@ -41,7 +41,7 @@ export const TableRow = styled.div`
   border: solid 0.5px #f2f2f2;
   background-color: #ffffff;
   display: grid;
-  grid-template-columns: repeat(6, 16.666%);
+  grid-template-columns: repeat(5, 20%);
   align-items: center;
 
   .pay-text {

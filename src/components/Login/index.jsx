@@ -377,6 +377,7 @@ const Login = () => {
                   large
                   className="secondary"
                   onClick={() => handleSelectFlow(FLOWS.IMPORT_INDIVIDUAL)}
+                  disabled
                 >
                   Import Existing Safe
                 </Button>

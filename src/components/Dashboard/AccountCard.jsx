@@ -1,9 +1,8 @@
 import React, { useState, useContext, useEffect } from "react";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 // import { Link } from "react-router-dom";
 // import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
-import { useDispatch } from "react-redux";
 import { BigNumber } from "@ethersproject/bignumber";
 
 import { Assets } from "./styles";
@@ -19,6 +18,7 @@ import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 import USDCIcon from "assets/icons/tokens/USDC-icon.png";
+import USDTIcon from "assets/icons/tokens/USDT-icon.png";
 import { SideNavContext } from "context/SideNavContext";
 import { getSafeBalances } from "store/dashboard/actions";
 import {
@@ -26,6 +26,7 @@ import {
   makeSelectBalances,
   // makeSelectError,
 } from "store/dashboard/selectors";
+import { tokens } from "constants/index";
 import { makeSelectPrices } from "store/market-rates/selectors";
 import Loading from "components/common/Loading";
 import { getMarketRates } from "store/market-rates/actions";
@@ -33,31 +34,32 @@ import { getMarketRates } from "store/market-rates/actions";
 const dashboardKey = "dashboard";
 const marketRatesKey = "marketRates";
 
-const DEFAULT_TOKENS = {
-  ETH: "ETH",
-  DAI: "DAI",
-  USDC: "USDC",
-};
-
 const defaultTokenDetails = [
-  {
-    id: 0,
-    name: DEFAULT_TOKENS.ETH,
-    icon: ETHIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
+  // {
+  //   id: 0,
+  //   name: DEFAULT_TOKENS.ETH,
+  //   icon: ETHIcon,
+  //   balance: "0.00",
+  //   usd: "0.00",
+  // },
   {
     id: 1,
-    name: DEFAULT_TOKENS.DAI,
+    name: tokens.DAI,
     icon: DAIIcon,
     balance: "0.00",
     usd: "0.00",
   },
   {
     id: 2,
-    name: DEFAULT_TOKENS.USDC,
+    name: tokens.USDC,
     icon: USDCIcon,
+    balance: "0.00",
+    usd: "0.00",
+  },
+  {
+    id: 3,
+    name: tokens.USDT,
+    icon: USDTIcon,
     balance: "0.00",
     usd: "0.00",
   },
@@ -103,6 +105,8 @@ export default function AccountCard() {
         return DAIIcon;
       case "USDC":
         return USDCIcon;
+      case "USDT":
+        return USDTIcon;
       default:
         return null;
     }
@@ -134,7 +138,7 @@ export default function AccountCard() {
           }
           // eth
           else if (bal.balance) {
-            seenTokens[DEFAULT_TOKENS.ETH] = true;
+            seenTokens[tokens.ETH] = true;
             return {
               id: idx,
               name: "ETH",
