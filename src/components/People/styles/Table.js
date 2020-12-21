@@ -67,6 +67,22 @@ export const TableRow = styled.div`
     color: ${({ theme }) => theme.primary};
     cursor: pointer;
   }
+
+  .text-danger {
+    position: relative;
+  }
+
+  .text-danger::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #dc3545;
+    position: absolute;
+    left: -10px;
+    top: 35%;
+  }
 `;
 
 const Table = { TableHead, TableBody, TableRow };

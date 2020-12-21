@@ -64,6 +64,7 @@ import {
 } from "./styles";
 
 import { Circle } from "components/Header/styles";
+import { FIELD_NAMES, isValidField } from "store/add-teammate/utils";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -97,6 +98,7 @@ export default function AddTeammate() {
 
   const [success, setSuccess] = useState(false);
   const [csvData, setCSVData] = useState();
+  const [invalidCsvData, setInvalidCsvData] = useState(false);
 
   const { register, errors, handleSubmit, reset, formState } = useForm({
     mode: "onChange",
@@ -167,6 +169,10 @@ export default function AddTeammate() {
       history.push("/dashboard/people/view");
     }
   }, [addBulkSuccess, history, success]);
+
+  useEffect(() => {
+    setInvalidCsvData(false);
+  }, [csvData]);
 
   const onSubmit = (values) => {
     if (chosenDepartment) {
@@ -256,7 +262,11 @@ export default function AddTeammate() {
   };
 
   const handleDrop = (data) => {
-    if (!data || data.length === 0) return;
+    // checking for 7 columns in the csv
+    if (!data || (data.length === 0 && data.some((arr) => arr.length !== 7))) {
+      setInvalidCsvData(true);
+      return;
+    }
     const formattedData = data.reduce((formatted, arr, i) => {
       return [
         ...formatted,
@@ -694,6 +704,64 @@ export default function AddTeammate() {
     );
   };
 
+  const renderCsvRow = ({
+    firstName,
+    lastName,
+    address,
+    salaryAmount,
+    salaryToken,
+    departmentName,
+    payCycleDate,
+    idx,
+  }) => {
+    const invalidName =
+      !isValidField(FIELD_NAMES.FIRST_NAME, firstName) ||
+      !isValidField(FIELD_NAMES.LAST_NAME, lastName);
+    const invalidAddress = !isValidField(FIELD_NAMES.ADDRESS, address);
+    const invalidPayDetails =
+      !isValidField(FIELD_NAMES.AMOUNT, salaryAmount) ||
+      !isValidField(FIELD_NAMES.TOKEN, salaryToken);
+    const invalidDepartment = !isValidField(
+      FIELD_NAMES.DEPARTMENT_NAME,
+      departmentName
+    );
+    const invalidPayCycleDate = !isValidField(
+      FIELD_NAMES.PAYCYCLE_DATE,
+      payCycleDate
+    );
+
+    const isCsvDataValid =
+      invalidName ||
+      invalidAddress ||
+      invalidPayDetails ||
+      invalidDepartment ||
+      invalidPayCycleDate;
+
+    if (isCsvDataValid && !invalidCsvData) {
+      setInvalidCsvData(true);
+    }
+
+    return (
+      <TableRow key={`${address}-${idx}`}>
+        <div className={`${invalidName && "text-danger"}`}>
+          {firstName} {lastName}
+        </div>
+        <div className={`${invalidAddress && "text-danger"}`}>
+          {minifyAddress(address)}
+        </div>
+        <div className={`${invalidPayDetails && "text-danger"}`}>
+          {salaryAmount} {salaryToken}
+        </div>
+        <div className={`${invalidDepartment && "text-danger"}`}>
+          {departmentName}
+        </div>
+        <div className={`${invalidPayCycleDate && "text-danger"}`}>
+          {numToOrd(payCycleDate)} of every month
+        </div>
+      </TableRow>
+    );
+  };
+
   const renderAddBulkTeammate = () => {
     const hasCsvData = csvData && csvData.length > 0;
     return (
@@ -746,21 +814,26 @@ export default function AddTeammate() {
                     payCycleDate,
                   },
                   idx
-                ) => (
-                  <TableRow key={`${address}-${idx}`}>
-                    <div>
-                      {firstName} {lastName}
-                    </div>
-                    <div>{minifyAddress(address)}</div>
-                    <div>
-                      {salaryAmount} {salaryToken}
-                    </div>
-                    <div>{departmentName}</div>
-                    <div>{numToOrd(payCycleDate)} of every month</div>
-                  </TableRow>
-                )
+                ) =>
+                  renderCsvRow({
+                    firstName,
+                    lastName,
+                    address,
+                    salaryAmount,
+                    salaryToken,
+                    departmentName,
+                    payCycleDate,
+                    idx,
+                  })
               )}
             </TableBody>
+          </div>
+        )}
+
+        {invalidCsvData && (
+          <div className="text-danger my-3">
+            Oops, something is not right. Please check your csv file and fix the
+            issues.
           </div>
         )}
 
@@ -768,7 +841,7 @@ export default function AddTeammate() {
           large
           type="button"
           onClick={onAddBulkTeammates}
-          disabled={!hasCsvData || loading}
+          disabled={!hasCsvData || loading || invalidCsvData}
           loading={loading}
         >
           Confirm
