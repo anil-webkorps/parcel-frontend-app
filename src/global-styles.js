@@ -92,6 +92,18 @@ const GlobalStyle = createGlobalStyle`
     min-height: 100%;
     min-width: 100%;
   }
+
+  // Scaling/zooming depending on screen width
+  @media (max-width: 1500px) {
+    body {
+      zoom: 85%;
+    }
+  }
+  @media (min-width: 1501px) and (max-width: 1600px) {
+    body {
+      zoom: 90%;
+    }
+  }
 `;
 
 export default GlobalStyle;

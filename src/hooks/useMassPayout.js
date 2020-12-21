@@ -252,7 +252,8 @@ export default function useMassPayout() {
           executor,
           autoApprovedSignature,
           {
-            gasLimit: Math.floor(gasLimit.toNumber() * 2.75), // giving a little higher gas limit just in case
+            gasLimit: Math.floor(gasLimit.toNumber() * 10), // giving a little higher gas limit just in case
+            // TODO: revisit gas limit estimation issue
             gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
           }
         );
