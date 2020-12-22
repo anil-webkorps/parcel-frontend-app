@@ -134,7 +134,7 @@ export default function People() {
   const { loadingTx, txHash, recievers, massPayout } = useMassPayout();
   const [selectedRows, setSelectedRows] = useState([]);
   const [departmentStep, setDepartmentStep] = useState(0);
-  const [payTokenBalanceInUSD, setPayTokenBalanceInUSD] = useState(0); // for now, this is DAI
+  // const [payTokenBalanceInUSD, setPayTokenBalanceInUSD] = useState(0); // for now, this is DAI
   // const [payTokenBalance, setPayTokenBalance] = useState(0);
   const [submittedTx, setSubmittedTx] = useState(false);
   const [selectedTokenDetails, setSelectedTokenDetails] = useState();
@@ -181,25 +181,6 @@ export default function People() {
       tokenDetails.filter(({ name }) => name === tokens.DAI)[0]
     );
   }, [tokenDetails]);
-
-  useEffect(() => {
-    if (balances && prices) {
-      let tokenBalanceObj;
-      for (let i = 0; i < balances.length; i++) {
-        if (balances[i].token && balances[i].token.symbol === tokens.DAI)
-          tokenBalanceObj = balances[i];
-      }
-      if (tokenBalanceObj) {
-        setPayTokenBalanceInUSD(
-          (tokenBalanceObj.balance / 10 ** tokenBalanceObj.token.decimals) *
-            prices[tokens.DAI]
-        );
-        // setPayTokenBalance(
-        //   tokenBalanceObj.balance / 10 ** tokenBalanceObj.token.decimals
-        // );
-      }
-    }
-  }, [balances, prices]);
 
   useEffect(() => {
     // reset to initial state
@@ -544,6 +525,8 @@ export default function People() {
   };
 
   const renderPaymentSummary = () => {
+    const insufficientBalance =
+      selectedTokenDetails.usd - totalAmountToPay > 0 ? false : true;
     return (
       <PaymentSummary>
         <div className="payment-info">
@@ -558,9 +541,9 @@ export default function People() {
           <div>
             <div className="payment-title">Balance after payment</div>
             <div className="payment-subtitle">
-              {payTokenBalanceInUSD - totalAmountToPay > 0
+              {!insufficientBalance
                 ? `US$ ${parseFloat(
-                    payTokenBalanceInUSD - totalAmountToPay
+                    selectedTokenDetails.usd - totalAmountToPay
                   ).toFixed(2)}`
                 : `Insufficient Balance`}
             </div>
@@ -568,7 +551,12 @@ export default function People() {
         </div>
 
         <div className="pay-button">
-          <Button type="submit" large loading={loadingTx} disabled={loadingTx}>
+          <Button
+            type="submit"
+            large
+            loading={loadingTx}
+            disabled={loadingTx || insufficientBalance}
+          >
             Pay Now
           </Button>
         </div>
