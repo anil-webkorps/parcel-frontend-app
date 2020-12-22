@@ -1,6 +1,6 @@
 import { injected } from "connectors";
 import MetamaskIcon from "assets/icons/icon-metamask.svg";
-// import ETHIcon from "assets/icons/tokens/ETH-icon.png";
+import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 import USDCIcon from "assets/icons/tokens/USDC-icon.png";
 import USDTIcon from "assets/icons/tokens/USDT-icon.png";
@@ -44,13 +44,13 @@ export const getDefaultIconIfPossible = (tokenSymbol) => {
 };
 
 export const defaultTokenDetails = [
-  // {
-  //   id: 0,
-  //   name: DEFAULT_TOKENS.ETH,
-  //   icon: ETHIcon,
-  //   balance: "0.00",
-  //   usd: "0.00",
-  // },
+  {
+    id: 0,
+    name: tokens.ETH,
+    icon: ETHIcon,
+    balance: "0.00",
+    usd: "0.00",
+  },
   {
     id: 1,
     name: tokens.DAI,
@@ -65,11 +65,11 @@ export const defaultTokenDetails = [
     balance: "0.00",
     usd: "0.00",
   },
-  {
-    id: 3,
-    name: tokens.USDC,
-    icon: USDTIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
+  // {
+  //   id: 3,
+  //   name: tokens.USDC,
+  //   icon: USDTIcon,
+  //   balance: "0.00",
+  //   usd: "0.00",
+  // },
 ];

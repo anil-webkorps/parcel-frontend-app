@@ -52,7 +52,6 @@ import SelectTokenModal, {
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 // import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 // import USDCIcon from "assets/icons/tokens/USDC-icon.png";
-// import USDTIcon from "assets/icons/tokens/USDT-icon.png";
 import {
   Container,
   Title,

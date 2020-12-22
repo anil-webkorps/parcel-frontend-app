@@ -34,18 +34,34 @@ export default function Navbar() {
   return (
     <div>
       <SideNav id="sidebar">
-        {navItems.map(({ id, link, name, icon, ...rest }) => (
+        {navItems.map(({ id, link, href, name, icon, ...rest }) => (
           <NavItem
             key={id}
             className={location.pathname === link ? "active" : ""}
             {...rest}
           >
-            <Link to={link}>
-              <div className="icon">
-                <FontAwesomeIcon icon={icon} color="#fff" />
-              </div>
-              <div className="name">{name}</div>
-            </Link>
+            {link ? (
+              <Link to={link}>
+                <div className="icon">
+                  <FontAwesomeIcon icon={icon} color="#fff" />
+                </div>
+                <div className="name">{name}</div>
+              </Link>
+            ) : href ? (
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                <div className="icon">
+                  <FontAwesomeIcon icon={icon} color="#fff" />
+                </div>
+                <div className="name">{name}</div>
+              </a>
+            ) : (
+              <React.Fragment>
+                <div className="icon">
+                  <FontAwesomeIcon icon={icon} color="#fff" />
+                </div>
+                <div className="name">{name}</div>
+              </React.Fragment>
+            )}
           </NavItem>
         ))}
 

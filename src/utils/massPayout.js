@@ -4,7 +4,7 @@ import { tokens } from "constants/index";
 import addresses from "constants/addresses";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 import USDCIcon from "assets/icons/tokens/USDC-icon.png";
-import USDTIcon from "assets/icons/tokens/USDT-icon.png";
+// import USDTIcon from "assets/icons/tokens/USDT-icon.png";
 
 const { DAI_ADDRESS, USDC_ADDRESS, USDT_ADDRESS } = addresses;
 
@@ -46,8 +46,8 @@ export const defaultTokenOptions = [
     value: "USDC",
     label: constructLabel(tokens.USDC, USDCIcon),
   },
-  {
-    value: "USDT",
-    label: constructLabel(tokens.USDT, USDTIcon),
-  },
+  // {
+  //   value: "USDT",
+  //   label: constructLabel(tokens.USDT, USDTIcon),
+  // },
 ];

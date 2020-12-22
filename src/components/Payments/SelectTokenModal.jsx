@@ -6,7 +6,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { BigNumber } from "@ethersproject/bignumber";
 
 import Button from "components/common/Button";
-import { tokens } from "constants/index";
+import {
+  tokens,
+  getDefaultIconIfPossible,
+  defaultTokenDetails,
+} from "constants/index";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import dashboardReducer from "store/dashboard/reducer";
@@ -24,9 +28,6 @@ import { getMarketRates } from "store/market-rates/actions";
 import Loading from "components/common/Loading";
 
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
-import DAIIcon from "assets/icons/tokens/DAI-icon.png";
-import USDCIcon from "assets/icons/tokens/USDC-icon.png";
-import USDTIcon from "assets/icons/tokens/USDT-icon.png";
 
 import { Title, Heading } from "../People/styles";
 import { TokenCard } from "./styles";
@@ -40,30 +41,6 @@ const modalStyles = `
     padding: 20px;
   }
 `;
-
-const defaultTokenDetails = [
-  {
-    id: 1,
-    name: tokens.DAI,
-    icon: DAIIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
-  {
-    id: 2,
-    name: tokens.USDC,
-    icon: USDCIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
-  {
-    id: 3,
-    name: tokens.USDT,
-    icon: USDTIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
-];
 
 const dashboardKey = "dashboard";
 const marketRatesKey = "marketRates";
@@ -106,19 +83,6 @@ function SelectTokenModal(props) {
   useEffect(() => {
     if (selectedTokenDetails) setTokenName(selectedTokenDetails.name);
   }, [selectedTokenDetails]);
-
-  const getDefaultIconIfPossible = (tokenSymbol) => {
-    switch (tokenSymbol) {
-      case "DAI":
-        return DAIIcon;
-      case "USDC":
-        return USDCIcon;
-      case "USDT":
-        return USDTIcon;
-      default:
-        return null;
-    }
-  };
 
   useEffect(() => {
     if (balances && balances.length > 0 && prices) {

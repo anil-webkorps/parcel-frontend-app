@@ -41,7 +41,7 @@ const navItems = [
   },
   {
     id: 5,
-    link: "/dashboard/support",
+    href: "https://t.me/parcelHQ",
     name: "Support",
     icon: faQuestionCircle,
     style: { position: "absolute", top: "75%", minWidth: "100px" },

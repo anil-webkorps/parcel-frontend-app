@@ -11,7 +11,7 @@ export default function Basic(props) {
       const reader = new FileReader();
       reader.onload = () => {
         csv.parse(reader.result, (err, data) => {
-          props.onDrop(data.slice(1));
+          props.onDrop(data ? data.slice(1) : undefined);
         });
       };
 

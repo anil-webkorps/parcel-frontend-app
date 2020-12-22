@@ -16,9 +16,6 @@ import { Card } from "components/common/Card";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
-import DAIIcon from "assets/icons/tokens/DAI-icon.png";
-import USDCIcon from "assets/icons/tokens/USDC-icon.png";
-import USDTIcon from "assets/icons/tokens/USDT-icon.png";
 import { SideNavContext } from "context/SideNavContext";
 import { getSafeBalances } from "store/dashboard/actions";
 import {
@@ -26,44 +23,17 @@ import {
   makeSelectBalances,
   // makeSelectError,
 } from "store/dashboard/selectors";
-import { tokens } from "constants/index";
+import {
+  tokens,
+  defaultTokenDetails,
+  getDefaultIconIfPossible,
+} from "constants/index";
 import { makeSelectPrices } from "store/market-rates/selectors";
 import Loading from "components/common/Loading";
 import { getMarketRates } from "store/market-rates/actions";
 
 const dashboardKey = "dashboard";
 const marketRatesKey = "marketRates";
-
-const defaultTokenDetails = [
-  // {
-  //   id: 0,
-  //   name: DEFAULT_TOKENS.ETH,
-  //   icon: ETHIcon,
-  //   balance: "0.00",
-  //   usd: "0.00",
-  // },
-  {
-    id: 1,
-    name: tokens.DAI,
-    icon: DAIIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
-  {
-    id: 2,
-    name: tokens.USDC,
-    icon: USDCIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
-  {
-    id: 3,
-    name: tokens.USDT,
-    icon: USDTIcon,
-    balance: "0.00",
-    usd: "0.00",
-  },
-];
 
 export default function AccountCard() {
   const [toggled] = useContext(SideNavContext);
@@ -98,19 +68,6 @@ export default function AccountCard() {
   useEffect(() => {
     dispatch(getMarketRates());
   }, [dispatch]);
-
-  const getDefaultIconIfPossible = (tokenSymbol) => {
-    switch (tokenSymbol) {
-      case "DAI":
-        return DAIIcon;
-      case "USDC":
-        return USDCIcon;
-      case "USDT":
-        return USDTIcon;
-      default:
-        return null;
-    }
-  };
 
   useEffect(() => {
     if (balances && balances.length > 0 && prices) {
