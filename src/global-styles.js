@@ -95,13 +95,8 @@ const GlobalStyle = createGlobalStyle`
 
   // Scaling/zooming depending on screen width
   @media (max-width: 1500px) {
-    body {
+    app {
       zoom: 85%;
-    }
-  }
-  @media (min-width: 1501px) and (max-width: 1600px) {
-    body {
-      zoom: 90%;
     }
   }
 `;
