@@ -24,6 +24,6 @@ export function findNetworkNameByWeb3ChainId(chainId) {
     case chainIds.KOVAN:
       return networkNames.KOVAN;
     default:
-      return "";
+      return "Unknown Network";
   }
 }

@@ -83,6 +83,10 @@ const GlobalStyle = createGlobalStyle`
 
   }
 
+  .cursor-pointer{
+    cursor: pointer;
+  }
+
   .modal {
     color: #373737;
   }
@@ -98,6 +102,12 @@ const GlobalStyle = createGlobalStyle`
     #root, .modal-dialog {
      zoom: 85%;
    }
+  }
+
+  .modal-content {
+    border-radius: 20px;
+    border: none;
+    padding: 20px;
   }
 `;
 

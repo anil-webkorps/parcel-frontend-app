@@ -5,6 +5,7 @@ import { Switch, Route } from "react-router-dom";
 
 import GlobalStyle, { lightTheme, darkTheme } from "global-styles";
 import Header from "components/Header";
+import NetworkModal from "components/Connect/NetworkModal";
 
 import RegisterPage from "pages/Register";
 import LoginPage from "pages/Login";
@@ -27,6 +28,7 @@ export default function App() {
           </Switch>
         </SideNavProvider>
         <GlobalStyle />
+        <NetworkModal />
       </ThemeProvider>
     </div>
   );

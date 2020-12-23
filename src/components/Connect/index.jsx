@@ -6,7 +6,7 @@ import { startCase } from "lodash";
 import { Account } from "components/common/Web3Utils";
 import { findNetworkNameByWeb3ChainId } from "constants/networks";
 import ConnectToWalletModal from "./ConnectModal";
-import NetworkModal from "./NetworkModal";
+// import NetworkModal from "./NetworkModal";
 import Button from "components/common/Button";
 
 const ConnectToWallet = ({ className, ...rest }) => {
@@ -41,7 +41,7 @@ const ConnectToWallet = ({ className, ...rest }) => {
         )}
       </Button>
       <ConnectToWalletModal show={show} handleToggle={handleToggle} />
-      <NetworkModal />
+      {/* <NetworkModal /> */}
     </div>
   );
 };

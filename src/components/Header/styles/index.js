@@ -7,3 +7,4 @@ export { default as AccountAddress } from "./AccountAddress";
 export { default as Circle } from "./Circle";
 export { default as Profile } from "./Profile";
 export { default as ProfileMenu } from "./ProfileMenu";
+export { default as NetworkName } from "./NetworkName";

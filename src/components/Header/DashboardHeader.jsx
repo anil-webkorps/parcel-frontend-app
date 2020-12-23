@@ -1,6 +1,9 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
+import { startCase } from "lodash";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlug } from "@fortawesome/free-solid-svg-icons";
 
 import CopyButton from "components/common/Copy";
 import SideNav from "components/SideNav";
@@ -15,6 +18,7 @@ import logoutSaga from "store/logout/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import LogoutPng from "assets/icons/logout.png";
 import ParcelSvg from "assets/icons/parcel.svg";
+import { findNetworkNameByWeb3ChainId } from "constants/networks";
 
 import {
   HeaderLink,
@@ -22,6 +26,7 @@ import {
   NavBarContent,
   NavGroup,
   AccountAddress,
+  NetworkName,
   Circle,
   Profile,
   ProfileMenu,
@@ -30,7 +35,7 @@ import {
 const logoutKey = "logout";
 
 export default function DashboardHeader() {
-  const { account } = useActiveWeb3React();
+  const { account, chainId } = useActiveWeb3React();
   const ownerName = useSelector(makeSelectOwnerName());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
@@ -40,6 +45,10 @@ export default function DashboardHeader() {
 
   const logout = () => {
     dispatch(logoutUser());
+  };
+
+  const getNetworkName = () => {
+    return startCase(findNetworkNameByWeb3ChainId(chainId));
   };
 
   return (
@@ -53,6 +62,17 @@ export default function DashboardHeader() {
             </HeaderLink>
           </div>
           <NavGroup>
+            {chainId && (
+              <NetworkName className="mr-3">
+                <Circle>
+                  <FontAwesomeIcon icon={faPlug} color="#fff" />
+                </Circle>
+                <div className="mx-3">
+                  <div className="name">{getNetworkName()}</div>
+                  <div className="info">Current Network</div>
+                </div>
+              </NetworkName>
+            )}
             <AccountAddress>
               <p>{minifyAddress(ownerSafeAddress)}</p>
               <Circle className="ml-2">
