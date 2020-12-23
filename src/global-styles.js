@@ -95,9 +95,9 @@ const GlobalStyle = createGlobalStyle`
 
   // Scaling/zooming depending on screen width
   @media (max-width: 1500px) {
-    app {
-      zoom: 85%;
-    }
+    #root, .modal-dialog {
+     zoom: 85%;
+   }
   }
 `;
 
