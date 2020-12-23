@@ -1,6 +1,7 @@
 import { createStore, applyMiddleware, compose } from "redux";
 import createSagaMiddleware from "redux-saga";
 import { routerMiddleware } from "connected-react-router";
+import { autoRehydrate } from "redux-persist";
 
 import createReducer from "./reducers";
 
@@ -29,7 +30,7 @@ export default function configureStore(initialState = {}, history) {
   // 1. sagaMiddleware: Makes redux-sagas work
   // 2. routerMiddleware: Syncs the location/URL path to the state
   const middlewares = [sagaMiddleware, routerMiddleware(history)];
-  const enhancers = [applyMiddleware(...middlewares)];
+  const enhancers = [applyMiddleware(...middlewares), autoRehydrate()];
 
   const store = createStore(
     createReducer(),

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faEdit,
+  // faEdit,
   faEye,
   faLongArrowAltLeft,
   faPlus,
@@ -198,9 +198,9 @@ export default function ViewTeammate() {
                         </div>
                       </Button>
 
-                      <div className="circle circle-grey">
+                      {/* <div className="circle circle-grey">
                         <FontAwesomeIcon icon={faEdit} color="#7367f0" />
-                      </div>
+                      </div> */}
                     </div>
                   </TableRow>
                 );
