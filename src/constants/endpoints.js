@@ -30,7 +30,7 @@ export const getTransactionsEndpoint = `${ROOT_BE_URL}/api/v1/transactions/get`;
 export const getTokenPricesEndpoint = `${ROOT_BE_URL}/api/v1/tokenPrices/usd`;
 
 // GNOSIS
-export const gnosisSafeTransactionEndpoint =
+export const gnosisSafeEndpoint =
   process.env.REACT_APP_NETWORK_NAME === networkNames.MAINNET
     ? `https://safe-transaction.gnosis.io/api/v1/safes/`
     : `https://safe-transaction.rinkeby.gnosis.io/api/v1/safes/`;

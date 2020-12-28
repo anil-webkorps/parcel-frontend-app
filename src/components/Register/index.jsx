@@ -645,7 +645,13 @@ const Register = () => {
         </div>
 
         <ErrorMessage name="threshold" errors={errors} />
-        <Button large type="submit" className="mt-3">
+        <Button
+          large
+          type="submit"
+          className="mt-3"
+          loading={createSafeLoading}
+          disabled={createSafeLoading}
+        >
           Proceed
         </Button>
       </StepDetails>
@@ -715,7 +721,7 @@ const Register = () => {
             register={register}
             type="radio"
             id={`flow-company`}
-            value={FLOWS.INDIVIDUAL_WITH_COMPANY} // Change this later to FLOWS.COMPANY
+            value={FLOWS.COMPANY} // Change this later to FLOWS.COMPANY
             label={"I have a Company"}
             labelStyle={{ minWidth: "260px" }}
           />

@@ -7,10 +7,10 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import { GET_SAFE_BALANCES } from "./action-types";
 import { getSafeBalancesSuccess, getSafeBalancesError } from "./actions";
 import request from "utils/request";
-import { gnosisSafeTransactionEndpoint } from "constants/endpoints";
+import { gnosisSafeEndpoint } from "constants/endpoints";
 
 export function* getSafeBalancesFromGnosis(action) {
-  const requestURL = `${gnosisSafeTransactionEndpoint}${action.safeAddress}/balances/usd/`;
+  const requestURL = `${gnosisSafeEndpoint}${action.safeAddress}/balances/usd/`;
   const options = {
     method: "GET",
   };

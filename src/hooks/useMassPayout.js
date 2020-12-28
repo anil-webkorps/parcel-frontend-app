@@ -32,12 +32,21 @@ import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import { getGasPrice } from "store/gas/actions";
 import gasPriceSaga from "store/gas/saga";
 import gasPriceReducer from "store/gas/reducer";
+import { createMultisigTransaction, getSafeDetails } from "store/safe/actions";
+import safeDetailsSaga from "store/safe/saga";
+import safeDetailsReducer from "store/safe/reducer";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectAverageGasPrice } from "store/gas/selectors";
+import {
+  makeSelectNonce,
+  makeSelectOwners,
+  makeSelectThreshold,
+} from "store/safe/selectors";
 import { getConfigByTokenNames } from "utils/massPayout";
 
 const gasPriceKey = "gas";
+const safeDetailsKey = "safe";
 
 const {
   DAI_ADDRESS,
@@ -46,6 +55,7 @@ const {
   USDC_ADDRESS,
   USDT_ADDRESS,
   UNISWAP_ROUTER_ADDRESS,
+  GNOSIS_SAFE_ADDRESS,
 } = addresses;
 
 export default function useMassPayout() {
@@ -56,16 +66,28 @@ export default function useMassPayout() {
   const [recievers, setRecievers] = useState();
 
   useInjectReducer({ key: gasPriceKey, reducer: gasPriceReducer });
+  useInjectReducer({ key: safeDetailsKey, reducer: safeDetailsReducer });
 
   useInjectSaga({ key: gasPriceKey, saga: gasPriceSaga });
+  useInjectSaga({ key: safeDetailsKey, saga: safeDetailsSaga });
 
   const dispatch = useDispatch();
 
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const averageGasPrice = useSelector(makeSelectAverageGasPrice());
+  const nonce = useSelector(makeSelectNonce());
+  const safeOwners = useSelector(makeSelectOwners());
+  const threshold = useSelector(makeSelectThreshold());
 
   // contracts
   const proxyContract = useContract(ownerSafeAddress, GnosisSafeABI, true);
+  // Contracts
+  //eslint-disable-next-line
+  const gnosisSafeMasterContract = useContract(
+    GNOSIS_SAFE_ADDRESS,
+    GnosisSafeABI
+  );
+  // const proxyContractRead = useContract(ownerSafeAddress, GnosisSafeABI, false);
   const [tokenFrom, setTokenFrom] = useState(tokens.DAI); // eslint-disable-line
   const dai = useContract(DAI_ADDRESS, ERC20ABI, true);
   // const erc20 = useContract(tokenNameToAddress[tokenFrom], ERC20ABI, true);
@@ -79,6 +101,13 @@ export default function useMassPayout() {
       // get gas prices
       dispatch(getGasPrice());
   }, [dispatch, averageGasPrice]);
+
+  useEffect(() => {
+    if (ownerSafeAddress) {
+      // get safe details
+      dispatch(getSafeDetails(ownerSafeAddress));
+    }
+  }, [dispatch, ownerSafeAddress]);
 
   const encodeMultiSendCallData = (transactions, ethLibAdapter) => {
     const standardizedTxs = transactions.map(standardizeTransaction);
@@ -96,6 +125,142 @@ export default function useMassPayout() {
         )
       ),
     ]);
+  };
+
+  let signTypedData = async function (account, typedData) {
+    return new Promise(function (resolve, reject) {
+      // const digest = TypedDataUtils.encodeDigest(typedData);
+      try {
+        const signer = library.getSigner(account);
+        console.log({ typedData, signer, account });
+
+        signer
+          .getAddress()
+          .then((address) =>
+            library
+              .send("eth_signTypedData_v4", [
+                address,
+                JSON.stringify({
+                  domain: typedData.domain,
+                  types: typedData.types,
+                  message: typedData.message,
+                  primaryType: "SafeTx",
+                }),
+              ])
+              .then((signature) => {
+                console.log({ signature });
+                resolve(signature);
+              })
+          )
+          .catch(console.error);
+        // signer
+        //   ._signTypedData(typedData.domain, typedData.types, typedData.message)
+        //   .then((signature) => {
+        //     console.log({ signature });
+        //     resolve(signature);
+        //   });
+        // signer.signMessage(digest).then((signature) => {
+        //   console.log({ signature });
+        //   resolve(signature);
+        // });
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  };
+
+  const signTransaction = async (
+    to,
+    value,
+    data,
+    operation,
+    txGasEstimate,
+    baseGasEstimate,
+    gasPrice,
+    txGasToken,
+    refundReceiver,
+    nonce
+  ) => {
+    const domain = {
+      verifyingContract: ownerSafeAddress,
+    };
+
+    const types = {
+      SafeTx: [
+        { type: "address", name: "to" },
+        { type: "uint256", name: "value" },
+        { type: "bytes", name: "data" },
+        { type: "uint8", name: "operation" },
+        { type: "uint256", name: "safeTxGas" },
+        { type: "uint256", name: "baseGas" },
+        { type: "uint256", name: "gasPrice" },
+        { type: "address", name: "gasToken" },
+        { type: "address", name: "refundReceiver" },
+        { type: "uint256", name: "nonce" },
+      ],
+    };
+
+    const message = {
+      to: to,
+      value: value,
+      data: data,
+      operation: operation,
+      safeTxGas: txGasEstimate,
+      baseGas: baseGasEstimate,
+      gasPrice: gasPrice,
+      gasToken: txGasToken,
+      refundReceiver: refundReceiver,
+      nonce: nonce,
+    };
+
+    const typedData = {
+      domain,
+      types,
+      message,
+    };
+
+    let signatureBytes = "0x";
+    const signature = await signTypedData(account, typedData);
+
+    const contractTransactionHash = await proxyContract.getTransactionHash(
+      to,
+      value,
+      data,
+      operation,
+      txGasEstimate,
+      baseGasEstimate,
+      gasPrice,
+      txGasToken,
+      refundReceiver,
+      nonce
+    );
+
+    dispatch(
+      createMultisigTransaction({
+        safeAddress: ownerSafeAddress,
+        to,
+        value,
+        data,
+        operation,
+        gasToken: txGasToken,
+        safeTxGas: txGasEstimate,
+        baseGas: baseGasEstimate,
+        gasPrice,
+        refundReceiver,
+        nonce,
+        contractTransactionHash,
+        sender: account,
+        signature,
+        origin,
+      })
+    );
+    // confirmingAccounts.sort();
+    // for (var i = 0; i < confirmingAccounts.length; i++) {
+    //   signatureBytes += (
+    //     await signTypedData(confirmingAccounts[i], typedData)
+    //   ).replace("0x", "");
+    // }
+    return signatureBytes;
   };
 
   const getERC20ContractByName = (name) => {
@@ -206,12 +371,13 @@ export default function useMassPayout() {
       const dataHash = encodeMultiSendCallData(transactions, ethLibAdapter);
 
       // Set parameters of execTransaction()
+      const to = MULTISEND_ADDRESS;
       const valueWei = 0;
       const data = dataHash;
       const operation = 1; // DELEGATECALL
       const gasPrice = 0; // If 0, then no refund to relayer
       const gasToken = ZERO_ADDRESS; // ETH
-      const txGasEstimate = 0;
+      let txGasEstimate = 0;
       const baseGasEstimate = 0;
       const executor = ZERO_ADDRESS;
 
@@ -223,12 +389,55 @@ export default function useMassPayout() {
         { type: "uint8", value: 1 } // v
       );
 
+      // if threshold > 1 and confirmations < threshold
+      if (threshold > 1) {
+        console.log({ threshold, safeOwners, nonce });
+
+        // Estimate safe transaction (need to be called with from set to the safe address)
+        // let estimateData = gnosisSafeMasterContract.interface.encodeFunctionData(
+        //   "requiredTxGas",
+        //   [to, valueWei, data, operation]
+        // );
+
+        // try {
+        //   let estimateResponse = await library.call({
+        //     to: ownerSafeAddress,
+        //     from: ownerSafeAddress,
+        //     data: estimateData,
+        //     gasPrice: 0,
+        //   });
+        //   console.log({ estimateResponse });
+
+        //   // Add 10k else we will fail in case of nested calls
+        //   txGasEstimate = txGasEstimate.toNumber() + 10000;
+        //   console.log("Tx Gas estimate: " + txGasEstimate);
+        // } catch (e) {
+        //   console.log("Could not estimate ", { e });
+        // }
+
+        let gasLimit = "1000000";
+
+        signTransaction(
+          to,
+          valueWei,
+          data,
+          operation,
+          gasLimit,
+          baseGasEstimate,
+          gasPrice,
+          gasToken,
+          ZERO_ADDRESS,
+          nonce
+        );
+        return;
+      }
+
       try {
         setLoadingTx(true);
         setTxHash("");
 
         const gasLimit = await proxyContract.estimateGas.execTransaction(
-          MULTISEND_ADDRESS,
+          to,
           valueWei,
           data,
           operation,
@@ -241,7 +450,7 @@ export default function useMassPayout() {
         );
 
         const tx = await proxyContract.execTransaction(
-          MULTISEND_ADDRESS,
+          to,
           valueWei,
           data,
           operation,

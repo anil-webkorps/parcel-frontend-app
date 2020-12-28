@@ -339,7 +339,7 @@ export default function QuickTransfer() {
         disabled={!formState.isValid || loadingTx}
         loading={loadingTx}
       >
-        Send
+        Sign/Send
       </Button>
     </Card>
   );
