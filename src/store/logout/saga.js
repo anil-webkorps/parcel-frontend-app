@@ -8,6 +8,7 @@ export function* logout() {
 
 function* invalidateSession() {
   yield localStorage.removeItem("token");
+  yield localStorage.removeItem("ENCRYPTION_KEY");
   window.location = "/";
   // yield put(push("/"));
 }

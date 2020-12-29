@@ -34,7 +34,7 @@ import OwnerPng from "assets/images/register/owner.png";
 import ThresholdPng from "assets/images/register/threshold.png";
 import PrivacyPng from "assets/images/register/privacy.png";
 import { Error } from "components/common/Form/styles";
-
+import { getPublicKey } from "utils/encryption";
 import addresses from "constants/addresses";
 import GnosisSafeABI from "constants/abis/GnosisSafe.json";
 import ProxyFactoryABI from "constants/abis/ProxyFactory.json";
@@ -46,7 +46,7 @@ import { MESSAGE_TO_SIGN } from "constants/index";
 import Loading from "components/common/Loading";
 
 const registerKey = "register";
-const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS } = addresses;
+const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
 
 const registerWizardKey = "registerWizard";
 
@@ -107,6 +107,7 @@ const INDIVIDUAL_REGISTER_STEPS = {
 
 const Register = () => {
   const [sign, setSign] = useLocalStorage("SIGNATURE");
+  const setEncryptionKey = useLocalStorage("ENCRYPTION_KEY")[1];
   const [loadingTx, setLoadingTx] = useState(false);
   const [createSafeLoading, setCreateSafeLoading] = useState(false);
   const [loadingAccount, setLoadingAccount] = useState(true);
@@ -209,7 +210,7 @@ const Register = () => {
         await library
           .getSigner(account)
           .signMessage(MESSAGE_TO_SIGN)
-          .then((signature) => {
+          .then(async (signature) => {
             setSign(signature);
             if (formData.referralId) createSafeWithMetaTransaction();
             else {
@@ -225,6 +226,26 @@ const Register = () => {
                         name: cryptoUtils.encryptData(formData.name, signature),
                       },
                     ];
+
+              const publicKey = getPublicKey(signature);
+
+              // set encryptionKey
+              const encryptionKey = cryptoUtils.getEncryptionKey(
+                signature,
+                formData.safeAddress
+              );
+              setEncryptionKey(encryptionKey);
+              let encryptionKeyData;
+              try {
+                encryptionKeyData = await cryptoUtils.encryptUsingPublicKey(
+                  encryptionKey,
+                  signature
+                );
+              } catch (error) {
+                console.error(error);
+                return;
+              }
+
               const body = {
                 name: cryptoUtils.encryptData(formData.name, signature),
                 safeAddress: formData.safeAddress,
@@ -234,6 +255,9 @@ const Register = () => {
                   from: account,
                   params: [GNOSIS_SAFE_ADDRESS, formData.creationData],
                 },
+                email: "",
+                encryptionKeyData,
+                publicKey,
               };
               dispatch(setOwnerDetails(formData.name, formData.safeAddress));
               dispatch(registerUser(body));
@@ -264,12 +288,12 @@ const Register = () => {
         [
           ownerAddresses,
           threshold,
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
+          ZERO_ADDRESS,
+          ZERO_ADDRESS,
+          ZERO_ADDRESS,
+          ZERO_ADDRESS,
           0,
-          "0x0000000000000000000000000000000000000000",
+          ZERO_ADDRESS,
         ]
       );
 
@@ -304,8 +328,9 @@ const Register = () => {
 
   const createSafeWithMetaTransaction = useCallback(async () => {
     let body;
+    console.log("called metatx");
 
-    if (gnosisSafeMasterContract && proxyFactory && account && sign) {
+    if (account && sign) {
       const ownerAddresses =
         formData.owners && formData.owners.length
           ? formData.owners.map(({ owner }) => owner)
@@ -322,46 +347,67 @@ const Register = () => {
                 name: cryptoUtils.encryptData(formData.name, sign),
               },
             ];
-      const threshold = Number(formData.threshold);
+      const threshold = formData.threshold ? Number(formData.threshold) : 1;
+      console.log({ threshold, encryptedOwners, ownerAddresses });
 
       const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
         "setup",
         [
           ownerAddresses,
           threshold,
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
+          ZERO_ADDRESS,
+          ZERO_ADDRESS,
+          ZERO_ADDRESS,
+          ZERO_ADDRESS,
           0,
-          "0x0000000000000000000000000000000000000000",
+          ZERO_ADDRESS,
         ]
       );
 
       // Execute Meta transaction
 
-      body = {
-        name: cryptoUtils.encryptData(formData.name, sign),
-        referralId: formData.referralId,
-        safeAddress: "",
-        createdBy: account,
-        owners: encryptedOwners,
-        proxyData: {
-          from: account,
-          params: [GNOSIS_SAFE_ADDRESS, creationData],
-        },
-      };
-    }
-    setLoadingTx(true);
-    dispatch(registerUser(body, false));
+      setLoadingTx(true);
 
-    proxyFactory.once("ProxyCreation", (proxy) => {
-      if (proxy) {
-        dispatch(setOwnerDetails(formData.name, proxy));
-        setLoadingTx(false);
-        history.push("/dashboard");
-      }
-    });
+      proxyFactory.once("ProxyCreation", async (proxy) => {
+        if (proxy) {
+          const publicKey = getPublicKey(sign);
+
+          // set encryptionKey
+          const encryptionKey = cryptoUtils.getEncryptionKey(sign, proxy);
+          setEncryptionKey(encryptionKey);
+          let encryptionKeyData;
+          try {
+            encryptionKeyData = await cryptoUtils.encryptUsingPublicKey(
+              encryptionKey,
+              sign
+            );
+          } catch (error) {
+            console.error(error);
+            return;
+          }
+
+          body = {
+            name: cryptoUtils.encryptData(formData.name, sign),
+            referralId: formData.referralId,
+            safeAddress: "",
+            createdBy: account,
+            owners: encryptedOwners,
+            proxyData: {
+              from: account,
+              params: [GNOSIS_SAFE_ADDRESS, creationData],
+            },
+            email: "",
+            encryptionKeyData,
+            publicKey,
+          };
+          console.log({ body });
+          dispatch(registerUser(body, false));
+          dispatch(setOwnerDetails(formData.name, proxy));
+          setLoadingTx(false);
+          history.push("/dashboard");
+        }
+      });
+    }
   }, [
     gnosisSafeMasterContract,
     proxyFactory,
@@ -370,6 +416,7 @@ const Register = () => {
     formData,
     sign,
     history,
+    setEncryptionKey,
   ]);
 
   const renderConnect = () => {
@@ -672,13 +719,15 @@ const Register = () => {
           onClick={signTerms}
           large
           className="mx-auto d-block"
+          disabled={loadingTx}
+          loading={loadingTx}
         >
           I'm in
         </Button>
         {loadingTx && (
-          <span className="ml-3 my-3">
+          <div className="ml-2 my-3">
             Waiting for transaction confirmation...
-          </span>
+          </div>
         )}
       </StepDetails>
     );

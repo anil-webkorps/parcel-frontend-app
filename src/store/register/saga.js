@@ -1,5 +1,6 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 import { push } from "connected-react-router";
+
 import { REGISTER_USER } from "./action-types";
 import { registerUserSuccess, registerUserError } from "./actions";
 import request from "utils/request";
@@ -25,6 +26,7 @@ export function* registerUser(action) {
       // Error in payload
       yield put(registerUserError(result.log));
     } else {
+      // set auth token
       localStorage.setItem("token", result.access_token);
       yield put(registerUserSuccess(result.transactionHash, result.log));
       if (action.redirect) yield put(push("/dashboard"));

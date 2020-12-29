@@ -72,7 +72,7 @@ import {
   RetryText,
 } from "./styles";
 
-const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS } = addresses;
+const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
 
 const loginKey = "login";
 const loginWizardKey = "loginWizard";
@@ -143,6 +143,7 @@ const IMPORT_INDIVIDUAL_STEPS = {
 
 const Login = () => {
   const [sign, setSign] = useLocalStorage("SIGNATURE");
+  const setEncryptionKey = useLocalStorage("ENCRYPTION_KEY")[1];
   const [hasAlreadySigned, setHasAlreadySigned] = useState(false);
   const [loadingAccount, setLoadingAccount] = useState(true);
   const [finalSubmitted, setFinalSubmitted] = useState(false);
@@ -320,12 +321,12 @@ const Login = () => {
         [
           ownerAddresses,
           threshold,
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
-          "0x0000000000000000000000000000000000000000",
+          ZERO_ADDRESS,
+          ZERO_ADDRESS,
+          ZERO_ADDRESS,
+          ZERO_ADDRESS,
           0,
-          "0x0000000000000000000000000000000000000000",
+          ZERO_ADDRESS,
         ]
       );
 
@@ -638,6 +639,7 @@ const Login = () => {
           safe,
           name: "Gnosis Safe User",
           balance: "1",
+          encryptionKeyData: "",
         });
       }
 
@@ -645,13 +647,23 @@ const Login = () => {
         safe: safe.safeAddress,
         name: cryptoUtils.decryptData(safe.name, sign),
         balance: "1",
+        encryptionKeyData: safe.encryptionKeyData,
       });
     }, []);
   }, [safes, flow, sign]);
 
-  const handleSelectSafe = (name, safe) => {
+  const handleSelectSafe = async (name, safe, encryptionKeyData) => {
     dispatch(chooseSafe(safe));
     dispatch(setOwnerDetails(name, safe));
+
+    if (sign) {
+      const encryptionKey = await cryptoUtils.decryptUsingPrivateKey(
+        encryptionKeyData,
+        sign
+      );
+      setEncryptionKey(encryptionKey);
+    }
+
     dispatch(loginUser(safe));
   };
   const handleRefetch = useCallback(() => {
@@ -669,7 +681,11 @@ const Login = () => {
       return (
         <div className="text-center my-5">
           <p className="mb-4">Oops, no safe found...</p>
-          <Button to="/" style={{ maxWidth: "200px" }} className="mx-auto mb-5">
+          <Button
+            to="/signup"
+            style={{ maxWidth: "200px" }}
+            className="mx-auto mb-5"
+          >
             Sign Up
           </Button>
 
@@ -683,8 +699,11 @@ const Login = () => {
         <p className="subtitle">
           Select the safe with which you would like to continue
         </p>
-        {safeDetails.map(({ safe, name, balance }) => (
-          <Safe key={safe} onClick={() => handleSelectSafe(name, safe)}>
+        {safeDetails.map(({ safe, name, balance, encryptionKeyData }) => (
+          <Safe
+            key={safe}
+            onClick={() => handleSelectSafe(name, safe, encryptionKeyData)}
+          >
             <div className="top">
               <div className="details">
                 <div className="icon">
