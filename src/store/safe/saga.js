@@ -46,12 +46,12 @@ function* createSafeTransaction({
   signature,
   origin,
 }) {
-  const requestURL = `${gnosisSafeEndpoint}/${safeAddress}/transactions/`;
+  const requestURL = `${gnosisSafeEndpoint}${safeAddress}/transactions/?has_confirmations=True`;
 
   const options = {
     method: "POST",
     body: JSON.stringify({
-      safe: safeAddress,
+      // safe: safeAddress,
       to,
       value,
       data,
@@ -66,6 +66,7 @@ function* createSafeTransaction({
       sender,
       signature,
       origin,
+      transactionHash: null,
     }),
     headers: {
       "content-type": "application/json",
@@ -83,6 +84,10 @@ function* createSafeTransaction({
     yield put(createMultisigTransactionError(err));
   }
 }
+
+// TODO: make GET req to the above URL, and get the current nonce
+// eslint-disable-next-line
+function* getTransactionNonce() {}
 
 function* watchGetSafeDetails() {
   yield takeLatest(GET_SAFE_DETAILS, getSafeDetailsFromGnosis);

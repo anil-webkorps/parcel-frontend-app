@@ -138,7 +138,7 @@ export default function useMassPayout() {
           .getAddress()
           .then((address) =>
             library
-              .send("eth_signTypedData_v4", [
+              .send("eth_signTypedData_v3", [
                 address,
                 JSON.stringify({
                   domain: typedData.domain,
@@ -149,7 +149,8 @@ export default function useMassPayout() {
               ])
               .then((signature) => {
                 console.log({ signature });
-                resolve(signature);
+
+                resolve(signature.replace("0x", ""));
               })
           )
           .catch(console.error);
@@ -157,7 +158,8 @@ export default function useMassPayout() {
         //   ._signTypedData(typedData.domain, typedData.types, typedData.message)
         //   .then((signature) => {
         //     console.log({ signature });
-        //     resolve(signature);
+        //     // resolve(signature);
+        //     resolve(signature.replace("0x", ""));
         //   });
         // signer.signMessage(digest).then((signature) => {
         //   console.log({ signature });
@@ -170,22 +172,23 @@ export default function useMassPayout() {
   };
 
   const signTransaction = async (
-    to,
-    value,
-    data,
-    operation,
-    txGasEstimate,
-    baseGasEstimate,
-    gasPrice,
-    txGasToken,
-    refundReceiver,
-    nonce
+    to = "0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8",
+    value = "0",
+    data = "0xa9059cbb0000000000000000000000005222318905891ae154c3fa5437830caa86be54990000000000000000000000000000000000000000000000008ac7230489e80000",
+    operation = 0,
+    txGasEstimate = 25565,
+    baseGasEstimate = 0,
+    gasPrice = "0",
+    txGasToken = "0x0000000000000000000000000000000000000000",
+    refundReceiver = "0x0000000000000000000000000000000000000000",
+    nonce = 3
   ) => {
     const domain = {
       verifyingContract: ownerSafeAddress,
     };
 
     const types = {
+      EIP712Domain: [{ type: "address", name: "verifyingContract" }],
       SafeTx: [
         { type: "address", name: "to" },
         { type: "uint256", name: "value" },
@@ -199,6 +202,7 @@ export default function useMassPayout() {
         { type: "uint256", name: "nonce" },
       ],
     };
+    console.log({ nonce });
 
     const message = {
       to: to,
@@ -210,7 +214,7 @@ export default function useMassPayout() {
       gasPrice: gasPrice,
       gasToken: txGasToken,
       refundReceiver: refundReceiver,
-      nonce: nonce,
+      nonce,
     };
 
     const typedData = {
@@ -221,6 +225,8 @@ export default function useMassPayout() {
 
     let signatureBytes = "0x";
     const signature = await signTypedData(account, typedData);
+    // const signature =
+    //   "a1301d30b4a75e24baf2c7a0965712ec26cd9e4411bd1f3263baaf72f4262ed7385c9b903527662a82b4a2d6517220100ff6d12a9de36adb1ac7e8042c4bd8231c";
 
     const contractTransactionHash = await proxyContract.getTransactionHash(
       to,
@@ -239,19 +245,19 @@ export default function useMassPayout() {
       createMultisigTransaction({
         safeAddress: ownerSafeAddress,
         to,
-        value,
+        value: String(value),
         data,
         operation,
         gasToken: txGasToken,
-        safeTxGas: txGasEstimate,
+        safeTxGas: Number(txGasEstimate),
         baseGas: baseGasEstimate,
-        gasPrice,
+        gasPrice: String(gasPrice),
         refundReceiver,
         nonce,
         contractTransactionHash,
         sender: account,
         signature,
-        origin,
+        origin: null,
       })
     );
     // confirmingAccounts.sort();
@@ -427,8 +433,10 @@ export default function useMassPayout() {
           gasPrice,
           gasToken,
           ZERO_ADDRESS,
-          nonce
+          // nonce
+          4
         );
+
         return;
       }
 
