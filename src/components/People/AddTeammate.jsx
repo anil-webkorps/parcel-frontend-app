@@ -93,7 +93,7 @@ const addTeammateKey = "addTeammate";
 const viewDepartmentsKey = "viewDepartments";
 
 export default function AddTeammate() {
-  const [sign] = useLocalStorage("SIGNATURE");
+  const [sign] = useLocalStorage("ENCRYPTION_KEY");
   const [toggled] = useContext(SideNavContext);
 
   const [success, setSuccess] = useState(false);

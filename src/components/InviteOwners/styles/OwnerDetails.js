@@ -7,6 +7,7 @@ export default styled.div`
   padding: 13px 24px;
   border-radius: 12px;
   background-color: #f2f2f2;
+  flex-wrap: wrap;
 
   display: flex;
   justify-content: space-between;
@@ -51,5 +52,11 @@ export default styled.div`
     color: ${({ theme }) => theme.primary};
     text-transform: uppercase;
     cursor: pointer;
+  }
+
+  .send-email {
+    // display: flex;
+    width: 100%;
+    margin-top: 16px;
   }
 `;

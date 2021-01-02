@@ -102,11 +102,11 @@ export default function DashboardHeader() {
                     <div className="option">Connected Account</div>
                     <div>{account && minifyAddress(account)}</div>
                   </li>
-                  <Link to="/dashboard/invite">
-                    <li>
+                  <li>
+                    <Link to="/dashboard/invite">
                       <div className="option">Invite Owners</div>
-                    </li>
-                  </Link>
+                    </Link>
+                  </li>
                   <li onClick={logout}>
                     <div className="option">Logout</div>
                     <div>

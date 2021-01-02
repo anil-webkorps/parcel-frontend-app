@@ -143,7 +143,7 @@ const IMPORT_INDIVIDUAL_STEPS = {
 
 const Login = () => {
   const [sign, setSign] = useLocalStorage("SIGNATURE");
-  const setEncryptionKey = useLocalStorage("ENCRYPTION_KEY")[1];
+  const [encryptionKey, setEncryptionKey] = useLocalStorage("ENCRYPTION_KEY"); // eslint-disable-line
   const [hasAlreadySigned, setHasAlreadySigned] = useState(false);
   const [loadingAccount, setLoadingAccount] = useState(true);
   const [finalSubmitted, setFinalSubmitted] = useState(false);

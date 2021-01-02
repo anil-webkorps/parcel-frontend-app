@@ -26,6 +26,11 @@ export const getDepartmentByIdEndpoint = `${ROOT_BE_URL}/api/v1/departments/getB
 export const createTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/create`;
 export const getTransactionsEndpoint = `${ROOT_BE_URL}/api/v1/transactions/get`;
 
+// INVITATION
+export const getInvitationsEndpoint = `${ROOT_BE_URL}/api/v1/invitation/get`;
+export const approveInvitationsEndpoint = `${ROOT_BE_URL}/api/v1/invitation/approve`;
+export const acceptInvitationsEndpoint = `${ROOT_BE_URL}/api/v1/invitation/accept`;
+
 // TOKEN PRICES
 export const getTokenPricesEndpoint = `${ROOT_BE_URL}/api/v1/tokenPrices/usd`;
 

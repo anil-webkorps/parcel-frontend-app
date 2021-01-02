@@ -124,7 +124,7 @@ const navStyles = `
 `;
 
 export default function People() {
-  const [sign] = useLocalStorage("SIGNATURE");
+  const [sign] = useLocalStorage("ENCRYPTION_KEY");
 
   const [checked, setChecked] = useState([]);
   const [isCheckedAll, setIsCheckedAll] = useState(false);

@@ -44,7 +44,7 @@ const { TableBody, TableHead, TableRow } = Table;
 const viewTeammatesKey = "viewTeammates";
 
 export default function ViewTeammate() {
-  const [sign] = useLocalStorage("SIGNATURE");
+  const [sign] = useLocalStorage("ENCRYPTION_KEY");
   useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
 
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });

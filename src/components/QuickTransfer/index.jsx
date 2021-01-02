@@ -67,7 +67,7 @@ const marketRatesKey = "marketRates";
 const transactionsKey = "transactions";
 
 export default function QuickTransfer() {
-  const [sign] = useLocalStorage("SIGNATURE");
+  const [sign] = useLocalStorage("ENCRYPTION_KEY");
 
   const { txHash, loadingTx, massPayout } = useMassPayout();
   const [submittedTx, setSubmittedTx] = useState(false);

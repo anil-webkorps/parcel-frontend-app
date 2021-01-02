@@ -57,6 +57,9 @@ export default styled.div`
       border-radius: 0 0 10px 10px;
     }
     li {
+      a {
+        color: #fff;
+      }
       opacity: 1;
 
       color: white;

@@ -43,7 +43,7 @@ const STATES = {
 };
 
 export default function PaymentsCard() {
-  const [sign] = useLocalStorage("SIGNATURE");
+  const [sign] = useLocalStorage("ENCRYPTION_KEY");
   const [state, setState] = useState(STATES.EMPTY_STATE);
   const [loading, setLoading] = useState(true);
   const [transactionData, setTransactionData] = useState();

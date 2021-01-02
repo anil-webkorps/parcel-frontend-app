@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLongArrowAltLeft,
@@ -14,14 +14,12 @@ import { Card } from "components/common/Card";
 import Button from "components/common/Button";
 import { Input, ErrorMessage } from "components/common/Form";
 import { useLocalStorage } from "hooks";
-import transactionsSaga from "store/transactions/saga";
-import { addTransaction } from "store/transactions/actions";
+import invitationSaga from "store/invitation/saga";
+import invitationReducer from "store/invitation/reducer";
+import { getInvitations } from "store/invitation/actions";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import dashboardReducer from "store/dashboard/reducer";
-import dashboardSaga from "store/dashboard/saga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
-import { getSafeBalances } from "store/dashboard/actions";
 import Loading from "components/common/Loading";
 
 import { Title, Heading, ActionItem } from "components/People/styles";
@@ -29,16 +27,17 @@ import { Container, OwnerDetails } from "./styles";
 import { Circle } from "components/Header/styles";
 import { minifyAddress } from "components/common/Web3Utils";
 
-const dashboardKey = "dashboard";
+const invitationKey = "invitation";
 
 export default function InviteOwners() {
-  const [sign] = useLocalStorage("SIGNATURE");
+  const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
+  const [showEmail, setShowEmail] = useState();
 
   // Reducers
-  useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
+  useInjectReducer({ key: invitationKey, reducer: invitationReducer });
 
   // Sagas
-  useInjectSaga({ key: dashboardKey, saga: dashboardSaga });
+  useInjectSaga({ key: invitationKey, saga: invitationSaga });
 
   const { register, errors, handleSubmit, formState } = useForm({
     mode: "onChange",
@@ -46,7 +45,15 @@ export default function InviteOwners() {
 
   // const dispatch = useDispatch();
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+
+  const dispatch = useDispatch();
   const history = useHistory();
+
+  useEffect(() => {
+    if (ownerSafeAddress) {
+      dispatch(getInvitations(ownerSafeAddress));
+    }
+  }, [dispatch, ownerSafeAddress]);
 
   const onSubmit = async (values) => {
     console.log({ values });
@@ -54,6 +61,11 @@ export default function InviteOwners() {
 
   const goBack = () => {
     history.goBack();
+  };
+
+  const toggleShowEmail = (idx) => {
+    if (showEmail === idx) setShowEmail();
+    else setShowEmail(idx);
   };
 
   const renderInviteOwners = () => {
@@ -82,7 +94,42 @@ export default function InviteOwners() {
                     </div>
                   </div>
                 </div>
-                <div className="invite-status">Invite to parcel</div>
+                <div
+                  className="invite-status"
+                  onClick={() => toggleShowEmail(1)}
+                >
+                  Invite to parcel
+                </div>
+                {showEmail === 1 && (
+                  <div className="send-email">
+                    <Row>
+                      <Col lg="8">
+                        <Input
+                          type="text"
+                          name="email"
+                          register={register}
+                          required={`Email is required`}
+                          pattern={{
+                            value: /^0x[a-fA-F0-9]{40}$/,
+                            message: "Invalid Ethereum Address",
+                          }}
+                          placeholder="satoshi@nakamoto.com"
+                        />
+                        <ErrorMessage name="email" errors={errors} />
+                      </Col>
+                      <Col lg="4">
+                        <Button
+                          large
+                          type="submit"
+                          disabled={!formState.isValid}
+                          style={{ minHeight: "0", height: "100%" }}
+                        >
+                          Send
+                        </Button>
+                      </Col>
+                    </Row>
+                  </div>
+                )}
               </OwnerDetails>
             </Col>
           </Row>
@@ -126,33 +173,6 @@ export default function InviteOwners() {
                 </div>
                 <div className="invite-status">Invite to parcel</div>
               </OwnerDetails>
-            </Col>
-          </Row>
-
-          <Row className="mt-5 mb-3 align-items-center">
-            <Col lg="9">
-              <Input
-                type="text"
-                name="email"
-                register={register}
-                required={`Email is required`}
-                pattern={{
-                  value: /^0x[a-fA-F0-9]{40}$/,
-                  message: "Invalid Ethereum Address",
-                }}
-                placeholder="satoshi@nakamoto.com"
-              />
-              <ErrorMessage name="email" errors={errors} />
-            </Col>
-            <Col lg="3">
-              <Button
-                large
-                type="submit"
-                disabled={!formState.isValid}
-                className="py-0"
-              >
-                Send
-              </Button>
             </Col>
           </Row>
         </Card>

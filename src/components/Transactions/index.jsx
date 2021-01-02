@@ -39,7 +39,7 @@ const { TableBody, TableHead, TableRow } = Table;
 const transactionsKey = "transactions";
 
 export default function Transactions() {
-  const [sign] = useLocalStorage("SIGNATURE");
+  const [sign] = useLocalStorage("ENCRYPTION_KEY");
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
