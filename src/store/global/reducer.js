@@ -8,6 +8,7 @@ import {
 export const initialState = {
   ownerName: "",
   ownerSafeAddress: "",
+  createdBy: "",
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -25,6 +26,7 @@ const reducer = (state = initialState, action) =>
       case SET_OWNER_DETAILS:
         draft.ownerName = action.name;
         draft.ownerSafeAddress = action.address;
+        draft.createdBy = action.createdBy;
         break;
     }
   });

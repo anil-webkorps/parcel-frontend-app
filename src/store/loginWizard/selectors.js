@@ -43,6 +43,12 @@ const makeSelectSafes = () =>
     (loginWizardState) => loginWizardState.safes
   );
 
+const makeSelectCreatedBy = () =>
+  createSelector(
+    selectLoginWizard,
+    (loginWizardState) => loginWizardState.createdBy
+  );
+
 const makeSelectError = () =>
   createSelector(
     selectLoginWizard,
@@ -57,5 +63,6 @@ export {
   makeSelectChosenSafeAddress,
   makeSelectLoading,
   makeSelectSafes,
+  makeSelectCreatedBy,
   makeSelectError,
 };

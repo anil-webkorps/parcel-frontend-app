@@ -43,7 +43,7 @@ const STATES = {
 };
 
 export default function PaymentsCard() {
-  const [sign] = useLocalStorage("ENCRYPTION_KEY");
+  const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   const [state, setState] = useState(STATES.EMPTY_STATE);
   const [loading, setLoading] = useState(true);
   const [transactionData, setTransactionData] = useState();
@@ -64,10 +64,10 @@ export default function PaymentsCard() {
 
   const getDecryptedDetails = useCallback(
     (data) => {
-      if (!sign) return "";
-      return JSON.parse(cryptoUtils.decryptData(data, sign));
+      if (!encryptionKey) return "";
+      return JSON.parse(cryptoUtils.decryptData(data, encryptionKey));
     },
-    [sign]
+    [encryptionKey]
   );
 
   useEffect(() => {

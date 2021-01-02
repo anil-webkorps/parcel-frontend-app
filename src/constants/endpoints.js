@@ -30,6 +30,7 @@ export const getTransactionsEndpoint = `${ROOT_BE_URL}/api/v1/transactions/get`;
 export const getInvitationsEndpoint = `${ROOT_BE_URL}/api/v1/invitation/get`;
 export const approveInvitationsEndpoint = `${ROOT_BE_URL}/api/v1/invitation/approve`;
 export const acceptInvitationsEndpoint = `${ROOT_BE_URL}/api/v1/invitation/accept`;
+export const createInvitationsEndpoint = `${ROOT_BE_URL}/api/v1/invitation/create`;
 
 // TOKEN PRICES
 export const getTokenPricesEndpoint = `${ROOT_BE_URL}/api/v1/tokenPrices/usd`;

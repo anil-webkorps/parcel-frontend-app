@@ -24,7 +24,7 @@ export function* getSafes(action) {
       // Error in payload
       yield put(getSafesError(result.log));
     } else {
-      yield put(getSafesSuccess(result.safes, result.log));
+      yield put(getSafesSuccess(result.safes, result.owner, result.log));
     }
   } catch (err) {
     yield put(getSafesError(err));
@@ -43,7 +43,7 @@ export function* getParcelSafes(action) {
       // Error in payload
       yield put(getSafesError(result.log));
     } else {
-      yield put(getSafesSuccess(result.safes, result.log));
+      yield put(getSafesSuccess(result.safes, result.owner, result.log));
     }
   } catch (err) {
     yield put(getSafesError(err));
@@ -65,7 +65,7 @@ export function* fetchSafes(action) {
       // Fetch safes api will asynchronously call get safes
       // so that by the time the user reaches the select safe section
       // the safes are ready
-      yield put(getSafesSuccess([], result.log));
+      yield put(getSafesSuccess([], "", result.log));
     }
   } catch (err) {
     yield put(getSafesError(err));

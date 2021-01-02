@@ -44,7 +44,7 @@ const { TableBody, TableHead, TableRow } = Table;
 const viewTeammatesKey = "viewTeammates";
 
 export default function ViewTeammate() {
-  const [sign] = useLocalStorage("ENCRYPTION_KEY");
+  const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
 
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
@@ -70,8 +70,8 @@ export default function ViewTeammate() {
   }, [dispatch, params, ownerSafeAddress]);
 
   const getDecryptedDetails = (data) => {
-    if (!sign) return "";
-    return JSON.parse(cryptoUtils.decryptData(data, sign));
+    if (!encryptionKey) return "";
+    return JSON.parse(cryptoUtils.decryptData(data, encryptionKey));
   };
 
   const goBack = () => {

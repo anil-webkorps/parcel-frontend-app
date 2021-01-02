@@ -13,4 +13,7 @@ const makeSelectOwnerName = () =>
 const makeSelectOwnerSafeAddress = () =>
   createSelector(selectGlobal, (globalState) => globalState.ownerSafeAddress);
 
-export { makeSelectOwnerName, makeSelectOwnerSafeAddress };
+const makeSelectCreatedBy = () =>
+  createSelector(selectGlobal, (globalState) => globalState.createdBy);
+
+export { makeSelectOwnerName, makeSelectOwnerSafeAddress, makeSelectCreatedBy };

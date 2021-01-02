@@ -18,10 +18,11 @@ export function setOwnerAddress(address) {
   };
 }
 
-export function setOwnerDetails(name, address) {
+export function setOwnerDetails(name, address, createdBy) {
   return {
     type: SET_OWNER_DETAILS,
     name,
-    address,
+    address, // safe address
+    createdBy,
   };
 }

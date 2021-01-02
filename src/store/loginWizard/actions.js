@@ -63,10 +63,11 @@ export function getSafes(owner, status = 0) {
   };
 }
 
-export function getSafesSuccess(safes, log) {
+export function getSafesSuccess(safes, createdBy, log) {
   return {
     type: GET_SAFES_SUCCESS,
     safes,
+    createdBy,
     log,
   };
 }

@@ -17,6 +17,10 @@ export default styled.div`
     display: flex;
     align-items: center;
   }
+
+  .icon {
+    font-size: 26px;
+  }
   .details {
     margin-left: 20px;
     .name {
@@ -55,7 +59,6 @@ export default styled.div`
   }
 
   .send-email {
-    // display: flex;
     width: 100%;
     margin-top: 16px;
   }

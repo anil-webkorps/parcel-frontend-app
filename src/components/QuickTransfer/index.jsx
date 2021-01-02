@@ -67,7 +67,7 @@ const marketRatesKey = "marketRates";
 const transactionsKey = "transactions";
 
 export default function QuickTransfer() {
-  const [sign] = useLocalStorage("ENCRYPTION_KEY");
+  const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
   const { txHash, loadingTx, massPayout } = useMassPayout();
   const [submittedTx, setSubmittedTx] = useState(false);
@@ -133,13 +133,16 @@ export default function QuickTransfer() {
     if (txHash) {
       setSubmittedTx(true);
       if (
-        sign &&
+        encryptionKey &&
         payoutDetails &&
         ownerSafeAddress &&
         totalAmountToPay &&
         selectedTokenDetails
       ) {
-        const to = cryptoUtils.encryptData(JSON.stringify(payoutDetails), sign);
+        const to = cryptoUtils.encryptData(
+          JSON.stringify(payoutDetails),
+          encryptionKey
+        );
         // const to = selectedTeammates;
 
         dispatch(
@@ -159,7 +162,7 @@ export default function QuickTransfer() {
     }
   }, [
     txHash,
-    sign,
+    encryptionKey,
     payoutDetails,
     dispatch,
     ownerSafeAddress,

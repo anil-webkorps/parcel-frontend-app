@@ -26,6 +26,7 @@ import {
   makeSelectChosenSafeAddress,
   makeSelectLoading,
   makeSelectSafes,
+  makeSelectCreatedBy,
 } from "store/loginWizard/selectors";
 import {
   chooseStep,
@@ -165,6 +166,7 @@ const Login = () => {
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
   const safes = useSelector(makeSelectSafes());
+  const createdBy = useSelector(makeSelectCreatedBy());
   const getSafesLoading = useSelector(makeSelectLoading());
   const flow = useSelector(makeSelectFlow());
   const chosenSafeAddress = useSelector(makeSelectChosenSafeAddress());
@@ -341,7 +343,7 @@ const Login = () => {
         },
       };
 
-      dispatch(setOwnerDetails(formData.name, chosenSafeAddress));
+      dispatch(setOwnerDetails(formData.name, chosenSafeAddress, account));
       dispatch(registerUser(body));
     }
   };
@@ -638,23 +640,25 @@ const Login = () => {
         return details.concat({
           safe,
           name: "Gnosis Safe User",
-          balance: "1",
+          balance: "0",
           encryptionKeyData: "",
+          createdBy,
         });
       }
 
       return details.concat({
         safe: safe.safeAddress,
         name: cryptoUtils.decryptData(safe.name, sign),
-        balance: "1",
+        balance: "0",
         encryptionKeyData: safe.encryptionKeyData,
+        createdBy,
       });
     }, []);
-  }, [safes, flow, sign]);
+  }, [safes, flow, sign, createdBy]);
 
-  const handleSelectSafe = async (name, safe, encryptionKeyData) => {
+  const handleSelectSafe = async (name, safe, encryptionKeyData, createdBy) => {
     dispatch(chooseSafe(safe));
-    dispatch(setOwnerDetails(name, safe));
+    dispatch(setOwnerDetails(name, safe, createdBy));
 
     if (sign) {
       const encryptionKey = await cryptoUtils.decryptUsingPrivateKey(
@@ -702,7 +706,9 @@ const Login = () => {
         {safeDetails.map(({ safe, name, balance, encryptionKeyData }) => (
           <Safe
             key={safe}
-            onClick={() => handleSelectSafe(name, safe, encryptionKeyData)}
+            onClick={() =>
+              handleSelectSafe(name, safe, encryptionKeyData, createdBy)
+            }
           >
             <div className="top">
               <div className="details">

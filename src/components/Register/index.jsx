@@ -259,7 +259,9 @@ const Register = () => {
                 encryptionKeyData,
                 publicKey,
               };
-              dispatch(setOwnerDetails(formData.name, formData.safeAddress));
+              dispatch(
+                setOwnerDetails(formData.name, formData.safeAddress, account)
+              );
               dispatch(registerUser(body));
             }
           });
@@ -400,9 +402,9 @@ const Register = () => {
             encryptionKeyData,
             publicKey,
           };
-          console.log({ body });
+          // console.log({ body });
           dispatch(registerUser(body, false));
-          dispatch(setOwnerDetails(formData.name, proxy));
+          dispatch(setOwnerDetails(formData.name, proxy, account));
           setLoadingTx(false);
           history.push("/dashboard");
         }
@@ -692,8 +694,14 @@ const Register = () => {
         </div>
 
         <ErrorMessage name="threshold" errors={errors} />
-        <Button large type="submit" className="mt-3">
-          Proceed
+        <Button
+          large
+          type="submit"
+          className="mt-3"
+          loading={createSafeLoading}
+          disabled={createSafeLoading}
+        >
+          Create Safe and Proceed
         </Button>
       </StepDetails>
     );
@@ -764,7 +772,7 @@ const Register = () => {
             register={register}
             type="radio"
             id={`flow-company`}
-            value={FLOWS.INDIVIDUAL_WITH_COMPANY} // Change this later to FLOWS.COMPANY
+            value={FLOWS.COMPANY}
             label={"I have a Company"}
             labelStyle={{ minWidth: "260px" }}
           />

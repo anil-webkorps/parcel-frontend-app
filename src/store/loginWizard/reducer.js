@@ -19,6 +19,7 @@ export const initialState = {
   error: false,
   flow: "", // LOGIN or IMPORT,
   chosenSafeAddress: "",
+  createdBy: "",
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -51,6 +52,7 @@ const reducer = (state = initialState, action) =>
       case GET_SAFES_SUCCESS:
         draft.loading = false;
         draft.safes = action.safes;
+        draft.createdBy = action.createdBy;
         break;
 
       case GET_SAFES_ERROR:

@@ -8,6 +8,7 @@ import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
+import { cryptoUtils } from "parcel-sdk";
 
 import { Info } from "components/Dashboard/styles";
 import { Card } from "components/common/Card";
@@ -16,11 +17,25 @@ import { Input, ErrorMessage } from "components/common/Form";
 import { useLocalStorage } from "hooks";
 import invitationSaga from "store/invitation/saga";
 import invitationReducer from "store/invitation/reducer";
-import { getInvitations } from "store/invitation/actions";
+import {
+  getInvitations,
+  createInvitation,
+  approveInvitation,
+} from "store/invitation/actions";
+import {
+  makeSelectLoading,
+  makeSelectSafeOwners,
+  makeSelectSuccess,
+  makeSelectCreating,
+} from "store/invitation/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOwnerSafeAddress,
+  makeSelectCreatedBy,
+} from "store/global/selectors";
 import Loading from "components/common/Loading";
+import { useActiveWeb3React } from "hooks";
 
 import { Title, Heading, ActionItem } from "components/People/styles";
 import { Container, OwnerDetails } from "./styles";
@@ -31,7 +46,11 @@ const invitationKey = "invitation";
 
 export default function InviteOwners() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
+  const [sign] = useLocalStorage("SIGNATURE");
   const [showEmail, setShowEmail] = useState();
+  const [ownerToBeInvited, setOwnerToBeInvited] = useState();
+
+  const { account } = useActiveWeb3React();
 
   // Reducers
   useInjectReducer({ key: invitationKey, reducer: invitationReducer });
@@ -40,11 +59,16 @@ export default function InviteOwners() {
   useInjectSaga({ key: invitationKey, saga: invitationSaga });
 
   const { register, errors, handleSubmit, formState } = useForm({
-    mode: "onChange",
+    mode: "all",
   });
 
   // const dispatch = useDispatch();
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const safeOwners = useSelector(makeSelectSafeOwners());
+  const createdBy = useSelector(makeSelectCreatedBy());
+  const loading = useSelector(makeSelectLoading());
+  const creatingInvitation = useSelector(makeSelectCreating());
+  const successfullyInvited = useSelector(makeSelectSuccess());
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -55,18 +79,130 @@ export default function InviteOwners() {
     }
   }, [dispatch, ownerSafeAddress]);
 
+  useEffect(() => {
+    if (successfullyInvited && ownerSafeAddress) {
+      dispatch(getInvitations(ownerSafeAddress));
+      setShowEmail();
+    }
+  }, [dispatch, successfullyInvited, ownerSafeAddress]);
+
   const onSubmit = async (values) => {
-    console.log({ values });
+    if (!account || !ownerToBeInvited || !ownerSafeAddress) return;
+    dispatch(
+      createInvitation({
+        safeAddress: ownerSafeAddress,
+        createdBy: account,
+        toAddress: ownerToBeInvited,
+        fromAddress: account,
+        toEmail: values.email,
+        fromEmail: "rohith.test@gmail.com",
+      })
+    );
+  };
+
+  const approveOwner = async (owner, invitationDetails) => {
+    if (!owner || !invitationDetails) return;
+
+    const { toPublicKey, invitationId } = invitationDetails;
+    const encryptionKeyData = await cryptoUtils.encryptUsingPublicKey(
+      encryptionKey,
+      toPublicKey
+    );
+    dispatch(approveInvitation(encryptionKeyData, invitationId));
   };
 
   const goBack = () => {
     history.goBack();
   };
 
-  const toggleShowEmail = (idx) => {
-    if (showEmail === idx) setShowEmail();
-    else setShowEmail(idx);
+  const toggleShowEmail = (idx, owner) => {
+    if (showEmail === idx) {
+      setShowEmail();
+      setOwnerToBeInvited();
+    } else {
+      setShowEmail(idx);
+      setOwnerToBeInvited(owner);
+    }
   };
+
+  const renderInvitationStatus = (owner, invitationDetails, idx) => {
+    if (owner === account || owner === createdBy) {
+      return null;
+    }
+
+    if (!invitationDetails) {
+      return (
+        <div
+          className="invite-status"
+          onClick={() => toggleShowEmail(idx, owner)}
+        >
+          Invite to parcel
+        </div>
+      );
+    }
+
+    if (invitationDetails && invitationDetails.status === 0) {
+      // sent invite and awaiting confirmation
+      return (
+        <div
+          className="invite-status"
+          onClick={() => console.log("pending confirmation")}
+        >
+          Awaiting Confirmation
+        </div>
+      );
+    }
+    if (invitationDetails && invitationDetails.status === 1) {
+      // sent invite and awaiting confirmation
+      return (
+        <div
+          className="invite-status"
+          onClick={() => approveOwner(owner, invitationDetails)}
+        >
+          Approve
+        </div>
+      );
+    }
+
+    if (invitationDetails && invitationDetails.status === 2) {
+      // sent invite and awaiting confirmation
+      return <div className="invite-status">Joined</div>;
+    }
+
+    return null;
+  };
+
+  const renderEmail = () => (
+    <div className="send-email">
+      <Row>
+        <Col lg="8">
+          <Input
+            type="text"
+            name="email"
+            register={register}
+            required={`Email is required`}
+            pattern={{
+              value: /\S+@\S+\.\S+/,
+              message: "Invalid email address",
+            }}
+            placeholder="satoshi@nakamoto.com"
+          />
+        </Col>
+        <Col lg="4">
+          <Button
+            large
+            type="submit"
+            disabled={!formState.isValid}
+            style={{ minHeight: "0", height: "100%" }}
+            loading={creatingInvitation}
+          >
+            Send
+          </Button>
+        </Col>
+      </Row>
+      <ErrorMessage name="email" errors={errors} />
+    </div>
+  );
 
   const renderInviteOwners = () => {
     return (
@@ -75,106 +211,40 @@ export default function InviteOwners() {
           <Title className="mb-2">Owners</Title>
           <Heading>List of all owners of the safe</Heading>
 
-          {false && <Loading color="#7367f0" />}
+          {loading && (
+            <div
+              className="d-flex align-items-center justify-content-center"
+              style={{ height: "250px" }}
+            >
+              <Loading color="primary" width="50px" height="50px" />
+            </div>
+          )}
 
-          <Row>
-            <Col lg="12">
-              <OwnerDetails>
-                <div className="left">
-                  <div className="icon">
-                    <FontAwesomeIcon icon={faUserCircle} color="#333" />
-                  </div>
-                  <div className="details">
-                    <div className="name">Rohith</div>
-                    <div className="address">
-                      Address:{" "}
-                      {minifyAddress(
-                        "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F"
-                      )}
+          {!loading &&
+            safeOwners &&
+            safeOwners.map(({ name, owner, invitationDetails }, idx) => (
+              <Row key={`${owner}${idx}`}>
+                <Col lg="12">
+                  <OwnerDetails>
+                    <div className="left">
+                      <div className="icon">
+                        <FontAwesomeIcon icon={faUserCircle} color="#333" />
+                      </div>
+                      <div className="details">
+                        <div className="name">
+                          {cryptoUtils.decryptData(name, sign)}
+                        </div>
+                        <div className="address">
+                          Address: {minifyAddress(owner)}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div
-                  className="invite-status"
-                  onClick={() => toggleShowEmail(1)}
-                >
-                  Invite to parcel
-                </div>
-                {showEmail === 1 && (
-                  <div className="send-email">
-                    <Row>
-                      <Col lg="8">
-                        <Input
-                          type="text"
-                          name="email"
-                          register={register}
-                          required={`Email is required`}
-                          pattern={{
-                            value: /^0x[a-fA-F0-9]{40}$/,
-                            message: "Invalid Ethereum Address",
-                          }}
-                          placeholder="satoshi@nakamoto.com"
-                        />
-                        <ErrorMessage name="email" errors={errors} />
-                      </Col>
-                      <Col lg="4">
-                        <Button
-                          large
-                          type="submit"
-                          disabled={!formState.isValid}
-                          style={{ minHeight: "0", height: "100%" }}
-                        >
-                          Send
-                        </Button>
-                      </Col>
-                    </Row>
-                  </div>
-                )}
-              </OwnerDetails>
-            </Col>
-          </Row>
-          <Row>
-            <Col lg="12">
-              <OwnerDetails>
-                <div className="left">
-                  <div className="icon">
-                    <FontAwesomeIcon icon={faUserCircle} color="#333" />
-                  </div>
-                  <div className="details">
-                    <div className="name">Rohith</div>
-                    <div className="address">
-                      Address:{" "}
-                      {minifyAddress(
-                        "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F"
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="invite-status">Invite to parcel</div>
-              </OwnerDetails>
-            </Col>
-          </Row>
-          <Row>
-            <Col lg="12">
-              <OwnerDetails>
-                <div className="left">
-                  <div className="icon">
-                    <FontAwesomeIcon icon={faUserCircle} color="#333" />
-                  </div>
-                  <div className="details">
-                    <div className="name">Rohith</div>
-                    <div className="address">
-                      Address:{" "}
-                      {minifyAddress(
-                        "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F"
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="invite-status">Invite to parcel</div>
-              </OwnerDetails>
-            </Col>
-          </Row>
+                    {renderInvitationStatus(owner, invitationDetails, idx)}
+                    {showEmail === idx && renderEmail()}
+                  </OwnerDetails>
+                </Col>
+              </Row>
+            ))}
         </Card>
       </form>
     );

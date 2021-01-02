@@ -93,7 +93,7 @@ const addTeammateKey = "addTeammate";
 const viewDepartmentsKey = "viewDepartments";
 
 export default function AddTeammate() {
-  const [sign] = useLocalStorage("ENCRYPTION_KEY");
+  const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   const [toggled] = useContext(SideNavContext);
 
   const [success, setSuccess] = useState(false);
@@ -228,7 +228,7 @@ export default function AddTeammate() {
   };
 
   const handleCreateTeammate = () => {
-    if (!sign || !ownerSafeAddress) return;
+    if (!encryptionKey || !ownerSafeAddress) return;
 
     const encryptedEmployeeDetails = cryptoUtils.encryptData(
       JSON.stringify({
@@ -240,7 +240,7 @@ export default function AddTeammate() {
         payCycleDate: chosenDepartment.payCycleDate,
         joiningDate: Date.now(),
       }),
-      sign
+      encryptionKey
     );
 
     const body = {
@@ -285,7 +285,7 @@ export default function AddTeammate() {
   };
 
   const onAddBulkTeammates = () => {
-    if (!sign || !ownerSafeAddress) return;
+    if (!encryptionKey || !ownerSafeAddress) return;
 
     let index = 0;
     const uniqueDepartmentsHashmap = csvData.reduce(
@@ -321,7 +321,7 @@ export default function AddTeammate() {
               address,
               // payCycleDate,
             }),
-            sign
+            encryptionKey
           );
 
           const uniqueIndex = uniqueDepartmentsHashmap[uniqueDepartmentName];

@@ -29,6 +29,7 @@ export default styled.div`
     position: absolute;
     top: 100%;
     min-width: 200px;
+    width: 100%;
     perspective: 1000px;
     z-index: -1;
     list-style-type: none;

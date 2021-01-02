@@ -124,7 +124,7 @@ const navStyles = `
 `;
 
 export default function People() {
-  const [sign] = useLocalStorage("ENCRYPTION_KEY");
+  const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
   const [checked, setChecked] = useState([]);
   const [isCheckedAll, setIsCheckedAll] = useState(false);
@@ -220,13 +220,16 @@ export default function People() {
     if (txHash) {
       setSubmittedTx(true);
       if (
-        sign &&
+        encryptionKey &&
         recievers &&
         ownerSafeAddress &&
         totalAmountToPay &&
         selectedTokenDetails
       ) {
-        const to = cryptoUtils.encryptData(JSON.stringify(recievers), sign);
+        const to = cryptoUtils.encryptData(
+          JSON.stringify(recievers),
+          encryptionKey
+        );
         // const to = selectedTeammates;
 
         dispatch(
@@ -245,7 +248,7 @@ export default function People() {
     }
   }, [
     txHash,
-    sign,
+    encryptionKey,
     recievers,
     dispatch,
     ownerSafeAddress,
@@ -307,8 +310,8 @@ export default function People() {
   ]);
 
   const getDecryptedDetails = (data) => {
-    if (!sign) return "";
-    return JSON.parse(cryptoUtils.decryptData(data, sign));
+    if (!encryptionKey) return "";
+    return JSON.parse(cryptoUtils.decryptData(data, encryptionKey));
   };
 
   const handleMassPayout = async (selectedTeammates) => {
