@@ -9,6 +9,7 @@ import ViewTeammates from "components/People/ViewTeammates";
 import Payments from "components/Payments";
 import Transactions from "components/Transactions";
 import QuickTransfer from "components/QuickTransfer";
+import InviteOwners from "components/InviteOwners";
 import Authenticated from "components/hoc/Authenticated";
 import NotFoundPage from "pages/NotFound";
 
@@ -49,6 +50,7 @@ const DashboardPage = ({ match }) => {
           path={`${match.path}/quick-transfer`}
           component={QuickTransfer}
         />
+        <Route exact path={`${match.path}/invite`} component={InviteOwners} />
         <Route component={NotFoundPage} />
       </Switch>
     </Authenticated>

@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { startCase } from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlug } from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
 
 import CopyButton from "components/common/Copy";
 import SideNav from "components/SideNav";
@@ -101,6 +102,11 @@ export default function DashboardHeader() {
                     <div className="option">Connected Account</div>
                     <div>{account && minifyAddress(account)}</div>
                   </li>
+                  <Link to="/dashboard/invite">
+                    <li>
+                      <div className="option">Invite Owners</div>
+                    </li>
+                  </Link>
                   <li onClick={logout}>
                     <div className="option">Logout</div>
                     <div>
