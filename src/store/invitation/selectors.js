@@ -33,6 +33,12 @@ const makeSelectApproving = () =>
     (invitationState) => invitationState.approving
   );
 
+const makeSelectCreatedBy = () =>
+  createSelector(
+    selectInvitation,
+    (invitationState) => invitationState.createdBy
+  );
+
 export {
   selectInvitation,
   makeSelectSafeOwners,
@@ -41,4 +47,5 @@ export {
   makeSelectSuccess,
   makeSelectCreating,
   makeSelectApproving,
+  makeSelectCreatedBy,
 };

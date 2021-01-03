@@ -139,7 +139,7 @@ export default function QuickTransfer() {
         totalAmountToPay &&
         selectedTokenDetails
       ) {
-        const to = cryptoUtils.encryptData(
+        const to = cryptoUtils.encryptDataUsingEncryptionKey(
           JSON.stringify(payoutDetails),
           encryptionKey
         );

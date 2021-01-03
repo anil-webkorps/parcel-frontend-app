@@ -214,21 +214,25 @@ const Register = () => {
             setSign(signature);
             if (formData.referralId) createSafeWithMetaTransaction();
             else {
-              // set encryptionKey
               const encryptionKey = cryptoUtils.getEncryptionKey(
                 signature,
                 formData.safeAddress
               );
+              // set encryptionKey
+              setEncryptionKey(encryptionKey);
               const encryptedOwners =
                 formData.owners && formData.owners.length
                   ? formData.owners.map(({ name, owner }) => ({
-                      name: cryptoUtils.encryptData(name, encryptionKey),
+                      name: cryptoUtils.encryptDataUsingEncryptionKey(
+                        name,
+                        encryptionKey
+                      ),
                       owner,
                     }))
                   : [
                       {
                         owner: account,
-                        name: cryptoUtils.encryptData(
+                        name: cryptoUtils.encryptDataUsingEncryptionKey(
                           formData.name,
                           encryptionKey
                         ),
@@ -237,7 +241,6 @@ const Register = () => {
 
               const publicKey = getPublicKey(signature);
 
-              setEncryptionKey(encryptionKey);
               let encryptionKeyData;
               try {
                 encryptionKeyData = await cryptoUtils.encryptUsingSignatures(
@@ -250,7 +253,10 @@ const Register = () => {
               }
 
               const body = {
-                name: cryptoUtils.encryptData(formData.name, encryptionKey),
+                name: cryptoUtils.encryptDataUsingEncryptionKey(
+                  formData.name,
+                  encryptionKey
+                ),
                 safeAddress: formData.safeAddress,
                 createdBy: account,
                 owners: encryptedOwners,
@@ -336,6 +342,12 @@ const Register = () => {
     console.log("called metatx");
 
     if (account && sign) {
+      const encryptionKey = cryptoUtils.getEncryptionKey(
+        sign,
+        formData.safeAddress
+      );
+      // set encryptionKey
+      setEncryptionKey(encryptionKey);
       const ownerAddresses =
         formData.owners && formData.owners.length
           ? formData.owners.map(({ owner }) => owner)
@@ -343,13 +355,19 @@ const Register = () => {
       const encryptedOwners =
         formData.owners && formData.owners.length
           ? formData.owners.map(({ name, owner }) => ({
-              name: cryptoUtils.encryptData(name, sign),
+              name: cryptoUtils.encryptDataUsingEncryptionKey(
+                name,
+                encryptionKey
+              ),
               owner,
             }))
           : [
               {
                 owner: account,
-                name: cryptoUtils.encryptData(formData.name, sign),
+                name: cryptoUtils.encryptDataUsingEncryptionKey(
+                  formData.name,
+                  encryptionKey
+                ),
               },
             ];
       const threshold = formData.threshold ? Number(formData.threshold) : 1;
@@ -392,7 +410,10 @@ const Register = () => {
           }
 
           body = {
-            name: cryptoUtils.encryptData(formData.name, sign),
+            name: cryptoUtils.encryptDataUsingEncryptionKey(
+              formData.name,
+              encryptionKey
+            ),
             referralId: formData.referralId,
             safeAddress: "",
             createdBy: account,

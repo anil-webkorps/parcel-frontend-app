@@ -230,7 +230,7 @@ export default function AddTeammate() {
   const handleCreateTeammate = () => {
     if (!encryptionKey || !ownerSafeAddress) return;
 
-    const encryptedEmployeeDetails = cryptoUtils.encryptData(
+    const encryptedEmployeeDetails = cryptoUtils.encryptDataUsingEncryptionKey(
       JSON.stringify({
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -312,7 +312,7 @@ export default function AddTeammate() {
             departmentName,
           } = csvData[i];
 
-          const encryptedEmployeeDetails = cryptoUtils.encryptData(
+          const encryptedEmployeeDetails = cryptoUtils.encryptDataUsingEncryptionKey(
             JSON.stringify({
               firstName,
               lastName,

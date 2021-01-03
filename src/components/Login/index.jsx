@@ -299,6 +299,11 @@ const Login = () => {
   const signup = async (_threshold) => {
     // let body;
     if (gnosisSafeMasterContract && proxyFactory && account) {
+      // set encryptionKey
+      const encryptionKey = cryptoUtils.getEncryptionKey(
+        sign,
+        chosenSafeAddress
+      );
       const ownerAddresses =
         formData.owners && formData.owners.length
           ? formData.owners.map(({ owner }) => owner)
@@ -306,12 +311,18 @@ const Login = () => {
       const encryptedOwners =
         formData.owners && formData.owners.length
           ? formData.owners.map(({ name, owner }) => ({
-              name: cryptoUtils.encryptData(name, sign),
+              name: cryptoUtils.encryptDataUsingEncryptionKey(
+                name,
+                encryptionKey
+              ),
               owner,
             }))
           : [
               {
-                name: cryptoUtils.encryptData(formData.name, sign),
+                name: cryptoUtils.encryptDataUsingEncryptionKey(
+                  formData.name,
+                  encryptionKey
+                ),
                 owner: account,
               },
             ];
@@ -334,7 +345,10 @@ const Login = () => {
       );
 
       const body = {
-        name: cryptoUtils.encryptData(formData.name, sign),
+        name: cryptoUtils.encryptDataUsingEncryptionKey(
+          formData.name,
+          encryptionKey
+        ),
         safeAddress: chosenSafeAddress,
         createdBy: account,
         owners: encryptedOwners,
@@ -659,7 +673,10 @@ const Login = () => {
 
       return details.concat({
         safe: safe.safeAddress,
-        name: cryptoUtils.decryptData(safe.name, encryptionKey),
+        name: cryptoUtils.decryptDataUsingEncryptionKey(
+          safe.name,
+          encryptionKey
+        ),
         balance: "0",
         encryptionKeyData: safe.encryptionKeyData,
         createdBy,

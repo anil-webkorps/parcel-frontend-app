@@ -20,10 +20,11 @@ export function getInvitations(safeAddress) {
   };
 }
 
-export function getInvitationsSuccess(owners, log) {
+export function getInvitationsSuccess(owners, createdBy, log) {
   return {
     type: GET_INVITATIONS_SUCCESS,
     owners,
+    createdBy,
     log,
   };
 }

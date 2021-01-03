@@ -23,6 +23,7 @@ export const initialState = {
   success: false,
   creating: false,
   approving: false,
+  createdBy: "",
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -37,6 +38,7 @@ const reducer = (state = initialState, action) =>
       case GET_INVITATIONS_SUCCESS:
         draft.loading = false;
         draft.owners = action.owners;
+        draft.createdBy = action.createdBy;
         break;
 
       case GET_INVITATIONS_ERROR:

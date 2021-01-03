@@ -10247,10 +10247,10 @@ param-case@^3.0.3:
     dot-case "^3.0.3"
     tslib "^1.10.0"
 
-parcel-sdk@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/parcel-sdk/-/parcel-sdk-1.0.6.tgz#adafd6f6a8ad8d75d448fc390aea09ade15e1a3e"
-  integrity sha512-OWImrGrBKXwxb+QXX4dlzO0dHBg81ooE0ee/AsJyiODBM77sFNIG9vnr90aexPIOTggzOfbe/w6tuTdBkUz8rg==
+parcel-sdk@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/parcel-sdk/-/parcel-sdk-1.0.7.tgz#061c41f5f18c62cc5e1af9d6e421ba16afbfb802"
+  integrity sha512-O7t1QE1WngruCesmUNhDIMoHmaSXLa9EhTbcrfI1gatf2NAgStR3Y+cXwm+95NRjCUCUAkzl1bgD0b13DtAuvg==
   dependencies:
     app-root-path "^3.0.0"
     cryptr "^4.0.2"

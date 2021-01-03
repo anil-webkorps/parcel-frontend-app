@@ -27,13 +27,11 @@ import {
   makeSelectSafeOwners,
   makeSelectSuccess,
   makeSelectCreating,
+  makeSelectCreatedBy,
 } from "store/invitation/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import {
-  makeSelectOwnerSafeAddress,
-  makeSelectCreatedBy,
-} from "store/global/selectors";
+import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { useActiveWeb3React } from "hooks";
 
@@ -46,7 +44,6 @@ const invitationKey = "invitation";
 
 export default function InviteOwners() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
-  const [sign] = useLocalStorage("SIGNATURE");
   const [showEmail, setShowEmail] = useState();
   const [ownerToBeInvited, setOwnerToBeInvited] = useState();
 
@@ -126,8 +123,11 @@ export default function InviteOwners() {
   };
 
   const renderInvitationStatus = (owner, invitationDetails, idx) => {
-    if (owner === account || owner === createdBy) {
-      return null;
+    if (owner === createdBy) {
+      return <div className="invite-status">Main Owner</div>;
+    }
+    if (owner === account) {
+      return <div className="invite-status">You</div>;
     }
 
     if (!invitationDetails) {
@@ -232,7 +232,10 @@ export default function InviteOwners() {
                       </div>
                       <div className="details">
                         <div className="name">
-                          {cryptoUtils.decryptData(name, sign)}
+                          {cryptoUtils.decryptDataUsingEncryptionKey(
+                            name,
+                            encryptionKey
+                          )}
                         </div>
                         <div className="address">
                           Address: {minifyAddress(owner)}

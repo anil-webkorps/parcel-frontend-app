@@ -39,7 +39,7 @@ const { TableBody, TableHead, TableRow } = Table;
 const transactionsKey = "transactions";
 
 export default function Transactions() {
-  const [sign] = useLocalStorage("ENCRYPTION_KEY");
+  const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
@@ -66,8 +66,10 @@ export default function Transactions() {
   };
 
   const getDecryptedDetails = (data) => {
-    if (!sign) return "";
-    return JSON.parse(cryptoUtils.decryptData(data, sign));
+    if (!encryptionKey) return "";
+    return JSON.parse(
+      cryptoUtils.decryptDataUsingEncryptionKey(data, encryptionKey)
+    );
   };
 
   const renderTransactions = () => {

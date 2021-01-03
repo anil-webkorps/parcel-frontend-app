@@ -65,7 +65,9 @@ export default function PaymentsCard() {
   const getDecryptedDetails = useCallback(
     (data) => {
       if (!encryptionKey) return "";
-      return JSON.parse(cryptoUtils.decryptData(data, encryptionKey));
+      return JSON.parse(
+        cryptoUtils.decryptDataUsingEncryptionKey(data, encryptionKey)
+      );
     },
     [encryptionKey]
   );

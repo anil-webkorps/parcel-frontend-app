@@ -226,7 +226,7 @@ export default function People() {
         totalAmountToPay &&
         selectedTokenDetails
       ) {
-        const to = cryptoUtils.encryptData(
+        const to = cryptoUtils.encryptDataUsingEncryptionKey(
           JSON.stringify(recievers),
           encryptionKey
         );
@@ -311,7 +311,9 @@ export default function People() {
 
   const getDecryptedDetails = (data) => {
     if (!encryptionKey) return "";
-    return JSON.parse(cryptoUtils.decryptData(data, encryptionKey));
+    return JSON.parse(
+      cryptoUtils.decryptDataUsingEncryptionKey(data, encryptionKey)
+    );
   };
 
   const handleMassPayout = async (selectedTeammates) => {

@@ -71,7 +71,9 @@ export default function ViewTeammate() {
 
   const getDecryptedDetails = (data) => {
     if (!encryptionKey) return "";
-    return JSON.parse(cryptoUtils.decryptData(data, encryptionKey));
+    return JSON.parse(
+      cryptoUtils.decryptDataUsingEncryptionKey(data, encryptionKey)
+    );
   };
 
   const goBack = () => {
