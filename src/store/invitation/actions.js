@@ -58,11 +58,12 @@ export function createInvitationError(error) {
   };
 }
 
-export function acceptInvitation(publicKey, invitationToken) {
+export function acceptInvitation(publicKey, invitationToken, account) {
   return {
     type: ACCEPT_INVITATION,
     publicKey,
     invitationToken,
+    account,
   };
 }
 

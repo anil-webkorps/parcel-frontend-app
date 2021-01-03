@@ -133,9 +133,9 @@ const AcceptInvite = () => {
     const publicKey = getPublicKey(sign);
     const searchParams = new URLSearchParams(location.search);
     const invitationToken = searchParams.get("invitationToken");
-    if (!invitationToken) return;
+    if (!invitationToken || !account) return;
 
-    dispatch(acceptInvitation(publicKey, invitationToken));
+    dispatch(acceptInvitation(publicKey, invitationToken, account));
   };
 
   const renderConnect = () => (

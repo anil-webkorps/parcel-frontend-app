@@ -65,7 +65,22 @@ export function* createInvitation(action) {
 }
 
 export function* acceptInvitation(action) {
-  const decoded = jwt_decode(action.invitationToken);
+  let decoded;
+  try {
+    decoded = jwt_decode(action.invitationToken);
+  } catch (err) {
+    yield put(acceptInvitationError(`Invalid invitation token.`));
+    return;
+  }
+
+  if (decoded.toAddress !== action.account) {
+    yield put(
+      acceptInvitationError(
+        `Invalid address. This invite was meant for the address: ${decoded.toAddress}.`
+      )
+    );
+    return;
+  }
 
   const requestURL = `${acceptInvitationsEndpoint}`;
   const options = {
