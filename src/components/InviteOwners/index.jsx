@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLongArrowAltLeft,
   faUserCircle,
+  faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
@@ -39,6 +40,7 @@ import { Title, Heading, ActionItem } from "components/People/styles";
 import { Container, OwnerDetails } from "./styles";
 import { Circle } from "components/Header/styles";
 import { minifyAddress } from "components/common/Web3Utils";
+import { Stepper, StepCircle } from "components/common/Stepper";
 
 const invitationKey = "invitation";
 
@@ -124,10 +126,10 @@ export default function InviteOwners() {
 
   const renderInvitationStatus = (owner, invitationDetails, idx) => {
     if (owner === createdBy) {
-      return <div className="invite-status">Main Owner</div>;
+      return <div className="highlighted-status">Main Owner</div>;
     }
     if (owner === account) {
-      return <div className="invite-status">You</div>;
+      return <div className="highlighted-status">You</div>;
     }
 
     if (!invitationDetails) {
@@ -143,20 +145,13 @@ export default function InviteOwners() {
 
     if (invitationDetails && invitationDetails.status === 0) {
       // sent invite and awaiting confirmation
-      return (
-        <div
-          className="invite-status"
-          onClick={() => console.log("pending confirmation")}
-        >
-          Awaiting Confirmation
-        </div>
-      );
+      return <div className="awaiting-status">Awaiting Confirmation</div>;
     }
     if (invitationDetails && invitationDetails.status === 1) {
       // sent invite and awaiting confirmation
       return (
         <div
-          className="invite-status"
+          className="approved-status"
           onClick={() => approveOwner(owner, invitationDetails)}
         >
           Approve
@@ -166,7 +161,7 @@ export default function InviteOwners() {
 
     if (invitationDetails && invitationDetails.status === 2) {
       // sent invite and awaiting confirmation
-      return <div className="invite-status">Joined</div>;
+      return <div className="joined-status">Joined</div>;
     }
 
     return null;
@@ -210,6 +205,26 @@ export default function InviteOwners() {
         <Card className="invite-owners">
           <Title className="mb-2">Owners</Title>
           <Heading>List of all owners of the safe</Heading>
+
+          <Stepper count={3}>
+            <StepCircle
+              title={`Step 1`}
+              subtitle={`Invite Owner to Parcel`}
+              backgroundColor="#7367f0"
+            />
+            <StepCircle
+              title={`Step 2`}
+              subtitle={`Owner Accepts Invite`}
+              // icon={<FontAwesomeIcon icon={faCheckCircle} color="#3bd800" />}
+              backgroundColor="#373737"
+            />
+            <StepCircle
+              title={`Step 3`}
+              subtitle={`Approve Owner`}
+              backgroundColor="#3bd800"
+              last
+            />
+          </Stepper>
 
           {loading && (
             <div

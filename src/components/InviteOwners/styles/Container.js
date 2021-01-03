@@ -15,7 +15,7 @@ export default styled.div`
 
   .invite-owners {
     width: 680px;
-    min-height: 656px;
+    min-height: 456px;
     margin: 0 auto;
     border-radius: 16px;
     box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);

@@ -58,6 +58,47 @@ export default styled.div`
     cursor: pointer;
   }
 
+  .highlighted-status,
+  .joined-status {
+    font-size: 12px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.25;
+    letter-spacing: normal;
+    text-align: right;
+    color: #fff;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: #3bd800;
+  }
+
+  .awaiting-status {
+    font-size: 12px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.25;
+    letter-spacing: normal;
+    text-align: right;
+    color: #373737;
+    text-transform: uppercase;
+  }
+
+  .approved-status {
+    font-size: 12px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.25;
+    letter-spacing: normal;
+    text-align: right;
+    color: #3bd800;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
   .send-email {
     width: 100%;
     margin-top: 16px;
