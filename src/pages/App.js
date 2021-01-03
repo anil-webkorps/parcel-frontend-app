@@ -10,6 +10,7 @@ import NetworkModal from "components/Connect/NetworkModal";
 import RegisterPage from "pages/Register";
 import LoginPage from "pages/Login";
 import DashboardPage from "./Dashboard";
+import AcceptInvitePage from "./AcceptInvite";
 import NotFoundPage from "./NotFound";
 import SideNavProvider from "context/SideNavContext";
 
@@ -24,6 +25,7 @@ export default function App() {
             <Route exact path="/" component={LoginPage} />
             <Route exact path="/signup" component={RegisterPage} />
             <Route path="/dashboard" component={DashboardPage} />
+            <Route path="/accept-invite" component={AcceptInvitePage} />
             <Route component={NotFoundPage} />
           </Switch>
         </SideNavProvider>

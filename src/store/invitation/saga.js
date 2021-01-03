@@ -1,4 +1,6 @@
 import { call, fork, put, takeLatest } from "redux-saga/effects";
+import jwt_decode from "jwt-decode";
+
 import {
   ACCEPT_INVITATION,
   APPROVE_INVITATION,
@@ -63,14 +65,19 @@ export function* createInvitation(action) {
 }
 
 export function* acceptInvitation(action) {
-  const invitationId = action.invitationToken; // TODO: jwt decode the id from token
+  const decoded = jwt_decode(action.invitationToken);
+
   const requestURL = `${acceptInvitationsEndpoint}`;
   const options = {
     method: "POST",
     body: JSON.stringify({
       publicKey: action.publicKey,
-      invitationId,
+      invitationId: decoded.invitationId,
     }),
+    headers: {
+      "content-type": "application/json",
+      Authorization: `Bearer ${action.invitationToken}`,
+    },
   };
 
   try {

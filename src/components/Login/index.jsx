@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -148,6 +148,7 @@ const Login = () => {
   const [hasAlreadySigned, setHasAlreadySigned] = useState(false);
   const [loadingAccount, setLoadingAccount] = useState(true);
   const [finalSubmitted, setFinalSubmitted] = useState(false);
+  const [safeDetails, setSafeDetails] = useState([]);
 
   const { active, account, library } = useActiveWeb3React();
 
@@ -634,8 +635,13 @@ const Login = () => {
     );
   };
 
-  const safeDetails = useMemo(() => {
-    return safes.reduce((details, safe) => {
+  const getEncryptionKey = async (data, sign) => {
+    const encryptionKey = await cryptoUtils.decryptUsingSignatures(data, sign);
+    return encryptionKey;
+  };
+
+  const getSafeDetails = useCallback(async () => {
+    const safeDetails = await safes.reduce(async (details, safe) => {
       if (flow === FLOWS.IMPORT || flow === FLOWS.IMPORT_INDIVIDUAL) {
         return details.concat({
           safe,
@@ -646,25 +652,37 @@ const Login = () => {
         });
       }
 
+      const encryptionKey = await getEncryptionKey(
+        safe.encryptionKeyData,
+        sign
+      );
+
       return details.concat({
         safe: safe.safeAddress,
-        name: cryptoUtils.decryptData(safe.name, sign),
+        name: cryptoUtils.decryptData(safe.name, encryptionKey),
         balance: "0",
         encryptionKeyData: safe.encryptionKeyData,
         createdBy,
       });
     }, []);
-  }, [safes, flow, sign, createdBy]);
+
+    setSafeDetails(safeDetails);
+
+    return safeDetails;
+  }, [createdBy, flow, safes, sign]);
+
+  useEffect(() => {
+    if (step === STEPS.TWO) {
+      getSafeDetails();
+    }
+  }, [step, getSafeDetails]);
 
   const handleSelectSafe = async (name, safe, encryptionKeyData, createdBy) => {
     dispatch(chooseSafe(safe));
     dispatch(setOwnerDetails(name, safe, createdBy));
 
     if (sign) {
-      const encryptionKey = await cryptoUtils.decryptUsingPrivateKey(
-        encryptionKeyData,
-        sign
-      );
+      const encryptionKey = await getEncryptionKey(encryptionKeyData, sign);
       setEncryptionKey(encryptionKey);
     }
 
@@ -703,24 +721,25 @@ const Login = () => {
         <p className="subtitle">
           Select the safe with which you would like to continue
         </p>
-        {safeDetails.map(({ safe, name, balance, encryptionKeyData }) => (
-          <Safe
-            key={safe}
-            onClick={() =>
-              handleSelectSafe(name, safe, encryptionKeyData, createdBy)
-            }
-          >
-            <div className="top">
-              <div className="details">
-                <div className="icon">
-                  <img src={TeamPng} alt="user" width="50" />
+        {safeDetails &&
+          safeDetails.map(({ safe, name, balance, encryptionKeyData }) => (
+            <Safe
+              key={safe}
+              onClick={() =>
+                handleSelectSafe(name, safe, encryptionKeyData, createdBy)
+              }
+            >
+              <div className="top">
+                <div className="details">
+                  <div className="icon">
+                    <img src={TeamPng} alt="user" width="50" />
+                  </div>
+                  <div className="info">
+                    <div className="desc">Name</div>
+                    <div className="val">{name}</div>
+                  </div>
                 </div>
-                <div className="info">
-                  <div className="desc">Name</div>
-                  <div className="val">{name}</div>
-                </div>
-              </div>
-              {/* <div className="details">
+                {/* <div className="details">
                 <div className="icon">
                   <FontAwesomeIcon icon={faWallet} color="#aaa" />
                 </div>
@@ -729,27 +748,27 @@ const Login = () => {
                   <div className="val">{balance} ETH</div>
                 </div>
               </div> */}
-            </div>
+              </div>
 
-            <div className="bottom">
-              <div className="details">
-                <div className="icon">
-                  <FontAwesomeIcon icon={faLock} color="#aaa" />
-                </div>
-                <div className="info">
-                  <div className="desc">Address</div>
-                  <div className="val">{safe}</div>
+              <div className="bottom">
+                <div className="details">
+                  <div className="icon">
+                    <FontAwesomeIcon icon={faLock} color="#aaa" />
+                  </div>
+                  <div className="info">
+                    <div className="desc">Address</div>
+                    <div className="val">{safe}</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="select-safe">
-              <Button iconOnly onClick={goBack} className="px-0">
-                <FontAwesomeIcon icon={faArrowRight} color="#fff" />
-              </Button>
-            </div>
-          </Safe>
-        ))}
+              <div className="select-safe">
+                <Button iconOnly onClick={goBack} className="px-0">
+                  <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+                </Button>
+              </div>
+            </Safe>
+          ))}
         <RetryText onClick={handleRefetch}>Safe not loaded?</RetryText>
       </StepDetails>
     );

@@ -214,30 +214,33 @@ const Register = () => {
             setSign(signature);
             if (formData.referralId) createSafeWithMetaTransaction();
             else {
-              const encryptedOwners =
-                formData.owners && formData.owners.length
-                  ? formData.owners.map(({ name, owner }) => ({
-                      name: cryptoUtils.encryptData(name, signature),
-                      owner,
-                    }))
-                  : [
-                      {
-                        owner: account,
-                        name: cryptoUtils.encryptData(formData.name, signature),
-                      },
-                    ];
-
-              const publicKey = getPublicKey(signature);
-
               // set encryptionKey
               const encryptionKey = cryptoUtils.getEncryptionKey(
                 signature,
                 formData.safeAddress
               );
+              const encryptedOwners =
+                formData.owners && formData.owners.length
+                  ? formData.owners.map(({ name, owner }) => ({
+                      name: cryptoUtils.encryptData(name, encryptionKey),
+                      owner,
+                    }))
+                  : [
+                      {
+                        owner: account,
+                        name: cryptoUtils.encryptData(
+                          formData.name,
+                          encryptionKey
+                        ),
+                      },
+                    ];
+
+              const publicKey = getPublicKey(signature);
+
               setEncryptionKey(encryptionKey);
               let encryptionKeyData;
               try {
-                encryptionKeyData = await cryptoUtils.encryptUsingPublicKey(
+                encryptionKeyData = await cryptoUtils.encryptUsingSignatures(
                   encryptionKey,
                   signature
                 );
@@ -247,7 +250,7 @@ const Register = () => {
               }
 
               const body = {
-                name: cryptoUtils.encryptData(formData.name, signature),
+                name: cryptoUtils.encryptData(formData.name, encryptionKey),
                 safeAddress: formData.safeAddress,
                 createdBy: account,
                 owners: encryptedOwners,
@@ -379,7 +382,7 @@ const Register = () => {
           setEncryptionKey(encryptionKey);
           let encryptionKeyData;
           try {
-            encryptionKeyData = await cryptoUtils.encryptUsingPublicKey(
+            encryptionKeyData = await cryptoUtils.encryptUsingSignatures(
               encryptionKey,
               sign
             );
