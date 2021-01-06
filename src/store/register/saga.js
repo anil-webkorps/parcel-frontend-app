@@ -1,11 +1,16 @@
-import { call, put, takeLatest } from "redux-saga/effects";
+import { call, put, fork, takeLatest } from "redux-saga/effects";
 import { push } from "connected-react-router";
 
-import { REGISTER_USER } from "./action-types";
-import { registerUserSuccess, registerUserError } from "./actions";
+import { CREATE_META_TX, REGISTER_USER } from "./action-types";
+import {
+  registerUserSuccess,
+  registerUserError,
+  createMetaTxError,
+  createMetaTxSuccess,
+} from "./actions";
 import request from "utils/request";
 // import { makeSelectUsername } from "containers/HomePage/selectors";
-import { registerEndpoint } from "constants/endpoints";
+import { registerEndpoint, createMetaTxEndpoint } from "constants/endpoints";
 import { networkId } from "constants/networks";
 
 export function* registerUser(action) {
@@ -37,6 +42,38 @@ export function* registerUser(action) {
   }
 }
 
-export default function* watchRegister() {
+export function* createMetaTx(action) {
+  const requestURL = createMetaTxEndpoint;
+  const options = {
+    method: "POST",
+    body: JSON.stringify({ ...action.body, networkId }),
+    headers: {
+      "content-type": "application/json",
+    },
+  };
+
+  try {
+    const result = yield call(request, requestURL, options);
+    if (result.flag !== 200) {
+      // Error in payload
+      yield put(createMetaTxError(result.log));
+    } else {
+      yield put(createMetaTxSuccess(result.transactionHash, result.log));
+    }
+  } catch (err) {
+    yield put(createMetaTxError(err));
+  }
+}
+
+function* watchRegister() {
   yield takeLatest(REGISTER_USER, registerUser);
+}
+
+function* watchCreateMetaTx() {
+  yield takeLatest(CREATE_META_TX, createMetaTx);
+}
+
+export default function* register() {
+  yield fork(watchRegister);
+  yield fork(watchCreateMetaTx);
 }

@@ -655,34 +655,41 @@ const Login = () => {
   };
 
   const getSafeDetails = useCallback(async () => {
-    const safeDetails = await safes.reduce(async (details, safe) => {
+    if (!safes || !safes.length) {
+      setSafeDetails([]);
+      return;
+    }
+
+    const safeDetails = [];
+
+    for (let i = 0; i < safes.length; i++) {
       if (flow === FLOWS.IMPORT || flow === FLOWS.IMPORT_INDIVIDUAL) {
-        return details.concat({
-          safe,
+        safeDetails.push({
+          safe: safes[i],
           name: "Gnosis Safe User",
           balance: "0",
           encryptionKeyData: "",
           createdBy,
         });
+      } else {
+        console.log({ curr: safes[i] });
+        const encryptionKey = await getEncryptionKey(
+          safes[i].encryptionKeyData,
+          sign
+        );
+
+        safeDetails.push({
+          safe: safes[i].safeAddress,
+          name: cryptoUtils.decryptDataUsingEncryptionKey(
+            safes[i].name,
+            encryptionKey
+          ),
+          balance: "0",
+          encryptionKeyData: safes[i].encryptionKeyData,
+          createdBy,
+        });
       }
-
-      const encryptionKey = await getEncryptionKey(
-        safe.encryptionKeyData,
-        sign
-      );
-
-      return details.concat({
-        safe: safe.safeAddress,
-        name: cryptoUtils.decryptDataUsingEncryptionKey(
-          safe.name,
-          encryptionKey
-        ),
-        balance: "0",
-        encryptionKeyData: safe.encryptionKeyData,
-        createdBy,
-      });
-    }, []);
-
+    }
     setSafeDetails(safeDetails);
 
     return safeDetails;
@@ -693,6 +700,7 @@ const Login = () => {
       getSafeDetails();
     }
   }, [step, getSafeDetails]);
+  console.log({ step, safes });
 
   const handleSelectSafe = async (name, safe, encryptionKeyData, createdBy) => {
     dispatch(chooseSafe(safe));

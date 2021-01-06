@@ -40,15 +40,20 @@ import GnosisSafeABI from "constants/abis/GnosisSafe.json";
 import ProxyFactoryABI from "constants/abis/ProxyFactory.json";
 import registerSaga from "store/register/saga";
 import { useInjectSaga } from "utils/injectSaga";
-import { registerUser } from "store/register/actions";
+import { registerUser, createMetaTx } from "store/register/actions";
 import { cryptoUtils } from "parcel-sdk";
-import { MESSAGE_TO_SIGN } from "constants/index";
+import { MESSAGE_TO_SIGN, DEFAULT_GAS_PRICE } from "constants/index";
 import Loading from "components/common/Loading";
+import gasPriceSaga from "store/gas/saga";
+import gasPriceReducer from "store/gas/reducer";
+import { makeSelectAverageGasPrice } from "store/gas/selectors";
+import { getGasPrice } from "store/gas/actions";
 
 const registerKey = "register";
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
 
 const registerWizardKey = "registerWizard";
+const gasPriceKey = "gas";
 
 const STEPS = {
   ZERO: 0,
@@ -113,23 +118,25 @@ const Register = () => {
   const [loadingAccount, setLoadingAccount] = useState(true);
 
   const { active, account, library } = useActiveWeb3React();
-
   // Reducers
   useInjectReducer({ key: registerWizardKey, reducer: registerWizardReducer });
   useInjectReducer({ key: registerKey, reducer: registerReducer });
+  useInjectReducer({ key: gasPriceKey, reducer: gasPriceReducer });
 
   // Sagas
   useInjectSaga({ key: registerKey, saga: registerSaga });
+  useInjectSaga({ key: gasPriceKey, saga: gasPriceSaga });
 
   // Route
   const location = useLocation();
-  const history = useHistory();
+  const history = useHistory(); // eslint-disable-line
 
   const dispatch = useDispatch();
 
   // Selectors
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
+  const averageGasPrice = useSelector(makeSelectAverageGasPrice());
   // const loading = useSelector(makeSelectLoading());
 
   // Form
@@ -151,6 +158,12 @@ const Register = () => {
     ProxyFactoryABI,
     true
   );
+
+  useEffect(() => {
+    if (!averageGasPrice)
+      // get gas prices
+      dispatch(getGasPrice());
+  }, [dispatch, averageGasPrice]);
 
   useEffect(() => {
     let timer;
@@ -318,7 +331,10 @@ const Register = () => {
       const tx = await proxyFactory.createProxy(
         GNOSIS_SAFE_ADDRESS,
         creationData,
-        { gasLimit: estimateGas, gasPrice: "10000000000" }
+        {
+          gasLimit: estimateGas,
+          gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
+        }
       );
 
       proxyFactory.once("ProxyCreation", (proxy) => {
@@ -342,36 +358,14 @@ const Register = () => {
     console.log("called metatx");
 
     if (account && sign) {
-      const encryptionKey = cryptoUtils.getEncryptionKey(
-        sign,
-        formData.safeAddress
-      );
-      // set encryptionKey
-      setEncryptionKey(encryptionKey);
+      console.log({ formData });
       const ownerAddresses =
         formData.owners && formData.owners.length
           ? formData.owners.map(({ owner }) => owner)
           : [account];
-      const encryptedOwners =
-        formData.owners && formData.owners.length
-          ? formData.owners.map(({ name, owner }) => ({
-              name: cryptoUtils.encryptDataUsingEncryptionKey(
-                name,
-                encryptionKey
-              ),
-              owner,
-            }))
-          : [
-              {
-                owner: account,
-                name: cryptoUtils.encryptDataUsingEncryptionKey(
-                  formData.name,
-                  encryptionKey
-                ),
-              },
-            ];
+
       const threshold = formData.threshold ? Number(formData.threshold) : 1;
-      console.log({ threshold, encryptedOwners, ownerAddresses });
+      // console.log({ threshold, ownerAddresses });
 
       const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
         "setup",
@@ -390,11 +384,22 @@ const Register = () => {
       // Execute Meta transaction
 
       setLoadingTx(true);
+      // const publicKey = getPublicKey(sign);
+
+      const metaTxBody = {
+        referralId: formData.referralId,
+        createdBy: account,
+        proxyData: {
+          from: account,
+          params: [GNOSIS_SAFE_ADDRESS, creationData],
+        },
+      };
+
+      dispatch(createMetaTx(metaTxBody));
 
       proxyFactory.once("ProxyCreation", async (proxy) => {
         if (proxy) {
           const publicKey = getPublicKey(sign);
-
           // set encryptionKey
           const encryptionKey = cryptoUtils.getEncryptionKey(sign, proxy);
           setEncryptionKey(encryptionKey);
@@ -409,13 +414,34 @@ const Register = () => {
             return;
           }
 
+          const encryptedOwners =
+            formData.owners && formData.owners.length
+              ? formData.owners.map(({ name, owner }) => ({
+                  name: cryptoUtils.encryptDataUsingEncryptionKey(
+                    name,
+                    encryptionKey
+                  ),
+                  owner,
+                }))
+              : [
+                  {
+                    owner: account,
+                    name: cryptoUtils.encryptDataUsingEncryptionKey(
+                      formData.name,
+                      encryptionKey
+                    ),
+                  },
+                ];
+
+          console.log({ formData, encryptionKey, proxy, account, sign });
+
           body = {
             name: cryptoUtils.encryptDataUsingEncryptionKey(
               formData.name,
               encryptionKey
             ),
             referralId: formData.referralId,
-            safeAddress: "",
+            safeAddress: proxy,
             createdBy: account,
             owners: encryptedOwners,
             proxyData: {
@@ -426,11 +452,10 @@ const Register = () => {
             encryptionKeyData,
             publicKey,
           };
-          // console.log({ body });
-          dispatch(registerUser(body, false));
+          dispatch(registerUser(body));
           dispatch(setOwnerDetails(formData.name, proxy, account));
           setLoadingTx(false);
-          history.push("/dashboard");
+          // history.push("/dashboard");
         }
       });
     }
@@ -441,7 +466,6 @@ const Register = () => {
     dispatch,
     formData,
     sign,
-    history,
     setEncryptionKey,
   ]);
 
