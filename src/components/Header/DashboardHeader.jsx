@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { startCase } from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlug } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 
 import CopyButton from "components/common/Copy";
 import SideNav from "components/SideNav";
