@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLongArrowAltLeft,
   faUserCircle,
-  faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
