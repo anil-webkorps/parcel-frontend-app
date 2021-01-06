@@ -1,12 +1,14 @@
 import React, { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  // faEdit,
+  faDownload,
   faEye,
   faLongArrowAltLeft,
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { show } from "redux-modal";
+import { CSVLink } from "react-csv";
+import { format } from "date-fns";
 
 // import { Col, Row } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
@@ -84,6 +86,50 @@ export default function ViewTeammate() {
     dispatch(show(TEAMMATE_DETAILS_MODAL, { ...props }));
   };
 
+  const renderExportEmployeeData = () => {
+    let csvData = [];
+    if (teammates && teammates.length > 0) {
+      teammates.map(({ data, departmentName, payCycleDate }) => {
+        const teammateDetails = getDecryptedDetails(data);
+        const {
+          firstName,
+          lastName,
+          salaryAmount,
+          salaryToken,
+          address,
+        } = teammateDetails;
+        csvData.push({
+          "First Name": firstName,
+          "Last Name": lastName,
+          Address: address,
+          "Salary Amount": salaryAmount,
+          "Salary Token": salaryToken,
+          "Department Name": departmentName,
+          "Paycycle Date": payCycleDate,
+        });
+        return csvData;
+      });
+    }
+    return (
+      <CSVLink
+        uFEFF={false}
+        data={csvData}
+        filename={`employees-${format(Date.now(), "dd/MM/yyyy-HH:mm:ss")}.csv`}
+      >
+        <Button iconOnly className="p-0 mr-3">
+          <ActionItem>
+            <Circle>
+              <FontAwesomeIcon icon={faDownload} color="#fff" />
+            </Circle>
+            <div className="mx-3">
+              <div className="name">Export as CSV</div>
+            </div>
+          </ActionItem>
+        </Button>
+      </CSVLink>
+    );
+  };
+
   return (
     <div
       className="position-relative"
@@ -115,24 +161,28 @@ export default function ViewTeammate() {
               </div>
             </div>
 
-            <Button
-              iconOnly
-              className="p-0"
-              to={
-                params && params.departmentId
-                  ? `/dashboard/people/new?departmentId=${params.departmentId}`
-                  : `/dashboard/people/new`
-              }
-            >
-              <ActionItem>
-                <Circle>
-                  <FontAwesomeIcon icon={faPlus} color="#fff" />
-                </Circle>
-                <div className="mx-3">
-                  <div className="name">Add Employee</div>
-                </div>
-              </ActionItem>
-            </Button>
+            <div className="d-flex">
+              {renderExportEmployeeData()}
+
+              <Button
+                iconOnly
+                className="p-0"
+                to={
+                  params && params.departmentId
+                    ? `/dashboard/people/new?departmentId=${params.departmentId}`
+                    : `/dashboard/people/new`
+                }
+              >
+                <ActionItem>
+                  <Circle>
+                    <FontAwesomeIcon icon={faPlus} color="#fff" />
+                  </Circle>
+                  <div className="mx-3">
+                    <div className="name">Add Employee</div>
+                  </div>
+                </ActionItem>
+              </Button>
+            </div>
           </div>
         </div>
       </Info>

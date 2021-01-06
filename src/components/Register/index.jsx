@@ -796,7 +796,7 @@ const Register = () => {
             register={register}
             type="radio"
             id={`flow-company`}
-            value={FLOWS.COMPANY}
+            value={FLOWS.INDIVIDUAL_WITH_COMPANY} // TODO: change this later to COMPANY
             label={"I have a Company"}
             labelStyle={{ minWidth: "260px" }}
           />
