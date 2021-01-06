@@ -27,3 +27,6 @@ export function findNetworkNameByWeb3ChainId(chainId) {
       return "Unknown Network";
   }
 }
+
+const requiredNetworkName = process.env.REACT_APP_NETWORK_NAME;
+export const networkId = chainIds[requiredNetworkName];

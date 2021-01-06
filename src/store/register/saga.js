@@ -6,6 +6,7 @@ import { registerUserSuccess, registerUserError } from "./actions";
 import request from "utils/request";
 // import { makeSelectUsername } from "containers/HomePage/selectors";
 import { registerEndpoint } from "constants/endpoints";
+import { networkId } from "constants/networks";
 
 export function* registerUser(action) {
   // Select username from store
@@ -13,7 +14,7 @@ export function* registerUser(action) {
   const requestURL = registerEndpoint;
   const options = {
     method: "POST",
-    body: JSON.stringify(action.body),
+    body: JSON.stringify({ ...action.body, networkId }),
     headers: {
       "content-type": "application/json",
     },

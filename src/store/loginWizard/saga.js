@@ -11,9 +11,10 @@ import {
   fetchSafesEndpoint,
   getParcelSafesEndpoint,
 } from "constants/endpoints";
+import { networkId } from "constants/networks";
 
 export function* getSafes(action) {
-  const requestURL = `${getSafesEndpoint}?owner=${action.owner}&status=${action.status}`;
+  const requestURL = `${getSafesEndpoint}?owner=${action.owner}&status=${action.status}&networkId=${networkId}`;
   const options = {
     method: "GET",
   };
@@ -32,7 +33,7 @@ export function* getSafes(action) {
 }
 
 export function* getParcelSafes(action) {
-  const requestURL = `${getParcelSafesEndpoint}?owner=${action.owner}&status=${action.status}`;
+  const requestURL = `${getParcelSafesEndpoint}?owner=${action.owner}&status=${action.status}&networkId=${networkId}`;
   const options = {
     method: "GET",
   };
@@ -51,7 +52,7 @@ export function* getParcelSafes(action) {
 }
 
 export function* fetchSafes(action) {
-  const requestURL = `${fetchSafesEndpoint}?owner=${action.owner}`;
+  const requestURL = `${fetchSafesEndpoint}?owner=${action.owner}&networkId=${networkId}`;
   const options = {
     method: "GET",
   };

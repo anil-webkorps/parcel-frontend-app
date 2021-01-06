@@ -10,11 +10,12 @@ import { loginUserSuccess, loginUserError, setImportSafeFlag } from "./actions";
 import request from "utils/request";
 // import { makeSelectUsername } from "containers/HomePage/selectors";
 import { loginEndpoint } from "constants/endpoints";
+import { networkId } from "constants/networks";
 
 export function* loginUser(action) {
   // Select username from store
   // const username = yield select(makeSelectUsername());
-  const requestURL = `${loginEndpoint}?safeAddress=${action.safeAddress}`;
+  const requestURL = `${loginEndpoint}?safeAddress=${action.safeAddress}&networkId=${networkId}`;
   const options = {
     method: "GET",
   };
