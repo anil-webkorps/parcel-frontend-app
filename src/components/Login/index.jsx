@@ -700,7 +700,6 @@ const Login = () => {
       getSafeDetails();
     }
   }, [step, getSafeDetails]);
-  console.log({ step, safes });
 
   const handleSelectSafe = async (name, safe, encryptionKeyData, createdBy) => {
     dispatch(chooseSafe(safe));
