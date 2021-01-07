@@ -36,6 +36,7 @@ import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectAverageGasPrice } from "store/gas/selectors";
 import { getConfigByTokenNames } from "utils/massPayout";
+import { gnosisSafeTransactionV2Endpoint } from "constants/endpoints";
 
 const gasPriceKey = "gas";
 
@@ -53,6 +54,7 @@ export default function useMassPayout() {
 
   const [loadingTx, setLoadingTx] = useState(false);
   const [txHash, setTxHash] = useState("");
+  const [txData, setTxData] = useState("");
   const [recievers, setRecievers] = useState();
 
   useInjectReducer({ key: gasPriceKey, reducer: gasPriceReducer });
@@ -206,6 +208,7 @@ export default function useMassPayout() {
       const dataHash = encodeMultiSendCallData(transactions, ethLibAdapter);
 
       // Set parameters of execTransaction()
+      const to = MULTISEND_ADDRESS;
       const valueWei = 0;
       const data = dataHash;
       const operation = 1; // DELEGATECALL
@@ -226,41 +229,85 @@ export default function useMassPayout() {
       try {
         setLoadingTx(true);
         setTxHash("");
+        setTxData("");
 
-        const gasLimit = await proxyContract.estimateGas.execTransaction(
-          MULTISEND_ADDRESS,
-          valueWei,
-          data,
-          operation,
-          txGasEstimate,
-          baseGasEstimate,
-          gasPrice,
-          gasToken,
-          executor,
-          autoApprovedSignature
-        );
+        // const gasLimit = await proxyContract.estimateGas.execTransaction(
+        //   MULTISEND_ADDRESS,
+        //   valueWei,
+        //   data,
+        //   operation,
+        //   txGasEstimate,
+        //   baseGasEstimate,
+        //   gasPrice,
+        //   gasToken,
+        //   executor,
+        //   autoApprovedSignature
+        // );
 
-        const tx = await proxyContract.execTransaction(
-          MULTISEND_ADDRESS,
-          valueWei,
-          data,
-          operation,
-          txGasEstimate,
-          baseGasEstimate,
-          gasPrice,
-          gasToken,
-          executor,
-          autoApprovedSignature,
+        // estimate using api
+        const estimateResponse = await fetch(
+          `${gnosisSafeTransactionV2Endpoint}${ownerSafeAddress}/transactions/estimate/`,
           {
-            gasLimit: Math.floor(gasLimit.toNumber() * 10), // giving a little higher gas limit just in case
-            // TODO: revisit gas limit estimation issue
-            gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
+            method: "POST",
+            body: JSON.stringify({
+              safe: ownerSafeAddress,
+              to,
+              value: valueWei,
+              data,
+              operation,
+              gasToken,
+            }),
+            headers: {
+              "content-type": "application/json",
+            },
           }
         );
-        setTxHash(tx.hash);
-        setLoadingTx(false);
+        const estimateResult = await estimateResponse.json();
 
-        await tx.wait();
+        const { safeTxGas, baseGas } = estimateResult;
+
+        // TODO: check if meta tx is enabled
+        if (to) {
+          setTxData({
+            to: ownerSafeAddress,
+            from: account,
+            params: [
+              to,
+              valueWei,
+              data,
+              operation,
+              txGasEstimate,
+              baseGasEstimate,
+              gasPrice,
+              gasToken,
+              executor,
+              autoApprovedSignature,
+            ],
+            gasLimit: Number(safeTxGas) + Number(baseGas) + 21000,
+          });
+        } else {
+          const tx = await proxyContract.execTransaction(
+            to,
+            valueWei,
+            data,
+            operation,
+            txGasEstimate,
+            baseGasEstimate,
+            gasPrice,
+            gasToken,
+            executor,
+            autoApprovedSignature,
+            {
+              gasLimit: Number(safeTxGas) + Number(baseGas) + 21000, // giving a little higher gas limit just in case
+              gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
+            }
+          );
+          setTxHash(tx.hash);
+
+          await tx.wait();
+        }
+
+        setLoadingTx(false);
       } catch (err) {
         setLoadingTx(false);
         console.error(err);
@@ -268,5 +315,5 @@ export default function useMassPayout() {
     }
   };
 
-  return { loadingTx, txHash, recievers, massPayout };
+  return { loadingTx, txHash, recievers, massPayout, txData };
 }

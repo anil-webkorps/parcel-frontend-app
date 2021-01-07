@@ -41,6 +41,10 @@ export const gnosisSafeTransactionEndpoint =
   process.env.REACT_APP_NETWORK_NAME === networkNames.MAINNET
     ? `https://safe-transaction.gnosis.io/api/v1/safes/`
     : `https://safe-transaction.rinkeby.gnosis.io/api/v1/safes/`;
+export const gnosisSafeTransactionV2Endpoint =
+  process.env.REACT_APP_NETWORK_NAME === networkNames.MAINNET
+    ? `https://safe-relay.rinkeby.gnosis.io/api/v2/safes/`
+    : `https://safe-relay.rinkeby.gnosis.io/api/v2/safes/`;
 
 // GAS STATION
 export const ethGasStationEndpoint =

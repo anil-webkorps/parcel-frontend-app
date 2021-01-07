@@ -69,7 +69,7 @@ const transactionsKey = "transactions";
 export default function QuickTransfer() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
-  const { txHash, loadingTx, massPayout } = useMassPayout();
+  const { txHash, loadingTx, massPayout, txData } = useMassPayout();
   const [submittedTx, setSubmittedTx] = useState(false);
   const [selectedTokenDetails, setSelectedTokenDetails] = useState();
   // eslint-disable-next-line
@@ -130,6 +130,7 @@ export default function QuickTransfer() {
   }, [prices, payoutDetails]);
 
   useEffect(() => {
+    console.log({ txHash, txData });
     if (txHash) {
       setSubmittedTx(true);
       if (
@@ -159,6 +160,24 @@ export default function QuickTransfer() {
           })
         );
       }
+    } else if (txData) {
+      const to = cryptoUtils.encryptDataUsingEncryptionKey(
+        JSON.stringify(payoutDetails),
+        encryptionKey
+      );
+      dispatch(
+        addTransaction({
+          to,
+          safeAddress: ownerSafeAddress,
+          createdBy: ownerSafeAddress,
+          txData,
+          tokenValue: totalAmountToPay,
+          tokenCurrency: selectedTokenDetails.name,
+          fiatValue: totalAmountToPay,
+          addresses: payoutDetails.map(({ address }) => address),
+          transactionMode: 1, // quick transfer
+        })
+      );
     }
   }, [
     txHash,
@@ -168,6 +187,7 @@ export default function QuickTransfer() {
     ownerSafeAddress,
     totalAmountToPay,
     selectedTokenDetails,
+    txData,
   ]);
 
   useEffect(() => {
