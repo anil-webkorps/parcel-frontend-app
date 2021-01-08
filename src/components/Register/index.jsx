@@ -110,7 +110,7 @@ const INDIVIDUAL_REGISTER_STEPS = {
 };
 
 const Register = () => {
-  const [sign, setSign] = useLocalStorage("SIGNATURE");
+  const [sign, setSign] = useLocalStorage("SIGNATURE"); //eslint-disable-line
   const setEncryptionKey = useLocalStorage("ENCRYPTION_KEY")[1];
   const [loadingTx, setLoadingTx] = useState(false);
   const [createSafeLoading, setCreateSafeLoading] = useState(false);
