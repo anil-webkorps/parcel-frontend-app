@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useLocation, useHistory } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
@@ -12,8 +12,6 @@ import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage, useContract } from "hooks";
 import ConnectButton from "components/Connect";
 import { Card } from "components/common/Card";
-// import CreateSafeForm from "./CreateSafeForm";
-// import AuthorizeButton from "../AuthorizeButton";
 import { useInjectReducer } from "utils/injectReducer";
 import registerWizardReducer from "store/registerWizard/reducer";
 import registerReducer from "store/register/reducer";
@@ -39,6 +37,7 @@ import addresses from "constants/addresses";
 import GnosisSafeABI from "constants/abis/GnosisSafe.json";
 import ProxyFactoryABI from "constants/abis/ProxyFactory.json";
 import registerSaga from "store/register/saga";
+import { makeSelectError as makeSelectRegisterError } from "store/register/selectors";
 import { useInjectSaga } from "utils/injectSaga";
 import { registerUser, createMetaTx } from "store/register/actions";
 import { cryptoUtils } from "parcel-sdk";
@@ -116,6 +115,7 @@ const Register = () => {
   const [loadingTx, setLoadingTx] = useState(false);
   const [createSafeLoading, setCreateSafeLoading] = useState(false);
   const [loadingAccount, setLoadingAccount] = useState(true);
+  const [isMetaTxEnabled, setIsMetaTxEnabled] = useState(false);
 
   const { active, account, library } = useActiveWeb3React();
   // Reducers
@@ -129,7 +129,6 @@ const Register = () => {
 
   // Route
   const location = useLocation();
-  const history = useHistory(); // eslint-disable-line
 
   const dispatch = useDispatch();
 
@@ -137,7 +136,7 @@ const Register = () => {
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
   const averageGasPrice = useSelector(makeSelectAverageGasPrice());
-  // const loading = useSelector(makeSelectLoading());
+  const errorInRegister = useSelector(makeSelectRegisterError());
 
   // Form
   const { register, handleSubmit, errors, reset, control } = useForm();
@@ -192,8 +191,15 @@ const Register = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const referralId = searchParams.get("referralId");
-    if (referralId) dispatch(updateForm({ referralId }));
+    if (referralId) {
+      dispatch(updateForm({ referralId }));
+      setIsMetaTxEnabled(true);
+    }
   }, [location, dispatch]); // eslint-disable-line
+
+  useEffect(() => {
+    if (errorInRegister) setLoadingTx(false);
+  }, [errorInRegister]);
 
   const onSubmit = async (values) => {
     // console.log(values);
@@ -225,7 +231,9 @@ const Register = () => {
           .signMessage(MESSAGE_TO_SIGN)
           .then(async (signature) => {
             setSign(signature);
-            if (formData.referralId) createSafeWithMetaTransaction();
+            console.log({ signature, formData });
+            if (formData.referralId)
+              await createSafeWithMetaTransaction(signature);
             else {
               const encryptionKey = cryptoUtils.getEncryptionKey(
                 signature,
@@ -353,12 +361,10 @@ const Register = () => {
     }
   };
 
-  const createSafeWithMetaTransaction = useCallback(async () => {
+  const createSafeWithMetaTransaction = async (sign) => {
     let body;
-    console.log("called metatx");
 
     if (account && sign) {
-      console.log({ formData });
       const ownerAddresses =
         formData.owners && formData.owners.length
           ? formData.owners.map(({ owner }) => owner)
@@ -433,8 +439,6 @@ const Register = () => {
                   },
                 ];
 
-          console.log({ formData, encryptionKey, proxy, account, sign });
-
           body = {
             name: cryptoUtils.encryptDataUsingEncryptionKey(
               formData.name,
@@ -459,15 +463,7 @@ const Register = () => {
         }
       });
     }
-  }, [
-    gnosisSafeMasterContract,
-    proxyFactory,
-    account,
-    dispatch,
-    formData,
-    sign,
-    setEncryptionKey,
-  ]);
+  };
 
   const renderConnect = () => {
     return (
@@ -577,7 +573,7 @@ const Register = () => {
           loading={createSafeLoading}
           disabled={createSafeLoading}
         >
-          Create Safe and Proceed
+          {isMetaTxEnabled ? `Proceed` : `Create Safe and Proceed`}
         </Button>
       </StepDetails>
     );
@@ -609,7 +605,7 @@ const Register = () => {
           loading={createSafeLoading}
           disabled={createSafeLoading}
         >
-          Create Safe and Proceed
+          {isMetaTxEnabled ? `Proceed` : `Create Safe and Proceed`}
         </Button>
       </StepDetails>
     );
@@ -784,6 +780,9 @@ const Register = () => {
           <div className="ml-2 my-3">
             Waiting for transaction confirmation...
           </div>
+        )}
+        {errorInRegister && (
+          <div className="text-danger ml-2 my-3">{errorInRegister}</div>
         )}
       </StepDetails>
     );

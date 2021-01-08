@@ -19,6 +19,12 @@ const makeSelectLoading = () =>
     (transactionsState) => transactionsState.loading
   );
 
+const makeSelectMetaTransactionHash = () =>
+  createSelector(
+    selectTransactions,
+    (transactionsState) => transactionsState.metaTransactionHash
+  );
+
 const makeSelectError = () =>
   createSelector(
     selectTransactions,
@@ -29,5 +35,6 @@ export {
   selectTransactions,
   makeSelectTransactions,
   makeSelectLoading,
+  makeSelectMetaTransactionHash,
   makeSelectError,
 };

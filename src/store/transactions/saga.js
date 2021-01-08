@@ -53,10 +53,10 @@ function* addTransaction({ body }) {
       // Error in payload
       yield put(addTransactionError(result.log));
     } else {
-      yield put(addTransactionSuccess(result.departmentId, result.log));
+      yield put(addTransactionSuccess(result.log, result.transactionHash));
     }
   } catch (err) {
-    yield put(addTransactionError(err));
+    yield put(addTransactionError("Error in creating transaction."));
   }
 }
 

@@ -6,10 +6,12 @@ import {
   VIEW_TRANSACTIONS,
   VIEW_TRANSACTIONS_ERROR,
   VIEW_TRANSACTIONS_SUCCESS,
+  CLEAR_TRANSACTION_HASH,
 } from "./action-types";
 
 export const initialState = {
   transactions: undefined,
+  metaTransactionHash: "",
   log: "",
 };
 
@@ -32,12 +34,17 @@ const reducer = (state = initialState, action) =>
       case ADD_TRANSACTION_SUCCESS:
         draft.loading = false;
         draft.log = action.log;
+        draft.metaTransactionHash = action.metaTransactionHash;
         break;
 
       case VIEW_TRANSACTIONS_SUCCESS:
         draft.loading = false;
         draft.transactions = action.transactions;
         draft.log = action.log;
+        break;
+
+      case CLEAR_TRANSACTION_HASH:
+        draft.metaTransactionHash = "";
         break;
     }
   });

@@ -51,11 +51,9 @@ export function* createMetaTx(action) {
       "content-type": "application/json",
     },
   };
-  console.log({ requestURL, options });
 
   try {
     const result = yield call(request, requestURL, options);
-    console.log({ result });
     if (result.flag !== 200) {
       // Error in payload
       yield put(createMetaTxError(result.log));

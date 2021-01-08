@@ -23,7 +23,15 @@ import {
 import { useMassPayout, useLocalStorage } from "hooks";
 import transactionsReducer from "store/transactions/reducer";
 import transactionsSaga from "store/transactions/saga";
-import { addTransaction } from "store/transactions/actions";
+import {
+  addTransaction,
+  clearTransactionHash,
+} from "store/transactions/actions";
+import {
+  makeSelectMetaTransactionHash,
+  makeSelectError as makeSelectErrorInCreateTx,
+  makeSelectLoading as makeSelectAddTxLoading,
+} from "store/transactions/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import dashboardReducer from "store/dashboard/reducer";
@@ -76,6 +84,7 @@ export default function QuickTransfer() {
   const [selectedTokenName, setSelectedTokenName] = useState(tokens.DAI);
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
   const [payoutDetails, setPayoutDetails] = useState(null);
+  const [metaTxHash, setMetaTxHash] = useState();
 
   // Reducers
   useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
@@ -99,6 +108,9 @@ export default function QuickTransfer() {
   const loading = useSelector(makeSelectLoading());
   const balances = useSelector(makeSelectBalances());
   const prices = useSelector(makeSelectPrices());
+  const txHashFromMetaTx = useSelector(makeSelectMetaTransactionHash());
+  const errorFromMetaTx = useSelector(makeSelectErrorInCreateTx());
+  const addingTx = useSelector(makeSelectAddTxLoading());
 
   useEffect(() => {
     if (selectedTokenName)
@@ -106,6 +118,13 @@ export default function QuickTransfer() {
         tokenDetails.filter(({ name }) => name === selectedTokenName)[0]
       );
   }, [tokenDetails, selectedTokenName]);
+
+  useEffect(() => {
+    if (txHashFromMetaTx) {
+      setMetaTxHash(txHashFromMetaTx);
+      dispatch(clearTransactionHash());
+    }
+  }, [dispatch, txHashFromMetaTx]);
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -130,7 +149,6 @@ export default function QuickTransfer() {
   }, [prices, payoutDetails]);
 
   useEffect(() => {
-    console.log({ txHash, txData });
     if (txHash) {
       setSubmittedTx(true);
       if (
@@ -161,23 +179,31 @@ export default function QuickTransfer() {
         );
       }
     } else if (txData) {
-      const to = cryptoUtils.encryptDataUsingEncryptionKey(
-        JSON.stringify(payoutDetails),
-        encryptionKey
-      );
-      dispatch(
-        addTransaction({
-          to,
-          safeAddress: ownerSafeAddress,
-          createdBy: ownerSafeAddress,
-          txData,
-          tokenValue: totalAmountToPay,
-          tokenCurrency: selectedTokenDetails.name,
-          fiatValue: totalAmountToPay,
-          addresses: payoutDetails.map(({ address }) => address),
-          transactionMode: 1, // quick transfer
-        })
-      );
+      if (
+        encryptionKey &&
+        payoutDetails &&
+        ownerSafeAddress &&
+        totalAmountToPay &&
+        selectedTokenDetails
+      ) {
+        const to = cryptoUtils.encryptDataUsingEncryptionKey(
+          JSON.stringify(payoutDetails),
+          encryptionKey
+        );
+        dispatch(
+          addTransaction({
+            to,
+            safeAddress: ownerSafeAddress,
+            createdBy: ownerSafeAddress,
+            txData,
+            tokenValue: totalAmountToPay,
+            tokenCurrency: selectedTokenDetails.name,
+            fiatValue: totalAmountToPay,
+            addresses: payoutDetails.map(({ address }) => address),
+            transactionMode: 1, // quick transfer
+          })
+        );
+      }
     }
   }, [
     txHash,
@@ -359,11 +385,14 @@ export default function QuickTransfer() {
         large
         type="submit"
         style={{ marginTop: "50px" }}
-        disabled={!formState.isValid || loadingTx}
-        loading={loadingTx}
+        disabled={!formState.isValid || loadingTx || addingTx}
+        loading={loadingTx || addingTx}
       >
         Send
       </Button>
+      {errorFromMetaTx && (
+        <div className="text-danger mt-3">{errorFromMetaTx}</div>
+      )}
     </Card>
   );
 
@@ -375,7 +404,7 @@ export default function QuickTransfer() {
     );
   };
 
-  return !submittedTx ? (
+  return !metaTxHash && !submittedTx ? (
     <div
       className="position-relative"
       style={{
@@ -414,6 +443,9 @@ export default function QuickTransfer() {
       <SelectTokenModal />
     </div>
   ) : (
-    <TransactionSubmitted txHash={txHash} selectedCount={1} />
+    <TransactionSubmitted
+      txHash={txHash ? txHash : metaTxHash}
+      selectedCount={1}
+    />
   );
 }

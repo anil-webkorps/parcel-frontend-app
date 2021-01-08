@@ -162,6 +162,97 @@ export default function useMassPayout() {
     ];
   };
 
+  let signTypedData = async function (account, typedData) {
+    return new Promise(function (resolve, reject) {
+      // const digest = TypedDataUtils.encodeDigest(typedData);
+      try {
+        const signer = library.getSigner(account);
+
+        signer
+          .getAddress()
+          .then((address) =>
+            library
+              .send("eth_signTypedData_v3", [
+                address,
+                JSON.stringify({
+                  domain: typedData.domain,
+                  types: typedData.types,
+                  message: typedData.message,
+                  primaryType: "SafeTx",
+                }),
+              ])
+              .then((signature) => {
+                resolve(signature.replace("0x", ""));
+              })
+          )
+          .catch((err) => {
+            console.error(err);
+            setLoadingTx(false);
+          });
+      } catch (err) {
+        setLoadingTx(false);
+        return reject(err);
+      }
+    });
+  };
+
+  const signTransaction = async (
+    to,
+    value,
+    data,
+    operation,
+    safeTxGas,
+    baseGas,
+    gasPrice,
+    gasToken,
+    refundReceiver,
+    nonce
+  ) => {
+    const domain = {
+      verifyingContract: ownerSafeAddress,
+    };
+
+    const types = {
+      EIP712Domain: [{ type: "address", name: "verifyingContract" }],
+      SafeTx: [
+        { type: "address", name: "to" },
+        { type: "uint256", name: "value" },
+        { type: "bytes", name: "data" },
+        { type: "uint8", name: "operation" },
+        { type: "uint256", name: "safeTxGas" },
+        { type: "uint256", name: "baseGas" },
+        { type: "uint256", name: "gasPrice" },
+        { type: "address", name: "gasToken" },
+        { type: "address", name: "refundReceiver" },
+        { type: "uint256", name: "nonce" },
+      ],
+    };
+
+    const message = {
+      to,
+      value,
+      data,
+      operation,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      gasToken,
+      refundReceiver,
+      nonce,
+    };
+
+    const typedData = {
+      domain,
+      types,
+      message,
+    };
+
+    let signatureBytes = "0x";
+    const signature = await signTypedData(account, typedData);
+
+    return signatureBytes + signature;
+  };
+
   const massPayout = async (recievers, tokenFrom) => {
     setRecievers(recievers);
     setTokenFrom(tokenFrom);
@@ -217,6 +308,7 @@ export default function useMassPayout() {
       const txGasEstimate = 0;
       const baseGasEstimate = 0;
       const executor = ZERO_ADDRESS;
+      const refundReceiver = ZERO_ADDRESS;
 
       // (r, s, v) where v is 1 means this signature is approved by the address encoded in value r
       // For a single user, we auto generate the signature without prompting the user
@@ -231,47 +323,63 @@ export default function useMassPayout() {
         setTxHash("");
         setTxData("");
 
-        // const gasLimit = await proxyContract.estimateGas.execTransaction(
-        //   MULTISEND_ADDRESS,
-        //   valueWei,
-        //   data,
-        //   operation,
-        //   txGasEstimate,
-        //   baseGasEstimate,
-        //   gasPrice,
-        //   gasToken,
-        //   executor,
-        //   autoApprovedSignature
-        // );
-
-        // estimate using api
-        const estimateResponse = await fetch(
-          `${gnosisSafeTransactionV2Endpoint}${ownerSafeAddress}/transactions/estimate/`,
-          {
-            method: "POST",
-            body: JSON.stringify({
-              safe: ownerSafeAddress,
+        try {
+          // estimate using api
+          const estimateResponse = await fetch(
+            `${gnosisSafeTransactionV2Endpoint}${ownerSafeAddress}/transactions/estimate/`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                safe: ownerSafeAddress,
+                to,
+                value: valueWei,
+                data,
+                operation,
+                gasToken,
+              }),
+              headers: {
+                "content-type": "application/json",
+              },
+            }
+          );
+          const estimateResult = await estimateResponse.json();
+          const { safeTxGas, baseGas, lastUsedNonce } = estimateResult;
+          const gasLimit = Number(safeTxGas) + Number(baseGas) + 21000; // giving a little higher gas limit just in case
+          const nonce = lastUsedNonce === null ? 0 : lastUsedNonce + 1;
+          if (to) {
+            // TODO: check if meta tx is enabled
+            const approvedSign = await signTransaction(
               to,
-              value: valueWei,
+              valueWei,
               data,
               operation,
+              "0", // set gasLimit as 0 for sign
+              baseGasEstimate,
+              gasPrice,
               gasToken,
-            }),
-            headers: {
-              "content-type": "application/json",
-            },
-          }
-        );
-        const estimateResult = await estimateResponse.json();
+              refundReceiver,
+              nonce
+            );
 
-        const { safeTxGas, baseGas } = estimateResult;
-
-        // TODO: check if meta tx is enabled
-        if (to) {
-          setTxData({
-            to: ownerSafeAddress,
-            from: account,
-            params: [
+            setTxData({
+              to: ownerSafeAddress,
+              from: ownerSafeAddress,
+              params: [
+                to,
+                valueWei,
+                data,
+                operation,
+                txGasEstimate,
+                baseGasEstimate,
+                gasPrice,
+                gasToken,
+                executor,
+                approvedSign,
+              ],
+              gasLimit,
+            });
+          } else {
+            const tx = await proxyContract.execTransaction(
               to,
               valueWei,
               data,
@@ -282,29 +390,18 @@ export default function useMassPayout() {
               gasToken,
               executor,
               autoApprovedSignature,
-            ],
-            gasLimit: Number(safeTxGas) + Number(baseGas) + 21000,
-          });
-        } else {
-          const tx = await proxyContract.execTransaction(
-            to,
-            valueWei,
-            data,
-            operation,
-            txGasEstimate,
-            baseGasEstimate,
-            gasPrice,
-            gasToken,
-            executor,
-            autoApprovedSignature,
-            {
-              gasLimit: Number(safeTxGas) + Number(baseGas) + 21000, // giving a little higher gas limit just in case
-              gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
-            }
-          );
-          setTxHash(tx.hash);
+              {
+                gasLimit,
+                gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
+              }
+            );
+            setTxHash(tx.hash);
 
-          await tx.wait();
+            await tx.wait();
+          }
+        } catch (err) {
+          setLoadingTx(false);
+          console.log(err.message);
         }
 
         setLoadingTx(false);
@@ -315,5 +412,5 @@ export default function useMassPayout() {
     }
   };
 
-  return { loadingTx, txHash, recievers, massPayout, txData };
+  return { loadingTx, txHash, recievers, massPayout, txData, setTxData };
 }

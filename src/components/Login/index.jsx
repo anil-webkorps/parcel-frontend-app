@@ -672,7 +672,6 @@ const Login = () => {
           createdBy,
         });
       } else {
-        console.log({ curr: safes[i] });
         const encryptionKey = await getEncryptionKey(
           safes[i].encryptionKeyData,
           sign
@@ -722,7 +721,11 @@ const Login = () => {
 
   const renderSafes = () => {
     if (getSafesLoading)
-      return <div className="text-center my-5">Loading...</div>;
+      return (
+        <div className="d-flex align-items-center justify-content-center mt-5">
+          <Loading color="primary" width="50px" height="50px" />
+        </div>
+      );
     if (!safes.length)
       return (
         <div className="text-center my-5">

@@ -9,3 +9,6 @@ export const VIEW_TRANSACTIONS_SUCCESS =
   "parcel/transactions/VIEW_TRANSACTIONS_SUCCESS";
 export const VIEW_TRANSACTIONS_ERROR =
   "parcel/transactions/VIEW_TRANSACTIONS_ERROR";
+
+export const CLEAR_TRANSACTION_HASH =
+  "parcel/transactions/CLEAR_TRANSACTION_HASH";

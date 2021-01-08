@@ -5,6 +5,7 @@ import {
   VIEW_TRANSACTIONS,
   VIEW_TRANSACTIONS_SUCCESS,
   VIEW_TRANSACTIONS_ERROR,
+  CLEAR_TRANSACTION_HASH,
 } from "./action-types";
 
 export function addTransaction({
@@ -38,10 +39,11 @@ export function addTransaction({
   };
 }
 
-export function addTransactionSuccess(log) {
+export function addTransactionSuccess(log, metaTransactionHash) {
   return {
     type: ADD_TRANSACTION_SUCCESS,
     log,
+    metaTransactionHash,
   };
 }
 
@@ -71,5 +73,11 @@ export function viewTransactionsError(error) {
   return {
     type: VIEW_TRANSACTIONS_ERROR,
     error,
+  };
+}
+
+export function clearTransactionHash() {
+  return {
+    type: CLEAR_TRANSACTION_HASH,
   };
 }

@@ -17,7 +17,11 @@ import viewDepartmentsReducer from "store/view-departments/reducer";
 import { getDepartments } from "store/view-departments/actions";
 import viewDepartmentsSaga from "store/view-departments/saga";
 import viewTeammatesSaga from "store/view-teammates/saga";
-
+import {
+  makeSelectMetaTransactionHash,
+  makeSelectError as makeSelectErrorInCreateTx,
+  makeSelectLoading as makeSelectAddTxLoading,
+} from "store/transactions/selectors";
 import viewTeammatesReducer from "store/view-teammates/reducer";
 import {
   getAllTeammates,
@@ -33,7 +37,10 @@ import {
 } from "store/view-teammates/selectors";
 import transactionsReducer from "store/transactions/reducer";
 import transactionsSaga from "store/transactions/saga";
-import { addTransaction } from "store/transactions/actions";
+import {
+  addTransaction,
+  clearTransactionHash,
+} from "store/transactions/actions";
 import marketRatesReducer from "store/market-rates/reducer";
 import { getMarketRates } from "store/market-rates/actions";
 import { makeSelectPrices } from "store/market-rates/selectors";
@@ -131,11 +138,17 @@ export default function People() {
   const [activeTab, setActiveTab] = useState(TABS.PEOPLE);
   // const [loadingTx, setLoadingTx] = useState(false);
   // const [txHash, setTxHash] = useState("");
-  const { loadingTx, txHash, recievers, massPayout } = useMassPayout();
+  const {
+    loadingTx,
+    txHash,
+    recievers,
+    massPayout,
+    txData,
+    setTxData,
+  } = useMassPayout();
   const [selectedRows, setSelectedRows] = useState([]);
   const [departmentStep, setDepartmentStep] = useState(0);
-  // const [payTokenBalanceInUSD, setPayTokenBalanceInUSD] = useState(0); // for now, this is DAI
-  // const [payTokenBalance, setPayTokenBalance] = useState(0);
+  const [metaTxHash, setMetaTxHash] = useState();
   const [submittedTx, setSubmittedTx] = useState(false);
   const [selectedTokenDetails, setSelectedTokenDetails] = useState();
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
@@ -167,10 +180,20 @@ export default function People() {
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const prices = useSelector(makeSelectPrices());
   const balances = useSelector(makeSelectBalances());
+  const txHashFromMetaTx = useSelector(makeSelectMetaTransactionHash());
+  const errorFromMetaTx = useSelector(makeSelectErrorInCreateTx());
+  const addingTx = useSelector(makeSelectAddTxLoading());
 
   useEffect(() => {
     dispatch(getMarketRates());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (txHashFromMetaTx) {
+      setMetaTxHash(txHashFromMetaTx);
+      dispatch(clearTransactionHash());
+    }
+  }, [dispatch, txHashFromMetaTx]);
 
   useEffect(() => {
     dispatch(getSafeBalances(ownerSafeAddress));
@@ -245,6 +268,33 @@ export default function People() {
           })
         );
       }
+    } else if (txData) {
+      console.log({ txData });
+      if (
+        encryptionKey &&
+        recievers &&
+        ownerSafeAddress &&
+        totalAmountToPay &&
+        selectedTokenDetails
+      ) {
+        const to = cryptoUtils.encryptDataUsingEncryptionKey(
+          JSON.stringify(recievers),
+          encryptionKey
+        );
+        dispatch(
+          addTransaction({
+            to,
+            safeAddress: ownerSafeAddress,
+            createdBy: ownerSafeAddress,
+            txData,
+            tokenValue: totalAmountToPay,
+            tokenCurrency: selectedTokenDetails.name,
+            fiatValue: totalAmountToPay,
+            addresses: recievers.map(({ address }) => address),
+          })
+        );
+        setTxData(undefined);
+      }
     }
   }, [
     txHash,
@@ -254,6 +304,8 @@ export default function People() {
     ownerSafeAddress,
     totalAmountToPay,
     selectedTokenDetails,
+    txData,
+    setTxData,
   ]);
 
   useEffect(() => {
@@ -322,7 +374,7 @@ export default function People() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    console.log({ selectedRows });
+    // console.log({ selectedRows });
 
     await handleMassPayout(selectedRows);
   };
@@ -559,8 +611,8 @@ export default function People() {
           <Button
             type="submit"
             large
-            loading={loadingTx}
-            disabled={loadingTx || insufficientBalance}
+            loading={loadingTx || addingTx}
+            disabled={loadingTx || insufficientBalance || addingTx}
           >
             Pay Now
           </Button>
@@ -569,7 +621,7 @@ export default function People() {
     );
   };
 
-  return !submittedTx ? (
+  return !metaTxHash && !submittedTx ? (
     <div
       style={{
         transition: "all 0.25s linear",
@@ -699,10 +751,16 @@ export default function People() {
               {!isNoneChecked && renderPaymentSummary()}
             </Card>
           </form>
+          {!loadingTx && errorFromMetaTx && (
+            <div className="text-danger mt-3">{errorFromMetaTx}</div>
+          )}
         </Container>
       </div>
     </div>
   ) : (
-    <TransactionSubmitted txHash={txHash} selectedCount={getSelectedCount()} />
+    <TransactionSubmitted
+      txHash={txHash ? txHash : metaTxHash}
+      selectedCount={getSelectedCount()}
+    />
   );
 }
