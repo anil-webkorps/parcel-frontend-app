@@ -17,7 +17,7 @@ export default function Authenticated({ children }) {
         history.push("/");
       }
       return children;
-    }, 1000);
+    }, 3000);
 
     return <Loading />;
   };
