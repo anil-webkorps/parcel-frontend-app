@@ -13,7 +13,7 @@ import transactionsSaga from "store/transactions/saga";
 import { viewTransactions } from "store/transactions/actions";
 import {
   makeSelectTransactions,
-  makeSelectLoading as makeSelectLoadingTransactions,
+  makeSelectFetching as makeSelectLoadingTransactions,
 } from "store/transactions/selectors";
 import viewTeammatesReducer from "store/view-teammates/reducer";
 import viewTeammatesSaga from "store/view-teammates/saga";

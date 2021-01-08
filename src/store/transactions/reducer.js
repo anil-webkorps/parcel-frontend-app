@@ -13,6 +13,9 @@ export const initialState = {
   transactions: undefined,
   metaTransactionHash: "",
   log: "",
+  errorInFetch: false,
+  fetching: false,
+  loading: false,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -20,15 +23,8 @@ const reducer = (state = initialState, action) =>
   produce(state, (draft) => {
     switch (action.type) {
       case ADD_TRANSACTION:
-      case VIEW_TRANSACTIONS:
         draft.loading = true;
         draft.error = false;
-        break;
-
-      case ADD_TRANSACTION_ERROR:
-      case VIEW_TRANSACTIONS_ERROR:
-        draft.loading = false;
-        draft.error = action.error;
         break;
 
       case ADD_TRANSACTION_SUCCESS:
@@ -37,10 +33,25 @@ const reducer = (state = initialState, action) =>
         draft.metaTransactionHash = action.metaTransactionHash;
         break;
 
-      case VIEW_TRANSACTIONS_SUCCESS:
+      case ADD_TRANSACTION_ERROR:
         draft.loading = false;
+        draft.error = action.error;
+        break;
+
+      case VIEW_TRANSACTIONS:
+        draft.fetching = true;
+        draft.error = false;
+        break;
+
+      case VIEW_TRANSACTIONS_SUCCESS:
+        draft.fetching = false;
         draft.transactions = action.transactions;
         draft.log = action.log;
+        break;
+
+      case VIEW_TRANSACTIONS_ERROR:
+        draft.errorInFetch = action.errorInFetch;
+        draft.fetching = false;
         break;
 
       case CLEAR_TRANSACTION_HASH:

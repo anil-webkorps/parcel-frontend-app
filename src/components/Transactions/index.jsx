@@ -19,7 +19,7 @@ import transactionsSaga from "store/transactions/saga";
 import { viewTransactions } from "store/transactions/actions";
 import {
   makeSelectTransactions,
-  makeSelectLoading,
+  makeSelectFetching,
 } from "store/transactions/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
@@ -49,7 +49,7 @@ export default function Transactions() {
   const dispatch = useDispatch();
 
   const transactions = useSelector(makeSelectTransactions());
-  const loading = useSelector(makeSelectLoading());
+  const loading = useSelector(makeSelectFetching());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
   useEffect(() => {

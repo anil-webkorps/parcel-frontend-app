@@ -47,6 +47,7 @@ import gasPriceSaga from "store/gas/saga";
 import gasPriceReducer from "store/gas/reducer";
 import { makeSelectAverageGasPrice } from "store/gas/selectors";
 import { getGasPrice } from "store/gas/actions";
+import NoReferralModal from "./NoReferralModal";
 
 const registerKey = "register";
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
@@ -882,6 +883,7 @@ const Register = () => {
           <form onSubmit={handleSubmit(onSubmit)}>{renderSteps()}</form>
         </Card>
       </Container>
+      <NoReferralModal />
     </Background>
   );
 };
