@@ -6,7 +6,7 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
@@ -100,11 +100,9 @@ export default function AddTeammate() {
   const [csvData, setCSVData] = useState();
   const [invalidCsvData, setInvalidCsvData] = useState(false);
 
-  const { register, errors, handleSubmit, reset, formState, control } = useForm(
-    {
-      mode: "onChange",
-    }
-  );
+  const { register, errors, handleSubmit, reset, formState } = useForm({
+    mode: "onChange",
+  });
 
   useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
   useInjectReducer({

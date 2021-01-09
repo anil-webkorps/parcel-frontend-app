@@ -27,6 +27,7 @@ import { useInjectSaga } from "utils/injectSaga";
 import Loading from "components/common/Loading";
 import TeamMembersPng from "assets/images/team-members.png";
 import { getPublicKey } from "utils/encryption";
+import ParcelLogo from "assets/images/parcel-logo-purple.png";
 
 import {
   Background,
@@ -142,7 +143,9 @@ const AcceptInvite = () => {
     <div>
       <Image minHeight="323px" />
       <InnerCard height="257px">
-        <h2 className="text-center">Welcome to Parcel</h2>
+        <h2 className="text-center mb-4">
+          <img src={ParcelLogo} alt="parcel" width="240" />
+        </h2>
         <div className="mt-2 mb-5 text-center">
           Your one stop for crypto payroll management.
           <br />

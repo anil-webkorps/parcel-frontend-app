@@ -48,6 +48,7 @@ import gasPriceReducer from "store/gas/reducer";
 import { makeSelectAverageGasPrice } from "store/gas/selectors";
 import { getGasPrice } from "store/gas/actions";
 import NoReferralModal from "./NoReferralModal";
+import ParcelLogo from "assets/images/parcel-logo-purple.png";
 
 const registerKey = "register";
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
@@ -471,8 +472,10 @@ const Register = () => {
       <div>
         <Image minHeight="323px" />
         <InnerCard height="257px">
-          <h2 className="text-center">Welcome to Parcel</h2>
-          <div className="mt-2 mb-5 text-center">
+          <h2 className="text-center mb-4">
+            <img src={ParcelLogo} alt="parcel" width="240" />
+          </h2>
+          <div className="mt-2 mb-4 text-center">
             Your one stop for crypto payroll management.
             <br />
             {!active && `Please connect your Ethereum wallet to proceed.`}
