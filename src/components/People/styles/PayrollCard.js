@@ -2,9 +2,8 @@ import styled from "styled-components/macro";
 
 export default styled.div`
   width: 416px;
-  height: 139px;
-  margin: 24px 0 93px;
-  padding: 24px 50px 61px 0;
+  height: 100%;
+  margin: 24px 0 120px;
   border-radius: 8px;
   border: solid 0.5px #aaaaaa;
   padding: 24px 16px;

@@ -373,10 +373,10 @@ const Login = () => {
       <Image minHeight="323px" />
       <InnerCard height="257px">
         <h2 className="text-center">Welcome to Parcel</h2>
-        <div className="mb-4 text-center">
+        <div className="mt-2 mb-5 text-center">
           Your one stop for crypto payroll management.
           <br />
-          Please connect your Ethereum wallet to proceed.
+          {!active && `Please connect your Ethereum wallet to proceed.`}
         </div>
         {loadingAccount && (
           <div className="d-flex align-items-center justify-content-center mt-5">
@@ -428,7 +428,7 @@ const Login = () => {
           <div>
             <h3 className="title">Login</h3>
             <p className="next">
-              {steps[step + 1] ? `NEXT: ${steps[step + 1]}` : `Finish`}
+              {steps[step + 1] ? `Next: ${steps[step + 1]}` : `Finish`}
             </p>
           </div>
           <div className="step-progress">
@@ -454,7 +454,9 @@ const Login = () => {
           style={{ minWidth: "130px" }}
         />
         <h3 className="title">What is your Company Name</h3>
-        <p className="subtitle">You’ll be know by this name on Parcel.</p>
+        <p className="subtitle">
+          You’ll be registered with this name on Parcel.
+        </p>
         <Input
           name="name"
           register={register}

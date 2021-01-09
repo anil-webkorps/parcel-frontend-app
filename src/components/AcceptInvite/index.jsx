@@ -146,7 +146,7 @@ const AcceptInvite = () => {
         <div className="mt-2 mb-5 text-center">
           Your one stop for crypto payroll management.
           <br />
-          Please connect your Ethereum wallet to proceed.
+          {!active && `Please connect your Ethereum wallet to proceed.`}
         </div>
         {loadingAccount && (
           <div className="d-flex align-items-center justify-content-center mt-5">
@@ -188,7 +188,7 @@ const AcceptInvite = () => {
           <div>
             <h3 className="title">Accept Invite</h3>
             <p className="next">
-              {steps[step + 1] ? `NEXT: ${steps[step + 1]}` : `Finish`}
+              {steps[step + 1] ? `Next: ${steps[step + 1]}` : `Finish`}
             </p>
           </div>
           <div className="step-progress">
