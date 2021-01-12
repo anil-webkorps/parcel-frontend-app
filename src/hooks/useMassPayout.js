@@ -253,7 +253,7 @@ export default function useMassPayout() {
     return signatureBytes + signature;
   };
 
-  const massPayout = async (recievers, tokenFrom) => {
+  const massPayout = async (recievers, tokenFrom, isMultiOwner = false) => {
     setRecievers(recievers);
     setTokenFrom(tokenFrom);
 
@@ -353,7 +353,7 @@ export default function useMassPayout() {
               valueWei,
               data,
               operation,
-              "0", // set gasLimit as 0 for sign
+              0, // set gasLimit as 0 for sign
               baseGasEstimate,
               gasPrice,
               gasToken,
@@ -361,23 +361,56 @@ export default function useMassPayout() {
               nonce
             );
 
-            setTxData({
-              to: ownerSafeAddress,
-              from: ownerSafeAddress,
-              params: [
+            if (!isMultiOwner) {
+              setTxData({
+                to: ownerSafeAddress,
+                from: ownerSafeAddress,
+                params: [
+                  to,
+                  valueWei,
+                  data,
+                  operation,
+                  txGasEstimate,
+                  baseGasEstimate,
+                  gasPrice,
+                  gasToken,
+                  executor,
+                  approvedSign,
+                ],
+                gasLimit,
+              });
+            } else {
+              const contractTransactionHash = await proxyContract.getTransactionHash(
                 to,
                 valueWei,
                 data,
                 operation,
-                txGasEstimate,
+                0,
                 baseGasEstimate,
                 gasPrice,
                 gasToken,
                 executor,
-                approvedSign,
-              ],
-              gasLimit,
-            });
+                nonce
+              );
+
+              setTxData({
+                safe: ownerSafeAddress,
+                to,
+                value: String(valueWei),
+                data,
+                operation,
+                gasToken,
+                safeTxGas: 0,
+                baseGas: baseGasEstimate,
+                gasPrice: String(gasPrice),
+                refundReceiver,
+                nonce,
+                contractTransactionHash,
+                sender: account,
+                signature: approvedSign,
+                origin: null,
+              });
+            }
           } else {
             const tx = await proxyContract.execTransaction(
               to,
