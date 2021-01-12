@@ -20,7 +20,7 @@ import {
   TextArea,
   SelectTokenDropdown,
 } from "components/common/Form";
-import { useMassPayout, useLocalStorage } from "hooks";
+import { useMassPayout, useLocalStorage, useActiveWeb3React } from "hooks";
 import transactionsReducer from "store/transactions/reducer";
 import transactionsSaga from "store/transactions/saga";
 import {
@@ -32,6 +32,21 @@ import {
   makeSelectError as makeSelectErrorInCreateTx,
   makeSelectLoading as makeSelectAddTxLoading,
 } from "store/transactions/selectors";
+import safeReducer from "store/safe/reducer";
+import safeSaga from "store/safe/saga";
+import { getNonce, getOwnersAndThreshold } from "store/safe/actions";
+import {
+  makeSelectNonce,
+  makeSelectThreshold,
+  makeSelectIsMultiOwner,
+  makeSelectLoading as makeSelectLoadingSafeDetails,
+} from "store/safe/selectors";
+import {
+  createMultisigTransaction,
+  getMultisigTransactions,
+} from "store/multisig/actions";
+import multisigSaga from "store/multisig/saga";
+import multisigReducer from "store/multisig/reducer";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import dashboardReducer from "store/dashboard/reducer";
@@ -73,10 +88,13 @@ import { Circle } from "components/Header/styles";
 const dashboardKey = "dashboard";
 const marketRatesKey = "marketRates";
 const transactionsKey = "transactions";
+const safeKey = "safe";
+const multisigKey = "multisig";
 
 export default function QuickTransfer() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
+  const { account } = useActiveWeb3React();
   const { txHash, loadingTx, massPayout, txData } = useMassPayout();
   const [submittedTx, setSubmittedTx] = useState(false);
   const [selectedTokenDetails, setSelectedTokenDetails] = useState();
@@ -90,11 +108,15 @@ export default function QuickTransfer() {
   useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
   useInjectReducer({ key: marketRatesKey, reducer: marketRatesReducer });
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
+  useInjectReducer({ key: safeKey, reducer: safeReducer });
+  useInjectReducer({ key: multisigKey, reducer: multisigReducer });
 
   // Sagas
   useInjectSaga({ key: dashboardKey, saga: dashboardSaga });
   useInjectSaga({ key: marketRatesKey, saga: marketRatesSaga });
   useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
+  useInjectSaga({ key: safeKey, saga: safeSaga });
+  useInjectSaga({ key: multisigKey, saga: multisigSaga });
 
   const { register, errors, handleSubmit, formState, control } = useForm({
     mode: "onChange",
@@ -111,6 +133,10 @@ export default function QuickTransfer() {
   const txHashFromMetaTx = useSelector(makeSelectMetaTransactionHash());
   const errorFromMetaTx = useSelector(makeSelectErrorInCreateTx());
   const addingTx = useSelector(makeSelectAddTxLoading());
+  const nonce = useSelector(makeSelectNonce());
+  const threshold = useSelector(makeSelectThreshold());
+  const isMultiOwner = useSelector(makeSelectIsMultiOwner());
+  const loadingSafeDetails = useSelector(makeSelectLoadingSafeDetails());
 
   useEffect(() => {
     if (selectedTokenName)
@@ -129,6 +155,10 @@ export default function QuickTransfer() {
   useEffect(() => {
     if (ownerSafeAddress) {
       dispatch(getSafeBalances(ownerSafeAddress));
+      dispatch(getNonce(ownerSafeAddress));
+      dispatch(getOwnersAndThreshold(ownerSafeAddress));
+      // TODO: remove later, just for testing
+      dispatch(getMultisigTransactions(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
 
@@ -190,19 +220,40 @@ export default function QuickTransfer() {
           JSON.stringify(payoutDetails),
           encryptionKey
         );
-        dispatch(
-          addTransaction({
-            to,
-            safeAddress: ownerSafeAddress,
-            createdBy: ownerSafeAddress,
-            txData,
-            tokenValue: totalAmountToPay,
-            tokenCurrency: selectedTokenDetails.name,
-            fiatValue: totalAmountToPay,
-            addresses: payoutDetails.map(({ address }) => address),
-            transactionMode: 1, // quick transfer
-          })
-        );
+
+        if (!isMultiOwner) {
+          // threshold = 1 or single owner
+          dispatch(
+            addTransaction({
+              to,
+              safeAddress: ownerSafeAddress,
+              createdBy: account,
+              txData,
+              tokenValue: totalAmountToPay,
+              tokenCurrency: selectedTokenDetails.name,
+              fiatValue: totalAmountToPay,
+              addresses: payoutDetails.map(({ address }) => address),
+              transactionMode: 1, // quick transfer
+            })
+          );
+        } else {
+          // threshold > 1
+          dispatch(
+            createMultisigTransaction({
+              to,
+              safeAddress: ownerSafeAddress,
+              createdBy: account,
+              txData,
+              tokenValue: totalAmountToPay,
+              tokenCurrency: selectedTokenDetails.name,
+              fiatValue: totalAmountToPay,
+              fiatCurrency: "USD",
+              addresses: payoutDetails.map(({ address }) => address),
+              transactionMode: 1, // quick transfer
+              nonce: nonce,
+            })
+          );
+        }
       }
     }
   }, [
@@ -214,6 +265,9 @@ export default function QuickTransfer() {
     totalAmountToPay,
     selectedTokenDetails,
     txData,
+    account,
+    isMultiOwner,
+    nonce,
   ]);
 
   useEffect(() => {
@@ -275,7 +329,7 @@ export default function QuickTransfer() {
       },
     ];
     setPayoutDetails(payoutDetails);
-    await massPayout(payoutDetails, selectedTokenDetails.name);
+    await massPayout(payoutDetails, selectedTokenDetails.name, isMultiOwner);
   };
 
   const goBack = () => {
@@ -388,7 +442,7 @@ export default function QuickTransfer() {
         disabled={!formState.isValid || loadingTx || addingTx}
         loading={loadingTx || addingTx}
       >
-        Send
+        {threshold > 1 ? `Create Transaction` : `Send`}
       </Button>
       {errorFromMetaTx && (
         <div className="text-danger mt-3">{errorFromMetaTx}</div>
@@ -399,7 +453,20 @@ export default function QuickTransfer() {
   const renderQuickTransfer = () => {
     return (
       <form onSubmit={handleSubmit(onSubmit)}>
-        <StepsCard>{renderTransferDetails()}</StepsCard>
+        <StepsCard>
+          {loadingSafeDetails ? (
+            <Card className="quick-transfer">
+              <div
+                className="d-flex align-items-center justify-content-center"
+                style={{ height: "400px" }}
+              >
+                <Loading color="primary" width="50px" height="50px" />
+              </div>
+            </Card>
+          ) : (
+            renderTransferDetails()
+          )}
+        </StepsCard>
       </form>
     );
   };
