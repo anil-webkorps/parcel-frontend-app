@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { startCase } from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlug } from "@fortawesome/free-solid-svg-icons";
-// import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import CopyButton from "components/common/Copy";
 import SideNav from "components/SideNav";
@@ -18,6 +18,7 @@ import { logoutUser } from "store/logout/actions";
 import logoutSaga from "store/logout/saga";
 import { useInjectSaga } from "utils/injectSaga";
 import LogoutPng from "assets/icons/logout.png";
+import SettingsPng from "assets/icons/settings.png";
 import ParcelSvg from "assets/icons/parcel.svg";
 import { findNetworkNameByWeb3ChainId } from "constants/networks";
 
@@ -102,11 +103,12 @@ export default function DashboardHeader() {
                     <div className="option">Connected Account</div>
                     <div>{account && minifyAddress(account)}</div>
                   </li>
-                  {/* <li>
-                    <Link to="/dashboard/invite">
-                      <div className="option">Invite Owners</div>
-                    </Link>
-                  </li> */}
+                  <Link to="/dashboard/invite">
+                    <div className="option">Settings</div>
+                    <div>
+                      <img src={SettingsPng} alt="settings" width="16" />
+                    </div>
+                  </Link>
                   <li onClick={logout}>
                     <div className="option">Logout</div>
                     <div>
