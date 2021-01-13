@@ -329,7 +329,12 @@ export default function QuickTransfer() {
       },
     ];
     setPayoutDetails(payoutDetails);
-    await massPayout(payoutDetails, selectedTokenDetails.name, isMultiOwner);
+    await massPayout(
+      payoutDetails,
+      selectedTokenDetails.name,
+      isMultiOwner,
+      nonce
+    );
   };
 
   const goBack = () => {

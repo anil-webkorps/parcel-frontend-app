@@ -253,7 +253,12 @@ export default function useMassPayout() {
     return signatureBytes + signature;
   };
 
-  const massPayout = async (recievers, tokenFrom, isMultiOwner = false) => {
+  const massPayout = async (
+    recievers,
+    tokenFrom,
+    isMultiOwner = false,
+    createNonce
+  ) => {
     setRecievers(recievers);
     setTokenFrom(tokenFrom);
 
@@ -348,20 +353,20 @@ export default function useMassPayout() {
           const nonce = lastUsedNonce === null ? 0 : lastUsedNonce + 1;
           if (to) {
             // TODO: check if meta tx is enabled
-            const approvedSign = await signTransaction(
-              to,
-              valueWei,
-              data,
-              operation,
-              0, // set gasLimit as 0 for sign
-              baseGasEstimate,
-              gasPrice,
-              gasToken,
-              refundReceiver,
-              nonce
-            );
 
             if (!isMultiOwner) {
+              const approvedSign = await signTransaction(
+                to,
+                valueWei,
+                data,
+                operation,
+                0, // set gasLimit as 0 for sign
+                baseGasEstimate,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                nonce
+              );
               setTxData({
                 to: ownerSafeAddress,
                 from: ownerSafeAddress,
@@ -380,6 +385,18 @@ export default function useMassPayout() {
                 gasLimit,
               });
             } else {
+              const approvedSign = await signTransaction(
+                to,
+                valueWei,
+                data,
+                operation,
+                0, // set gasLimit as 0 for sign
+                baseGasEstimate,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                createNonce
+              );
               const contractTransactionHash = await proxyContract.getTransactionHash(
                 to,
                 valueWei,
@@ -390,11 +407,11 @@ export default function useMassPayout() {
                 gasPrice,
                 gasToken,
                 executor,
-                nonce
+                createNonce
               );
 
               setTxData({
-                safe: ownerSafeAddress,
+                // safe: ownerSafeAddress,
                 to,
                 value: String(valueWei),
                 data,
@@ -404,11 +421,12 @@ export default function useMassPayout() {
                 baseGas: baseGasEstimate,
                 gasPrice: String(gasPrice),
                 refundReceiver,
-                nonce,
+                nonce: createNonce,
                 contractTransactionHash,
                 sender: account,
-                signature: approvedSign,
+                signature: approvedSign.replace("0x", ""),
                 origin: null,
+                transactionHash: null,
               });
             }
           } else {
