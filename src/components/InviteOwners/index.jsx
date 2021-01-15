@@ -106,7 +106,9 @@ export default function InviteOwners() {
       encryptionKey,
       toPublicKey
     );
-    dispatch(approveInvitation(encryptionKeyData, invitationId));
+    dispatch(
+      approveInvitation(encryptionKeyData, invitationId, ownerSafeAddress)
+    );
   };
 
   const goBack = () => {

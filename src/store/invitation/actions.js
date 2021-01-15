@@ -81,11 +81,16 @@ export function acceptInvitationError(error) {
   };
 }
 
-export function approveInvitation(encryptionKeyData, invitationId) {
+export function approveInvitation(
+  encryptionKeyData,
+  invitationId,
+  safeAddress
+) {
   return {
     type: APPROVE_INVITATION,
     encryptionKeyData,
     invitationId,
+    safeAddress,
   };
 }
 

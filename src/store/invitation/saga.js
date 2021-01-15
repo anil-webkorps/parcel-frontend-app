@@ -115,6 +115,7 @@ export function* approveInvitation(action) {
     body: JSON.stringify({
       encryptionKeyData: action.encryptionKeyData,
       invitationId: action.invitationId,
+      safeAddress: action.safeAddress,
     }),
   };
 
