@@ -41,10 +41,7 @@ import {
   makeSelectIsMultiOwner,
   makeSelectLoading as makeSelectLoadingSafeDetails,
 } from "store/safe/selectors";
-import {
-  createMultisigTransaction,
-  getMultisigTransactions,
-} from "store/multisig/actions";
+import { createMultisigTransaction } from "store/multisig/actions";
 import multisigSaga from "store/multisig/saga";
 import multisigReducer from "store/multisig/reducer";
 import { useInjectReducer } from "utils/injectReducer";
@@ -157,8 +154,6 @@ export default function QuickTransfer() {
       dispatch(getSafeBalances(ownerSafeAddress));
       dispatch(getNonce(ownerSafeAddress));
       dispatch(getOwnersAndThreshold(ownerSafeAddress));
-      // TODO: remove later, just for testing
-      dispatch(getMultisigTransactions(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
 
@@ -253,6 +248,7 @@ export default function QuickTransfer() {
               nonce: nonce,
             })
           );
+          history.push("/dashboard/transactions");
         }
       }
     }
@@ -268,6 +264,7 @@ export default function QuickTransfer() {
     account,
     isMultiOwner,
     nonce,
+    history,
   ]);
 
   useEffect(() => {

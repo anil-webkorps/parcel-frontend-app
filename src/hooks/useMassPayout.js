@@ -253,6 +253,130 @@ export default function useMassPayout() {
     return signatureBytes + signature;
   };
 
+  const submitMassPayout = async ({
+    safe,
+    to,
+    value,
+    data,
+    operation,
+    gasToken,
+    safeTxGas,
+    baseGas,
+    gasPrice,
+    refundReceiver,
+    nonce,
+    safeTxHash,
+    executor,
+    // signatures,
+    origin,
+    confirmations,
+  }) => {
+    if (account && library) {
+      const ethLibAdapter = new EthersAdapter({
+        ethers,
+        signer: library.getSigner(account),
+      });
+
+      // (r, s, v) where v is 1 means this signature is approved by the address encoded in value r
+      // For a single user, we auto generate the signature without prompting the user
+      const autoApprovedSignature = ethLibAdapter.abiEncodePacked(
+        { type: "uint256", value: account }, // r
+        { type: "uint256", value: 0 }, // s
+        { type: "uint8", value: 1 } // v
+      );
+
+      let signatures = autoApprovedSignature;
+
+      for (let i = 0; i < confirmations.length; i++) {
+        signatures += confirmations[i].signature.replace("0x", "");
+      }
+
+      console.log({ signatures });
+
+      try {
+        setLoadingTx(true);
+        setTxHash("");
+        setTxData("");
+
+        try {
+          // estimate using api
+          const estimateResponse = await fetch(
+            `${gnosisSafeTransactionV2Endpoint}${safe}/transactions/estimate/`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                safe,
+                to,
+                value,
+                data,
+                operation,
+                gasToken,
+              }),
+              headers: {
+                "content-type": "application/json",
+              },
+            }
+          );
+          const estimateResult = await estimateResponse.json();
+          const {
+            safeTxGas: finalSafeTxGas,
+            baseGas: finalBaseGas,
+          } = estimateResult;
+          const gasLimit =
+            Number(finalSafeTxGas) + Number(finalBaseGas) + 21000; // giving a little higher gas limit just in case
+
+          const tx = await proxyContract.execTransaction(
+            to,
+            value,
+            data,
+            operation,
+            safeTxGas,
+            baseGas,
+            gasPrice,
+            gasToken,
+            executor,
+            signatures,
+            {
+              gasLimit,
+              gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
+            }
+          );
+          setTxHash(tx.hash);
+          console.log({ hash: tx.hash });
+
+          setTxData({
+            // safe: ownerSafeAddress,
+            to,
+            value,
+            data,
+            operation,
+            gasToken,
+            safeTxGas,
+            baseGas,
+            gasPrice,
+            refundReceiver,
+            nonce,
+            contractTransactionHash: safeTxHash,
+            sender: account,
+            // signature: signatures,
+            transactionHash: tx.hash,
+            origin,
+          });
+
+          await tx.wait();
+        } catch (err) {
+          setLoadingTx(false);
+          console.log(err.message);
+        }
+
+        setLoadingTx(false);
+      } catch (err) {
+        setLoadingTx(false);
+        console.error(err);
+      }
+    }
+  };
+
   const massPayout = async (
     recievers,
     tokenFrom,
@@ -385,6 +509,11 @@ export default function useMassPayout() {
                 gasLimit,
               });
             } else {
+              // Multiowner
+
+              // Case 1: Initiate new tx
+              // Case 2: Accept or reject existing tx
+              // Case 3: Submit final tx
               const approvedSign = await signTransaction(
                 to,
                 valueWei,
@@ -463,5 +592,13 @@ export default function useMassPayout() {
     }
   };
 
-  return { loadingTx, txHash, recievers, massPayout, txData, setTxData };
+  return {
+    loadingTx,
+    txHash,
+    recievers,
+    massPayout,
+    submitMassPayout,
+    txData,
+    setTxData,
+  };
 }

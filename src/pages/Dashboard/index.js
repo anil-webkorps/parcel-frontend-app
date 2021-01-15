@@ -7,7 +7,8 @@ import AddTeammate from "components/People/AddTeammate";
 import AddDepartment from "components/People/AddDepartment";
 import ViewTeammates from "components/People/ViewTeammates";
 import Payments from "components/Payments";
-import Transactions from "components/Transactions";
+// import Transactions from "components/Transactions";
+import MultiSigTransactions from "components/Transactions/MultiSigTransactions";
 import QuickTransfer from "components/QuickTransfer";
 import InviteOwners from "components/InviteOwners";
 import Authenticated from "components/hoc/Authenticated";
@@ -40,10 +41,11 @@ const DashboardPage = ({ match }) => {
           component={ViewTeammates}
         />
         <Route exact path={`${match.path}/payments`} component={Payments} />
+        {/* TODO: Depending on threshold, render <Transactions /> or <MultiSigTransactions /> */}
         <Route
           exact
           path={`${match.path}/transactions`}
-          component={Transactions}
+          component={MultiSigTransactions}
         />
         <Route
           exact

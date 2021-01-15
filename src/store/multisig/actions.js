@@ -5,6 +5,12 @@ import {
   GET_MULTISIG_TRANSACTIONS,
   GET_MULTISIG_TRANSACTIONS_SUCCESS,
   GET_MULTISIG_TRANSACTIONS_ERROR,
+  SUBMIT_MULTISIG_TRANSACTION,
+  SUBMIT_MULTISIG_TRANSACTION_SUCCESS,
+  SUBMIT_MULTISIG_TRANSACTION_ERROR,
+  CONFIRM_MULTISIG_TRANSACTION,
+  CONFIRM_MULTISIG_TRANSACTION_SUCCESS,
+  CONFIRM_MULTISIG_TRANSACTION_ERROR,
 } from "./action-types";
 
 export function getMultisigTransactions(safeAddress) {
@@ -46,6 +52,50 @@ export function createMultisigTransactionSuccess(transactionId, log) {
 export function createMultisigTransactionError(error) {
   return {
     type: CREATE_MULTISIG_TRANSACTION_ERROR,
+    error,
+  };
+}
+
+export function confirmMultisigTransaction(body) {
+  return {
+    type: CONFIRM_MULTISIG_TRANSACTION,
+    body,
+  };
+}
+
+export function confirmMultisigTransactionSuccess(transactionId, log) {
+  return {
+    type: CONFIRM_MULTISIG_TRANSACTION_SUCCESS,
+    transactionId,
+    log,
+  };
+}
+
+export function confirmMultisigTransactionError(error) {
+  return {
+    type: CONFIRM_MULTISIG_TRANSACTION_ERROR,
+    error,
+  };
+}
+
+export function submitMultisigTransaction(body) {
+  return {
+    type: SUBMIT_MULTISIG_TRANSACTION,
+    body,
+  };
+}
+
+export function submitMultisigTransactionSuccess(transactionHash, log) {
+  return {
+    type: SUBMIT_MULTISIG_TRANSACTION_SUCCESS,
+    transactionHash,
+    log,
+  };
+}
+
+export function submitMultisigTransactionError(error) {
+  return {
+    type: SUBMIT_MULTISIG_TRANSACTION_ERROR,
     error,
   };
 }
