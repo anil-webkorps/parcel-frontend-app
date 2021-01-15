@@ -10,7 +10,7 @@ import request from "utils/request";
 import { gnosisSafeTransactionEndpoint } from "constants/endpoints";
 
 function* getSafeDetailsFromGnosis(action) {
-  const requestURL = `${gnosisSafeTransactionEndpoint}/${action.safeAddress}`;
+  const requestURL = `${gnosisSafeTransactionEndpoint}${action.safeAddress}`;
 
   const options = {
     method: "GET",

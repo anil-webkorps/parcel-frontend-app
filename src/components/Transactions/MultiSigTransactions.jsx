@@ -101,6 +101,7 @@ export default function MultiSigTransactions() {
           transactionId: selectedTransaction.txDetails.transactionId,
           txData: txData,
           transactionHash: txHash,
+          isMetaEnabled: false,
         })
       );
     }
@@ -121,6 +122,7 @@ export default function MultiSigTransactions() {
   };
 
   const renderTransactions = () => {
+    console.log({ transactions });
     // let csvData = [];
     // if (transactions && transactions.length > 0) {
     //   transactions.map(
@@ -222,38 +224,7 @@ export default function MultiSigTransactions() {
                 </div>
               ) : transactions && transactions.length > 0 ? (
                 transactions.map((transaction, idx) => {
-                  const {
-                    safe,
-                    // to,
-                    value,
-                    data,
-                    operation,
-                    gasToken,
-                    safeTxGas,
-                    baseGas,
-                    gasPrice,
-                    refundReceiver,
-                    nonce,
-                    executionDate,
-                    submissionDate,
-                    modified, //date
-                    blockNumber,
-                    transactionHash,
-                    safeTxHash,
-                    executor,
-                    isExecuted,
-                    isSuccessful,
-                    ethGasPrice,
-                    gasUsed,
-                    fee,
-                    origin,
-                    confirmationsRequired,
-                    signatures,
-                    rejectedCount,
-                    confirmedCount,
-                    confirmations,
-                    txDetails,
-                  } = transaction;
+                  const { txDetails } = transaction;
 
                   if (txDetails) {
                     const {
@@ -496,12 +467,22 @@ export default function MultiSigTransactions() {
       <ConfirmSection>
         <div className="buttons">
           <div className="approve-button">
-            <Button type="button" large onClick={approveTransaction}>
+            <Button
+              type="button"
+              large
+              onClick={approveTransaction}
+              disabled={loadingTx}
+            >
               Approve
             </Button>
           </div>
           <div className="reject-button">
-            <Button type="button" large onClick={rejectTransaction}>
+            <Button
+              type="button"
+              large
+              onClick={rejectTransaction}
+              disabled={loadingTx}
+            >
               Reject
             </Button>
           </div>
@@ -512,52 +493,52 @@ export default function MultiSigTransactions() {
 
   const renderTransactionDetails = (transaction) => {
     const {
-      safe,
+      // safe,
       // to,
-      value,
-      data,
-      operation,
-      gasToken,
-      safeTxGas,
-      baseGas,
-      gasPrice,
-      refundReceiver,
-      nonce,
-      executionDate,
-      submissionDate,
-      modified, //date
-      blockNumber,
+      // value,
+      // data,
+      // operation,
+      // gasToken,
+      // safeTxGas,
+      // baseGas,
+      // gasPrice,
+      // refundReceiver,
+      // nonce,
+      // executionDate,
+      // submissionDate,
+      // modified, //date
+      // blockNumber,
       transactionHash,
-      safeTxHash,
-      executor,
+      // safeTxHash,
+      // executor,
       isExecuted,
-      isSuccessful,
-      ethGasPrice,
-      gasUsed,
-      fee,
-      origin,
-      confirmationsRequired,
-      signatures,
-      rejectedCount,
-      confirmedCount,
+      // isSuccessful,
+      // ethGasPrice,
+      // gasUsed,
+      // fee,
+      // origin,
+      // confirmationsRequired,
+      // signatures,
+      // rejectedCount,
+      // confirmedCount,
       confirmations,
       txDetails,
     } = transaction;
 
     const {
       transactionId,
-      addresses,
+      // addresses,
       safeAddress,
       to,
-      tokenValue,
-      tokenCurrency,
+      // tokenValue,
+      // tokenCurrency,
       fiatValue,
-      fiatCurrency,
+      // fiatCurrency,
       transactionFees,
       status,
       createdOn,
       transactionMode,
-      createdBy,
+      // createdBy,
     } = txDetails;
     const paidTeammates = getDecryptedDetails(to);
     const isQuickTransfer = transactionMode === 1;

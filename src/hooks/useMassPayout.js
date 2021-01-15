@@ -253,24 +253,27 @@ export default function useMassPayout() {
     return signatureBytes + signature;
   };
 
-  const submitMassPayout = async ({
-    safe,
-    to,
-    value,
-    data,
-    operation,
-    gasToken,
-    safeTxGas,
-    baseGas,
-    gasPrice,
-    refundReceiver,
-    nonce,
-    safeTxHash,
-    executor,
-    // signatures,
-    origin,
-    confirmations,
-  }) => {
+  const submitMassPayout = async (
+    {
+      safe,
+      to,
+      value,
+      data,
+      operation,
+      gasToken,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      refundReceiver,
+      nonce,
+      safeTxHash,
+      executor,
+      // signatures,
+      origin,
+      confirmations,
+    },
+    isMetaEnabled = false
+  ) => {
     if (account && library) {
       const ethLibAdapter = new EthersAdapter({
         ethers,
@@ -285,13 +288,20 @@ export default function useMassPayout() {
         { type: "uint8", value: 1 } // v
       );
 
-      let signatures = autoApprovedSignature;
+      // let signatures = autoApprovedSignature;
+      let signatureBytes = "0x";
+      const confirmingAccounts = [
+        { owner: account, signature: autoApprovedSignature },
+        ...confirmations.map(({ owner, signature }) => ({ owner, signature })),
+      ];
+      confirmingAccounts.sort((a, b) => (a.owner > b.owner ? 1 : -1));
+      console.log({ confirmingAccounts });
 
-      for (let i = 0; i < confirmations.length; i++) {
-        signatures += confirmations[i].signature.replace("0x", "");
+      for (let i = 0; i < confirmingAccounts.length; i++) {
+        signatureBytes += confirmingAccounts[i].signature.replace("0x", "");
       }
 
-      console.log({ signatures });
+      console.log({ signatureBytes });
 
       try {
         setLoadingTx(true);
@@ -324,6 +334,18 @@ export default function useMassPayout() {
           } = estimateResult;
           const gasLimit =
             Number(finalSafeTxGas) + Number(finalBaseGas) + 21000; // giving a little higher gas limit just in case
+          console.log({
+            to,
+            value,
+            data,
+            operation,
+            safeTxGas,
+            baseGas,
+            gasPrice,
+            gasToken,
+            executor,
+            signatureBytes,
+          });
 
           const tx = await proxyContract.execTransaction(
             to,
@@ -334,8 +356,8 @@ export default function useMassPayout() {
             baseGas,
             gasPrice,
             gasToken,
-            executor,
-            signatures,
+            ZERO_ADDRESS, // executor
+            signatureBytes,
             {
               gasLimit,
               gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
