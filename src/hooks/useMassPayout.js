@@ -55,6 +55,7 @@ export default function useMassPayout() {
   const [loadingTx, setLoadingTx] = useState(false);
   const [txHash, setTxHash] = useState("");
   const [txData, setTxData] = useState("");
+  const [confirmTxData, setConfirmTxData] = useState("");
   const [recievers, setRecievers] = useState();
 
   useInjectReducer({ key: gasPriceKey, reducer: gasPriceReducer });
@@ -253,6 +254,88 @@ export default function useMassPayout() {
     return signatureBytes + signature;
   };
 
+  const confirmMassPayout = async ({
+    safe,
+    to,
+    value,
+    data,
+    operation,
+    gasToken,
+    safeTxGas,
+    baseGas,
+    gasPrice,
+    refundReceiver,
+    nonce,
+    // safeTxHash,
+    executor,
+    // signatures,
+    origin,
+  }) => {
+    if (account) {
+      try {
+        setLoadingTx(true);
+        setTxHash("");
+        setConfirmTxData("");
+
+        try {
+          const approvedSign = await signTransaction(
+            to,
+            value,
+            data,
+            operation,
+            safeTxGas,
+            baseGas,
+            gasPrice,
+            gasToken,
+            refundReceiver,
+            nonce
+          );
+
+          const contractTransactionHash = await proxyContract.getTransactionHash(
+            to,
+            value,
+            data,
+            operation,
+            safeTxGas,
+            baseGas,
+            gasPrice,
+            gasToken,
+            executor || ZERO_ADDRESS,
+            nonce
+          );
+
+          const txData = {
+            // POST to gnosis
+            to,
+            value,
+            data,
+            operation,
+            gasToken,
+            safeTxGas,
+            baseGas,
+            gasPrice,
+            refundReceiver,
+            nonce,
+            contractTransactionHash,
+            sender: account,
+            transactionHash: null,
+            origin,
+            signature: approvedSign.replace("0x", ""),
+          };
+          setConfirmTxData(txData);
+        } catch (err) {
+          setLoadingTx(false);
+          console.log(err.message);
+        }
+
+        setLoadingTx(false);
+      } catch (err) {
+        setLoadingTx(false);
+        console.error(err);
+      }
+    }
+  };
+
   const submitMassPayout = async (
     {
       safe,
@@ -272,7 +355,8 @@ export default function useMassPayout() {
       origin,
       confirmations,
     },
-    isMetaEnabled = false
+    isMetaEnabled = false,
+    isApproved = true
   ) => {
     if (account && library) {
       const ethLibAdapter = new EthersAdapter({
@@ -288,21 +372,7 @@ export default function useMassPayout() {
         { type: "uint8", value: 1 } // v
       );
 
-      // let signatures = autoApprovedSignature;
       let signatureBytes = "0x";
-      const confirmingAccounts = [
-        { owner: account, signature: autoApprovedSignature },
-        ...confirmations.map(({ owner, signature }) => ({ owner, signature })),
-      ];
-      confirmingAccounts.sort((a, b) => (a.owner > b.owner ? 1 : -1));
-      console.log({ confirmingAccounts });
-
-      for (let i = 0; i < confirmingAccounts.length; i++) {
-        signatureBytes += confirmingAccounts[i].signature.replace("0x", "");
-      }
-
-      console.log({ signatureBytes });
-
       try {
         setLoadingTx(true);
         setTxHash("");
@@ -334,20 +404,8 @@ export default function useMassPayout() {
           } = estimateResult;
           const gasLimit =
             Number(finalSafeTxGas) + Number(finalBaseGas) + 21000; // giving a little higher gas limit just in case
-          console.log({
-            to,
-            value,
-            data,
-            operation,
-            safeTxGas,
-            baseGas,
-            gasPrice,
-            gasToken,
-            executor,
-            signatureBytes,
-          });
 
-          const tx = await proxyContract.execTransaction(
+          const contractTransactionHash = await proxyContract.getTransactionHash(
             to,
             value,
             data,
@@ -356,36 +414,175 @@ export default function useMassPayout() {
             baseGas,
             gasPrice,
             gasToken,
-            ZERO_ADDRESS, // executor
-            signatureBytes,
-            {
-              gasLimit,
-              gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
-            }
+            executor || ZERO_ADDRESS,
+            nonce
           );
-          setTxHash(tx.hash);
-          console.log({ hash: tx.hash });
 
-          setTxData({
-            // safe: ownerSafeAddress,
-            to,
-            value,
-            data,
-            operation,
-            gasToken,
-            safeTxGas,
-            baseGas,
-            gasPrice,
-            refundReceiver,
-            nonce,
-            contractTransactionHash: safeTxHash,
-            sender: account,
-            // signature: signatures,
-            transactionHash: tx.hash,
-            origin,
-          });
+          if (isMetaEnabled) {
+            const approvedSign = await signTransaction(
+              to,
+              value,
+              data,
+              operation,
+              safeTxGas,
+              baseGas,
+              gasPrice,
+              gasToken,
+              refundReceiver,
+              nonce
+            );
 
-          await tx.wait();
+            const confirmingAccounts = isApproved
+              ? [
+                  { owner: account, signature: approvedSign },
+                  ...confirmations.map(
+                    ({ owner, signature, approved }) =>
+                      approved && {
+                        owner,
+                        signature,
+                      }
+                  ),
+                ].filter(Boolean)
+              : [
+                  { owner: account, signature: approvedSign },
+                  ...confirmations.map(
+                    ({ owner, signature, rejected }) =>
+                      rejected && {
+                        owner,
+                        signature,
+                      }
+                  ),
+                ].filter(Boolean);
+            // const confirmingAccounts = [
+            //   { owner: account, signature: approvedSign },
+            //   ...confirmations.map(({ owner, signature }) => ({
+            //     owner,
+            //     signature,
+            //   })),
+            // ];
+            confirmingAccounts.sort((a, b) => (a.owner > b.owner ? 1 : -1));
+            console.log({ confirmingAccounts });
+
+            for (let i = 0; i < confirmingAccounts.length; i++) {
+              signatureBytes += confirmingAccounts[i].signature.replace(
+                "0x",
+                ""
+              );
+            }
+
+            const txData = {
+              // POST to gnosis
+              data: {
+                to,
+                value,
+                data,
+                operation,
+                gasToken,
+                safeTxGas,
+                baseGas,
+                gasPrice,
+                refundReceiver,
+                nonce,
+                contractTransactionHash,
+                sender: account,
+                transactionHash: null, // will be added from BE after executing meta tx
+                origin,
+              },
+              metaTxData: {
+                to: ownerSafeAddress,
+                from: ownerSafeAddress,
+                params: [
+                  to,
+                  value,
+                  data,
+                  operation,
+                  safeTxGas,
+                  baseGas,
+                  gasPrice,
+                  gasToken,
+                  executor || ZERO_ADDRESS,
+                  signatureBytes,
+                ],
+                gasLimit,
+              },
+            };
+            setTxData(txData);
+          } else {
+            const confirmingAccounts = isApproved
+              ? [
+                  { owner: account, signature: autoApprovedSignature },
+                  ...confirmations.map(
+                    ({ owner, signature, approved }) =>
+                      approved && {
+                        owner,
+                        signature,
+                      }
+                  ),
+                ].filter(Boolean)
+              : [
+                  { owner: account, signature: autoApprovedSignature },
+                  ...confirmations.map(
+                    ({ owner, signature, rejected }) =>
+                      rejected && {
+                        owner,
+                        signature,
+                      }
+                  ),
+                ].filter(Boolean);
+            confirmingAccounts.sort((a, b) => (a.owner > b.owner ? 1 : -1));
+
+            console.log({ confirmingAccounts });
+
+            for (let i = 0; i < confirmingAccounts.length; i++) {
+              signatureBytes += confirmingAccounts[i].signature.replace(
+                "0x",
+                ""
+              );
+            }
+
+            console.log({ signatureBytes });
+
+            const tx = await proxyContract.execTransaction(
+              to,
+              value,
+              data,
+              operation,
+              safeTxGas,
+              baseGas,
+              gasPrice,
+              gasToken,
+              executor || ZERO_ADDRESS, // executor
+              signatureBytes,
+              {
+                gasLimit,
+                gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
+              }
+            );
+            setTxHash(tx.hash);
+            console.log({ hash: tx.hash });
+
+            setTxData({
+              // POST to gnosis
+              data: {
+                to,
+                value,
+                data,
+                operation,
+                gasToken,
+                safeTxGas,
+                baseGas,
+                gasPrice,
+                refundReceiver,
+                nonce,
+                contractTransactionHash,
+                sender: account,
+                transactionHash: tx.hash,
+                origin,
+              },
+            });
+
+            await tx.wait();
+          }
         } catch (err) {
           setLoadingTx(false);
           console.log(err.message);
@@ -622,5 +819,8 @@ export default function useMassPayout() {
     submitMassPayout,
     txData,
     setTxData,
+    confirmTxData,
+    setConfirmTxData,
+    confirmMassPayout,
   };
 }

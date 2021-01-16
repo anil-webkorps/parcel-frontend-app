@@ -17,6 +17,7 @@ import CopyButton from "components/common/Copy";
 import multisigReducer from "store/multisig/reducer";
 import multisigSaga from "store/multisig/saga";
 import {
+  confirmMultisigTransaction,
   getMultisigTransactions,
   submitMultisigTransaction,
 } from "store/multisig/actions";
@@ -46,6 +47,7 @@ import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
 import StatusText from "./StatusText";
 import { getDefaultIconIfPossible } from "constants/index";
 import { Stepper, StepCircle } from "components/common/Stepper";
+import addresses from "constants/addresses";
 
 import { Table, ActionItem } from "../People/styles";
 import { Circle } from "components/Header/styles";
@@ -57,12 +59,23 @@ const { TableBody, TableHead, TableRow } = Table;
 const multisigKey = "multisig";
 const invitationKey = "invitation";
 const safeKey = "safe";
+let isMetaEnabled = true; // TODO: get this from api
+const { MULTISEND_ADDRESS } = addresses;
 
 export default function MultiSigTransactions() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const { account } = useActiveWeb3React();
-  const { txHash, loadingTx, submitMassPayout, txData } = useMassPayout();
+  const {
+    txHash,
+    loadingTx,
+    submitMassPayout,
+    confirmMassPayout,
+    confirmTxData,
+    setConfirmTxData,
+    txData,
+    setTxData,
+  } = useMassPayout();
 
   // Reducers
   useInjectReducer({ key: multisigKey, reducer: multisigReducer });
@@ -93,19 +106,46 @@ export default function MultiSigTransactions() {
   }, [dispatch, ownerSafeAddress]);
 
   useEffect(() => {
-    if (txHash && txData && selectedTransaction) {
-      console.log({ txHash, txData, selectedTransaction });
+    if (txData && selectedTransaction) {
       dispatch(
         submitMultisigTransaction({
           safeAddress: ownerSafeAddress,
           transactionId: selectedTransaction.txDetails.transactionId,
           txData: txData,
-          transactionHash: txHash,
-          isMetaEnabled: false,
+          transactionHash: txHash || "",
+          isMetaEnabled,
         })
       );
+      setTxData("");
     }
-  }, [dispatch, txHash, txData, selectedTransaction, ownerSafeAddress]);
+  }, [
+    dispatch,
+    txHash,
+    txData,
+    selectedTransaction,
+    ownerSafeAddress,
+    setTxData,
+    // isMetaEnabled
+  ]);
+
+  useEffect(() => {
+    if (confirmTxData && selectedTransaction) {
+      dispatch(
+        confirmMultisigTransaction({
+          safeAddress: ownerSafeAddress,
+          transactionId: selectedTransaction.txDetails.transactionId,
+          txData: confirmTxData,
+        })
+      );
+      setConfirmTxData("");
+    }
+  }, [
+    dispatch,
+    confirmTxData,
+    selectedTransaction,
+    ownerSafeAddress,
+    setConfirmTxData,
+  ]);
 
   const goBack = () => {
     setSelectedTransaction(null);
@@ -122,7 +162,6 @@ export default function MultiSigTransactions() {
   };
 
   const renderTransactions = () => {
-    console.log({ transactions });
     // let csvData = [];
     // if (transactions && transactions.length > 0) {
     //   transactions.map(
@@ -350,32 +389,20 @@ export default function MultiSigTransactions() {
 
   const approveTransaction = async () => {
     const {
-      safe,
-      to,
+      // safe,
+      // to,
       value,
       data,
-      operation,
+      // operation,
       gasToken,
       safeTxGas,
       baseGas,
       gasPrice,
       refundReceiver,
       nonce,
-      // executionDate,
-      // submissionDate,
-      // modified, //date
-      // blockNumber,
-      // transactionHash,
       safeTxHash,
       executor,
-      // isExecuted,
-      // isSuccessful,
-      // ethGasPrice,
-      // gasUsed,
-      // fee,
       origin,
-      // confirmationsRequired,
-      // signatures,
       confirmedCount,
       confirmations,
       // txDetails,
@@ -383,23 +410,27 @@ export default function MultiSigTransactions() {
 
     if (confirmedCount === threshold - 1) {
       // submit final approve tx
-      await submitMassPayout({
-        safe,
-        to,
-        value,
-        data,
-        operation,
-        gasToken,
-        safeTxGas,
-        baseGas,
-        gasPrice,
-        refundReceiver,
-        nonce,
-        safeTxHash,
-        executor,
-        origin,
-        confirmations,
-      });
+      await submitMassPayout(
+        {
+          safe: ownerSafeAddress,
+          to: MULTISEND_ADDRESS,
+          value,
+          data,
+          operation: 1,
+          gasToken,
+          safeTxGas,
+          baseGas,
+          gasPrice,
+          refundReceiver,
+          nonce,
+          safeTxHash,
+          executor,
+          origin,
+          confirmations,
+        },
+        isMetaEnabled,
+        true
+      );
     } else {
       // call confirm api
     }
@@ -411,7 +442,7 @@ export default function MultiSigTransactions() {
       // to,
       value,
       // data,
-      operation,
+      // operation,
       gasToken,
       safeTxGas,
       baseGas,
@@ -440,12 +471,35 @@ export default function MultiSigTransactions() {
 
     if (rejectedCount === threshold - 1) {
       // submit final reject tx
-      await submitMassPayout({
+      await submitMassPayout(
+        {
+          safe,
+          to: safe,
+          value,
+          data: "0x",
+          operation: 0,
+          gasToken,
+          safeTxGas,
+          baseGas,
+          gasPrice,
+          refundReceiver,
+          nonce,
+          safeTxHash,
+          executor,
+          origin,
+          confirmations,
+        },
+        isMetaEnabled,
+        false
+      );
+    } else {
+      // call confirm api with reject params
+      await confirmMassPayout({
         safe,
         to: safe,
         value,
         data: "0x",
-        operation,
+        operation: 0,
         gasToken,
         safeTxGas,
         baseGas,
@@ -457,37 +511,45 @@ export default function MultiSigTransactions() {
         origin,
         confirmations,
       });
-    } else {
-      // call confirm api
     }
   };
 
   const renderConfirmSection = () => {
+    const { isExecuted, confirmations } = selectedTransaction;
+
+    let shouldShowConfirmSection = !isExecuted ? true : false;
+
+    for (let i = 0; i < confirmations.length; i++) {
+      if (confirmations[i].owner === account) shouldShowConfirmSection = false;
+    }
+
     return (
-      <ConfirmSection>
-        <div className="buttons">
-          <div className="approve-button">
-            <Button
-              type="button"
-              large
-              onClick={approveTransaction}
-              disabled={loadingTx}
-            >
-              Approve
-            </Button>
+      shouldShowConfirmSection && (
+        <ConfirmSection>
+          <div className="buttons">
+            <div className="approve-button">
+              <Button
+                type="button"
+                large
+                onClick={approveTransaction}
+                disabled={loadingTx}
+              >
+                Approve
+              </Button>
+            </div>
+            <div className="reject-button">
+              <Button
+                type="button"
+                large
+                onClick={rejectTransaction}
+                disabled={loadingTx}
+              >
+                Reject
+              </Button>
+            </div>
           </div>
-          <div className="reject-button">
-            <Button
-              type="button"
-              large
-              onClick={rejectTransaction}
-              disabled={loadingTx}
-            >
-              Reject
-            </Button>
-          </div>
-        </div>
-      </ConfirmSection>
+        </ConfirmSection>
+      )
     );
   };
 

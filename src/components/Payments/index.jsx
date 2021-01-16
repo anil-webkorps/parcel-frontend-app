@@ -269,7 +269,6 @@ export default function People() {
         );
       }
     } else if (txData) {
-      console.log({ txData });
       if (
         encryptionKey &&
         recievers &&
