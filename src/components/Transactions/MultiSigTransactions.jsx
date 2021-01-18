@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   // faDownload,
@@ -20,10 +20,13 @@ import {
   confirmMultisigTransaction,
   getMultisigTransactions,
   submitMultisigTransaction,
+  clearMultisigTransactionHash,
 } from "store/multisig/actions";
 import {
   makeSelectMultisigTransactions,
   makeSelectFetching,
+  makeSelectMultisigTransactionHash,
+  makeSelectConfirmed,
 } from "store/multisig/selectors";
 import invitationSaga from "store/invitation/saga";
 import invitationReducer from "store/invitation/reducer";
@@ -48,6 +51,7 @@ import StatusText from "./StatusText";
 import { getDefaultIconIfPossible } from "constants/index";
 import { Stepper, StepCircle } from "components/common/Stepper";
 import addresses from "constants/addresses";
+import TransactionSubmitted from "components/Payments/TransactionSubmitted";
 
 import { Table, ActionItem } from "../People/styles";
 import { Circle } from "components/Header/styles";
@@ -65,6 +69,8 @@ const { MULTISEND_ADDRESS } = addresses;
 export default function MultiSigTransactions() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [finalTxHash, setFinalTxHash] = useState();
+
   const { account } = useActiveWeb3React();
   const {
     txHash,
@@ -96,14 +102,29 @@ export default function MultiSigTransactions() {
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const safeOwners = useSelector(makeSelectSafeOwners());
   const threshold = useSelector(makeSelectThreshold());
+  const txHashFromMetaTx = useSelector(makeSelectMultisigTransactionHash());
+  const confirmedStatus = useSelector(makeSelectConfirmed());
 
   useEffect(() => {
     if (ownerSafeAddress) {
-      dispatch(getMultisigTransactions(ownerSafeAddress));
+      // dispatch(getMultisigTransactions(ownerSafeAddress));
       dispatch(getInvitations(ownerSafeAddress));
       dispatch(getOwnersAndThreshold(ownerSafeAddress));
     }
   }, [dispatch, ownerSafeAddress]);
+
+  useEffect(() => {
+    if (ownerSafeAddress && !selectedTransaction) {
+      dispatch(getMultisigTransactions(ownerSafeAddress));
+    }
+  }, [dispatch, ownerSafeAddress, selectedTransaction]);
+
+  useEffect(() => {
+    if (txHashFromMetaTx) {
+      setFinalTxHash(txHashFromMetaTx);
+      dispatch(clearMultisigTransactionHash());
+    }
+  }, [dispatch, txHashFromMetaTx]);
 
   useEffect(() => {
     if (txData && selectedTransaction) {
@@ -146,6 +167,13 @@ export default function MultiSigTransactions() {
     ownerSafeAddress,
     setConfirmTxData,
   ]);
+
+  useEffect(() => {
+    if (confirmedStatus) {
+      // dispatch(getMultisigTransactions(ownerSafeAddress));
+      setSelectedTransaction(null);
+    }
+  }, [confirmedStatus, ownerSafeAddress]);
 
   const goBack = () => {
     setSelectedTransaction(null);
@@ -831,7 +859,26 @@ export default function MultiSigTransactions() {
     );
   };
 
-  return !selectedTransaction
-    ? renderTransactions()
-    : renderTransactionDetails(selectedTransaction);
+  const clearTxHash = () => {
+    setFinalTxHash("");
+    setSelectedTransaction("");
+  };
+
+  const noOfPeoplePaid = useMemo(() => {
+    return selectedTransaction && selectedTransaction.txDetails
+      ? selectedTransaction.txDetails.addresses.length
+      : 0;
+  }, [selectedTransaction]);
+
+  return finalTxHash ? (
+    <TransactionSubmitted
+      txHash={finalTxHash}
+      selectedCount={noOfPeoplePaid}
+      clearTxHash={clearTxHash}
+    />
+  ) : !selectedTransaction ? (
+    renderTransactions()
+  ) : (
+    renderTransactionDetails(selectedTransaction)
+  );
 }

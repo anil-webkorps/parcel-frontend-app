@@ -11,6 +11,7 @@ import {
   CONFIRM_MULTISIG_TRANSACTION,
   CONFIRM_MULTISIG_TRANSACTION_SUCCESS,
   CONFIRM_MULTISIG_TRANSACTION_ERROR,
+  CLEAR_MULTISIG_TRANSACTION,
 } from "./action-types";
 
 export function getMultisigTransactions(safeAddress) {
@@ -97,5 +98,10 @@ export function submitMultisigTransactionError(error) {
   return {
     type: SUBMIT_MULTISIG_TRANSACTION_ERROR,
     error,
+  };
+}
+export function clearMultisigTransactionHash() {
+  return {
+    type: CLEAR_MULTISIG_TRANSACTION,
   };
 }

@@ -21,6 +21,9 @@ const makeSelectMultisigTransactionHash = () =>
 const makeSelectUpdating = () =>
   createSelector(selectMultisig, (multisigState) => multisigState.updating);
 
+const makeSelectConfirmed = () =>
+  createSelector(selectMultisig, (multisigState) => multisigState.confirmed);
+
 const makeSelectError = () =>
   createSelector(selectMultisig, (multisigState) => multisigState.error);
 
@@ -31,5 +34,6 @@ export {
   makeSelectMultisigTransactionHash,
   makeSelectSuccess,
   makeSelectUpdating,
+  makeSelectConfirmed,
   makeSelectError,
 };

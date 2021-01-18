@@ -9,7 +9,11 @@ import { TransactionUrl } from "components/common/Web3Utils";
 import TransactionSubmittedPng from "assets/images/transaction-submitted.png";
 
 import { Container, Title, Heading, Text } from "./styles";
-export default function TransactionSubmitted({ txHash, selectedCount }) {
+export default function TransactionSubmitted({
+  txHash,
+  selectedCount,
+  clearTxHash,
+}) {
   return (
     <div
       style={{
@@ -40,7 +44,12 @@ export default function TransactionSubmitted({ txHash, selectedCount }) {
               </Button>
             </Col>
             <Col lg="6" sm="12">
-              <Button large type="button" to="/dashboard/transactions">
+              <Button
+                large
+                type="button"
+                to="/dashboard/transactions"
+                onClick={() => clearTxHash && clearTxHash()}
+              >
                 Track Status
               </Button>
             </Col>

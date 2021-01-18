@@ -12,6 +12,7 @@ import {
   CONFIRM_MULTISIG_TRANSACTION,
   CONFIRM_MULTISIG_TRANSACTION_SUCCESS,
   CONFIRM_MULTISIG_TRANSACTION_ERROR,
+  CLEAR_MULTISIG_TRANSACTION,
 } from "./action-types";
 
 export const initialState = {
@@ -21,6 +22,7 @@ export const initialState = {
   log: "",
   error: false,
   success: false,
+  confirmed: false,
   transactionHash: "",
 };
 
@@ -63,20 +65,20 @@ const reducer = (state = initialState, action) =>
 
       case CONFIRM_MULTISIG_TRANSACTION:
         draft.updating = true;
-        draft.success = false;
+        draft.confirmed = false;
         draft.error = false;
         break;
 
       case CONFIRM_MULTISIG_TRANSACTION_SUCCESS:
         draft.updating = false;
         draft.log = action.log;
-        draft.success = true;
+        draft.confirmed = true;
         break;
 
       case CONFIRM_MULTISIG_TRANSACTION_ERROR:
         draft.updating = false;
         draft.error = action.error;
-        draft.success = false;
+        draft.confirmed = false;
         break;
 
       case SUBMIT_MULTISIG_TRANSACTION:
@@ -96,6 +98,10 @@ const reducer = (state = initialState, action) =>
         draft.updating = false;
         draft.error = action.error;
         draft.success = false;
+        break;
+
+      case CLEAR_MULTISIG_TRANSACTION:
+        draft.transactionHash = "";
         break;
     }
   });
