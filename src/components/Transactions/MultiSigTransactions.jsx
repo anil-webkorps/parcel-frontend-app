@@ -63,7 +63,7 @@ const { TableBody, TableHead, TableRow } = Table;
 const multisigKey = "multisig";
 const invitationKey = "invitation";
 const safeKey = "safe";
-let isMetaEnabled = false; // TODO: get this from api
+let isMetaEnabled = true; // TODO: get this from api
 const { MULTISEND_ADDRESS } = addresses;
 
 export default function MultiSigTransactions() {
