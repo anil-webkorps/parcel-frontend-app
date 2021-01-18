@@ -460,7 +460,9 @@ export default function useMassPayout() {
             //     signature,
             //   })),
             // ];
-            confirmingAccounts.sort((a, b) => (a.owner > b.owner ? 1 : -1));
+            confirmingAccounts.sort((a, b) =>
+              a.owner.toLowerCase() > b.owner.toLowerCase() ? 1 : -1
+            );
             console.log({ confirmingAccounts });
 
             for (let i = 0; i < confirmingAccounts.length; i++) {
@@ -529,7 +531,9 @@ export default function useMassPayout() {
                       }
                   ),
                 ].filter(Boolean);
-            confirmingAccounts.sort((a, b) => (a.owner > b.owner ? 1 : -1));
+            confirmingAccounts.sort((a, b) =>
+              a.owner.toLowerCase() > b.owner.toLowerCase() ? 1 : -1
+            );
 
             console.log({ confirmingAccounts });
 

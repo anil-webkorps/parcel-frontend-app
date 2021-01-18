@@ -63,7 +63,7 @@ const { TableBody, TableHead, TableRow } = Table;
 const multisigKey = "multisig";
 const invitationKey = "invitation";
 const safeKey = "safe";
-let isMetaEnabled = true; // TODO: get this from api
+let isMetaEnabled = false; // TODO: get this from api
 const { MULTISEND_ADDRESS } = addresses;
 
 export default function MultiSigTransactions() {
@@ -461,6 +461,23 @@ export default function MultiSigTransactions() {
       );
     } else {
       // call confirm api
+      await confirmMassPayout({
+        safe: ownerSafeAddress,
+        to: MULTISEND_ADDRESS,
+        value,
+        data,
+        operation: 1,
+        gasToken,
+        safeTxGas,
+        baseGas,
+        gasPrice,
+        refundReceiver,
+        nonce,
+        safeTxHash,
+        executor,
+        origin,
+        confirmations,
+      });
     }
   };
 
