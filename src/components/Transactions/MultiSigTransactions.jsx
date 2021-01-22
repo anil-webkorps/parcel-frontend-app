@@ -42,6 +42,10 @@ import {
   makeSelectThreshold,
   makeSelectLoading as makeSelectLoadingSafeDetails,
 } from "store/safe/selectors";
+import metaTxReducer from "store/metatx/reducer";
+import metaTxSaga from "store/metatx/saga";
+import { getMetaTxEnabled } from "store/metatx/actions";
+import { makeSelectIsMetaTxEnabled } from "store/metatx/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
@@ -63,7 +67,8 @@ const { TableBody, TableHead, TableRow } = Table;
 const multisigKey = "multisig";
 const invitationKey = "invitation";
 const safeKey = "safe";
-let isMetaEnabled = true; // TODO: get this from api
+const metaTxKey = "metatx";
+
 const { MULTISEND_ADDRESS } = addresses;
 
 export default function MultiSigTransactions() {
@@ -87,11 +92,13 @@ export default function MultiSigTransactions() {
   useInjectReducer({ key: multisigKey, reducer: multisigReducer });
   useInjectReducer({ key: invitationKey, reducer: invitationReducer });
   useInjectReducer({ key: safeKey, reducer: safeReducer });
+  useInjectReducer({ key: metaTxKey, reducer: metaTxReducer });
 
   // Sagas
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
   useInjectSaga({ key: invitationKey, saga: invitationSaga });
   useInjectSaga({ key: safeKey, saga: safeSaga });
+  useInjectSaga({ key: metaTxKey, saga: metaTxSaga });
 
   const dispatch = useDispatch();
 
@@ -104,10 +111,11 @@ export default function MultiSigTransactions() {
   const threshold = useSelector(makeSelectThreshold());
   const txHashFromMetaTx = useSelector(makeSelectMultisigTransactionHash());
   const confirmedStatus = useSelector(makeSelectConfirmed());
+  const isMetaEnabled = useSelector(makeSelectIsMetaTxEnabled());
 
   useEffect(() => {
     if (ownerSafeAddress) {
-      // dispatch(getMultisigTransactions(ownerSafeAddress));
+      dispatch(getMetaTxEnabled(ownerSafeAddress));
       dispatch(getInvitations(ownerSafeAddress));
       dispatch(getOwnersAndThreshold(ownerSafeAddress));
     }
@@ -127,10 +135,11 @@ export default function MultiSigTransactions() {
   }, [dispatch, txHashFromMetaTx]);
 
   useEffect(() => {
-    if (txData && selectedTransaction) {
+    if (txData && selectedTransaction && account) {
       dispatch(
         submitMultisigTransaction({
           safeAddress: ownerSafeAddress,
+          fromAddress: account,
           transactionId: selectedTransaction.txDetails.transactionId,
           txData: txData,
           transactionHash: txHash || "",
@@ -146,7 +155,8 @@ export default function MultiSigTransactions() {
     selectedTransaction,
     ownerSafeAddress,
     setTxData,
-    // isMetaEnabled
+    account,
+    isMetaEnabled,
   ]);
 
   useEffect(() => {
@@ -600,32 +610,10 @@ export default function MultiSigTransactions() {
 
   const renderTransactionDetails = (transaction) => {
     const {
-      // safe,
-      // to,
-      // value,
-      // data,
-      // operation,
-      // gasToken,
-      // safeTxGas,
-      // baseGas,
-      // gasPrice,
-      // refundReceiver,
-      // nonce,
-      // executionDate,
-      // submissionDate,
-      // modified, //date
-      // blockNumber,
       transactionHash,
-      // safeTxHash,
       // executor,
       isExecuted,
       // isSuccessful,
-      // ethGasPrice,
-      // gasUsed,
-      // fee,
-      // origin,
-      // confirmationsRequired,
-      // signatures,
       // rejectedCount,
       // confirmedCount,
       confirmations,

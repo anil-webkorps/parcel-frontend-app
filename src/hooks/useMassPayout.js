@@ -349,7 +349,7 @@ export default function useMassPayout() {
       gasPrice,
       refundReceiver,
       nonce,
-      safeTxHash,
+      // safeTxHash,
       executor,
       // signatures,
       origin,

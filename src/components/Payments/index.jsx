@@ -9,6 +9,7 @@ import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { cryptoUtils } from "parcel-sdk";
 import { show } from "redux-modal";
 import { BigNumber } from "@ethersproject/bignumber";
+import { useHistory } from "react-router-dom";
 
 import { Info } from "components/Dashboard/styles";
 import { Card } from "components/common/Card";
@@ -17,11 +18,6 @@ import viewDepartmentsReducer from "store/view-departments/reducer";
 import { getDepartments } from "store/view-departments/actions";
 import viewDepartmentsSaga from "store/view-departments/saga";
 import viewTeammatesSaga from "store/view-teammates/saga";
-import {
-  makeSelectMetaTransactionHash,
-  makeSelectError as makeSelectErrorInCreateTx,
-  makeSelectLoading as makeSelectAddTxLoading,
-} from "store/transactions/selectors";
 import viewTeammatesReducer from "store/view-teammates/reducer";
 import {
   getAllTeammates,
@@ -38,6 +34,11 @@ import {
 import transactionsReducer from "store/transactions/reducer";
 import transactionsSaga from "store/transactions/saga";
 import {
+  makeSelectMetaTransactionHash,
+  makeSelectError as makeSelectErrorInCreateTx,
+  makeSelectLoading as makeSelectAddTxLoading,
+} from "store/transactions/selectors";
+import {
   addTransaction,
   clearTransactionHash,
 } from "store/transactions/actions";
@@ -49,9 +50,21 @@ import dashboardReducer from "store/dashboard/reducer";
 import { getSafeBalances } from "store/dashboard/actions";
 import { makeSelectBalances } from "store/dashboard/selectors";
 import dashboardSaga from "store/dashboard/saga";
+import safeReducer from "store/safe/reducer";
+import safeSaga from "store/safe/saga";
+import { getNonce, getOwnersAndThreshold } from "store/safe/actions";
+import {
+  makeSelectNonce,
+  makeSelectThreshold,
+  makeSelectIsMultiOwner,
+  makeSelectLoading as makeSelectLoadingSafeDetails,
+} from "store/safe/selectors";
+import { createMultisigTransaction } from "store/multisig/actions";
+import multisigSaga from "store/multisig/saga";
+import multisigReducer from "store/multisig/reducer";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { useLocalStorage, useMassPayout } from "hooks";
+import { useActiveWeb3React, useLocalStorage, useMassPayout } from "hooks";
 import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import { minifyAddress } from "components/common/Web3Utils";
@@ -78,6 +91,8 @@ const viewDepartmentsKey = "viewDepartments";
 const marketRatesKey = "marketRates";
 const dashboardKey = "dashboard";
 const transactionsKey = "transactions";
+const safeKey = "safe";
+const multisigKey = "multisig";
 
 const TABS = {
   PEOPLE: "1",
@@ -133,6 +148,8 @@ const navStyles = `
 export default function People() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
+  const { account } = useActiveWeb3React();
+
   const [checked, setChecked] = useState([]);
   const [isCheckedAll, setIsCheckedAll] = useState(false);
   const [activeTab, setActiveTab] = useState(TABS.PEOPLE);
@@ -157,6 +174,7 @@ export default function People() {
     if (activeTab !== tab) setActiveTab(tab);
   };
 
+  // Reducers
   useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
   useInjectReducer({
     key: viewDepartmentsKey,
@@ -165,14 +183,22 @@ export default function People() {
   useInjectReducer({ key: marketRatesKey, reducer: marketRatesReducer });
   useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
+  useInjectReducer({ key: safeKey, reducer: safeReducer });
+  useInjectReducer({ key: multisigKey, reducer: multisigReducer });
 
+  // Sagas
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
   useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
   useInjectSaga({ key: marketRatesKey, saga: marketRatesSaga });
   useInjectSaga({ key: dashboardKey, saga: dashboardSaga });
   useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
+  useInjectSaga({ key: safeKey, saga: safeSaga });
+  useInjectSaga({ key: multisigKey, saga: multisigSaga });
 
   const dispatch = useDispatch();
+  const history = useHistory();
+
+  // Selectors
   const allDepartments = useSelector(makeSelectDepartments());
   const loadingDepartments = useSelector(makeSelectDepartmentsLoading()); // eslint-disable-line
   const loadingTeammates = useSelector(makeSelectTeammatesLoading()); // eslint-disable-line
@@ -183,6 +209,10 @@ export default function People() {
   const txHashFromMetaTx = useSelector(makeSelectMetaTransactionHash());
   const errorFromMetaTx = useSelector(makeSelectErrorInCreateTx());
   const addingTx = useSelector(makeSelectAddTxLoading());
+  const nonce = useSelector(makeSelectNonce());
+  const threshold = useSelector(makeSelectThreshold());
+  const isMultiOwner = useSelector(makeSelectIsMultiOwner());
+  const loadingSafeDetails = useSelector(makeSelectLoadingSafeDetails());
 
   useEffect(() => {
     dispatch(getMarketRates());
@@ -194,6 +224,14 @@ export default function People() {
       dispatch(clearTransactionHash());
     }
   }, [dispatch, txHashFromMetaTx]);
+
+  useEffect(() => {
+    if (ownerSafeAddress) {
+      dispatch(getSafeBalances(ownerSafeAddress));
+      dispatch(getNonce(ownerSafeAddress));
+      dispatch(getOwnersAndThreshold(ownerSafeAddress));
+    }
+  }, [ownerSafeAddress, dispatch]);
 
   useEffect(() => {
     dispatch(getSafeBalances(ownerSafeAddress));
@@ -247,7 +285,8 @@ export default function People() {
         recievers &&
         ownerSafeAddress &&
         totalAmountToPay &&
-        selectedTokenDetails
+        selectedTokenDetails &&
+        account
       ) {
         const to = cryptoUtils.encryptDataUsingEncryptionKey(
           JSON.stringify(recievers),
@@ -259,7 +298,7 @@ export default function People() {
           addTransaction({
             to,
             safeAddress: ownerSafeAddress,
-            createdBy: ownerSafeAddress,
+            createdBy: account,
             transactionHash: txHash,
             tokenValue: totalAmountToPay,
             tokenCurrency: selectedTokenDetails.name,
@@ -274,25 +313,47 @@ export default function People() {
         recievers &&
         ownerSafeAddress &&
         totalAmountToPay &&
-        selectedTokenDetails
+        selectedTokenDetails &&
+        account
       ) {
         const to = cryptoUtils.encryptDataUsingEncryptionKey(
           JSON.stringify(recievers),
           encryptionKey
         );
-        dispatch(
-          addTransaction({
-            to,
-            safeAddress: ownerSafeAddress,
-            createdBy: ownerSafeAddress,
-            txData,
-            tokenValue: totalAmountToPay,
-            tokenCurrency: selectedTokenDetails.name,
-            fiatValue: totalAmountToPay,
-            addresses: recievers.map(({ address }) => address),
-          })
-        );
-        setTxData(undefined);
+        if (!isMultiOwner) {
+          // threshold = 1 or single owner
+          dispatch(
+            addTransaction({
+              to,
+              safeAddress: ownerSafeAddress,
+              createdBy: account,
+              txData,
+              tokenValue: totalAmountToPay,
+              tokenCurrency: selectedTokenDetails.name,
+              fiatValue: totalAmountToPay,
+              addresses: recievers.map(({ address }) => address),
+            })
+          );
+          setTxData(undefined);
+        } else {
+          // threshold > 1
+          dispatch(
+            createMultisigTransaction({
+              to,
+              safeAddress: ownerSafeAddress,
+              createdBy: account,
+              txData,
+              tokenValue: totalAmountToPay,
+              tokenCurrency: selectedTokenDetails.name,
+              fiatValue: totalAmountToPay,
+              fiatCurrency: "USD",
+              addresses: recievers.map(({ address }) => address),
+              nonce: nonce,
+              transactionMode: 0, // mass payout
+            })
+          );
+          history.push("/dashboard/transactions");
+        }
       }
     }
   }, [
@@ -305,6 +366,10 @@ export default function People() {
     selectedTokenDetails,
     txData,
     setTxData,
+    account,
+    isMultiOwner,
+    nonce,
+    history,
   ]);
 
   useEffect(() => {
@@ -368,7 +433,12 @@ export default function People() {
   };
 
   const handleMassPayout = async (selectedTeammates) => {
-    await massPayout(selectedTeammates, selectedTokenDetails.name);
+    await massPayout(
+      selectedTeammates,
+      selectedTokenDetails.name,
+      isMultiOwner,
+      nonce
+    );
   };
 
   const onSubmit = async (e) => {
@@ -613,7 +683,14 @@ export default function People() {
             loading={loadingTx || addingTx}
             disabled={loadingTx || insufficientBalance || addingTx}
           >
-            Pay Now
+            {loadingSafeDetails && (
+              <div className="d-flex align-items-center justify-content-center">
+                <Loading color="#fff" width="50px" height="50px" />
+              </div>
+            )}
+
+            {!loadingSafeDetails &&
+              (threshold > 1 ? `Create Transaction` : `Pay Now`)}
           </Button>
         </div>
       </PaymentSummary>

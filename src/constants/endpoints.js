@@ -33,6 +33,9 @@ export const getMultisigTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transaction
 export const submitMultisigTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/multisig/submit`;
 export const confirmMultisigTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/multisig/confirm`;
 
+// METATX
+export const getMetaTxLimitsEndpoint = `${ROOT_BE_URL}/api/v1/transactions/getMetaTxLimits`;
+
 // INVITATION
 export const getInvitationsEndpoint = `${ROOT_BE_URL}/api/v1/invitation/get`;
 export const approveInvitationsEndpoint = `${ROOT_BE_URL}/api/v1/invitation/approve`;
