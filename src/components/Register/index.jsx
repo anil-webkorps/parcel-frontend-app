@@ -274,6 +274,10 @@ const Register = () => {
                 return;
               }
 
+              const threshold = formData.threshold
+                ? parseInt(formData.threshold)
+                : 1;
+
               const body = {
                 name: cryptoUtils.encryptDataUsingEncryptionKey(
                   formData.name,
@@ -289,6 +293,7 @@ const Register = () => {
                 email: "",
                 encryptionKeyData,
                 publicKey,
+                threshold,
               };
               dispatch(
                 setOwnerDetails(formData.name, formData.safeAddress, account)
@@ -456,6 +461,7 @@ const Register = () => {
             email: "",
             encryptionKeyData,
             publicKey,
+            threshold,
           };
           dispatch(registerUser(body));
           dispatch(setOwnerDetails(formData.name, proxy, account));
