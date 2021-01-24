@@ -49,9 +49,9 @@ import { makeSelectAverageGasPrice } from "store/gas/selectors";
 import { getGasPrice } from "store/gas/actions";
 import NoReferralModal from "./NoReferralModal";
 
-const registerKey = "register";
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
 
+const registerKey = "register";
 const registerWizardKey = "registerWizard";
 const gasPriceKey = "gas";
 

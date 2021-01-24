@@ -10,6 +10,7 @@ export const createMetaTxEndpoint = `${ROOT_BE_URL}/api/v1/users/create/meta-tx`
 export const fetchSafesEndpoint = `${ROOT_BE_URL}/api/v1/users/fetch-safes`;
 export const getSafesEndpoint = `${ROOT_BE_URL}/api/v1/users/get-safes`;
 export const getParcelSafesEndpoint = `${ROOT_BE_URL}/api/v1/users/get-parcel-safes`;
+export const getSafeOwnersEndpoint = `${ROOT_BE_URL}/api/v1/users/get-safe-owners`;
 export const loginEndpoint = `${ROOT_BE_URL}/api/v1/users/login`;
 
 // TEAMMATE

@@ -1,24 +1,22 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
   faArrowRight,
   faLock,
-  faMinus,
-  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { cryptoUtils } from "parcel-sdk";
 import { utils } from "ethers";
 
 import Container from "react-bootstrap/Container";
-import { useActiveWeb3React, useLocalStorage, useContract } from "hooks";
+import { useActiveWeb3React, useLocalStorage } from "hooks";
 import ConnectButton from "components/Connect";
 import { Card } from "components/common/Card";
 import { useInjectReducer } from "utils/injectReducer";
 import loginWizardReducer from "store/loginWizard/reducer";
 import loginReducer from "store/login/reducer";
-// import registerWizardReducer from "store/registerWizard/reducer";
 import {
   makeSelectFormData,
   makeSelectStep,
@@ -27,6 +25,9 @@ import {
   makeSelectLoading,
   makeSelectSafes,
   makeSelectCreatedBy,
+  makeSelectGnosisSafeOwners,
+  makeSelectGnosisSafeThreshold,
+  makeSelectFetchingSafeDetails,
 } from "store/loginWizard/selectors";
 import {
   chooseStep,
@@ -36,6 +37,7 @@ import {
   getParcelSafes,
   fetchSafes,
   chooseSafe,
+  getSafeOwners,
 } from "store/loginWizard/actions";
 import { makeSelectFlag } from "store/login/selectors";
 import { setOwnerDetails } from "store/global/actions";
@@ -45,18 +47,21 @@ import { Input, ErrorMessage } from "components/common/Form";
 import { useForm, useFieldArray } from "react-hook-form";
 import Img from "components/common/Img";
 import CompanyPng from "assets/images/register/company.png";
-import OwnerPng from "assets/images/register/owner.png";
+// import OwnerPng from "assets/images/register/owner.png";
 import ThresholdPng from "assets/images/register/threshold.png";
 import PrivacyPng from "assets/images/register/privacy.png";
 import { Error } from "components/common/Form/styles";
+import { getPublicKey } from "utils/encryption";
 
-import addresses from "constants/addresses";
 import { MESSAGE_TO_SIGN } from "constants/index";
-import GnosisSafeABI from "constants/abis/GnosisSafe.json";
-import ProxyFactoryABI from "constants/abis/ProxyFactory.json";
 import loginSaga from "store/login/saga";
 import loginWizardSaga from "store/loginWizard/saga";
+import registerReducer from "store/register/reducer";
 import registerSaga from "store/register/saga";
+import {
+  makeSelectError as makeSelectRegisterError,
+  makeSelectLoading as makeSelectLoadingRegister,
+} from "store/register/selectors";
 import { useInjectSaga } from "utils/injectSaga";
 import { loginUser } from "store/login/actions";
 import { registerUser } from "store/register/actions";
@@ -72,8 +77,6 @@ import {
   Safe,
   RetryText,
 } from "./styles";
-
-const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
 
 const loginKey = "login";
 const loginWizardKey = "loginWizard";
@@ -130,8 +133,8 @@ const IMPORT_STEPS = {
   [STEPS.ZERO]: "Connect",
   [STEPS.ONE]: "Privacy",
   [STEPS.TWO]: "Choose Safe",
-  [STEPS.THREE]: "Company Name",
-  [STEPS.FOUR]: "Owner Name",
+  [STEPS.THREE]: "Owner Address/Name",
+  [STEPS.FOUR]: "Owner Details",
   [STEPS.FIVE]: "Threshold",
 };
 
@@ -155,6 +158,7 @@ const Login = () => {
   // Reducers
   useInjectReducer({ key: loginWizardKey, reducer: loginWizardReducer });
   useInjectReducer({ key: loginKey, reducer: loginReducer });
+  useInjectReducer({ key: registerKey, reducer: registerReducer });
 
   // Sagas
   useInjectSaga({ key: loginKey, saga: loginSaga });
@@ -162,6 +166,7 @@ const Login = () => {
   useInjectSaga({ key: registerKey, saga: registerSaga });
 
   const dispatch = useDispatch();
+  const location = useLocation();
 
   // Selectors
   const step = useSelector(makeSelectStep());
@@ -172,26 +177,18 @@ const Login = () => {
   const flow = useSelector(makeSelectFlow());
   const chosenSafeAddress = useSelector(makeSelectChosenSafeAddress());
   const flag = useSelector(makeSelectFlag());
+  const fetching = useSelector(makeSelectFetchingSafeDetails());
+  const gnosisSafeOwners = useSelector(makeSelectGnosisSafeOwners());
+  const gnosisSafeThreshold = useSelector(makeSelectGnosisSafeThreshold());
+  const errorInRegister = useSelector(makeSelectRegisterError());
+  const creating = useSelector(makeSelectLoadingRegister());
 
   // Form
   const { register, handleSubmit, errors, reset, control } = useForm();
-  const { fields, append, remove } = useFieldArray({
+  const { fields } = useFieldArray({
     control,
     name: "owners",
   });
-
-  // Contracts
-  const gnosisSafeMasterContract = useContract(
-    GNOSIS_SAFE_ADDRESS,
-    GnosisSafeABI,
-    true
-  );
-
-  const proxyFactory = useContract(
-    PROXY_FACTORY_ADDRESS,
-    ProxyFactoryABI,
-    true
-  );
 
   useEffect(() => {
     let timer;
@@ -218,6 +215,13 @@ const Login = () => {
   }, [reset, formData, account]);
 
   useEffect(() => {
+    reset({
+      owners: gnosisSafeOwners.map((owner) => ({ name: "", owner })),
+      ...formData,
+    });
+  }, [reset, gnosisSafeOwners, formData]);
+
+  useEffect(() => {
     if (step === STEPS.ONE && account) {
       if (sign) {
         const msgHash = utils.hashMessage(MESSAGE_TO_SIGN);
@@ -238,6 +242,12 @@ const Login = () => {
   }, [step, dispatch, account, sign, flow]);
 
   useEffect(() => {
+    if (step === STEPS.THREE && flow === FLOWS.IMPORT) {
+      dispatch(getSafeOwners(chosenSafeAddress));
+    }
+  }, [step, dispatch, chosenSafeAddress, flow]);
+
+  useEffect(() => {
     if (finalSubmitted) {
       signup(1); // one owner
     }
@@ -256,12 +266,22 @@ const Login = () => {
     }
   }, [flag, dispatch]);
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const referralId = searchParams.get("referralId");
+    if (referralId) {
+      dispatch(updateForm({ referralId }));
+    }
+  }, [location, dispatch]);
+
+  const completeImport = async () => {
+    await signup(gnosisSafeThreshold);
+  };
+
   const onSubmit = async (values) => {
     dispatch(updateForm(values));
 
-    if (flow === FLOWS.IMPORT && step === getStepsCountByFlow(FLOWS.IMPORT)) {
-      await signup(values.threshold);
-    } else if (
+    if (
       flow === FLOWS.IMPORT_INDIVIDUAL &&
       step === getStepsCountByFlow(FLOWS.IMPORT_INDIVIDUAL)
     ) {
@@ -298,16 +318,15 @@ const Login = () => {
 
   const signup = async (_threshold) => {
     // let body;
-    if (gnosisSafeMasterContract && proxyFactory && account) {
+    if (account) {
       // set encryptionKey
       const encryptionKey = cryptoUtils.getEncryptionKey(
         sign,
         chosenSafeAddress
       );
-      const ownerAddresses =
-        formData.owners && formData.owners.length
-          ? formData.owners.map(({ owner }) => owner)
-          : [account];
+      // set encryptionKey
+      setEncryptionKey(encryptionKey);
+
       const encryptedOwners =
         formData.owners && formData.owners.length
           ? formData.owners.map(({ name, owner }) => ({
@@ -330,19 +349,19 @@ const Login = () => {
       const threshold = formData.threshold
         ? parseInt(formData.threshold)
         : _threshold;
-      const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
-        "setup",
-        [
-          ownerAddresses,
-          threshold,
-          ZERO_ADDRESS,
-          ZERO_ADDRESS,
-          ZERO_ADDRESS,
-          ZERO_ADDRESS,
-          0,
-          ZERO_ADDRESS,
-        ]
-      );
+
+      const publicKey = getPublicKey(sign);
+
+      let encryptionKeyData;
+      try {
+        encryptionKeyData = await cryptoUtils.encryptUsingSignatures(
+          encryptionKey,
+          sign
+        );
+      } catch (error) {
+        console.error(error);
+        return;
+      }
 
       const body = {
         name: cryptoUtils.encryptDataUsingEncryptionKey(
@@ -352,10 +371,10 @@ const Login = () => {
         safeAddress: chosenSafeAddress,
         createdBy: account,
         owners: encryptedOwners,
-        proxyData: {
-          from: account,
-          params: [GNOSIS_SAFE_ADDRESS, creationData],
-        },
+        referralId: formData.referralId,
+        threshold,
+        publicKey,
+        encryptionKeyData,
       };
 
       dispatch(setOwnerDetails(formData.name, chosenSafeAddress, account));
@@ -394,8 +413,8 @@ const Login = () => {
                   type="button"
                   large
                   className="secondary"
-                  onClick={() => handleSelectFlow(FLOWS.IMPORT_INDIVIDUAL)}
-                  disabled
+                  onClick={() => handleSelectFlow(FLOWS.IMPORT)}
+                  disabled={!formData.referralId}
                 >
                   Import Existing Safe
                 </Button>
@@ -426,7 +445,9 @@ const Login = () => {
         </div>
         <StepInfo>
           <div>
-            <h3 className="title">Login</h3>
+            <h3 className="title">
+              {flow === FLOWS.LOGIN ? `Login` : `Import`}
+            </h3>
             <p className="next">
               {steps[step + 1] ? `NEXT: ${steps[step + 1]}` : `Finish`}
             </p>
@@ -470,19 +491,17 @@ const Login = () => {
   };
 
   const renderOwnerDetails = () => {
+    if (fetching) {
+      return (
+        <div className="d-flex align-items-center justify-content-center mt-5">
+          <Loading color="primary" width="50px" height="50px" />
+        </div>
+      );
+    }
     return (
       <StepDetails>
-        {fields.length === 1 && (
-          <Img
-            src={OwnerPng}
-            alt="owner"
-            className="my-2"
-            width="130px"
-            style={{ minWidth: "130px" }}
-          />
-        )}
         <h3 className="title">Owner Name & Address</h3>
-        <p className="subtitle">You can add multiple owners</p>
+        <p className="subtitle">Please enter the name of the owners</p>
         {fields.map(({ id, name, owner }, index) => {
           return (
             <div
@@ -490,7 +509,7 @@ const Login = () => {
               className="row mb-3 align-items-baseline"
               style={{ minHeight: "60px" }}
             >
-              <div className="col-5">
+              <div className="col-6">
                 <Input
                   name={`owners[${index}].name`}
                   register={register}
@@ -504,7 +523,7 @@ const Login = () => {
                     <Error>{errors["owners"][index].name.message}</Error>
                   )}
               </div>
-              <div className="col-5">
+              <div className="col-6">
                 <Input
                   name={`owners[${index}].owner`}
                   register={register}
@@ -513,44 +532,14 @@ const Login = () => {
                     value: /^0x[a-fA-F0-9]{40}$/g,
                     message: "Invalid Ethereum Address",
                   }}
-                  placeholder="0x32Be...2D88"
                   defaultValue={owner}
+                  style={{ pointerEvents: "none" }}
                 />
                 {errors["owners"] &&
                   errors["owners"][index] &&
                   errors["owners"][index].owner && (
                     <Error>{errors["owners"][index].owner.message}</Error>
                   )}
-              </div>
-              <div className="px-1">
-                {index === fields.length - 1 && (
-                  <div>
-                    <Button
-                      type="button"
-                      iconOnly
-                      onClick={() => append({})}
-                      style={{ backgroundColor: "#7367f0" }}
-                      className="px-2 py-2"
-                    >
-                      <FontAwesomeIcon icon={faPlus} color="#fff" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              <div className="px-1">
-                {fields.length > 1 && index === fields.length - 1 && (
-                  <div>
-                    <Button
-                      type="button"
-                      iconOnly
-                      onClick={() => remove(index)}
-                      style={{ backgroundColor: "#ff1c46" }}
-                      className="px-2 py-2"
-                    >
-                      <FontAwesomeIcon icon={faMinus} color="#fff" />
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
           );
@@ -574,31 +563,23 @@ const Login = () => {
           style={{ minWidth: "130px" }}
         />
         <h3 className="title">Threshold</h3>
-        <p className="subtitle">
-          How many people should authorize transactions?
+        <p className="subtitle pb-5">
+          Any transaction requires the confirmation of {gnosisSafeThreshold} out
+          of {gnosisSafeOwners && gnosisSafeOwners.length} owners.
         </p>
-        <div
-          className="row mr-4 align-items-center radio-toolbar"
-          style={{ padding: "10px 16px 0" }}
+        <Button
+          large
+          type="button"
+          onClick={completeImport}
+          loading={creating}
+          disabled={creating}
+          className="mt-5"
         >
-          {formData.owners.map(({ owner }, index) => (
-            <Input
-              name={`threshold`}
-              register={register}
-              type="radio"
-              id={`threshold${index}`}
-              value={index + 1}
-              defaultChecked={index === 0}
-              label={index + 1}
-              key={owner}
-            />
-          ))}
-        </div>
-
-        <ErrorMessage name="threshold" errors={errors} />
-        <Button large type="submit" className="mt-3">
           Complete Import
         </Button>
+        {errorInRegister && (
+          <div className="text-danger ml-2 my-3">{errorInRegister}</div>
+        )}
       </StepDetails>
     );
   };
@@ -711,6 +692,12 @@ const Login = () => {
 
     dispatch(loginUser(safe));
   };
+
+  const handleImportSelectedSafe = async (safe) => {
+    dispatch(chooseSafe(safe));
+    goNext();
+  };
+
   const handleRefetch = useCallback(() => {
     if (flow === FLOWS.IMPORT || flow === FLOWS.IMPORT_INDIVIDUAL) {
       dispatch(getSafes(account, 1)); // 1 => get safes from gnosis api
@@ -753,7 +740,9 @@ const Login = () => {
             <Safe
               key={safe}
               onClick={() =>
-                handleSelectSafe(name, safe, encryptionKeyData, createdBy)
+                encryptionKeyData
+                  ? handleSelectSafe(name, safe, encryptionKeyData, createdBy)
+                  : handleImportSelectedSafe(safe)
               }
             >
               <div className="top">
