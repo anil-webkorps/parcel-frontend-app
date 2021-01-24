@@ -475,7 +475,7 @@ const Login = () => {
           style={{ minWidth: "130px" }}
         />
         <h3 className="title">What is your Company Name</h3>
-        <p className="subtitle">You’ll be know by this name on Parcel.</p>
+        <p className="subtitle">You’ll be known by this name on Parcel.</p>
         <Input
           name="name"
           register={register}
@@ -509,7 +509,7 @@ const Login = () => {
               className="row mb-3 align-items-baseline"
               style={{ minHeight: "60px" }}
             >
-              <div className="col-6">
+              <div className="col-4 pr-0">
                 <Input
                   name={`owners[${index}].name`}
                   register={register}
@@ -523,7 +523,7 @@ const Login = () => {
                     <Error>{errors["owners"][index].name.message}</Error>
                   )}
               </div>
-              <div className="col-6">
+              <div className="col-8">
                 <Input
                   name={`owners[${index}].owner`}
                   register={register}
@@ -533,7 +533,7 @@ const Login = () => {
                     message: "Invalid Ethereum Address",
                   }}
                   defaultValue={owner}
-                  style={{ pointerEvents: "none" }}
+                  className="default-address"
                 />
                 {errors["owners"] &&
                   errors["owners"][index] &&

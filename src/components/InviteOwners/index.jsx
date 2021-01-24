@@ -34,6 +34,7 @@ import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { useActiveWeb3React } from "hooks";
+import CopyButton from "components/common/Copy";
 
 import { Title, Heading, ActionItem } from "components/People/styles";
 import { Container, OwnerDetails } from "./styles";
@@ -126,11 +127,11 @@ export default function InviteOwners() {
   };
 
   const renderInvitationStatus = (owner, invitationDetails, idx) => {
-    if (owner === createdBy) {
-      return <div className="highlighted-status">Main Owner</div>;
-    }
     if (owner === account) {
       return <div className="highlighted-status">You</div>;
+    }
+    if (owner === createdBy) {
+      return <div className="highlighted-status">Owner</div>;
     }
 
     if (!invitationDetails) {
@@ -146,7 +147,20 @@ export default function InviteOwners() {
 
     if (invitationDetails && invitationDetails.status === 0) {
       // sent invite and awaiting confirmation
-      return <div className="awaiting-status">Awaiting Confirmation</div>;
+      return (
+        <div className="d-flex align-items-center">
+          <div className="awaiting-status mr-2">Awaiting Confirmation</div>
+          {invitationDetails.invitationLink && (
+            <CopyButton
+              id="invitation-link"
+              tooltip="Invitation Link"
+              value={invitationDetails.invitationLink}
+              size="md"
+              color="#7367f0"
+            />
+          )}
+        </div>
+      );
     }
     if (invitationDetails && invitationDetails.status === 1) {
       // sent invite and awaiting confirmation
@@ -162,7 +176,7 @@ export default function InviteOwners() {
 
     if (invitationDetails && invitationDetails.status === 2) {
       // sent invite and awaiting confirmation
-      return <div className="joined-status">Joined</div>;
+      return <div className="joined-status">Owner</div>;
     }
 
     return null;

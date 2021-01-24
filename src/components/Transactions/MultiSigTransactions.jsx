@@ -27,6 +27,7 @@ import {
   makeSelectFetching,
   makeSelectMultisigTransactionHash,
   makeSelectConfirmed,
+  makeSelectUpdating,
 } from "store/multisig/selectors";
 import invitationSaga from "store/invitation/saga";
 import invitationReducer from "store/invitation/reducer";
@@ -86,6 +87,10 @@ export default function MultiSigTransactions() {
     setConfirmTxData,
     txData,
     setTxData,
+    approving,
+    setApproving,
+    rejecting,
+    setRejecting,
   } = useMassPayout();
 
   // Reducers
@@ -112,6 +117,7 @@ export default function MultiSigTransactions() {
   const txHashFromMetaTx = useSelector(makeSelectMultisigTransactionHash());
   const confirmedStatus = useSelector(makeSelectConfirmed());
   const isMetaEnabled = useSelector(makeSelectIsMetaTxEnabled());
+  const updating = useSelector(makeSelectUpdating());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -446,10 +452,35 @@ export default function MultiSigTransactions() {
       // txDetails,
     } = selectedTransaction;
 
-    if (confirmedCount === threshold - 1) {
-      // submit final approve tx
-      await submitMassPayout(
-        {
+    try {
+      setApproving(true);
+
+      if (confirmedCount === threshold - 1) {
+        // submit final approve tx
+        await submitMassPayout(
+          {
+            safe: ownerSafeAddress,
+            to: MULTISEND_ADDRESS,
+            value,
+            data,
+            operation: 1,
+            gasToken,
+            safeTxGas,
+            baseGas,
+            gasPrice,
+            refundReceiver,
+            nonce,
+            safeTxHash,
+            executor,
+            origin,
+            confirmations,
+          },
+          isMetaEnabled,
+          true
+        );
+      } else {
+        // call confirm api
+        await confirmMassPayout({
           safe: ownerSafeAddress,
           to: MULTISEND_ADDRESS,
           value,
@@ -465,29 +496,11 @@ export default function MultiSigTransactions() {
           executor,
           origin,
           confirmations,
-        },
-        isMetaEnabled,
-        true
-      );
-    } else {
-      // call confirm api
-      await confirmMassPayout({
-        safe: ownerSafeAddress,
-        to: MULTISEND_ADDRESS,
-        value,
-        data,
-        operation: 1,
-        gasToken,
-        safeTxGas,
-        baseGas,
-        gasPrice,
-        refundReceiver,
-        nonce,
-        safeTxHash,
-        executor,
-        origin,
-        confirmations,
-      });
+        });
+      }
+      setApproving(false);
+    } catch (error) {
+      setApproving(false);
     }
   };
 
@@ -524,10 +537,35 @@ export default function MultiSigTransactions() {
       // txDetails,
     } = selectedTransaction;
 
-    if (rejectedCount === threshold - 1) {
-      // submit final reject tx
-      await submitMassPayout(
-        {
+    try {
+      setRejecting(true);
+
+      if (rejectedCount === threshold - 1) {
+        // submit final reject tx
+        await submitMassPayout(
+          {
+            safe,
+            to: safe,
+            value,
+            data: "0x",
+            operation: 0,
+            gasToken,
+            safeTxGas,
+            baseGas,
+            gasPrice,
+            refundReceiver,
+            nonce,
+            safeTxHash,
+            executor,
+            origin,
+            confirmations,
+          },
+          isMetaEnabled,
+          false
+        );
+      } else {
+        // call confirm api with reject params
+        await confirmMassPayout({
           safe,
           to: safe,
           value,
@@ -543,29 +581,11 @@ export default function MultiSigTransactions() {
           executor,
           origin,
           confirmations,
-        },
-        isMetaEnabled,
-        false
-      );
-    } else {
-      // call confirm api with reject params
-      await confirmMassPayout({
-        safe,
-        to: safe,
-        value,
-        data: "0x",
-        operation: 0,
-        gasToken,
-        safeTxGas,
-        baseGas,
-        gasPrice,
-        refundReceiver,
-        nonce,
-        safeTxHash,
-        executor,
-        origin,
-        confirmations,
-      });
+        });
+      }
+      setRejecting(false);
+    } catch (error) {
+      setRejecting(false);
     }
   };
 
@@ -587,7 +607,8 @@ export default function MultiSigTransactions() {
                 type="button"
                 large
                 onClick={approveTransaction}
-                disabled={loadingTx}
+                disabled={loadingTx || updating}
+                loading={approving}
               >
                 Approve
               </Button>
@@ -597,7 +618,8 @@ export default function MultiSigTransactions() {
                 type="button"
                 large
                 onClick={rejectTransaction}
-                disabled={loadingTx}
+                disabled={loadingTx || updating}
+                loading={rejecting}
               >
                 Reject
               </Button>

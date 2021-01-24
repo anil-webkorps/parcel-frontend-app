@@ -539,7 +539,7 @@ const Register = () => {
           style={{ minWidth: "130px" }}
         />
         <h3 className="title">What is your Company Name</h3>
-        <p className="subtitle">You’ll be know by this name on Parcel.</p>
+        <p className="subtitle">You’ll be known by this name on Parcel.</p>
         <Input
           name="name"
           register={register}
@@ -565,7 +565,7 @@ const Register = () => {
           style={{ minWidth: "130px" }}
         />
         <h3 className="title">What is your Name</h3>
-        <p className="subtitle">You’ll be know by this name on Parcel.</p>
+        <p className="subtitle">You’ll be known by this name on Parcel.</p>
         <Input
           name="name"
           register={register}
@@ -597,7 +597,7 @@ const Register = () => {
           style={{ minWidth: "130px" }}
         />
         <h3 className="title">What is your Company Name</h3>
-        <p className="subtitle">You’ll be know by this name on Parcel.</p>
+        <p className="subtitle">You’ll be known by this name on Parcel.</p>
         <Input
           name="name"
           register={register}
@@ -752,7 +752,7 @@ const Register = () => {
           loading={createSafeLoading}
           disabled={createSafeLoading}
         >
-          Create Safe and Proceed
+          {isMetaTxEnabled ? `Proceed` : `Create Safe and Proceed`}
         </Button>
       </StepDetails>
     );

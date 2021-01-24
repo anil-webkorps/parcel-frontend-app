@@ -49,4 +49,10 @@ export default styled.div`
   .radio-toolbar input[type="radio"]:checked + label {
     background-color: #c3c3c3;
   }
+
+  .default-address {
+    pointer-events: none;
+    opacity: 0.7;
+    font-size: 13.5px !important;
+  }
 `;

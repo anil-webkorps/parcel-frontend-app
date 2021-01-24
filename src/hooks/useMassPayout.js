@@ -57,6 +57,8 @@ export default function useMassPayout() {
   const [txData, setTxData] = useState("");
   const [confirmTxData, setConfirmTxData] = useState("");
   const [recievers, setRecievers] = useState();
+  const [approving, setApproving] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
 
   useInjectReducer({ key: gasPriceKey, reducer: gasPriceReducer });
 
@@ -189,9 +191,13 @@ export default function useMassPayout() {
           .catch((err) => {
             console.error(err);
             setLoadingTx(false);
+            setApproving(false);
+            setRejecting(false);
           });
       } catch (err) {
         setLoadingTx(false);
+        setApproving(false);
+        setRejecting(false);
         return reject(err);
       }
     });
@@ -826,5 +832,9 @@ export default function useMassPayout() {
     confirmTxData,
     setConfirmTxData,
     confirmMassPayout,
+    setApproving,
+    setRejecting,
+    approving,
+    rejecting,
   };
 }

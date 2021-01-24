@@ -258,7 +258,7 @@ const AcceptInvite = () => {
         <h3 className="title">Accept Invite and join Parcel</h3>
 
         <p className="subtitle pb-5">
-          Once you accept the invitation, the main owner will approve you.
+          Once you accept the invitation, one of the owners will approve you.
           <br />
           Then, you can login and view the Parcel dashboard.
         </p>
@@ -284,7 +284,7 @@ const AcceptInvite = () => {
       <InnerCard height="257px">
         <h2 className="text-center">Invitation Accepted</h2>
         <div className="mt-2 mb-5 text-center">
-          Great! Now, the main owner will approve you
+          Great! Now, one of the owners will approve you
           <br />
           and you will be able to login to the Parcel dashboard.
         </div>
