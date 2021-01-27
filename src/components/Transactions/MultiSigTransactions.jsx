@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  // faDownload,
+  faDownload,
   faLink,
   faLongArrowAltLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { format } from "date-fns";
 import { cryptoUtils } from "parcel-sdk";
 import { useSelector, useDispatch } from "react-redux";
-// import { CSVLink } from "react-csv";
+import { CSVLink } from "react-csv";
 
 import { useActiveWeb3React, useLocalStorage, useMassPayout } from "hooks";
 import Button from "components/common/Button";
@@ -206,41 +206,40 @@ export default function MultiSigTransactions() {
   };
 
   const renderTransactions = () => {
-    // let csvData = [];
-    // if (transactions && transactions.length > 0) {
-    //   transactions.map(
-    //     ({
-    //       to,
-    //       transactionHash,
-    //       transactionId,
-    //       transactionFees,
-    //       createdOn,
-    //     }) => {
-    //       const paidTeammates = getDecryptedDetails(to);
-    //       for (let i = 0; i < paidTeammates.length; i++) {
-    //         const {
-    //           firstName,
-    //           lastName,
-    //           salaryAmount,
-    //           salaryToken,
-    //           address,
-    //         } = paidTeammates[i];
-    //         csvData.push({
-    //           "First Name": firstName,
-    //           "Last Name": lastName,
-    //           "Salary Token": salaryToken,
-    //           "Salary Amount": salaryAmount,
-    //           Address: address,
-    //           "Transaction Hash": transactionHash,
-    //           "Created On": format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss"),
-    //           "Transaction ID": transactionId,
-    //           "Transaction fees": parseFloat(transactionFees).toFixed(5),
-    //         });
-    //       }
-    //       return csvData;
-    //     }
-    //   );
-    // }
+    let csvData = [];
+    if (transactions && transactions.length > 0) {
+      transactions.map((transaction) => {
+        const { txDetails, transactionHash } = transaction;
+
+        if (txDetails) {
+          const { transactionId, to, createdOn, transactionFees } = txDetails;
+          const paidTeammates = getDecryptedDetails(to);
+          for (let i = 0; i < paidTeammates.length; i++) {
+            const {
+              firstName,
+              lastName,
+              salaryAmount,
+              salaryToken,
+              address,
+            } = paidTeammates[i];
+            csvData.push({
+              "First Name": firstName,
+              "Last Name": lastName,
+              "Salary Token": salaryToken,
+              "Salary Amount": salaryAmount,
+              Address: address,
+              "Transaction Hash": transactionHash || "",
+              "Created On": format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss"),
+              "Transaction ID": transactionId,
+              "Transaction fees": transactionFees
+                ? parseFloat(transactionFees).toFixed(5)
+                : "",
+            });
+          }
+        }
+        return csvData;
+      });
+    }
     return (
       <div
         className="position-relative"
@@ -265,7 +264,7 @@ export default function MultiSigTransactions() {
                 </div>
               </div>
 
-              {/* <CSVLink
+              <CSVLink
                 data={csvData}
                 filename={`transactions-${format(
                   Date.now(),
@@ -282,7 +281,7 @@ export default function MultiSigTransactions() {
                     </div>
                   </ActionItem>
                 </Button>
-              </CSVLink> */}
+              </CSVLink>
             </div>
           </div>
         </Info>
