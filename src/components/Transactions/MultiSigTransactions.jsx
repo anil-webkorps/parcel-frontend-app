@@ -209,9 +209,9 @@ export default function MultiSigTransactions() {
     let csvData = [];
     if (transactions && transactions.length > 0) {
       transactions.map((transaction) => {
-        const { txDetails, transactionHash } = transaction;
+        const { txDetails, transactionHash, isExecuted } = transaction;
 
-        if (txDetails) {
+        if (txDetails && isExecuted) {
           const { transactionId, to, createdOn, transactionFees } = txDetails;
           const paidTeammates = getDecryptedDetails(to);
           for (let i = 0; i < paidTeammates.length; i++) {
