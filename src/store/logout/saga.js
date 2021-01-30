@@ -1,5 +1,5 @@
 import { takeEvery, put } from "redux-saga/effects";
-import { setOwnerDetails } from "store/global/actions";
+import { clearGlobalState } from "store/global/actions";
 // import { push } from "connected-react-router";
 import { LOGOUT_USER } from "./action-types";
 
@@ -11,7 +11,7 @@ function* invalidateSession() {
   yield localStorage.removeItem("token");
   yield localStorage.removeItem("ENCRYPTION_KEY");
   yield localStorage.removeItem("SIGNATURE");
-  yield put(setOwnerDetails("", "", ""));
+  yield put(clearGlobalState());
   window.location = "/";
   // yield put(push("/"));
 }

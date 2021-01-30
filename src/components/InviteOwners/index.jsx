@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLongArrowAltLeft,
   faUserCircle,
+  faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
@@ -35,12 +36,15 @@ import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { useActiveWeb3React } from "hooks";
 import CopyButton from "components/common/Copy";
+import Img from "components/common/Img";
 
 import { Title, Heading, ActionItem } from "components/People/styles";
-import { Container, OwnerDetails } from "./styles";
+import { Container, OwnerDetails, StepDetails } from "./styles";
 import { Circle } from "components/Header/styles";
 import { minifyAddress } from "components/common/Web3Utils";
-import { Stepper, StepCircle } from "components/common/Stepper";
+import Step1Png from "assets/icons/invite/step-1.png";
+import Step2Png from "assets/icons/invite/step-2.png";
+import Step3Png from "assets/icons/invite/step-3.png";
 
 const invitationKey = "invitation";
 
@@ -48,6 +52,7 @@ export default function InviteOwners() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   const [showEmail, setShowEmail] = useState();
   const [ownerToBeInvited, setOwnerToBeInvited] = useState();
+  const [displayInviteSteps, setDisplayInviteSteps] = useState(false);
 
   const { account } = useActiveWeb3React();
 
@@ -84,6 +89,20 @@ export default function InviteOwners() {
       setShowEmail();
     }
   }, [dispatch, successfullyInvited, ownerSafeAddress]);
+
+  useEffect(() => {
+    if (
+      safeOwners &&
+      safeOwners.length > 1 &&
+      !safeOwners.slice(1).every((owner) => owner.invitationDetails)
+    ) {
+      setDisplayInviteSteps(true);
+    }
+  }, [safeOwners]);
+
+  const toggleShowOwners = () => {
+    setDisplayInviteSteps((displayInviteSteps) => !displayInviteSteps);
+  };
 
   const onSubmit = async (values) => {
     if (!account || !ownerToBeInvited || !ownerSafeAddress) return;
@@ -218,29 +237,21 @@ export default function InviteOwners() {
     return (
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="invite-owners">
-          <Title className="mb-2">Owners</Title>
-          <Heading>List of all owners of the safe</Heading>
-
-          <Stepper count={3}>
-            <StepCircle
-              title={`Step 1`}
-              subtitle={`Invite Owner to Parcel`}
-              backgroundColor="#7367f0"
-            />
-            <StepCircle
-              title={`Step 2`}
-              subtitle={`Owner Accepts Invite`}
-              // icon={<FontAwesomeIcon icon={faCheckCircle} color="#3bd800" />}
-              backgroundColor="#373737"
-            />
-            <StepCircle
-              title={`Step 3`}
-              subtitle={`Approve Owner`}
-              backgroundColor="#3bd800"
-              last
-            />
-          </Stepper>
-
+          <Row className="justify-content-between align-items-center mb-4">
+            <Col lg="10">
+              <Title className="mb-2">Owners</Title>
+              <Heading>List of all owners of the safe</Heading>
+            </Col>
+            <Col lg="2" className="text-right">
+              <Button iconOnly className="p-0" onClick={toggleShowOwners}>
+                <FontAwesomeIcon
+                  icon={faInfoCircle}
+                  color="#333"
+                  style={{ fontSize: "28px" }}
+                />
+              </Button>
+            </Col>
+          </Row>
           {loading && (
             <div
               className="d-flex align-items-center justify-content-center"
@@ -283,6 +294,63 @@ export default function InviteOwners() {
     );
   };
 
+  const renderInviteSteps = () => {
+    return (
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Card className="invite-owners">
+          <Title className="mb-2">Owners</Title>
+          <Heading>
+            To allow other owners to use Parcel, follow these simple steps
+          </Heading>
+          <Row className="align-items-center mt-4">
+            <Col lg="2" className="pr-0">
+              <Img src={Step1Png} alt="step1" width="64" />
+            </Col>
+            <Col lg="10" className="pl-0">
+              <StepDetails>
+                <div className="step-title">STEP 1</div>
+                <div className="step-subtitle">Invite the Owners to Parcel</div>
+              </StepDetails>
+            </Col>
+          </Row>
+          <Row className="align-items-center mt-4">
+            <Col lg="2" className="pr-0">
+              <Img src={Step2Png} alt="step2" width="64" />
+            </Col>
+            <Col lg="10" className="pl-0">
+              <StepDetails>
+                <div className="step-title">STEP 2</div>
+                <div className="step-subtitle">Owner Accepts the Invite</div>
+              </StepDetails>
+            </Col>
+          </Row>
+          <Row className="align-items-center mt-4">
+            <Col lg="2" className="pr-0">
+              <Img src={Step3Png} alt="step3" width="64" />
+            </Col>
+            <Col lg="10" className="pl-0">
+              <StepDetails>
+                <div className="step-title">STEP 3</div>
+                <div className="step-subtitle">
+                  You Give Final Approval To The Owner
+                </div>
+              </StepDetails>
+            </Col>
+          </Row>
+
+          <Button
+            large
+            type="button"
+            className="mt-5"
+            onClick={toggleShowOwners}
+          >
+            View All Owners
+          </Button>
+        </Card>
+      </form>
+    );
+  };
+
   return (
     <div
       className="position-relative"
@@ -317,7 +385,7 @@ export default function InviteOwners() {
           transition: "all 0.25s linear",
         }}
       >
-        {renderInviteOwners()}
+        {displayInviteSteps ? renderInviteSteps() : renderInviteOwners()}
       </Container>
     </div>
   );

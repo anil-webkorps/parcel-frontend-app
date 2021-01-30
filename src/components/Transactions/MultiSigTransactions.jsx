@@ -31,25 +31,19 @@ import {
 } from "store/multisig/selectors";
 import invitationSaga from "store/invitation/saga";
 import invitationReducer from "store/invitation/reducer";
-import { getInvitations } from "store/invitation/actions";
-import {
-  makeSelectLoading as makeSelectLoadingSafeOwners,
-  makeSelectSafeOwners,
-} from "store/invitation/selectors";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
-import { getOwnersAndThreshold } from "store/safe/actions";
-import {
-  makeSelectThreshold,
-  makeSelectLoading as makeSelectLoadingSafeDetails,
-} from "store/safe/selectors";
 import metaTxReducer from "store/metatx/reducer";
 import metaTxSaga from "store/metatx/saga";
 import { getMetaTxEnabled } from "store/metatx/actions";
 import { makeSelectIsMetaTxEnabled } from "store/metatx/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOwnerSafeAddress,
+  makeSelectThreshold,
+  makeSelectSafeOwners,
+} from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
 import StatusText from "./StatusText";
@@ -109,8 +103,6 @@ export default function MultiSigTransactions() {
 
   const transactions = useSelector(makeSelectMultisigTransactions());
   const loading = useSelector(makeSelectFetching());
-  const loadingSafeOwners = useSelector(makeSelectLoadingSafeOwners());
-  const loadingSafeDetails = useSelector(makeSelectLoadingSafeDetails());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const safeOwners = useSelector(makeSelectSafeOwners());
   const threshold = useSelector(makeSelectThreshold());
@@ -122,8 +114,6 @@ export default function MultiSigTransactions() {
   useEffect(() => {
     if (ownerSafeAddress) {
       dispatch(getMetaTxEnabled(ownerSafeAddress));
-      dispatch(getInvitations(ownerSafeAddress));
-      dispatch(getOwnersAndThreshold(ownerSafeAddress));
     }
   }, [dispatch, ownerSafeAddress]);
 
@@ -297,7 +287,7 @@ export default function MultiSigTransactions() {
             </TableHead>
 
             <TableBody>
-              {loading || loadingSafeOwners || loadingSafeDetails ? (
+              {loading ? (
                 <div
                   className="d-flex align-items-center justify-content-center"
                   style={{ height: "400px" }}

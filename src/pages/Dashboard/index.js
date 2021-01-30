@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Route, Switch } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 import Dashboard from "components/Dashboard";
 import People from "components/People";
@@ -14,33 +14,11 @@ import QuickTransfer from "components/QuickTransfer";
 import InviteOwners from "components/InviteOwners";
 import Authenticated from "components/hoc/Authenticated";
 import NotFoundPage from "pages/NotFound";
-import safeReducer from "store/safe/reducer";
-import safeSaga from "store/safe/saga";
-import { getOwnersAndThreshold } from "store/safe/actions";
-import { makeSelectIsMultiOwner } from "store/safe/selectors";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
-import { useInjectReducer } from "utils/injectReducer";
-import { useInjectSaga } from "utils/injectSaga";
-
-const safeKey = "safe";
+import { makeSelectIsMultiOwner } from "store/global/selectors";
 
 const DashboardPage = ({ match }) => {
-  // Reducers
-  useInjectReducer({ key: safeKey, reducer: safeReducer });
-
-  // Sagas
-  useInjectSaga({ key: safeKey, saga: safeSaga });
-
-  const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const isMultiOwner = useSelector(makeSelectIsMultiOwner());
 
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (ownerSafeAddress) {
-      dispatch(getOwnersAndThreshold(ownerSafeAddress));
-    }
-  }, [dispatch, ownerSafeAddress]);
   return (
     <Authenticated>
       <Switch>
@@ -67,7 +45,6 @@ const DashboardPage = ({ match }) => {
           component={ViewTeammates}
         />
         <Route exact path={`${match.path}/payments`} component={Payments} />
-        {/* TODO: Depending on threshold, render <Transactions /> or <MultiSigTransactions /> */}
         <Route
           exact
           path={`${match.path}/transactions`}

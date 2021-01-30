@@ -37,8 +37,6 @@ import safeSaga from "store/safe/saga";
 import { getNonce, getOwnersAndThreshold } from "store/safe/actions";
 import {
   makeSelectNonce,
-  makeSelectThreshold,
-  makeSelectIsMultiOwner,
   makeSelectLoading as makeSelectLoadingSafeDetails,
 } from "store/safe/selectors";
 import { createMultisigTransaction } from "store/multisig/actions";
@@ -50,7 +48,11 @@ import dashboardReducer from "store/dashboard/reducer";
 import marketRatesReducer from "store/market-rates/reducer";
 import dashboardSaga from "store/dashboard/saga";
 import marketRatesSaga from "store/market-rates/saga";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOwnerSafeAddress,
+  makeSelectIsMultiOwner,
+  makeSelectThreshold,
+} from "store/global/selectors";
 import { getSafeBalances } from "store/dashboard/actions";
 import {
   makeSelectLoading,
