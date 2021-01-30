@@ -52,11 +52,9 @@ import { makeSelectBalances } from "store/dashboard/selectors";
 import dashboardSaga from "store/dashboard/saga";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
-import { getNonce, getOwnersAndThreshold } from "store/safe/actions";
+import { getNonce } from "store/safe/actions";
 import {
   makeSelectNonce,
-  makeSelectThreshold,
-  makeSelectIsMultiOwner,
   makeSelectLoading as makeSelectLoadingSafeDetails,
 } from "store/safe/selectors";
 import { createMultisigTransaction } from "store/multisig/actions";
@@ -66,7 +64,11 @@ import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { useActiveWeb3React, useLocalStorage, useMassPayout } from "hooks";
 import { numToOrd } from "utils/date-helpers";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOwnerSafeAddress,
+  makeSelectThreshold,
+  makeSelectIsMultiOwner,
+} from "store/global/selectors";
 import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 import TeamPng from "assets/images/user-team.png";
@@ -229,7 +231,6 @@ export default function People() {
     if (ownerSafeAddress) {
       dispatch(getSafeBalances(ownerSafeAddress));
       dispatch(getNonce(ownerSafeAddress));
-      dispatch(getOwnersAndThreshold(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
 

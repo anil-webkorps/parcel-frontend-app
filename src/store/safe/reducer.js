@@ -1,12 +1,5 @@
 import produce from "immer";
-import {
-  GET_OWNERS_AND_THRESHOLD,
-  GET_OWNERS_AND_THRESHOLD_SUCCESS,
-  GET_OWNERS_AND_THRESHOLD_ERROR,
-  GET_NONCE,
-  GET_NONCE_SUCCESS,
-  GET_NONCE_ERROR,
-} from "./action-types";
+import { GET_NONCE, GET_NONCE_SUCCESS, GET_NONCE_ERROR } from "./action-types";
 
 export const initialState = {
   loading: false,
@@ -21,19 +14,11 @@ export const initialState = {
 const reducer = (state = initialState, action) =>
   produce(state, (draft) => {
     switch (action.type) {
-      case GET_OWNERS_AND_THRESHOLD:
       case GET_NONCE:
         draft.loading = true;
         draft.error = false;
         break;
 
-      case GET_OWNERS_AND_THRESHOLD_SUCCESS:
-        draft.loading = false;
-        draft.threshold = action.threshold;
-        draft.owners = action.owners;
-        break;
-
-      case GET_OWNERS_AND_THRESHOLD_ERROR:
       case GET_NONCE_ERROR:
         draft.loading = false;
         draft.error = action.error;

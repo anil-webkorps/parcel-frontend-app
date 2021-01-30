@@ -9,12 +9,6 @@ const makeSelectLoading = () =>
 const makeSelectOwners = () =>
   createSelector(selectSafeDetails, (safeState) => safeState.owners);
 
-const makeSelectThreshold = () =>
-  createSelector(selectSafeDetails, (safeState) => safeState.threshold);
-
-const makeSelectIsMultiOwner = () =>
-  createSelector(selectSafeDetails, (safeState) => safeState.threshold > 1);
-
 const makeSelectNonce = () =>
   createSelector(selectSafeDetails, (safeState) => safeState.nonce);
 
@@ -24,8 +18,6 @@ const makeSelectError = () =>
 export {
   selectSafeDetails,
   makeSelectOwners,
-  makeSelectThreshold,
-  makeSelectIsMultiOwner,
   makeSelectNonce,
   makeSelectLoading,
   makeSelectError,

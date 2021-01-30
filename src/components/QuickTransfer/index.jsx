@@ -34,7 +34,7 @@ import {
 } from "store/transactions/selectors";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
-import { getNonce, getOwnersAndThreshold } from "store/safe/actions";
+import { getNonce } from "store/safe/actions";
 import {
   makeSelectNonce,
   makeSelectLoading as makeSelectLoadingSafeDetails,
@@ -155,7 +155,6 @@ export default function QuickTransfer() {
     if (ownerSafeAddress) {
       dispatch(getSafeBalances(ownerSafeAddress));
       dispatch(getNonce(ownerSafeAddress));
-      dispatch(getOwnersAndThreshold(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
 
