@@ -29,8 +29,6 @@ import {
   makeSelectConfirmed,
   makeSelectUpdating,
 } from "store/multisig/selectors";
-import invitationSaga from "store/invitation/saga";
-import invitationReducer from "store/invitation/reducer";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
 import metaTxReducer from "store/metatx/reducer";
@@ -60,7 +58,6 @@ import { Container, Detail, ConfirmSection } from "./styles";
 const { TableBody, TableHead, TableRow } = Table;
 
 const multisigKey = "multisig";
-const invitationKey = "invitation";
 const safeKey = "safe";
 const metaTxKey = "metatx";
 
@@ -89,13 +86,11 @@ export default function MultiSigTransactions() {
 
   // Reducers
   useInjectReducer({ key: multisigKey, reducer: multisigReducer });
-  useInjectReducer({ key: invitationKey, reducer: invitationReducer });
   useInjectReducer({ key: safeKey, reducer: safeReducer });
   useInjectReducer({ key: metaTxKey, reducer: metaTxReducer });
 
   // Sagas
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
-  useInjectSaga({ key: invitationKey, saga: invitationSaga });
   useInjectSaga({ key: safeKey, saga: safeSaga });
   useInjectSaga({ key: metaTxKey, saga: metaTxSaga });
 
