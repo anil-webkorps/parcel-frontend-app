@@ -1,8 +1,11 @@
 import { call, put, fork, takeLatest } from "redux-saga/effects";
+import { push } from "connected-react-router";
+
 import {
   CONFIRM_MULTISIG_TRANSACTION,
   CREATE_MULTISIG_TRANSACTION,
   GET_MULTISIG_TRANSACTIONS,
+  GET_MULTISIG_TRANSACTION_BY_ID,
   SUBMIT_MULTISIG_TRANSACTION,
 } from "./action-types";
 import {
@@ -14,6 +17,8 @@ import {
   confirmMultisigTransactionError,
   submitMultisigTransactionSuccess,
   submitMultisigTransactionError,
+  getMultisigTransactionByIdError,
+  getMultisigTransactionByIdSuccess,
 } from "./actions";
 import request from "utils/request";
 import {
@@ -21,6 +26,7 @@ import {
   getMultisigTransactionEndpoint,
   confirmMultisigTransactionEndpoint,
   submitMultisigTransactionEndpoint,
+  getMultisigTransactionByIdEndpoint,
 } from "constants/endpoints";
 
 function* getMultisigTransactions(action) {
@@ -34,6 +40,20 @@ function* getMultisigTransactions(action) {
     yield put(getMultisigTransactionsSuccess(result.transactions));
   } catch (err) {
     yield put(getMultisigTransactionsError(err));
+  }
+}
+
+function* getMultisigTransactionById(action) {
+  const requestURL = `${getMultisigTransactionByIdEndpoint}?safeAddress=${action.safeAddress}&transactionId=${action.transactionId}`;
+  const options = {
+    method: "GET",
+  };
+
+  try {
+    const result = yield call(request, requestURL, options);
+    yield put(getMultisigTransactionByIdSuccess(result.transaction));
+  } catch (err) {
+    yield put(getMultisigTransactionByIdError(err));
   }
 }
 
@@ -53,6 +73,7 @@ function* createMultisigTransaction(action) {
     yield put(
       createMultisigTransactionSuccess(result.transactionId, result.log)
     );
+    yield put(push("/dashboard/transactions"));
   } catch (err) {
     yield put(createMultisigTransactionError(err));
   }
@@ -104,6 +125,10 @@ function* watchGetMultisigTransactions() {
   yield takeLatest(GET_MULTISIG_TRANSACTIONS, getMultisigTransactions);
 }
 
+function* watchGetMultisigTransactionById() {
+  yield takeLatest(GET_MULTISIG_TRANSACTION_BY_ID, getMultisigTransactionById);
+}
+
 function* watchCreateMultisigTransaction() {
   yield takeLatest(CREATE_MULTISIG_TRANSACTION, createMultisigTransaction);
 }
@@ -118,6 +143,7 @@ function* watchSubmitMultisigTransaction() {
 
 export default function* multisig() {
   yield fork(watchGetMultisigTransactions);
+  yield fork(watchGetMultisigTransactionById);
   yield fork(watchCreateMultisigTransaction);
   yield fork(watchConfirmMultisigTransaction);
   yield fork(watchSubmitMultisigTransaction);

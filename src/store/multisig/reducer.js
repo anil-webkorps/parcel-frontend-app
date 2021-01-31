@@ -3,6 +3,9 @@ import {
   GET_MULTISIG_TRANSACTIONS,
   GET_MULTISIG_TRANSACTIONS_SUCCESS,
   GET_MULTISIG_TRANSACTIONS_ERROR,
+  GET_MULTISIG_TRANSACTION_BY_ID,
+  GET_MULTISIG_TRANSACTION_BY_ID_SUCCESS,
+  GET_MULTISIG_TRANSACTION_BY_ID_ERROR,
   CREATE_MULTISIG_TRANSACTION,
   CREATE_MULTISIG_TRANSACTION_SUCCESS,
   CREATE_MULTISIG_TRANSACTION_ERROR,
@@ -19,6 +22,7 @@ export const initialState = {
   fetching: false,
   updating: false,
   transactions: [],
+  transactionDetails: null, // tx by id
   log: "",
   error: false,
   success: false,
@@ -41,6 +45,21 @@ const reducer = (state = initialState, action) =>
         break;
 
       case GET_MULTISIG_TRANSACTIONS_ERROR:
+        draft.fetching = false;
+        draft.error = action.error;
+        break;
+
+      case GET_MULTISIG_TRANSACTION_BY_ID:
+        draft.fetching = true;
+        draft.error = false;
+        break;
+
+      case GET_MULTISIG_TRANSACTION_BY_ID_SUCCESS:
+        draft.fetching = false;
+        draft.transactionDetails = action.transactionDetails;
+        break;
+
+      case GET_MULTISIG_TRANSACTION_BY_ID_ERROR:
         draft.fetching = false;
         draft.error = action.error;
         break;

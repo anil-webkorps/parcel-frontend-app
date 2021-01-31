@@ -9,6 +9,12 @@ const makeSelectFetching = () =>
 const makeSelectMultisigTransactions = () =>
   createSelector(selectMultisig, (multisigState) => multisigState.transactions);
 
+const makeSelectMultisigTransactionDetails = () =>
+  createSelector(
+    selectMultisig,
+    (multisigState) => multisigState.transactionDetails
+  );
+
 const makeSelectSuccess = () =>
   createSelector(selectMultisig, (multisigState) => multisigState.success);
 
@@ -30,6 +36,7 @@ const makeSelectError = () =>
 export {
   selectMultisig,
   makeSelectMultisigTransactions,
+  makeSelectMultisigTransactionDetails,
   makeSelectFetching,
   makeSelectMultisigTransactionHash,
   makeSelectSuccess,

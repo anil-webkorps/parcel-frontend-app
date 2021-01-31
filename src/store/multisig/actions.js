@@ -5,6 +5,9 @@ import {
   GET_MULTISIG_TRANSACTIONS,
   GET_MULTISIG_TRANSACTIONS_SUCCESS,
   GET_MULTISIG_TRANSACTIONS_ERROR,
+  GET_MULTISIG_TRANSACTION_BY_ID,
+  GET_MULTISIG_TRANSACTION_BY_ID_SUCCESS,
+  GET_MULTISIG_TRANSACTION_BY_ID_ERROR,
   SUBMIT_MULTISIG_TRANSACTION,
   SUBMIT_MULTISIG_TRANSACTION_SUCCESS,
   SUBMIT_MULTISIG_TRANSACTION_ERROR,
@@ -31,6 +34,28 @@ export function getMultisigTransactionsSuccess(transactions) {
 export function getMultisigTransactionsError(error) {
   return {
     type: GET_MULTISIG_TRANSACTIONS_ERROR,
+    error,
+  };
+}
+
+export function getMultisigTransactionById(safeAddress, transactionId) {
+  return {
+    type: GET_MULTISIG_TRANSACTION_BY_ID,
+    safeAddress,
+    transactionId,
+  };
+}
+
+export function getMultisigTransactionByIdSuccess(transactionDetails) {
+  return {
+    type: GET_MULTISIG_TRANSACTION_BY_ID_SUCCESS,
+    transactionDetails,
+  };
+}
+
+export function getMultisigTransactionByIdError(error) {
+  return {
+    type: GET_MULTISIG_TRANSACTION_BY_ID_ERROR,
     error,
   };
 }

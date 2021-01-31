@@ -249,7 +249,6 @@ export default function QuickTransfer() {
               nonce: nonce,
             })
           );
-          history.push("/dashboard/transactions");
         }
       }
     }

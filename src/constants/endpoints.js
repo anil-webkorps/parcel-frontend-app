@@ -31,6 +31,7 @@ export const getTransactionsEndpoint = `${ROOT_BE_URL}/api/v1/transactions/get`;
 // MULTISIG
 export const createMultisigTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/multisig/create`;
 export const getMultisigTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/multisig/get`;
+export const getMultisigTransactionByIdEndpoint = `${ROOT_BE_URL}/api/v1/transactions/multisig/getById`;
 export const submitMultisigTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/multisig/submit`;
 export const confirmMultisigTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/multisig/confirm`;
 

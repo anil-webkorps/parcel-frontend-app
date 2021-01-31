@@ -10,6 +10,7 @@ import ViewTeammates from "components/People/ViewTeammates";
 import Payments from "components/Payments";
 import Transactions from "components/Transactions";
 import MultiSigTransactions from "components/Transactions/MultiSigTransactions";
+import MultiSigTransactionDetails from "components/Transactions/MultiSigTransactionDetails";
 import QuickTransfer from "components/QuickTransfer";
 import InviteOwners from "components/InviteOwners";
 import Authenticated from "components/hoc/Authenticated";
@@ -49,6 +50,11 @@ const DashboardPage = ({ match }) => {
           exact
           path={`${match.path}/transactions`}
           component={isMultiOwner ? MultiSigTransactions : Transactions}
+        />
+        <Route
+          exact
+          path={`${match.path}/transactions/:transactionId`}
+          component={isMultiOwner ? MultiSigTransactionDetails : Transactions}
         />
         <Route
           exact

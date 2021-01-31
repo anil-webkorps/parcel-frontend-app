@@ -173,75 +173,72 @@ export default function Transactions() {
                   <Loading color="primary" width="50px" height="50px" />
                 </div>
               ) : transactions && transactions.length > 0 ? (
-                transactions
-                  .slice()
-                  .reverse()
-                  .map(
-                    (
-                      {
-                        transactionId,
-                        addresses,
-                        transactionHash,
-                        safeAddress,
-                        to,
-                        tokenValue,
-                        tokenCurrency,
-                        fiatValue,
-                        fiatCurrency,
-                        transactionFees,
-                        status,
-                        createdOn,
-                        transactionMode,
-                      },
-                      idx
-                    ) => {
-                      return (
-                        <TableRow key={`${transactionId}-${idx}`}>
-                          <div>
-                            <TransactionUrl hash={transactionHash}>
-                              {minifyAddress(transactionHash)}
-                            </TransactionUrl>
-                          </div>
-                          <div>
-                            <img
-                              src={getDefaultIconIfPossible(tokenCurrency)}
-                              alt={tokenCurrency}
-                              width="16"
-                            />{" "}
-                            {tokenValue} {tokenCurrency} (US ${fiatValue})
-                          </div>
-                          <div>
-                            {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}
-                          </div>
-                          <div>
-                            <StatusText status={status} />
-                          </div>
-                          <div
-                            className="d-flex justify-content-end purple-text"
-                            onClick={() =>
-                              setSelectedTransaction({
-                                transactionId,
-                                addresses,
-                                transactionHash,
-                                safeAddress,
-                                to,
-                                tokenValue,
-                                tokenCurrency,
-                                fiatValue,
-                                fiatCurrency,
-                                transactionFees,
-                                status,
-                                createdOn,
-                                transactionMode,
-                              })
-                            }
-                          >
-                            VIEW
-                          </div>
-                        </TableRow>
-                      );
-                    }
-                  )
+                transactions.map(
+                  (
+                    {
+                      transactionId,
+                      addresses,
+                      transactionHash,
+                      safeAddress,
+                      to,
+                      tokenValue,
+                      tokenCurrency,
+                      fiatValue,
+                      fiatCurrency,
+                      transactionFees,
+                      status,
+                      createdOn,
+                      transactionMode,
+                    },
+                    idx
+                  ) => {
+                    return (
+                      <TableRow key={`${transactionId}-${idx}`}>
+                        <div>
+                          <TransactionUrl hash={transactionHash}>
+                            {minifyAddress(transactionHash)}
+                          </TransactionUrl>
+                        </div>
+                        <div>
+                          <img
+                            src={getDefaultIconIfPossible(tokenCurrency)}
+                            alt={tokenCurrency}
+                            width="16"
+                          />{" "}
+                          {tokenValue} {tokenCurrency} (US ${fiatValue})
+                        </div>
+                        <div>
+                          {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}
+                        </div>
+                        <div>
+                          <StatusText status={status} />
+                        </div>
+                        <div
+                          className="d-flex justify-content-end purple-text"
+                          onClick={() =>
+                            setSelectedTransaction({
+                              transactionId,
+                              addresses,
+                              transactionHash,
+                              safeAddress,
+                              to,
+                              tokenValue,
+                              tokenCurrency,
+                              fiatValue,
+                              fiatCurrency,
+                              transactionFees,
+                              status,
+                              createdOn,
+                              transactionMode,
+                            })
+                          }
+                        >
+                          VIEW
+                        </div>
+                      </TableRow>
+                    );
+                  }
+                )
               ) : (
                 <div
                   className="d-flex align-items-center justify-content-center"
