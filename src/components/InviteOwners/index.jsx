@@ -91,11 +91,9 @@ export default function InviteOwners() {
   }, [dispatch, successfullyInvited, ownerSafeAddress]);
 
   useEffect(() => {
-    if (
-      safeOwners &&
-      safeOwners.length > 1 &&
-      !safeOwners.slice(1).every((owner) => owner.invitationDetails)
-    ) {
+    if (safeOwners && safeOwners.some((owner) => owner.invitationDetails)) {
+      setDisplayInviteSteps(false);
+    } else {
       setDisplayInviteSteps(true);
     }
   }, [safeOwners]);
@@ -302,50 +300,66 @@ export default function InviteOwners() {
           <Heading>
             To allow other owners to use Parcel, follow these simple steps
           </Heading>
-          <Row className="align-items-center mt-4">
-            <Col lg="2" className="pr-0">
-              <Img src={Step1Png} alt="step1" width="64" />
-            </Col>
-            <Col lg="10" className="pl-0">
-              <StepDetails>
-                <div className="step-title">STEP 1</div>
-                <div className="step-subtitle">Invite the Owners to Parcel</div>
-              </StepDetails>
-            </Col>
-          </Row>
-          <Row className="align-items-center mt-4">
-            <Col lg="2" className="pr-0">
-              <Img src={Step2Png} alt="step2" width="64" />
-            </Col>
-            <Col lg="10" className="pl-0">
-              <StepDetails>
-                <div className="step-title">STEP 2</div>
-                <div className="step-subtitle">Owner Accepts the Invite</div>
-              </StepDetails>
-            </Col>
-          </Row>
-          <Row className="align-items-center mt-4">
-            <Col lg="2" className="pr-0">
-              <Img src={Step3Png} alt="step3" width="64" />
-            </Col>
-            <Col lg="10" className="pl-0">
-              <StepDetails>
-                <div className="step-title">STEP 3</div>
-                <div className="step-subtitle">
-                  You Give Final Approval To The Owner
-                </div>
-              </StepDetails>
-            </Col>
-          </Row>
+          {loading && (
+            <div
+              className="d-flex align-items-center justify-content-center"
+              style={{ height: "250px" }}
+            >
+              <Loading color="primary" width="50px" height="50px" />
+            </div>
+          )}
+          {!loading && (
+            <React.Fragment>
+              <Row className="align-items-center mt-4">
+                <Col lg="2" className="pr-0">
+                  <Img src={Step1Png} alt="step1" width="64" />
+                </Col>
+                <Col lg="10" className="pl-0">
+                  <StepDetails>
+                    <div className="step-title">STEP 1</div>
+                    <div className="step-subtitle">
+                      Invite the Owners to Parcel
+                    </div>
+                  </StepDetails>
+                </Col>
+              </Row>
+              <Row className="align-items-center mt-4">
+                <Col lg="2" className="pr-0">
+                  <Img src={Step2Png} alt="step2" width="64" />
+                </Col>
+                <Col lg="10" className="pl-0">
+                  <StepDetails>
+                    <div className="step-title">STEP 2</div>
+                    <div className="step-subtitle">
+                      Owner Accepts the Invite
+                    </div>
+                  </StepDetails>
+                </Col>
+              </Row>
+              <Row className="align-items-center mt-4">
+                <Col lg="2" className="pr-0">
+                  <Img src={Step3Png} alt="step3" width="64" />
+                </Col>
+                <Col lg="10" className="pl-0">
+                  <StepDetails>
+                    <div className="step-title">STEP 3</div>
+                    <div className="step-subtitle">
+                      You Give Final Approval To The Owner
+                    </div>
+                  </StepDetails>
+                </Col>
+              </Row>
 
-          <Button
-            large
-            type="button"
-            className="mt-5"
-            onClick={toggleShowOwners}
-          >
-            View All Owners
-          </Button>
+              <Button
+                large
+                type="button"
+                className="mt-5"
+                onClick={toggleShowOwners}
+              >
+                View All Owners
+              </Button>
+            </React.Fragment>
+          )}
         </Card>
       </form>
     );
