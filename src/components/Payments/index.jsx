@@ -353,7 +353,6 @@ export default function People() {
               transactionMode: 0, // mass payout
             })
           );
-          history.push("/dashboard/transactions");
         }
       }
     }

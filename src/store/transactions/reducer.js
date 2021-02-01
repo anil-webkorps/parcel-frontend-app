@@ -6,11 +6,15 @@ import {
   VIEW_TRANSACTIONS,
   VIEW_TRANSACTIONS_ERROR,
   VIEW_TRANSACTIONS_SUCCESS,
+  GET_TRANSACTION_BY_ID,
+  GET_TRANSACTION_BY_ID_SUCCESS,
+  GET_TRANSACTION_BY_ID_ERROR,
   CLEAR_TRANSACTION_HASH,
 } from "./action-types";
 
 export const initialState = {
   transactions: undefined,
+  transactionDetails: null,
   metaTransactionHash: "",
   log: "",
   errorInFetch: false,
@@ -50,6 +54,22 @@ const reducer = (state = initialState, action) =>
         break;
 
       case VIEW_TRANSACTIONS_ERROR:
+        draft.errorInFetch = action.errorInFetch;
+        draft.fetching = false;
+        break;
+
+      case GET_TRANSACTION_BY_ID:
+        draft.fetching = true;
+        draft.error = false;
+        break;
+
+      case GET_TRANSACTION_BY_ID_SUCCESS:
+        draft.fetching = false;
+        draft.transactionDetails = action.transactionDetails;
+        draft.log = action.log;
+        break;
+
+      case GET_TRANSACTION_BY_ID_ERROR:
         draft.errorInFetch = action.errorInFetch;
         draft.fetching = false;
         break;

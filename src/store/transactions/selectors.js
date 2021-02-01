@@ -25,6 +25,12 @@ const makeSelectFetching = () =>
     (transactionsState) => transactionsState.fetching
   );
 
+const makeSelectTransactionDetails = () =>
+  createSelector(
+    selectTransactions,
+    (transactionsState) => transactionsState.transactionDetails
+  );
+
 const makeSelectMetaTransactionHash = () =>
   createSelector(
     selectTransactions,
@@ -44,4 +50,5 @@ export {
   makeSelectFetching,
   makeSelectMetaTransactionHash,
   makeSelectError,
+  makeSelectTransactionDetails,
 };

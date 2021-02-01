@@ -27,6 +27,7 @@ export const getDepartmentByIdEndpoint = `${ROOT_BE_URL}/api/v1/departments/getB
 // TRANSACTIONS
 export const createTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/create`;
 export const getTransactionsEndpoint = `${ROOT_BE_URL}/api/v1/transactions/get`;
+export const getTransactionByIdEndpoint = `${ROOT_BE_URL}/api/v1/transactions/getById`;
 
 // MULTISIG
 export const createMultisigTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/multisig/create`;

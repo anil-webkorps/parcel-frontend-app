@@ -5,6 +5,9 @@ import {
   VIEW_TRANSACTIONS,
   VIEW_TRANSACTIONS_SUCCESS,
   VIEW_TRANSACTIONS_ERROR,
+  GET_TRANSACTION_BY_ID,
+  GET_TRANSACTION_BY_ID_SUCCESS,
+  GET_TRANSACTION_BY_ID_ERROR,
   CLEAR_TRANSACTION_HASH,
 } from "./action-types";
 
@@ -72,6 +75,29 @@ export function viewTransactionsSuccess(transactions, log) {
 export function viewTransactionsError(error) {
   return {
     type: VIEW_TRANSACTIONS_ERROR,
+    error,
+  };
+}
+
+export function getTransactionById(safeAddress, transactionId) {
+  return {
+    type: GET_TRANSACTION_BY_ID,
+    safeAddress,
+    transactionId,
+  };
+}
+
+export function getTransactionByIdSuccess(transactionDetails, log) {
+  return {
+    type: GET_TRANSACTION_BY_ID_SUCCESS,
+    transactionDetails,
+    log,
+  };
+}
+
+export function getTransactionByIdError(error) {
+  return {
+    type: GET_TRANSACTION_BY_ID_ERROR,
     error,
   };
 }
