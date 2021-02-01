@@ -487,7 +487,7 @@ export default function MultiSigTransactions() {
     if (!transactionDetails) return null;
 
     const {
-      transactionHash,
+      // transactionHash,
       // executor,
       isExecuted,
       // isSuccessful,
