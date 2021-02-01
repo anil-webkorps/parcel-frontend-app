@@ -67,6 +67,51 @@ export default styled.div`
       color: #373737;
     }
 
+    .payment-status-threshold {
+      font-size: 13px;
+      font-weight: normal;
+      font-stretch: normal;
+      font-style: normal;
+      line-height: 1.2;
+      letter-spacing: normal;
+      text-align: left;
+      color: #373737;
+
+      span {
+        font-weight: bold;
+      }
+    }
+
+    .status-card {
+      .success {
+        background-color: #3bd800;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-size: 14px;
+        text-transform: uppercase;
+        color: #fff;
+      }
+
+      .rejected,
+      .failed {
+        background-color: #ff0a0a;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-size: 14px;
+        text-transform: uppercase;
+        color: #fff;
+      }
+
+      .pending {
+        background-color: #fdbe42;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-size: 14px;
+        text-transform: uppercase;
+        color: #fff;
+      }
+    }
+
     .confirm-steps-container {
       min-height: 100px;
       width: fit-content;

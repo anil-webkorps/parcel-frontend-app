@@ -38,7 +38,6 @@ export function* loginUser(action) {
         yield put(loginUserError(`Invalid JWT token.`));
         return;
       }
-      console.log({ decoded });
 
       yield put(setOwnersAndThreshold(decoded.owners, decoded.threshold));
       yield put(loginUserSuccess(result.transactionHash, result.log));

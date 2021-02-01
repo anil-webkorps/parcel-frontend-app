@@ -95,8 +95,9 @@ export default function PaymentsCard() {
   useEffect(() => {
     if (transactions && transactions.length > 0) {
       setState(STATES.TRANSACTION_EXECUTED);
-      const latestTx = transactions[transactions.length - 1];
+      const latestTx = transactions[0];
       const transactionData = {
+        transactionId: latestTx.transactionId,
         amountPaid: latestTx.fiatValue,
         currency: latestTx.fiatCurrency,
         tokenCurrency: latestTx.tokenCurrency,
@@ -143,7 +144,10 @@ export default function PaymentsCard() {
       case STATES.TEAMMATES_ADDED:
         return `/dashboard/people`;
       case STATES.TRANSACTION_EXECUTED:
-        return `/dashboard/transactions`;
+        return (
+          transactionData &&
+          `/dashboard/transactions/${transactionData.transactionId}`
+        );
       default:
         return null;
     }

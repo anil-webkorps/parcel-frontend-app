@@ -188,6 +188,21 @@ export default function MultiSigTransactions() {
     );
   };
 
+  const renderFinalStatus = (confirmedCount, rejectedCount, isExecuted) => {
+    if (
+      (confirmedCount >= threshold || rejectedCount >= threshold) &&
+      !isExecuted
+    ) {
+      return <div className="pending">Pending</div>;
+    }
+    if (isExecuted && confirmedCount >= threshold)
+      return <div className="success">Success</div>;
+    else if (isExecuted && rejectedCount >= threshold)
+      return <div className="rejected">Rejected</div>;
+
+    return <div className="failed">Failed</div>;
+  };
+
   const getStatusText = (approved, rejected) => {
     if (approved) return "Approved";
     else if (rejected) return "Rejected";
@@ -195,10 +210,12 @@ export default function MultiSigTransactions() {
   };
 
   const getStatusColor = (owner, approved, rejected) => {
+    // green
     if (approved) return "#3bd800";
+    // red
     else if (rejected) return "#ff0a0a";
     else if (account && owner === account) return "#7367f0";
-    // pending
+    // pending yellow
     return "#fdbe42";
   };
 
@@ -474,8 +491,8 @@ export default function MultiSigTransactions() {
       // executor,
       isExecuted,
       // isSuccessful,
-      // rejectedCount,
-      // confirmedCount,
+      rejectedCount,
+      confirmedCount,
       confirmations,
       txDetails,
     } = transactionDetails;
@@ -483,6 +500,7 @@ export default function MultiSigTransactions() {
     const {
       transactionId,
       // addresses,
+      transactionHash: txDetailsHash,
       safeAddress,
       to,
       // tokenValue,
@@ -539,6 +557,19 @@ export default function MultiSigTransactions() {
           <Card className="payment-status-card">
             <div className="d-flex justify-content-between align-items-center">
               <div className="payment-status-title">Payment Status</div>
+              {confirmedCount >= threshold || rejectedCount >= threshold ? (
+                <div className="status-card ml-3">
+                  {renderFinalStatus(confirmedCount, rejectedCount, isExecuted)}
+                </div>
+              ) : (
+                <p className="payment-status-threshold">
+                  Transaction requires the confirmation of{" "}
+                  <span>
+                    {threshold} out of {safeOwners.length}
+                  </span>{" "}
+                  owners
+                </p>
+              )}
             </div>
             <div className="confirm-steps-container">
               <Stepper count={safeOwners.length}>
@@ -647,14 +678,14 @@ export default function MultiSigTransactions() {
               )}
             </TableBody>
           </div>
-          {isExecuted && (
+          {txDetailsHash && (
             <Card className="multisig-details-card">
               <div className="d-flex justify-content-between align-items-center">
                 <div className="details-title">Details</div>
                 <div className="d-flex justify-content-between align-items-center">
                   <Detail style={{ borderRadius: "24px", width: "200px" }}>
                     <div className="title">Transaction Hash</div>
-                    <div className="desc">{minifyAddress(transactionHash)}</div>
+                    <div className="desc">{minifyAddress(txDetailsHash)}</div>
                   </Detail>
                   <Detail
                     style={{ borderRadius: "50%" }}
@@ -663,7 +694,7 @@ export default function MultiSigTransactions() {
                     <CopyButton
                       id="address"
                       tooltip="transaction hash"
-                      value={transactionHash}
+                      value={txDetailsHash}
                       size="lg"
                       color="#7367f0"
                     />
@@ -672,7 +703,7 @@ export default function MultiSigTransactions() {
                     style={{ borderRadius: "50%" }}
                     className="d-flex justify-content-center align-items-center ml-3"
                   >
-                    <TransactionUrl hash={transactionHash}>
+                    <TransactionUrl hash={txDetailsHash}>
                       <FontAwesomeIcon
                         icon={faLink}
                         size="lg"
