@@ -433,13 +433,51 @@ export default function MultiSigTransactions() {
   };
 
   const renderConfirmSection = () => {
-    const { isExecuted, confirmations } = transactionDetails;
+    const { isExecuted, confirmations, txDetails } = transactionDetails;
+    const { transactionHash } = txDetails;
 
     let shouldShowConfirmSection = !isExecuted ? true : false;
 
+    // if every owner has voted, but the tx is not executed, that means there is a conflict
+    // Ex: 2:2 with 1 approve and 1 reject, 3:3 with 2 approve and 1 reject
+    // in this case, show Reject button to all the owners who previously approved
+    let shouldShowOnlyReject = false;
+    const confirmedOwnersMap = {};
+
     for (let i = 0; i < confirmations.length; i++) {
-      if (confirmations[i].owner === account) shouldShowConfirmSection = false;
+      if (!confirmedOwnersMap[confirmations[i].owner])
+        confirmedOwnersMap[confirmations[i].owner] = true;
     }
+
+    if (
+      Object.keys(confirmedOwnersMap).length === safeOwners.length &&
+      !transactionHash
+    ) {
+      shouldShowOnlyReject = confirmations.find(
+        ({ owner, approved }) => owner === account && approved
+      );
+      return (
+        shouldShowOnlyReject && (
+          <ConfirmSection>
+            <div className="buttons">
+              <div className="reject-button">
+                <Button
+                  type="button"
+                  large
+                  onClick={rejectTransaction}
+                  disabled={loadingTx || updating}
+                  loading={rejecting}
+                >
+                  Reject
+                </Button>
+              </div>
+            </div>
+          </ConfirmSection>
+        )
+      );
+    }
+
+    if (confirmedOwnersMap[account] === true) shouldShowConfirmSection = false;
 
     return (
       shouldShowConfirmSection && (

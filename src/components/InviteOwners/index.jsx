@@ -110,8 +110,8 @@ export default function InviteOwners() {
         createdBy: account,
         toAddress: ownerToBeInvited,
         fromAddress: account,
-        toEmail: values.email,
-        fromEmail: "rohith.test@gmail.com",
+        toEmail: values.email || "",
+        fromEmail: "rohith.test@gmail.com", // TODO: change this before launch
       })
     );
   };
@@ -212,7 +212,7 @@ export default function InviteOwners() {
               value: /\S+@\S+\.\S+/,
               message: "Invalid email address",
             }}
-            placeholder="satoshi@nakamoto.com"
+            placeholder="Email ID (Optional)"
           />
         </Col>
         <Col lg="4">
