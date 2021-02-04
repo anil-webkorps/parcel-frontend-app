@@ -1,58 +1,43 @@
-import React, { useState, useContext, useEffect } from "react";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSelector, useDispatch } from "react-redux";
-// import { Link } from "react-router-dom";
-// import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { BigNumber } from "@ethersproject/bignumber";
 
 import { Assets } from "./styles";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import dashboardReducer from "store/dashboard/reducer";
-import marketRatesReducer from "store/market-rates/reducer";
-import dashboardSaga from "store/dashboard/saga";
-import marketRatesSaga from "store/market-rates/saga";
+import tokensReducer from "store/tokens/reducer";
+import tokensSaga from "store/tokens/saga";
+import { getTokens } from "store/tokens/actions";
+import {
+  makeSelectLoading as makeSelectLoadingTokens,
+  makeselectTokens,
+} from "store/tokens/selectors";
 import { Card } from "components/common/Card";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
-import { SideNavContext } from "context/SideNavContext";
-import { getSafeBalances } from "store/dashboard/actions";
-import {
-  makeSelectLoading,
-  makeSelectBalances,
-  // makeSelectError,
-} from "store/dashboard/selectors";
-import {
-  tokens,
-  defaultTokenDetails,
-  getDefaultIconIfPossible,
-} from "constants/index";
-import { makeSelectPrices } from "store/market-rates/selectors";
+import { defaultTokenDetails, getDefaultIconIfPossible } from "constants/index";
 import Loading from "components/common/Loading";
-import { getMarketRates } from "store/market-rates/actions";
 
-const dashboardKey = "dashboard";
-const marketRatesKey = "marketRates";
+const tokensKey = "tokens";
 
 export default function AccountCard() {
-  const [toggled] = useContext(SideNavContext);
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
   // Reducers
-  useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
-  useInjectReducer({ key: marketRatesKey, reducer: marketRatesReducer });
+  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   // Sagas
-  useInjectSaga({ key: dashboardKey, saga: dashboardSaga });
-  useInjectSaga({ key: marketRatesKey, saga: marketRatesSaga });
+  useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
 
   // Selectors
-  const loading = useSelector(makeSelectLoading());
-  const balances = useSelector(makeSelectBalances());
-  const prices = useSelector(makeSelectPrices());
+  const tokenList = useSelector(makeselectTokens());
+  const loading = useSelector(makeSelectLoadingTokens());
   // const error = useSelector(makeSelectError());
 
   const [totalBalance, setTotalBalance] = useState("0.00");
@@ -62,61 +47,44 @@ export default function AccountCard() {
 
   useEffect(() => {
     if (ownerSafeAddress) {
-      dispatch(getSafeBalances(ownerSafeAddress));
+      dispatch(getTokens(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
-  useEffect(() => {
-    dispatch(getMarketRates());
-  }, [dispatch]);
 
   useEffect(() => {
-    if (balances && balances.length > 0 && prices) {
-      const seenTokens = {};
-      const allTokenDetails = balances
-        .map((bal, idx) => {
-          // erc20
-          if (bal.token && bal.tokenAddress) {
-            const balance = BigNumber.from(bal.balance)
-              .div(BigNumber.from(String(10 ** bal.token.decimals)))
-              .toString();
-            // mark as seen
-            seenTokens[bal.token.symbol] = true;
-            const tokenIcon = getDefaultIconIfPossible(bal.token.symbol);
-
+    if (tokenList && tokenList.length > 0) {
+      const allTokenDetails = tokenList
+        .map(({ tokenDetails, balanceDetails }, idx) => {
+          if (!tokenDetails) return null;
+          if (!balanceDetails) {
+            const tokenIcon = getDefaultIconIfPossible(
+              tokenDetails.tokenInfo.symbol
+            );
             return {
               id: idx,
-              name: bal.token && bal.token.symbol,
-              icon: tokenIcon ? tokenIcon : bal.token.logoUri,
-              balance,
-              usd: bal.token
-                ? balance * prices[bal.token.symbol]
-                : balance * prices["ETH"],
+              name: tokenDetails.tokenInfo.symbol,
+              icon: tokenIcon || tokenDetails.tokenInfo.logoUri || ETHIcon,
+              balance: 0,
+              usd: 0,
             };
           }
-          // eth
-          else if (bal.balance) {
-            seenTokens[tokens.ETH] = true;
-            return {
-              id: idx,
-              name: "ETH",
-              icon: ETHIcon,
-              balance: bal.balance / 10 ** 18,
-              usd: bal.balanceUsd,
-            };
-          } else return "";
+          // erc20
+          const balance = BigNumber.from(balanceDetails.balance)
+            .div(BigNumber.from(String(10 ** tokenDetails.tokenInfo.decimals)))
+            .toString();
+
+          return {
+            id: idx,
+            name: tokenDetails.tokenInfo.symbol,
+            icon: tokenDetails.tokenInfo.logoUri || ETHIcon,
+            balance,
+            usd: balance * balanceDetails.usdConversion,
+          };
         })
         .filter(Boolean);
-
-      if (allTokenDetails.length < 3) {
-        const zeroBalanceTokensToShow = defaultTokenDetails.filter(
-          (token) => !seenTokens[token.name]
-        );
-        setTokenDetails([...allTokenDetails, ...zeroBalanceTokensToShow]);
-      } else {
-        setTokenDetails(allTokenDetails.slice(0, 3));
-      }
+      setTokenDetails(allTokenDetails.slice(0, 3));
     }
-  }, [balances, prices]);
+  }, [tokenList]);
 
   useEffect(() => {
     const total = tokenDetails.reduce(
@@ -131,7 +99,7 @@ export default function AccountCard() {
       <Card
         className="p-4"
         style={{
-          width: toggled ? "37em" : "45em",
+          width: "45em",
         }}
       >
         <div className="d-flex justify-content-between align-items-center">
@@ -141,11 +109,11 @@ export default function AccountCard() {
               Find overview of your wallets and manage payments
             </div>
           </div>
-          {/* <Link to="/dashboard">
+          <Link to="/dashboard">
             <div className="circle">
               <FontAwesomeIcon icon={faArrowRight} color="#fff" />
             </div>
-          </Link> */}
+          </Link>
         </div>
 
         {loading ? (
@@ -162,10 +130,10 @@ export default function AccountCard() {
                 <div className="overview-text">Total Balance</div>
                 <div className="overview-amount">${totalBalance}</div>
               </div>
-              <div className="overview-card">
+              {/* <div className="overview-card">
                 <div className="overview-text">Interest Earned</div>
                 <div className="overview-amount">${interestEarned}</div>
-              </div>
+              </div> */}
             </div>
             {tokenDetails.map(({ id, name, icon, usd, balance }) => (
               <Assets key={id}>

@@ -48,6 +48,10 @@ export const createInvitationsEndpoint = `${ROOT_BE_URL}/api/v1/invitation/creat
 // TOKEN PRICES
 export const getTokenPricesEndpoint = `${ROOT_BE_URL}/api/v1/tokenPrices/usd`;
 
+// tokens
+export const getTokensEndpoint = `${ROOT_BE_URL}/api/v1/tokens/get`;
+export const addCustomTokenEndpoint = `${ROOT_BE_URL}/api/v1/tokens/add`;
+
 // GNOSIS
 export const gnosisSafeTransactionEndpoint =
   process.env.REACT_APP_NETWORK_NAME === networkNames.MAINNET

@@ -59,11 +59,11 @@ export default styled.div`
 
   .overview-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     grid-gap: 20px;
     margin-top: 20px;
     .overview-card {
-      max-width: 353px;
+      // max-width: 353px;
       width: 100%;
       height: 120px;
       padding: 25px 15px;
