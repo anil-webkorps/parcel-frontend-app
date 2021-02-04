@@ -144,8 +144,6 @@ const AcceptInvite = () => {
       <InnerCard height="257px">
         <h2 className="text-center">Welcome to Parcel</h2>
         <div className="mt-2 mb-5 text-center">
-          Your one stop for crypto payroll management.
-          <br />
           Please connect your Ethereum wallet to proceed.
         </div>
         {loadingAccount && (
@@ -156,9 +154,9 @@ const AcceptInvite = () => {
 
         {!loadingAccount &&
           (!active ? (
-            <ConnectButton large className="mx-auto d-block" />
+            <ConnectButton large className="mx-auto d-block mt-3" />
           ) : (
-            <div className="row">
+            <div className="row mt-3">
               <div className="col-12">
                 <Button
                   type="button"

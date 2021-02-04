@@ -478,9 +478,7 @@ const Register = () => {
         <Image minHeight="323px" />
         <InnerCard height="257px">
           <h2 className="text-center">Welcome to Parcel</h2>
-          <div className="mb-4 text-center">
-            Your one stop for crypto payroll management.
-            <br />
+          <div className="pb-5 mt-2 text-center">
             Please connect your Ethereum wallet to proceed.
           </div>
           {loadingAccount && (
@@ -489,7 +487,7 @@ const Register = () => {
             </div>
           )}
           {!loadingAccount && (
-            <ConnectButton large className="mx-auto d-block" />
+            <ConnectButton large className="mx-auto d-block mt-3" />
           )}
         </InnerCard>
       </div>
