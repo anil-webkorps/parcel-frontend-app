@@ -48,6 +48,7 @@ import gasPriceReducer from "store/gas/reducer";
 import { makeSelectAverageGasPrice } from "store/gas/selectors";
 import { getGasPrice } from "store/gas/actions";
 import NoReferralModal from "./NoReferralModal";
+import ParcelLogo from "assets/images/parcel-logo-purple.png";
 
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
 
@@ -97,8 +98,8 @@ const getStepsCountByFlow = (flow) => {
 const COMPANY_REGISTER_STEPS = {
   [STEPS.ZERO]: "Connect",
   [STEPS.ONE]: "About you",
-  [STEPS.TWO]: "Owner Address/Name",
-  [STEPS.THREE]: "Owner Details",
+  [STEPS.TWO]: "Owner Details",
+  [STEPS.THREE]: "Oqnwe Name/Address",
   [STEPS.FOUR]: "Payment Threshold",
   [STEPS.FIVE]: "Privacy",
 };
@@ -106,7 +107,7 @@ const COMPANY_REGISTER_STEPS = {
 const INDIVIDUAL_REGISTER_STEPS = {
   [STEPS.ZERO]: "Connect",
   [STEPS.ONE]: "About you",
-  [STEPS.TWO]: "Owner Address/Name",
+  [STEPS.TWO]: "Owner Details",
   [STEPS.THREE]: "Privacy",
 };
 
@@ -477,9 +478,13 @@ const Register = () => {
       <div>
         <Image minHeight="323px" />
         <InnerCard height="257px">
-          <h2 className="text-center">Welcome to Parcel</h2>
-          <div className="pb-5 mt-2 text-center">
-            Please connect your Ethereum wallet to proceed.
+          <h2 className="text-center mb-4">
+            <img src={ParcelLogo} alt="parcel" width="240" />
+          </h2>
+          <div className="mt-2 mb-4 text-center">
+            Your one stop for crypto treasury management.
+            <br />
+            {!active && `Please connect your Ethereum wallet to proceed.`}
           </div>
           {loadingAccount && (
             <div className="d-flex align-items-center justify-content-center">
@@ -509,7 +514,7 @@ const Register = () => {
           <div>
             <h3 className="title">Sign Up</h3>
             <p className="next">
-              {steps[step + 1] ? `NEXT: ${steps[step + 1]}` : `Finish`}
+              {steps[step + 1] ? `Next: ${steps[step + 1]}` : `Finish`}
             </p>
           </div>
           {step > STEPS.ONE && (
@@ -537,7 +542,9 @@ const Register = () => {
           style={{ minWidth: "130px" }}
         />
         <h3 className="title">What is your Company Name</h3>
-        <p className="subtitle">You’ll be known by this name on Parcel.</p>
+        <p className="subtitle">
+          You’ll be registered with this name on Parcel.
+        </p>
         <Input
           name="name"
           register={register}
@@ -563,7 +570,9 @@ const Register = () => {
           style={{ minWidth: "130px" }}
         />
         <h3 className="title">What is your Name</h3>
-        <p className="subtitle">You’ll be known by this name on Parcel.</p>
+        <p className="subtitle">
+          You’ll be registered with this name on Parcel.
+        </p>
         <Input
           name="name"
           register={register}
@@ -595,7 +604,9 @@ const Register = () => {
           style={{ minWidth: "130px" }}
         />
         <h3 className="title">What is your Company Name</h3>
-        <p className="subtitle">You’ll be known by this name on Parcel.</p>
+        <p className="subtitle">
+          You’ll be registered with this name on Parcel.
+        </p>
         <Input
           name="name"
           register={register}
@@ -803,8 +814,7 @@ const Register = () => {
           width="130px"
           style={{ minWidth: "130px" }}
         />
-        <h3 className="title">What best defines you?</h3>
-        <p className="subtitle">Tell us about you</p>
+        <h3 className="title mb-4">What best defines you?</h3>
         <div
           className="row mr-4 align-items-center justify-content-between radio-toolbar"
           style={{ padding: "10px 16px 0" }}
@@ -817,7 +827,7 @@ const Register = () => {
             value={FLOWS.INDIVIDUAL}
             defaultChecked
             label={"I'm an Individual"}
-            labelStyle={{ minWidth: "260px" }}
+            labelStyle={{ minWidth: "265px" }}
           />
           <Input
             name={`flow`}
@@ -826,12 +836,12 @@ const Register = () => {
             id={`flow-company`}
             value={FLOWS.COMPANY}
             label={"I have a Company"}
-            labelStyle={{ minWidth: "260px" }}
+            labelStyle={{ minWidth: "265px" }}
           />
         </div>
 
         <ErrorMessage name="flow" errors={errors} />
-        <Button large type="submit" className="mt-3">
+        <Button large type="submit" className="mt-4">
           Proceed
         </Button>
       </StepDetails>

@@ -530,9 +530,9 @@ export default function People() {
               checked={isCheckedAll}
               onChange={handleCheckAll}
             />
-            <div>Employee Name</div>
+            <div>Teammate Name</div>
           </div>
-          <div>Department</div>
+          <div>Team</div>
           {/* <div>Pay Token</div> */}
           <div>Pay Amount</div>
           <div>Address</div>
@@ -611,7 +611,7 @@ export default function People() {
           className="d-flex align-items-center justify-content-center"
           style={{ height: "400px" }}
         >
-          No Departments Found!
+          No Teams Found!
         </div>
       );
     }
@@ -640,7 +640,7 @@ export default function People() {
 
                 <div className="line" />
                 <div className="lower">
-                  <div className="mb-3">Employees : {employees}</div>
+                  <div className="mb-3">Teammates : {employees}</div>
                   <div>Paydate : {numToOrd(payCycleDate)} of every month</div>
                 </div>
               </Card>
@@ -716,7 +716,7 @@ export default function People() {
               <div>
                 <div className="title">Payments</div>
                 <div className="subtitle">
-                  You can instantly pay or manage team payrolls
+                  One click mass payouts to teams and people
                 </div>
               </div>
               {!selectedTokenDetails && (
@@ -778,7 +778,7 @@ export default function People() {
                     }`}
                     onClick={() => toggle(TABS.DEPARTMENT)}
                   >
-                    Department
+                    Teams
                   </NavLink>
                 </NavItem>
               </Nav>

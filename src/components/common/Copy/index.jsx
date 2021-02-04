@@ -30,7 +30,7 @@ export default function CopyButton({
   }, [value]);
 
   return (
-    <div>
+    <div className="position-relative">
       <FontAwesomeIcon
         id={id}
         onClick={onClickCopy}

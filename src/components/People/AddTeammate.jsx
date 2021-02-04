@@ -85,7 +85,7 @@ const FLOWS = {
 
 const ADD_SINGLE_TEAMMATE_STEPS = {
   [STEPS.ZERO]: "Add Teammate",
-  [STEPS.ONE]: "Choose Department",
+  [STEPS.ONE]: "Choose Team",
   [STEPS.TWO]: "Payroll Details",
 };
 
@@ -426,13 +426,13 @@ export default function AddTeammate() {
         </Col>
       </Row>
 
-      <Heading>DEPARTMENT</Heading>
+      <Heading>TEAM</Heading>
       {!chosenDepartment ? (
         <ChooseDepartment type="submit">
           <div>
-            <div className="choose-title">Choose Department</div>
+            <div className="choose-title">Choose Team</div>
             <div className="choose-subtitle">
-              Employee will be paid as per department date.
+              Teammates will be paid as per team paycycle date.
             </div>
           </div>
           <div className="p-0">
@@ -466,7 +466,7 @@ export default function AddTeammate() {
         className="mt-5"
         disabled={!formState.isValid}
       >
-        Add Employee
+        Add Teammate
       </Button>
     </Card>
   );
@@ -474,8 +474,8 @@ export default function AddTeammate() {
   const renderChooseDepartment = () => {
     return (
       <Card className="choose-department">
-        <Title>Choose Department</Title>
-        <Heading>You can choose from existing department or add new.</Heading>
+        <Title>Choose Team</Title>
+        <Heading>You can choose an existing team or add a new one.</Heading>
         <Departments>
           {allDepartments &&
             allDepartments.map((department) => (
@@ -510,7 +510,7 @@ export default function AddTeammate() {
                 className="mr-2"
               />
             </span>
-            Add New Department
+            Add New Team
           </Button>
         </Link>
       </Card>
@@ -521,8 +521,8 @@ export default function AddTeammate() {
     return (
       chosenDepartment && (
         <Card className="paydate">
-          <Title>Department Paydate</Title>
-          <Heading>The user will be paid as per department pay date.</Heading>
+          <Title>Team Paydate</Title>
+          <Heading>The user will be paid as per team pay date.</Heading>
 
           <PayrollCard>
             <div className="dept-name">{chosenDepartment.name}</div>
@@ -530,7 +530,7 @@ export default function AddTeammate() {
               PAYROLL DATE : {numToOrd(chosenDepartment.payCycleDate)} of Every
               Month
             </div>
-            <div className="change-date mt-4">Change Payroll date </div>
+            {/* <div className="change-date mt-4">Change Payroll date </div> */}
           </PayrollCard>
 
           <Button
@@ -584,7 +584,7 @@ export default function AddTeammate() {
           <div>
             <div className="choose-title">Upload via CSV</div>
             <div className="choose-subtitle">
-              Add multiple employees quickly
+              Add multiple teammates quickly
             </div>
           </div>
           <div className="p-0">
@@ -599,7 +599,7 @@ export default function AddTeammate() {
         <div className="line"></div>
         <div className="lower">
           <div className="choose-subtitle">
-            We recommend you upload the employee data as per our format.
+            We recommend this format to upload team data.
           </div>
           <div className="text-left mt-4">
             <div className="sample-csv">👉 Download Format CSV</div>
@@ -610,8 +610,8 @@ export default function AddTeammate() {
       <ChooseAddOption onClick={() => handleSelectFlow(FLOWS.SINGLE)}>
         <div className="d-flex justify-content-between upper">
           <div>
-            <div className="choose-title">Add one employee</div>
-            <div className="choose-subtitle">Quickly add one employee</div>
+            <div className="choose-title">Add one teammate</div>
+            {/* <div className="choose-subtitle">Quickly add one employee</div> */}
           </div>
           <div className="p-0">
             <div
@@ -626,7 +626,7 @@ export default function AddTeammate() {
         <div className="lower mt-3">
           <div className="choose-subtitle">Steps include:</div>
           <div className="choose-subtitle">
-            Teammate salary details, Department details, Wallet address
+            Teammate salary details, Team details, Wallet address
           </div>
         </div>
       </ChooseAddOption>
@@ -663,7 +663,7 @@ export default function AddTeammate() {
                 </div>
               </div>
               <div className="mb-3">
-                <div className="section-title mb-1">Department</div>
+                <div className="section-title mb-1">Team</div>
                 <div className="section-desc">{chosenDepartment.name}</div>
               </div>
               <div className="mb-3">
@@ -769,11 +769,11 @@ export default function AddTeammate() {
         style={{ width: hasCsvData ? "960px" : "480px" }}
       >
         <Title className="mb-2">Upload via CSV</Title>
-        <Heading>Add multiple employees quickly</Heading>
+        <Heading>Add multiple teammates quickly</Heading>
         <div className="text-left mt-4">
           <a
             className="sample-csv"
-            href="https://drive.google.com/file/d/1hej7TII_7mEDc8bETwtRghTq6hh-ozQj/view?usp=sharing"
+            href="https://drive.google.com/file/d/1uf1Ms8VkJkAC8kX9AM6XGC7gGIVZOBRB/view?usp=sharing"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -791,10 +791,10 @@ export default function AddTeammate() {
         {hasCsvData && (
           <div className="mb-4">
             <TableHead>
-              <div>Employee Name</div>
+              <div>Teammate Name</div>
               <div>Address</div>
               <div>Disbursement</div>
-              <div>Department Name</div>
+              <div>Team</div>
               <div>Payroll Cycle</div>
             </TableHead>
 

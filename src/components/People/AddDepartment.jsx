@@ -118,7 +118,7 @@ export default function AddDepartment() {
 
   const renderAddDepartment = () => (
     <Card className="add-department">
-      <Title className="mb-4">Add New Department</Title>
+      <Title className="mb-4">Add New Team</Title>
       <Heading>WHAT SHOULD IT BE CALLED?</Heading>
       <Row className="mb-4">
         <Col lg="12">
@@ -126,8 +126,8 @@ export default function AddDepartment() {
             type="text"
             name="departmentName"
             register={register}
-            required={`Department Name is required`}
-            placeholder="Department Name"
+            required={`Team Name is required`}
+            placeholder="Team Name"
           />
           <ErrorMessage name="departmentName" errors={errors} />
         </Col>
@@ -154,8 +154,7 @@ export default function AddDepartment() {
       </Row>
 
       <Text className="mt-4">
-        All the teammates in this department will be paid on this date every
-        month.
+        All the teammates in this team will be paid on this date every month.
       </Text>
 
       <Button
@@ -165,22 +164,22 @@ export default function AddDepartment() {
         disabled={!selectedDay}
         loading={loading}
       >
-        Add Department
+        Add Team
       </Button>
     </Card>
   );
 
   const renderSuccess = () => (
     <Card className="add-department">
-      <Title className="mb-2">Department Saved</Title>
-      <Heading>Wow! You have a department on-board</Heading>
+      <Title className="mb-2">Team Saved</Title>
+      <Heading>Wow! You have a team on-board</Heading>
       <Summary>
         <div className="left">
           <img src={TeamPng} alt="department" width="70" />
         </div>
         <div className="right">
           <div className="mb-4">
-            <div className="section-title mb-1">Department Name</div>
+            <div className="section-title mb-1">Team Name</div>
             <div className="section-desc">{formData.name}</div>
           </div>
           <div>

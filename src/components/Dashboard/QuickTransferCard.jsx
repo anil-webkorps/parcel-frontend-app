@@ -14,7 +14,7 @@ export default function QuickTransferCard() {
           <div>
             <div className="card-title">Quick Transfer</div>
             <div className="card-subtitle">
-              Send money quickly to address and wallets.
+              Send money quickly with built in token swaps
             </div>
           </div>
           <Link to="/dashboard/quick-transfer">

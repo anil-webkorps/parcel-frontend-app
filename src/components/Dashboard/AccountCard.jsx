@@ -106,7 +106,7 @@ export default function AccountCard() {
           <div>
             <div className="card-title">Account</div>
             <div className="card-subtitle">
-              Find overview of your wallets and manage payments
+              Find overview of your account balances
             </div>
           </div>
           <Link to="/dashboard">

@@ -104,7 +104,7 @@ export default function ViewTeammate() {
           Address: address,
           "Salary Amount": salaryAmount,
           "Salary Token": salaryToken,
-          "Department Name": departmentName,
+          Team: departmentName,
           "Paycycle Date": payCycleDate,
         });
         return csvData;
@@ -157,7 +157,7 @@ export default function ViewTeammate() {
                 </ActionItem>
               </Button>
               <div className="title mx-3 my-0" style={{ fontSize: "20px" }}>
-                All Employees
+                All Teammates
               </div>
             </div>
 
@@ -178,7 +178,7 @@ export default function ViewTeammate() {
                     <FontAwesomeIcon icon={faPlus} color="#fff" />
                   </Circle>
                   <div className="mx-3">
-                    <div className="name">Add Employee</div>
+                    <div className="name">Add Teammate</div>
                   </div>
                 </ActionItem>
               </Button>
@@ -190,8 +190,8 @@ export default function ViewTeammate() {
       <Container>
         <div>
           <TableHead>
-            <div>Employee Name</div>
-            <div>Department</div>
+            <div>Teammate Name</div>
+            <div>Team</div>
             <div>Payroll Cycle</div>
             <div>Disbursement</div>
             <div></div>

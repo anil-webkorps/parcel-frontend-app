@@ -87,11 +87,10 @@ export default function People() {
                 <img src={TeamMembersPng} alt="humans" width="400px" />
               </div>
               <div className="card-title">
-                Hassle-Free team and People management
+                Hassle-Free Team and People management
               </div>
               <div className="card-subtitle">
-                Add team members, set-up your teams and their payroll. Enjoy a
-                hassle free payroll management
+                Add teams and manage people with easy imports.
               </div>
 
               <Button
@@ -127,12 +126,12 @@ export default function People() {
             <Button large iconOnly className="p-0" to="/dashboard/people/view">
               <AllEmployees>
                 <div>
-                  <div className="all-employees-title mb-4">All Employees</div>
+                  <div className="all-employees-title mb-4">All Teammates</div>
                   <div className="all-employees-subtitle mb-2">
-                    Total Employees : <span>{totalEmployees}</span>
+                    Total Teammates : <span>{totalEmployees}</span>
                   </div>
                   <div className="all-employees-subtitle">
-                    Total Departments :{" "}
+                    Total Teams :{" "}
                     <span>
                       {(allDepartments && allDepartments.length) || 0}
                     </span>
@@ -185,7 +184,7 @@ export default function People() {
 
                       <div className="line" />
                       <div className="lower">
-                        <div className="mb-3">Employees : {employees}</div>
+                        <div className="mb-3">Teammates : {employees}</div>
                         <div>
                           Paydate : {numToOrd(payCycleDate)} of every month
                         </div>
@@ -200,7 +199,7 @@ export default function People() {
                   <div className="circle">
                     <FontAwesomeIcon icon={faPlus} color="#fff" />
                   </div>
-                  <div className="add-now">Add Department</div>
+                  <div className="add-now">Add Team</div>
                 </Button>
               </Card>
             </Link>

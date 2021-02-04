@@ -51,7 +51,7 @@ function TeammateDetailsModal(props) {
             </div>
           </div>
           <div className="mb-3">
-            <div className="section-title mb-1">Department</div>
+            <div className="section-title mb-1">Team</div>
             <div className="section-desc">{departmentName}</div>
           </div>
           <div className="mb-3">

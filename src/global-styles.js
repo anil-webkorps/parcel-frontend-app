@@ -102,6 +102,10 @@ const GlobalStyle = createGlobalStyle`
     #root, .modal-dialog {
      zoom: 85%;
    }
+
+   .tooltip {
+      zoom: 85%;
+    }
   }
 
   .modal-content {
