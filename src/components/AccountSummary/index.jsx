@@ -1,0 +1,232 @@
+import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLongArrowAltLeft } from "@fortawesome/free-solid-svg-icons";
+import { Col, Row } from "reactstrap";
+import { useForm } from "react-hook-form";
+import { useSelector, useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
+
+import { Info } from "components/Dashboard/styles";
+import { Card } from "components/common/Card";
+import Button from "components/common/Button";
+import Img from "components/common/Img";
+import { Input, ErrorMessage } from "components/common/Form";
+import tokensReducer from "store/tokens/reducer";
+import tokensSaga from "store/tokens/saga";
+import {
+  makeSelectTokenList,
+  makeSelectLoading,
+  makeSelectSuccess,
+  makeSelectUpdating,
+  makeSelectError,
+} from "store/tokens/selectors";
+import { getTokens, addCustomToken } from "store/tokens/actions";
+import { useInjectReducer } from "utils/injectReducer";
+import { useInjectSaga } from "utils/injectSaga";
+import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import Loading from "components/common/Loading";
+
+import { Title, Heading, ActionItem, Table } from "components/People/styles";
+import { Circle } from "components/Header/styles";
+import { Container } from "./styles";
+
+const { TableBody, TableHead, TableRow } = Table;
+
+const tokensKey = "tokens";
+
+export default function AccountSummary() {
+  // Reducers
+  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
+
+  // Sagas
+  useInjectSaga({ key: tokensKey, saga: tokensSaga });
+
+  const { register, errors, handleSubmit, reset } = useForm({
+    mode: "onChange",
+  });
+
+  const dispatch = useDispatch();
+  const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const history = useHistory();
+
+  const [totalBalance, setTotalBalance] = useState("0.00");
+  const [success, setSuccess] = useState(false);
+
+  // Selectors
+  const loading = useSelector(makeSelectLoading());
+  const updating = useSelector(makeSelectUpdating());
+  const tokenList = useSelector(makeSelectTokenList());
+  const addedSuccessfully = useSelector(makeSelectSuccess());
+  const error = useSelector(makeSelectError());
+
+  useEffect(() => {
+    if (ownerSafeAddress) {
+      dispatch(getTokens(ownerSafeAddress));
+    }
+  }, [ownerSafeAddress, dispatch]);
+
+  useEffect(() => {
+    const total = tokenList.reduce(
+      (sum, token) => (sum += parseFloat(token.usd)),
+      0
+    );
+    setTotalBalance(parseFloat(total).toFixed(2));
+  }, [tokenList]);
+
+  useEffect(() => {
+    if (addedSuccessfully) {
+      setSuccess(true);
+      reset({
+        contractAddress: "",
+      });
+      setTimeout(() => {
+        setSuccess(false);
+      }, 2000);
+    }
+  }, [addedSuccessfully, reset]);
+
+  const onSubmit = async (values) => {
+    if (ownerSafeAddress) {
+      dispatch(addCustomToken(ownerSafeAddress, values.contractAddress));
+    }
+  };
+
+  const goBack = () => {
+    history.goBack();
+  };
+
+  const renderAddCustomToken = () => (
+    <Card className="add-custom-card">
+      <Title className="mb-3">Add Token</Title>
+      <Heading>Copy and paste the token contract address</Heading>
+      <Row className="mt-3">
+        <Col lg="8">
+          <Input
+            type="text"
+            name="contractAddress"
+            register={register}
+            required={`Contract Address is required`}
+            pattern={{
+              value: /^0x[a-fA-F0-9]{40}$/,
+              message: "Invalid Ethereum Address",
+            }}
+            placeholder="Token Contract Address"
+          />
+        </Col>
+        <Col lg="4">
+          <Button
+            type="submit"
+            className="p-0"
+            large
+            style={{ minHeight: "0", height: "100%" }}
+            loading={updating}
+            disabled={updating}
+          >
+            Add
+          </Button>
+        </Col>
+      </Row>
+      <ErrorMessage name="contractAddress" errors={errors} />
+      {success && (
+        <div className="text-success mt-3">Token added successfully!</div>
+      )}
+      {error && <div className="text-danger mt-3">{error}</div>}
+    </Card>
+  );
+
+  const renderTokens = () => {
+    return (
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Card className="balance-card">
+          <div className="d-flex justify-content-between align-items-center">
+            <div className="balance-title">Total Balance</div>
+            <div className="balance-subtitle">${totalBalance}</div>
+          </div>
+        </Card>
+        <div
+          style={{
+            position: "absolute",
+            top: "20px",
+            left: "0",
+            right: "0",
+          }}
+        >
+          <TableHead col={2} style={{ width: "683px" }} className="mx-auto">
+            <div>Token Name</div>
+            <div>Balance</div>
+          </TableHead>
+          <TableBody
+            className="mx-auto"
+            style={{
+              height: "330px",
+              minHeight: "0",
+              overflow: "auto",
+              width: "683px",
+            }}
+          >
+            {loading && (
+              <div
+                className="d-flex align-items-center justify-content-center"
+                style={{ height: "200px" }}
+              >
+                <Loading color="primary" width="50px" height="50px" />
+              </div>
+            )}
+            {!loading &&
+              tokenList.map(({ id, name, icon, usd, balance }) => (
+                <TableRow col={2} key={id}>
+                  <div>
+                    <Img src={icon} alt="ether" width="30" /> {name}
+                  </div>
+                  <div>
+                    {parseFloat(balance).toFixed(2)} {name} (USD$
+                    {parseFloat(usd).toFixed(2)})
+                  </div>
+                </TableRow>
+              ))}
+          </TableBody>
+        </div>
+        {renderAddCustomToken()}
+      </form>
+    );
+  };
+
+  return (
+    <div
+      className="position-relative"
+      style={{
+        transition: "all 0.25s linear",
+      }}
+    >
+      <Info>
+        <div
+          style={{
+            maxWidth: "1200px",
+            transition: "all 0.25s linear",
+          }}
+          className="mx-auto"
+        >
+          <Button iconOnly className="p-0" onClick={goBack}>
+            <ActionItem>
+              <Circle>
+                <FontAwesomeIcon icon={faLongArrowAltLeft} color="#fff" />
+              </Circle>
+              <div className="mx-3">
+                <div className="name">Back</div>
+              </div>
+            </ActionItem>
+          </Button>
+        </div>
+      </Info>
+
+      <Container
+        style={{
+          maxWidth: "1200px",
+          transition: "all 0.25s linear",
+        }}
+      >
+        {renderTokens()}
+      </Container>
+    </div>
+  );
+}

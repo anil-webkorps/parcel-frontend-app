@@ -9,6 +9,7 @@ import AddDepartment from "components/People/AddDepartment";
 import ViewTeammates from "components/People/ViewTeammates";
 import Payments from "components/Payments";
 import Transactions from "components/Transactions";
+import AccountSummary from "components/AccountSummary";
 import MultiSigTransactions from "components/Transactions/MultiSigTransactions";
 import MultiSigTransactionDetails from "components/Transactions/MultiSigTransactionDetails";
 import TransactionDetails from "components/Transactions/TransactionDetails";
@@ -63,6 +64,11 @@ const DashboardPage = ({ match }) => {
           exact
           path={`${match.path}/quick-transfer`}
           component={QuickTransfer}
+        />
+        <Route
+          exact
+          path={`${match.path}/account`}
+          component={AccountSummary}
         />
         <Route exact path={`${match.path}/invite`} component={InviteOwners} />
         <Route component={NotFoundPage} />

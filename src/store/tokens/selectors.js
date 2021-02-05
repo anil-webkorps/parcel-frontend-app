@@ -7,8 +7,14 @@ import { initialState } from "./reducer";
 
 const selectTokens = (state) => state.tokens || initialState;
 
-const makeselectTokens = () =>
+const makeSelectTokens = () =>
   createSelector(selectTokens, (tokensState) => tokensState.tokens);
+
+const makeSelectTokenList = () =>
+  createSelector(selectTokens, (tokensState) => tokensState.tokenList);
+
+const makeSelectSuccess = () =>
+  createSelector(selectTokens, (tokensState) => tokensState.success);
 
 const makeSelectLoading = () =>
   createSelector(selectTokens, (tokensState) => tokensState.loading);
@@ -21,7 +27,9 @@ const makeSelectError = () =>
 
 export {
   selectTokens,
-  makeselectTokens,
+  makeSelectTokens,
+  makeSelectSuccess,
+  makeSelectTokenList,
   makeSelectLoading,
   makeSelectUpdating,
   makeSelectError,

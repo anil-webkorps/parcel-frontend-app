@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
-import { BigNumber } from "@ethersproject/bignumber";
 
 import { Assets } from "./styles";
 import { useInjectReducer } from "utils/injectReducer";
@@ -13,13 +12,12 @@ import tokensSaga from "store/tokens/saga";
 import { getTokens } from "store/tokens/actions";
 import {
   makeSelectLoading as makeSelectLoadingTokens,
-  makeselectTokens,
+  makeSelectTokenList,
 } from "store/tokens/selectors";
 import { Card } from "components/common/Card";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 
-import ETHIcon from "assets/icons/tokens/ETH-icon.png";
-import { defaultTokenDetails, getDefaultIconIfPossible } from "constants/index";
+import { defaultTokenDetails } from "constants/index";
 import Loading from "components/common/Loading";
 
 const tokensKey = "tokens";
@@ -36,8 +34,8 @@ export default function AccountCard() {
   const dispatch = useDispatch();
 
   // Selectors
-  const tokenList = useSelector(makeselectTokens());
   const loading = useSelector(makeSelectLoadingTokens());
+  const tokenList = useSelector(makeSelectTokenList());
   // const error = useSelector(makeSelectError());
 
   const [totalBalance, setTotalBalance] = useState("0.00");
@@ -53,36 +51,7 @@ export default function AccountCard() {
 
   useEffect(() => {
     if (tokenList && tokenList.length > 0) {
-      const allTokenDetails = tokenList
-        .map(({ tokenDetails, balanceDetails }, idx) => {
-          if (!tokenDetails) return null;
-          if (!balanceDetails) {
-            const tokenIcon = getDefaultIconIfPossible(
-              tokenDetails.tokenInfo.symbol
-            );
-            return {
-              id: idx,
-              name: tokenDetails.tokenInfo.symbol,
-              icon: tokenIcon || tokenDetails.tokenInfo.logoUri || ETHIcon,
-              balance: 0,
-              usd: 0,
-            };
-          }
-          // erc20
-          const balance = BigNumber.from(balanceDetails.balance)
-            .div(BigNumber.from(String(10 ** tokenDetails.tokenInfo.decimals)))
-            .toString();
-
-          return {
-            id: idx,
-            name: tokenDetails.tokenInfo.symbol,
-            icon: tokenDetails.tokenInfo.logoUri || ETHIcon,
-            balance,
-            usd: balance * balanceDetails.usdConversion,
-          };
-        })
-        .filter(Boolean);
-      setTokenDetails(allTokenDetails.slice(0, 3));
+      setTokenDetails(tokenList.slice(0, 3));
     }
   }, [tokenList]);
 
@@ -109,7 +78,7 @@ export default function AccountCard() {
               Find overview of your account balances
             </div>
           </div>
-          <Link to="/dashboard">
+          <Link to="/dashboard/account">
             <div className="circle">
               <FontAwesomeIcon icon={faArrowRight} color="#fff" />
             </div>

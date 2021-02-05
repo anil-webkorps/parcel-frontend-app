@@ -5,6 +5,7 @@ import {
   ADD_CUSTOM_TOKEN,
   ADD_CUSTOM_TOKEN_SUCCESS,
   ADD_CUSTOM_TOKEN_ERROR,
+  SET_SUCCESS,
 } from "./action-types";
 
 export function getTokens(safeAddress) {
@@ -49,5 +50,11 @@ export function addCustomTokenError(error) {
   return {
     type: ADD_CUSTOM_TOKEN_ERROR,
     error,
+  };
+}
+export function setSuccess(bool = true) {
+  return {
+    type: SET_SUCCESS,
+    bool,
   };
 }
