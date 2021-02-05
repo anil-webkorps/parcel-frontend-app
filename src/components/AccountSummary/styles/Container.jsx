@@ -26,20 +26,24 @@ export default styled.div`
     top: -70px;
     left: 0;
     right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 
     .balance-title {
-      font-size: 18px;
-      font-weight: bold;
+      font-size: 16px;
+      font-weight: normal;
       font-stretch: normal;
       font-style: normal;
       line-height: 1.2;
       letter-spacing: normal;
       text-align: left;
-      color: #373737;
+      color: #8b8b8b;
     }
 
     .balance-subtitle {
-      font-size: 18px;
+      font-size: 32px;
       font-weight: bold;
       font-stretch: normal;
       font-style: normal;
@@ -47,6 +51,7 @@ export default styled.div`
       letter-spacing: normal;
       text-align: left;
       color: #373737;
+      margin-top: 10px;
 
       span {
         font-weight: bold;
@@ -64,7 +69,7 @@ export default styled.div`
     border: solid 1px #f2f2f2;
     background-color: #ffffff;
     position: absolute;
-    top: 450px;
+    top: 480px;
     left: 0;
     right: 0;
   }

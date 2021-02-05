@@ -13,7 +13,6 @@ import { getDefaultIconIfPossible } from "constants/index";
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 
 export const initialState = {
-  tokens: undefined,
   log: "",
   loading: false,
   updating: false,
@@ -68,7 +67,6 @@ const reducer = (state = initialState, action) =>
         draft.tokenList = allTokenDetails;
         draft.loading = false;
         draft.log = action.log;
-        draft.tokens = action.tokens;
         break;
 
       case GET_TOKENS_ERROR:

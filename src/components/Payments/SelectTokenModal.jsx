@@ -3,31 +3,17 @@ import { Modal, ModalHeader } from "reactstrap";
 import { connectModal as reduxModal } from "redux-modal";
 import { Col, Row } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
-import { BigNumber } from "@ethersproject/bignumber";
 
 import Button from "components/common/Button";
-import {
-  tokens,
-  getDefaultIconIfPossible,
-  defaultTokenDetails,
-} from "constants/index";
+import { tokens, defaultTokenDetails } from "constants/index";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import dashboardReducer from "store/dashboard/reducer";
-import marketRatesReducer from "store/market-rates/reducer";
-import dashboardSaga from "store/dashboard/saga";
-import marketRatesSaga from "store/market-rates/saga";
+import tokensReducer from "store/tokens/reducer";
+import tokensSaga from "store/tokens/saga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
-import { getSafeBalances } from "store/dashboard/actions";
-import {
-  makeSelectLoading,
-  makeSelectBalances,
-} from "store/dashboard/selectors";
-import { makeSelectPrices } from "store/market-rates/selectors";
-import { getMarketRates } from "store/market-rates/actions";
+import { getTokens } from "store/tokens/actions";
+import { makeSelectLoading, makeSelectTokenList } from "store/tokens/selectors";
 import Loading from "components/common/Loading";
-
-import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 
 import { Title, Heading } from "../People/styles";
 import { TokenCard } from "./styles";
@@ -42,8 +28,7 @@ const modalStyles = `
   }
 `;
 
-const dashboardKey = "dashboard";
-const marketRatesKey = "marketRates";
+const tokensKey = "tokens";
 
 function SelectTokenModal(props) {
   const {
@@ -53,85 +38,36 @@ function SelectTokenModal(props) {
     setSelectedTokenDetails,
   } = props;
   // Reducers
-  useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
-  useInjectReducer({ key: marketRatesKey, reducer: marketRatesReducer });
+  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   // Sagas
-  useInjectSaga({ key: dashboardKey, saga: dashboardSaga });
-  useInjectSaga({ key: marketRatesKey, saga: marketRatesSaga });
+  useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
 
   // Selectors
   const loading = useSelector(makeSelectLoading());
-  const balances = useSelector(makeSelectBalances());
-  const prices = useSelector(makeSelectPrices());
+  const tokenList = useSelector(makeSelectTokenList());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
   const [tokenName, setTokenName] = useState(tokens.DAI);
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
 
   useEffect(() => {
-    if (ownerSafeAddress && !balances) {
-      dispatch(getSafeBalances(ownerSafeAddress));
+    if (ownerSafeAddress && (!tokenList || !tokenList.length)) {
+      dispatch(getTokens(ownerSafeAddress));
     }
-  }, [ownerSafeAddress, balances, dispatch]);
-  useEffect(() => {
-    if (!prices) dispatch(getMarketRates());
-  }, [dispatch, prices]);
+  }, [ownerSafeAddress, tokenList, dispatch]);
 
   useEffect(() => {
     if (selectedTokenDetails) setTokenName(selectedTokenDetails.name);
   }, [selectedTokenDetails]);
 
   useEffect(() => {
-    if (balances && balances.length > 0 && prices) {
-      const seenTokens = {};
-      const allTokenDetails = balances
-        .map((bal, idx) => {
-          // erc20
-          if (bal.token && bal.tokenAddress) {
-            const balance = BigNumber.from(bal.balance)
-              .div(BigNumber.from(String(10 ** bal.token.decimals)))
-              .toString();
-            // mark as seen
-            seenTokens[bal.token.symbol] = true;
-            const tokenIcon = getDefaultIconIfPossible(bal.token.symbol);
-
-            return {
-              id: idx,
-              name: bal.token && bal.token.symbol,
-              icon: tokenIcon ? tokenIcon : bal.token.logoUri,
-              balance,
-              usd: bal.token
-                ? balance * prices[bal.token.symbol]
-                : balance * prices["ETH"],
-            };
-          }
-          // eth
-          else if (bal.balance) {
-            seenTokens[tokens.ETH] = true;
-            return {
-              id: idx,
-              name: "ETH",
-              icon: ETHIcon,
-              balance: bal.balance / 10 ** 18,
-              usd: bal.balanceUsd,
-            };
-          } else return "";
-        })
-        .filter(Boolean);
-
-      if (allTokenDetails.length < 3) {
-        const zeroBalanceTokensToShow = defaultTokenDetails.filter(
-          (token) => !seenTokens[token.name]
-        );
-        setTokenDetails([...allTokenDetails, ...zeroBalanceTokensToShow]);
-      } else {
-        setTokenDetails(allTokenDetails);
-      }
+    if (tokenList && tokenList.length > 0) {
+      setTokenDetails(tokenList);
     }
-  }, [balances, prices]);
+  }, [tokenList]);
 
   const confirmToken = () => {
     setSelectedTokenDetails(

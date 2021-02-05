@@ -138,15 +138,13 @@ export default function AccountSummary() {
     return (
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="balance-card">
-          <div className="d-flex justify-content-between align-items-center">
-            <div className="balance-title">Total Balance</div>
-            <div className="balance-subtitle">${totalBalance}</div>
-          </div>
+          <div className="balance-title">Total Balance</div>
+          <div className="balance-subtitle">${totalBalance}</div>
         </Card>
         <div
           style={{
             position: "absolute",
-            top: "20px",
+            top: "60px",
             left: "0",
             right: "0",
           }}

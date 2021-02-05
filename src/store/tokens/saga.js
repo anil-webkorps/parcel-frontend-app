@@ -14,13 +14,13 @@ function* addCustomToken(action) {
   const requestURL = `${addCustomTokenEndpoint}`;
   const options = {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
     body: JSON.stringify({
       safeAddress: action.safeAddress,
       contractAddress: action.contractAddress,
     }),
+    headers: {
+      "content-type": "application/json",
+    },
   };
   try {
     const result = yield call(request, requestURL, options);
