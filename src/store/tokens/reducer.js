@@ -19,6 +19,7 @@ export const initialState = {
   success: false,
   error: false,
   tokenList: [],
+  prices: null,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -36,16 +37,19 @@ const reducer = (state = initialState, action) =>
           action.tokens
             .map(({ tokenDetails, balanceDetails }, idx) => {
               if (!tokenDetails) return null;
-              if (!balanceDetails) {
-                const tokenIcon = getDefaultIconIfPossible(
-                  tokenDetails.tokenInfo.symbol
-                );
+              const tokenIcon = getDefaultIconIfPossible(
+                tokenDetails.tokenInfo.symbol
+              );
+              // eslint-disable-next-line
+              if (balanceDetails && balanceDetails.balance == 0) {
                 return {
                   id: idx,
                   name: tokenDetails.tokenInfo.symbol,
                   icon: tokenIcon || tokenDetails.tokenInfo.logoUri || ETHIcon,
                   balance: 0,
                   usd: 0,
+                  address: tokenDetails.tokenInfo.address,
+                  decimals: tokenDetails.tokenInfo.decimals,
                 };
               }
               // erc20
@@ -58,13 +62,16 @@ const reducer = (state = initialState, action) =>
               return {
                 id: idx,
                 name: tokenDetails.tokenInfo.symbol,
-                icon: tokenDetails.tokenInfo.logoUri || ETHIcon,
+                icon: tokenIcon || tokenDetails.tokenInfo.logoUri || ETHIcon,
                 balance,
                 usd: balance * balanceDetails.usdConversion,
+                address: tokenDetails.tokenInfo.address,
+                decimals: tokenDetails.tokenInfo.decimals,
               };
             })
             .filter(Boolean);
         draft.tokenList = allTokenDetails;
+        draft.prices = action.prices;
         draft.loading = false;
         draft.log = action.log;
         break;

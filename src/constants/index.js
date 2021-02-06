@@ -4,6 +4,7 @@ import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 import USDCIcon from "assets/icons/tokens/USDC-icon.png";
 import USDTIcon from "assets/icons/tokens/USDT-icon.png";
+import addresses from "./addresses";
 
 export const NetworkContextName = "NETWORK";
 
@@ -50,6 +51,7 @@ export const defaultTokenDetails = [
     icon: ETHIcon,
     balance: "0.00",
     usd: "0.00",
+    address: addresses.ZERO_ADDRESS,
   },
   {
     id: 1,
@@ -57,6 +59,7 @@ export const defaultTokenDetails = [
     icon: DAIIcon,
     balance: "0.00",
     usd: "0.00",
+    address: addresses.DAI_ADDRESS,
   },
   {
     id: 2,
@@ -64,6 +67,7 @@ export const defaultTokenDetails = [
     icon: USDCIcon,
     balance: "0.00",
     usd: "0.00",
+    address: addresses.USDC_ADDRESS,
   },
   // {
   //   id: 3,

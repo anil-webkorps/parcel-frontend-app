@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { cryptoUtils } from "parcel-sdk";
 import { show } from "redux-modal";
-import { BigNumber } from "@ethersproject/bignumber";
 import { useHistory } from "react-router-dom";
 
 import { Info } from "components/Dashboard/styles";
@@ -42,14 +41,7 @@ import {
   addTransaction,
   clearTransactionHash,
 } from "store/transactions/actions";
-import marketRatesReducer from "store/market-rates/reducer";
-import { getMarketRates } from "store/market-rates/actions";
-import { makeSelectPrices } from "store/market-rates/selectors";
-import marketRatesSaga from "store/market-rates/saga";
-import dashboardReducer from "store/dashboard/reducer";
 import { getSafeBalances } from "store/dashboard/actions";
-import { makeSelectBalances } from "store/dashboard/selectors";
-import dashboardSaga from "store/dashboard/saga";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
 import { getNonce } from "store/safe/actions";
@@ -60,6 +52,14 @@ import {
 import { createMultisigTransaction } from "store/multisig/actions";
 import multisigSaga from "store/multisig/saga";
 import multisigReducer from "store/multisig/reducer";
+import { getTokens } from "store/tokens/actions";
+import {
+  makeSelectLoading as makeSelectLoadingTokens,
+  makeSelectTokenList,
+  makeSelectPrices,
+} from "store/tokens/selectors";
+import tokensSaga from "store/tokens/saga";
+import tokensReducer from "store/tokens/reducer";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { useActiveWeb3React, useLocalStorage, useMassPayout } from "hooks";
@@ -72,7 +72,6 @@ import {
 import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 import TeamPng from "assets/images/user-team.png";
-import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 
 import {
   tokens,
@@ -90,11 +89,10 @@ const { TableBody, TableHead, TableRow } = Table;
 // reducer/saga keys
 const viewTeammatesKey = "viewTeammates";
 const viewDepartmentsKey = "viewDepartments";
-const marketRatesKey = "marketRates";
-const dashboardKey = "dashboard";
 const transactionsKey = "transactions";
 const safeKey = "safe";
 const multisigKey = "multisig";
+const tokensKey = "tokens";
 
 const TABS = {
   PEOPLE: "1",
@@ -147,7 +145,7 @@ const navStyles = `
   }
 `;
 
-export default function People() {
+export default function Payments() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
   const { account } = useActiveWeb3React();
@@ -157,6 +155,12 @@ export default function People() {
   const [activeTab, setActiveTab] = useState(TABS.PEOPLE);
   // const [loadingTx, setLoadingTx] = useState(false);
   // const [txHash, setTxHash] = useState("");
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [departmentStep, setDepartmentStep] = useState(0);
+  const [metaTxHash, setMetaTxHash] = useState();
+  const [submittedTx, setSubmittedTx] = useState(false);
+  const [selectedTokenDetails, setSelectedTokenDetails] = useState();
+  const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
   const {
     loadingTx,
     txHash,
@@ -164,13 +168,7 @@ export default function People() {
     massPayout,
     txData,
     setTxData,
-  } = useMassPayout();
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [departmentStep, setDepartmentStep] = useState(0);
-  const [metaTxHash, setMetaTxHash] = useState();
-  const [submittedTx, setSubmittedTx] = useState(false);
-  const [selectedTokenDetails, setSelectedTokenDetails] = useState();
-  const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
+  } = useMassPayout({ tokenDetails: selectedTokenDetails });
 
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
@@ -182,20 +180,18 @@ export default function People() {
     key: viewDepartmentsKey,
     reducer: viewDepartmentsReducer,
   });
-  useInjectReducer({ key: marketRatesKey, reducer: marketRatesReducer });
-  useInjectReducer({ key: dashboardKey, reducer: dashboardReducer });
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
   useInjectReducer({ key: safeKey, reducer: safeReducer });
   useInjectReducer({ key: multisigKey, reducer: multisigReducer });
+  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   // Sagas
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
   useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
-  useInjectSaga({ key: marketRatesKey, saga: marketRatesSaga });
-  useInjectSaga({ key: dashboardKey, saga: dashboardSaga });
   useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
   useInjectSaga({ key: safeKey, saga: safeSaga });
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
+  useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -207,7 +203,6 @@ export default function People() {
   const teammates = useSelector(makeSelectTeammates());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const prices = useSelector(makeSelectPrices());
-  const balances = useSelector(makeSelectBalances());
   const txHashFromMetaTx = useSelector(makeSelectMetaTransactionHash());
   const errorFromMetaTx = useSelector(makeSelectErrorInCreateTx());
   const addingTx = useSelector(makeSelectAddTxLoading());
@@ -215,10 +210,8 @@ export default function People() {
   const threshold = useSelector(makeSelectThreshold());
   const isMultiOwner = useSelector(makeSelectIsMultiOwner());
   const loadingSafeDetails = useSelector(makeSelectLoadingSafeDetails());
-
-  useEffect(() => {
-    dispatch(getMarketRates());
-  }, [dispatch]);
+  const tokenList = useSelector(makeSelectTokenList());
+  const loadingTokens = useSelector(makeSelectLoadingTokens());
 
   useEffect(() => {
     if (txHashFromMetaTx) {
@@ -229,7 +222,8 @@ export default function People() {
 
   useEffect(() => {
     if (ownerSafeAddress) {
-      dispatch(getSafeBalances(ownerSafeAddress));
+      // dispatch(getSafeBalances(ownerSafeAddress));
+      dispatch(getTokens(ownerSafeAddress));
       dispatch(getNonce(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
@@ -278,6 +272,21 @@ export default function People() {
     );
   }, [prices, selectedRows]);
 
+  const isMassPayoutAllowed = useMemo(() => {
+    const hashmap = selectedRows.reduce((hashmap, token) => {
+      if (!hashmap[token.salaryToken]) {
+        hashmap[token.salaryToken] = true;
+      }
+      return hashmap;
+    }, {});
+
+    return selectedTokenDetails &&
+      Object.keys(hashmap).length === 1 &&
+      hashmap[selectedTokenDetails.name]
+      ? true
+      : false;
+  }, [selectedRows, selectedTokenDetails]);
+
   useEffect(() => {
     if (txHash) {
       setSubmittedTx(true);
@@ -301,7 +310,10 @@ export default function People() {
             safeAddress: ownerSafeAddress,
             createdBy: account,
             transactionHash: txHash,
-            tokenValue: totalAmountToPay,
+            tokenValue: recievers.reduce(
+              (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+              0
+            ),
             tokenCurrency: selectedTokenDetails.name,
             fiatValue: totalAmountToPay,
             addresses: recievers.map(({ address }) => address),
@@ -329,7 +341,10 @@ export default function People() {
               safeAddress: ownerSafeAddress,
               createdBy: account,
               txData,
-              tokenValue: totalAmountToPay,
+              tokenValue: recievers.reduce(
+                (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+                0
+              ),
               tokenCurrency: selectedTokenDetails.name,
               fiatValue: totalAmountToPay,
               addresses: recievers.map(({ address }) => address),
@@ -344,7 +359,10 @@ export default function People() {
               safeAddress: ownerSafeAddress,
               createdBy: account,
               txData,
-              tokenValue: totalAmountToPay,
+              tokenValue: recievers.reduce(
+                (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+                0
+              ),
               tokenCurrency: selectedTokenDetails.name,
               fiatValue: totalAmountToPay,
               fiatCurrency: "USD",
@@ -370,56 +388,14 @@ export default function People() {
     isMultiOwner,
     nonce,
     history,
+    prices,
   ]);
 
   useEffect(() => {
-    if (balances && balances.length > 0 && prices) {
-      const seenTokens = {};
-      const allTokenDetails = balances
-        .map((bal, idx) => {
-          // erc20
-          if (bal.token && bal.tokenAddress) {
-            const balance = BigNumber.from(bal.balance)
-              .div(BigNumber.from(String(10 ** bal.token.decimals)))
-              .toString();
-            // mark as seen
-            seenTokens[bal.token.symbol] = true;
-            const tokenIcon = getDefaultIconIfPossible(bal.token.symbol);
-
-            return {
-              id: idx,
-              name: bal.token && bal.token.symbol,
-              icon: tokenIcon ? tokenIcon : bal.token.logoUri,
-              balance,
-              usd: bal.token
-                ? balance * prices[bal.token.symbol]
-                : balance * prices["ETH"],
-            };
-          }
-          // eth
-          else if (bal.balance) {
-            seenTokens[tokens.ETH] = true;
-            return {
-              id: idx,
-              name: tokens.ETH,
-              icon: ETHIcon,
-              balance: bal.balance / 10 ** 18,
-              usd: bal.balanceUsd,
-            };
-          } else return "";
-        })
-        .filter(Boolean);
-
-      if (allTokenDetails.length < 3) {
-        const zeroBalanceTokensToShow = defaultTokenDetails.filter(
-          (token) => !seenTokens[token.name]
-        );
-        setTokenDetails([...allTokenDetails, ...zeroBalanceTokensToShow]);
-      } else {
-        setTokenDetails(allTokenDetails);
-      }
+    if (tokenList && tokenList.length > 0) {
+      setTokenDetails(tokenList);
     }
-  }, [balances, prices]);
+  }, [tokenList]);
 
   const isNoneChecked = useMemo(() => checked.every((check) => !check), [
     checked,
@@ -443,7 +419,7 @@ export default function People() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    // console.log({ selectedRows });
+    console.log({ selectedRows });
 
     await handleMassPayout(selectedRows);
   };
@@ -681,9 +657,14 @@ export default function People() {
             type="submit"
             large
             loading={loadingTx || addingTx}
-            disabled={loadingTx || insufficientBalance || addingTx}
+            disabled={
+              loadingTx ||
+              insufficientBalance ||
+              addingTx ||
+              !isMassPayoutAllowed
+            }
           >
-            {loadingSafeDetails && (
+            {(loadingSafeDetails || loadingTokens) && (
               <div className="d-flex align-items-center justify-content-center">
                 <Loading color="#fff" width="50px" height="50px" />
               </div>
@@ -826,6 +807,12 @@ export default function People() {
 
               {!isNoneChecked && renderPaymentSummary()}
             </Card>
+            {!isNoneChecked && !isMassPayoutAllowed && (
+              <div className="text-danger mt-3">
+                Please make sure all the teammate's token match your selected
+                token!
+              </div>
+            )}
           </form>
           {!loadingTx && errorFromMetaTx && (
             <div className="text-danger mt-3">{errorFromMetaTx}</div>

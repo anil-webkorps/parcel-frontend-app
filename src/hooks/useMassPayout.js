@@ -49,7 +49,8 @@ const {
   UNISWAP_ROUTER_ADDRESS,
 } = addresses;
 
-export default function useMassPayout() {
+export default function useMassPayout(props = {}) {
+  const { tokenDetails } = props;
   const { account, library } = useActiveWeb3React();
 
   const [loadingTx, setLoadingTx] = useState(false);
@@ -73,6 +74,7 @@ export default function useMassPayout() {
   const proxyContract = useContract(ownerSafeAddress, GnosisSafeABI, true);
   const [tokenFrom, setTokenFrom] = useState(tokens.DAI); // eslint-disable-line
   const dai = useContract(DAI_ADDRESS, ERC20ABI, true);
+  const customToken = useContract(ZERO_ADDRESS, ERC20ABI, true);
   // const erc20 = useContract(tokenNameToAddress[tokenFrom], ERC20ABI, true);
   const usdc = useContract(USDC_ADDRESS, ERC20ABI, true); // eslint-disable-line
   const usdt = useContract(USDT_ADDRESS, ERC20ABI, true); // eslint-disable-line
@@ -116,20 +118,26 @@ export default function useMassPayout() {
     }
   };
 
+  const getERC20Contract = (contractAddress) => {
+    return customToken.attach(contractAddress);
+  };
+
   // if the tokens are different, add two transactions:
   // 1. approve uniswap router to spend the token (eg DAI)
   // 2. swap the input token for the output token using uniswap
+  // TODO: revisit this for swapping from custom token
   const getUniswapTransactions = (
     tokenTo,
     tokenAmount,
     toAddress,
-    tokenFrom
+    tokenFrom,
+    inputTokenDetails
   ) => {
     // TODO: come up with a better solution for max amount in
     // should calculate max amount needed for the swap from uniswap
     const amountIn = parseEther(String(Number.MAX_SAFE_INTEGER));
 
-    const amountOut = getAmountInWei(tokenTo, tokenAmount);
+    const amountOut = getAmountInWei(tokenAmount, inputTokenDetails.decimals);
 
     const { functionName, path } = getConfigByTokenNames(tokenTo, tokenFrom);
     const erc20 = getERC20ContractByName(tokenFrom);
@@ -614,6 +622,7 @@ export default function useMassPayout() {
   ) => {
     setRecievers(recievers);
     setTokenFrom(tokenFrom);
+    if (!tokenDetails) return;
 
     if (account && library) {
       const ethLibAdapter = new EthersAdapter({
@@ -621,7 +630,7 @@ export default function useMassPayout() {
         signer: library.getSigner(account),
       });
 
-      const erc20 = getERC20ContractByName(tokenFrom);
+      const erc20 = getERC20Contract(tokenDetails.address);
 
       // If input and output tokens are different, swap using uniswap
       // If input and output tokens are same, simply call transfer
@@ -633,13 +642,17 @@ export default function useMassPayout() {
                 salaryToken,
                 salaryAmount,
                 address,
-                tokenFrom
+                tokenFrom,
+                tokenDetails
               )
             );
             return tx;
           }
 
-          const transferAmount = getAmountInWei(salaryToken, salaryAmount);
+          const transferAmount = getAmountInWei(
+            salaryAmount,
+            tokenDetails.decimals
+          );
           tx.push({
             operation: 0, // CALL
             to: erc20.address,

@@ -15,10 +15,11 @@ export function getTokens(safeAddress) {
   };
 }
 
-export function getTokensSuccess(tokens, log) {
+export function getTokensSuccess(tokens, prices, log) {
   return {
     type: GET_TOKENS_SUCCESS,
     tokens,
+    prices,
     log,
   };
 }

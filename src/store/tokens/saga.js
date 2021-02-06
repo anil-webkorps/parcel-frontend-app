@@ -48,10 +48,10 @@ function* fetchTokens(action) {
       // Error in payload
       yield put(getTokensError(result.log));
     } else {
-      yield put(getTokensSuccess(result.tokens, result.log));
+      yield put(getTokensSuccess(result.tokens, result.prices, result.log));
     }
   } catch (err) {
-    yield put(getTokensError("Error in creating transaction."));
+    yield put(getTokensError(err.message));
   }
 }
 

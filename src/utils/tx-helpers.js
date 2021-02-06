@@ -1,4 +1,3 @@
-import { tokens } from "constants/index";
 import { BigNumber } from "@ethersproject/bignumber";
 // Hex helpers
 export function joinHexData(hexData) {
@@ -34,16 +33,8 @@ export function standardizeTransaction(tx) {
   };
 }
 
-export const getAmountInWei = (tokenName, tokenAmount) => {
-  switch (tokenName) {
-    case tokens.DAI:
-      return BigNumber.from(tokenAmount).mul(BigNumber.from(String(10 ** 18)));
-    case tokens.USDC:
-      return BigNumber.from(tokenAmount).mul(BigNumber.from(String(10 ** 6)));
-    case tokens.USDT:
-      return BigNumber.from(tokenAmount).mul(BigNumber.from(String(10 ** 6)));
-
-    default:
-      return 0;
-  }
+export const getAmountInWei = (tokenAmount, decimals) => {
+  return BigNumber.from(tokenAmount).mul(
+    BigNumber.from(String(10 ** decimals))
+  );
 };

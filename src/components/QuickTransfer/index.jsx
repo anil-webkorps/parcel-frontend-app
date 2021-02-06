@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLongArrowAltLeft } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
@@ -17,6 +17,7 @@ import {
   Input,
   ErrorMessage,
   TextArea,
+  CurrencyInput,
   // SelectTokenDropdown,
 } from "components/common/Form";
 import { useMassPayout, useLocalStorage, useActiveWeb3React } from "hooks";
@@ -54,6 +55,7 @@ import { getTokens } from "store/tokens/actions";
 import {
   makeSelectLoading,
   makeSelectTokenList,
+  makeSelectPrices,
   // makeSelectError,
 } from "store/tokens/selectors";
 import Loading from "components/common/Loading";
@@ -81,7 +83,6 @@ export default function QuickTransfer() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
   const { account } = useActiveWeb3React();
-  const { txHash, loadingTx, massPayout, txData } = useMassPayout();
   const [submittedTx, setSubmittedTx] = useState(false);
   const [selectedTokenDetails, setSelectedTokenDetails] = useState();
   // eslint-disable-next-line
@@ -90,6 +91,9 @@ export default function QuickTransfer() {
   const [payoutDetails, setPayoutDetails] = useState(null);
   const [metaTxHash, setMetaTxHash] = useState();
 
+  const { txHash, loadingTx, massPayout, txData } = useMassPayout({
+    tokenDetails: selectedTokenDetails,
+  });
   // Reducers
   useInjectReducer({ key: tokensKey, reducer: tokensReducer });
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
@@ -102,9 +106,11 @@ export default function QuickTransfer() {
   useInjectSaga({ key: safeKey, saga: safeSaga });
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
 
-  const { register, errors, handleSubmit, formState } = useForm({
-    mode: "onChange",
-  });
+  const { register, errors, handleSubmit, formState, control, reset } = useForm(
+    {
+      mode: "onChange",
+    }
+  );
 
   const dispatch = useDispatch();
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
@@ -120,6 +126,7 @@ export default function QuickTransfer() {
   const threshold = useSelector(makeSelectThreshold());
   const isMultiOwner = useSelector(makeSelectIsMultiOwner());
   const loadingSafeDetails = useSelector(makeSelectLoadingSafeDetails());
+  const prices = useSelector(makeSelectPrices());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -178,7 +185,10 @@ export default function QuickTransfer() {
             safeAddress: ownerSafeAddress,
             createdBy: ownerSafeAddress,
             transactionHash: txHash,
-            tokenValue: totalAmountToPay,
+            tokenValue: payoutDetails.reduce(
+              (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+              0
+            ),
             tokenCurrency: selectedTokenDetails.name,
             fiatValue: totalAmountToPay,
             addresses: payoutDetails.map(({ address }) => address),
@@ -207,7 +217,10 @@ export default function QuickTransfer() {
               safeAddress: ownerSafeAddress,
               createdBy: account,
               txData,
-              tokenValue: totalAmountToPay,
+              tokenValue: payoutDetails.reduce(
+                (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+                0
+              ),
               tokenCurrency: selectedTokenDetails.name,
               fiatValue: totalAmountToPay,
               addresses: payoutDetails.map(({ address }) => address),
@@ -222,7 +235,10 @@ export default function QuickTransfer() {
               safeAddress: ownerSafeAddress,
               createdBy: account,
               txData,
-              tokenValue: totalAmountToPay,
+              tokenValue: payoutDetails.reduce(
+                (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+                0
+              ),
               tokenCurrency: selectedTokenDetails.name,
               fiatValue: totalAmountToPay,
               fiatCurrency: "USD",
@@ -282,6 +298,7 @@ export default function QuickTransfer() {
         setSelectedTokenDetails,
       })
     );
+    reset({ address: "", amount: "" });
   };
 
   const renderTransferDetails = () => (
@@ -332,12 +349,28 @@ export default function QuickTransfer() {
 
       <Row className="mb-4">
         <Col lg="12" sm="12">
-          <Input
-            type="number"
+          <Controller
+            control={control}
             name="amount"
-            register={register}
-            required={`Amount is required`}
-            placeholder="Amount"
+            render={({ onChange, value }) => (
+              <CurrencyInput
+                type="number"
+                name="amount"
+                // register={register}
+                required={`Amount is required`}
+                value={value}
+                onChange={onChange}
+                placeholder="Amount"
+                convertionRate={
+                  prices &&
+                  selectedTokenDetails &&
+                  prices[selectedTokenDetails.name]
+                }
+                tokenName={
+                  selectedTokenDetails ? selectedTokenDetails.name : ""
+                }
+              />
+            )}
           />
           <ErrorMessage name="amount" errors={errors} />
         </Col>

@@ -22,6 +22,9 @@ const makeSelectLoading = () =>
 const makeSelectUpdating = () =>
   createSelector(selectTokens, (tokensState) => tokensState.updating);
 
+const makeSelectPrices = () =>
+  createSelector(selectTokens, (tokensState) => tokensState.prices);
+
 const makeSelectError = () =>
   createSelector(selectTokens, (tokensState) => tokensState.error);
 
@@ -30,6 +33,7 @@ export {
   makeSelectTokens,
   makeSelectSuccess,
   makeSelectTokenList,
+  makeSelectPrices,
   makeSelectLoading,
   makeSelectUpdating,
   makeSelectError,
