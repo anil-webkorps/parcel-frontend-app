@@ -11,27 +11,27 @@ export default styled.div`
   right: 0;
   top: 180px;
 
-  .balance-card {
+  .balance-card,
+  .interest-card {
+    height: 105px;
     margin: 0 auto;
     // max-width: 1000px;
-    width: fit-content;
-    min-width: 683px;
+    width: 100%;
+    // min-width: 683px;
     min-height: 0px;
     padding: 17px 36px;
     border-radius: 16px;
     box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
     border: solid 1px #f2f2f2;
     background-color: #ffffff;
-    position: absolute;
-    top: -70px;
-    left: 0;
-    right: 0;
+    margin: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 
-    .balance-title {
+    .balance-title,
+    .interest-title {
       font-size: 16px;
       font-weight: normal;
       font-stretch: normal;
@@ -57,6 +57,20 @@ export default styled.div`
         font-weight: bold;
       }
     }
+    .interest-subtitle {
+      font-size: 18px;
+      font-stretch: normal;
+      font-style: normal;
+      line-height: 1.2;
+      letter-spacing: normal;
+      text-align: left;
+      color: #8b8b8b;
+      margin-top: 16px;
+
+      span {
+        font-weight: bold;
+      }
+    }
   }
 
   .add-custom-card {
@@ -72,5 +86,14 @@ export default styled.div`
     top: 480px;
     left: 0;
     right: 0;
+  }
+
+  .cards {
+    position: absolute;
+    top: -70px;
+    left: 0;
+    right: 0;
+    max-width: 683px;
+    margin: auto;
   }
 `;

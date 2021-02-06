@@ -137,10 +137,21 @@ export default function AccountSummary() {
   const renderTokens = () => {
     return (
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Card className="balance-card">
-          <div className="balance-title">Total Balance</div>
-          <div className="balance-subtitle">${totalBalance}</div>
-        </Card>
+        <Row className="cards">
+          <Col lg="6" className="pl-0">
+            <Card className="balance-card">
+              <div className="balance-title">Total Balance</div>
+              <div className="balance-subtitle">${totalBalance}</div>
+            </Card>
+          </Col>
+          <Col lg="6" className="pr-0">
+            <Card className="interest-card">
+              <div className="interest-title">Total Interest</div>
+              <div className="interest-subtitle">Coming Soon</div>
+            </Card>
+          </Col>
+        </Row>
+
         <div
           style={{
             position: "absolute",

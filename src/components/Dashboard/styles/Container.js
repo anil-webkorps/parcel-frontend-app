@@ -59,7 +59,7 @@ export default styled.div`
 
   .overview-cards {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-gap: 20px;
     margin-top: 20px;
     .overview-card {
@@ -92,6 +92,16 @@ export default styled.div`
         text-align: center;
         color: #8b8b8b;
         margin-top: 8px;
+      }
+      .overview-coming-soon {
+        font-size: 18px;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: 1.22;
+        letter-spacing: normal;
+        text-align: center;
+        color: #8b8b8b;
+        margin-top: 20px;
       }
     }
   }

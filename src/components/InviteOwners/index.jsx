@@ -111,7 +111,7 @@ export default function InviteOwners() {
         toAddress: ownerToBeInvited,
         fromAddress: account,
         toEmail: values.email || "",
-        fromEmail: "rohith.test@gmail.com", // TODO: change this before launch
+        fromEmail: "hello@parcel.money", // TODO: change this before launch
       })
     );
   };
@@ -207,7 +207,7 @@ export default function InviteOwners() {
             type="text"
             name="email"
             register={register}
-            required={`Email is required`}
+            // required={`Email is required`}
             pattern={{
               value: /\S+@\S+\.\S+/,
               message: "Invalid email address",

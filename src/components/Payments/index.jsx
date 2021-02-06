@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { cryptoUtils } from "parcel-sdk";
 import { show } from "redux-modal";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
 import { Info } from "components/Dashboard/styles";
 import { Card } from "components/common/Card";
@@ -44,6 +44,10 @@ import {
 import { getSafeBalances } from "store/dashboard/actions";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
+import invitationSaga from "store/invitation/saga";
+import invitationReducer from "store/invitation/reducer";
+import { getInvitations } from "store/invitation/actions";
+import { makeSelectIsSetupComplete } from "store/invitation/selectors";
 import { getNonce } from "store/safe/actions";
 import {
   makeSelectNonce,
@@ -93,6 +97,7 @@ const transactionsKey = "transactions";
 const safeKey = "safe";
 const multisigKey = "multisig";
 const tokensKey = "tokens";
+const invitationKey = "invitation";
 
 const TABS = {
   PEOPLE: "1",
@@ -184,6 +189,7 @@ export default function Payments() {
   useInjectReducer({ key: safeKey, reducer: safeReducer });
   useInjectReducer({ key: multisigKey, reducer: multisigReducer });
   useInjectReducer({ key: tokensKey, reducer: tokensReducer });
+  useInjectReducer({ key: invitationKey, reducer: invitationReducer });
 
   // Sagas
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
@@ -192,6 +198,7 @@ export default function Payments() {
   useInjectSaga({ key: safeKey, saga: safeSaga });
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
   useInjectSaga({ key: tokensKey, saga: tokensSaga });
+  useInjectSaga({ key: invitationKey, saga: invitationSaga });
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -212,6 +219,7 @@ export default function Payments() {
   const loadingSafeDetails = useSelector(makeSelectLoadingSafeDetails());
   const tokenList = useSelector(makeSelectTokenList());
   const loadingTokens = useSelector(makeSelectLoadingTokens());
+  const isSetupComplete = useSelector(makeSelectIsSetupComplete());
 
   useEffect(() => {
     if (txHashFromMetaTx) {
@@ -224,6 +232,7 @@ export default function Payments() {
     if (ownerSafeAddress) {
       // dispatch(getSafeBalances(ownerSafeAddress));
       dispatch(getTokens(ownerSafeAddress));
+      dispatch(getInvitations(ownerSafeAddress));
       dispatch(getNonce(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
@@ -315,7 +324,7 @@ export default function Payments() {
               0
             ),
             tokenCurrency: selectedTokenDetails.name,
-            fiatValue: totalAmountToPay,
+            fiatValue: parseFloat(totalAmountToPay).toFixed(5),
             addresses: recievers.map(({ address }) => address),
           })
         );
@@ -346,7 +355,7 @@ export default function Payments() {
                 0
               ),
               tokenCurrency: selectedTokenDetails.name,
-              fiatValue: totalAmountToPay,
+              fiatValue: parseFloat(totalAmountToPay).toFixed(5),
               addresses: recievers.map(({ address }) => address),
             })
           );
@@ -557,7 +566,12 @@ export default function Payments() {
                       width="16"
                     />{" "}
                     {salaryAmount} {salaryToken} (US$
-                    {prices ? prices[salaryToken] * salaryAmount : 0})
+                    {prices
+                      ? parseFloat(prices[salaryToken] * salaryAmount).toFixed(
+                          2
+                        )
+                      : 0}
+                    )
                   </div>
                   <div>{minifyAddress(address)}</div>
                   <div className="text-right">
@@ -565,7 +579,13 @@ export default function Payments() {
                       <Button
                         type="submit"
                         iconOnly
-                        disabled={!checked[idx] || loadingTx || isNoneChecked}
+                        disabled={
+                          !checked[idx] ||
+                          loadingTx ||
+                          isNoneChecked ||
+                          !isMassPayoutAllowed ||
+                          !isSetupComplete
+                        }
                         className="py-0"
                       >
                         <span className="pay-text">PAY</span>
@@ -661,7 +681,8 @@ export default function Payments() {
               loadingTx ||
               insufficientBalance ||
               addingTx ||
-              !isMassPayoutAllowed
+              !isMassPayoutAllowed ||
+              !isSetupComplete
             }
           >
             {(loadingSafeDetails || loadingTokens) && (
@@ -810,7 +831,13 @@ export default function Payments() {
             {!isNoneChecked && !isMassPayoutAllowed && (
               <div className="text-danger mt-3">
                 Please make sure all the teammate's token match your selected
-                token!
+                token
+              </div>
+            )}
+            {!isNoneChecked && !isSetupComplete && (
+              <div className="mt-3">
+                Please <Link to="/dashboard/invite">complete your setup</Link>{" "}
+                before creating a transaction
               </div>
             )}
           </form>

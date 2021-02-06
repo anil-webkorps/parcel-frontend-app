@@ -99,10 +99,10 @@ export default function AccountCard() {
                 <div className="overview-text">Total Balance</div>
                 <div className="overview-amount">${totalBalance}</div>
               </div>
-              {/* <div className="overview-card">
+              <div className="overview-card">
                 <div className="overview-text">Interest Earned</div>
-                <div className="overview-amount">${interestEarned}</div>
-              </div> */}
+                <div className="overview-coming-soon ">Coming Soon</div>
+              </div>
             </div>
             {tokenDetails.map(({ id, name, icon, usd, balance }) => (
               <Assets key={id}>

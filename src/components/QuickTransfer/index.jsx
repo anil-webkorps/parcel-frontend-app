@@ -190,7 +190,7 @@ export default function QuickTransfer() {
               0
             ),
             tokenCurrency: selectedTokenDetails.name,
-            fiatValue: totalAmountToPay,
+            fiatValue: parseFloat(totalAmountToPay).toFixed(5),
             addresses: payoutDetails.map(({ address }) => address),
             transactionMode: 1, // quick transfer
           })
@@ -218,11 +218,12 @@ export default function QuickTransfer() {
               createdBy: account,
               txData,
               tokenValue: payoutDetails.reduce(
-                (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+                (total, { salaryAmount }) =>
+                  (total += parseFloat(salaryAmount)),
                 0
               ),
               tokenCurrency: selectedTokenDetails.name,
-              fiatValue: totalAmountToPay,
+              fiatValue: parseFloat(totalAmountToPay).toFixed(5),
               addresses: payoutDetails.map(({ address }) => address),
               transactionMode: 1, // quick transfer
             })

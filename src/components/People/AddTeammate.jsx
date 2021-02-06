@@ -420,6 +420,7 @@ export default function AddTeammate() {
             options={[
               { name: "DAI", value: "DAI" },
               { name: "USDC", value: "USDC" },
+              { name: "USDT", value: "USDT" },
             ]}
           />
           <ErrorMessage name="currency" errors={errors} />

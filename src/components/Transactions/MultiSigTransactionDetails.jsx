@@ -512,7 +512,7 @@ export default function MultiSigTransactions() {
   };
 
   const renderTransactionDetails = () => {
-    if (loading)
+    if (loading || updating)
       return (
         <div
           className="d-flex align-items-center justify-content-center"

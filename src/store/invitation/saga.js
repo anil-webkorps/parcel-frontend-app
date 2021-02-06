@@ -37,7 +37,13 @@ export function* getInvitations(action) {
       // Error in payload
       yield put(getInvitationsError(result.log));
     } else {
-      yield put(getInvitationsSuccess(result.owners, result.safeOwner));
+      yield put(
+        getInvitationsSuccess(
+          result.owners,
+          result.safeOwner,
+          result.setupCompleted
+        )
+      );
     }
   } catch (err) {
     yield put(getInvitationsError(err));
