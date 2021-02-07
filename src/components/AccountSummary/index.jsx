@@ -5,7 +5,7 @@ import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
-
+import { getAddress } from "@ethersproject/address";
 import { Info } from "components/Dashboard/styles";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
@@ -87,7 +87,9 @@ export default function AccountSummary() {
 
   const onSubmit = async (values) => {
     if (ownerSafeAddress) {
-      dispatch(addCustomToken(ownerSafeAddress, values.contractAddress));
+      dispatch(
+        addCustomToken(ownerSafeAddress, getAddress(values.contractAddress))
+      );
     }
   };
 

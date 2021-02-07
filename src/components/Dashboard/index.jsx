@@ -9,10 +9,7 @@ import AccountCard from "./AccountCard";
 import PaymentsCard from "./PaymentsCard";
 import QuickTransferCard from "./QuickTransferCard";
 import CompleteSetup from "./CompleteSetup";
-import {
-  makeSelectIsMultiOwner,
-  makeSelectOwnerSafeAddress,
-} from "store/global/selectors";
+import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import invitationSaga from "store/invitation/saga";
 import invitationReducer from "store/invitation/reducer";
 import { getInvitations } from "store/invitation/actions";
@@ -30,7 +27,6 @@ const invitationKey = "invitation";
 export default function Dashboard() {
   const [toggled] = useContext(SideNavContext);
   const ownerName = useSelector(makeSelectOwnerName());
-  const isMultiOwner = useSelector(makeSelectIsMultiOwner());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const isSetupComplete = useSelector(makeSelectIsSetupComplete());
   const loadingSetupStatus = useSelector(makeSelectLoading());
@@ -44,10 +40,10 @@ export default function Dashboard() {
   useInjectSaga({ key: invitationKey, saga: invitationSaga });
 
   useEffect(() => {
-    if (ownerSafeAddress && isMultiOwner) {
+    if (ownerSafeAddress) {
       dispatch(getInvitations(ownerSafeAddress));
     }
-  }, [dispatch, ownerSafeAddress, isMultiOwner]);
+  }, [dispatch, ownerSafeAddress]);
 
   return (
     <div

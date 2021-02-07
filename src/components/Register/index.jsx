@@ -233,7 +233,6 @@ const Register = () => {
           .signMessage(MESSAGE_TO_SIGN)
           .then(async (signature) => {
             setSign(signature);
-            console.log({ signature, formData });
             if (formData.referralId)
               await createSafeWithMetaTransaction(signature);
             else {
