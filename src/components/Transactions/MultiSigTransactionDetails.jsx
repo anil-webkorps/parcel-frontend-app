@@ -24,6 +24,7 @@ import {
   makeSelectConfirmed,
   makeSelectUpdating,
   makeSelectMultisigTransactionDetails,
+  makeSelectMultisigExecutionAllowed,
 } from "store/multisig/selectors";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
@@ -104,6 +105,7 @@ export default function MultiSigTransactions() {
   const transactionDetails = useSelector(
     makeSelectMultisigTransactionDetails()
   );
+  const executionAllowed = useSelector(makeSelectMultisigExecutionAllowed());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -433,7 +435,13 @@ export default function MultiSigTransactions() {
   };
 
   const renderConfirmSection = () => {
-    const { isExecuted, confirmations, txDetails } = transactionDetails;
+    const {
+      isExecuted,
+      confirmations,
+      txDetails,
+      rejectedCount,
+      confirmedCount,
+    } = transactionDetails;
     const { transactionHash } = txDetails;
 
     let shouldShowConfirmSection = !isExecuted ? true : false;
@@ -478,6 +486,22 @@ export default function MultiSigTransactions() {
     }
 
     if (confirmedOwnersMap[account] === true) shouldShowConfirmSection = false;
+
+    // If there is any pending transaction, don't allow to execute
+    if (
+      (rejectedCount === threshold - 1 || confirmedCount === threshold - 1) &&
+      !executionAllowed
+    ) {
+      return (
+        shouldShowConfirmSection && (
+          <ConfirmSection className="d-flex justify-content-center align-items-center">
+            <div className="text-danger">
+              You have some pending transactions. Please execute them first.
+            </div>
+          </ConfirmSection>
+        )
+      );
+    }
 
     return (
       shouldShowConfirmSection && (

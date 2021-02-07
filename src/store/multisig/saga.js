@@ -51,7 +51,12 @@ function* getMultisigTransactionById(action) {
 
   try {
     const result = yield call(request, requestURL, options);
-    yield put(getMultisigTransactionByIdSuccess(result.transaction));
+    yield put(
+      getMultisigTransactionByIdSuccess(
+        result.transaction,
+        result.executionAllowed
+      )
+    );
   } catch (err) {
     yield put(getMultisigTransactionByIdError(err));
   }

@@ -35,7 +35,6 @@ import transactionsSaga from "store/transactions/saga";
 import {
   makeSelectMetaTransactionHash,
   makeSelectError as makeSelectErrorInCreateTx,
-  makeSelectLoading as makeSelectAddTxLoading,
 } from "store/transactions/selectors";
 import {
   addTransaction,
@@ -55,6 +54,7 @@ import {
 import { createMultisigTransaction } from "store/multisig/actions";
 import multisigSaga from "store/multisig/saga";
 import multisigReducer from "store/multisig/reducer";
+import { makeSelectUpdating as makeSelectAddTxLoading } from "store/multisig/selectors";
 import { getTokens } from "store/tokens/actions";
 import {
   makeSelectLoading as makeSelectLoadingTokens,
@@ -829,22 +829,24 @@ export default function Payments() {
 
               {!isNoneChecked && renderPaymentSummary()}
             </Card>
-            {!isNoneChecked && !isMassPayoutAllowed && (
-              <div className="text-danger mt-3">
-                Please make sure all the teammate's token match your selected
-                token
-              </div>
-            )}
-            {!isNoneChecked && !isSetupComplete && (
-              <div className="mt-3">
-                Please <Link to="/dashboard/invite">complete your setup</Link>{" "}
-                before creating a transaction
-              </div>
-            )}
+            <div style={{ minHeight: "20vh" }}>
+              {!isNoneChecked && !isMassPayoutAllowed && (
+                <div className="text-danger mt-3">
+                  Please make sure all the teammate's token match your selected
+                  token
+                </div>
+              )}
+              {!isNoneChecked && !isSetupComplete && (
+                <div className="mt-3">
+                  Please <Link to="/dashboard/invite">complete your setup</Link>{" "}
+                  before creating a transaction
+                </div>
+              )}
+              {!loadingTx && errorFromMetaTx && (
+                <div className="text-danger mt-3">{errorFromMetaTx}</div>
+              )}
+            </div>
           </form>
-          {!loadingTx && errorFromMetaTx && (
-            <div className="text-danger mt-3">{errorFromMetaTx}</div>
-          )}
         </Container>
       </div>
     </div>

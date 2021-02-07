@@ -46,10 +46,14 @@ export function getMultisigTransactionById(safeAddress, transactionId) {
   };
 }
 
-export function getMultisigTransactionByIdSuccess(transactionDetails) {
+export function getMultisigTransactionByIdSuccess(
+  transactionDetails,
+  executionAllowed
+) {
   return {
     type: GET_MULTISIG_TRANSACTION_BY_ID_SUCCESS,
     transactionDetails,
+    executionAllowed,
   };
 }
 

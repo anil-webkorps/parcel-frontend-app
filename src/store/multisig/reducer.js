@@ -28,6 +28,7 @@ export const initialState = {
   success: false,
   confirmed: false,
   transactionHash: "",
+  executionAllowed: false,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -57,6 +58,7 @@ const reducer = (state = initialState, action) =>
       case GET_MULTISIG_TRANSACTION_BY_ID_SUCCESS:
         draft.fetching = false;
         draft.transactionDetails = action.transactionDetails;
+        draft.executionAllowed = action.executionAllowed;
         break;
 
       case GET_MULTISIG_TRANSACTION_BY_ID_ERROR:
