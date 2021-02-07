@@ -2,8 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { UncontrolledTooltip } from "reactstrap";
 import copy from "copy-to-clipboard";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCopy } from "@fortawesome/free-solid-svg-icons";
 
 export default function CopyLink({
   id,
