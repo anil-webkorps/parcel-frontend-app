@@ -657,7 +657,9 @@ export default function Payments() {
           </div>
           <div>
             <div className="payment-title">Total Amount</div>
-            <div className="payment-subtitle">US$ {totalAmountToPay}</div>
+            <div className="payment-subtitle">
+              US$ {parseFloat(totalAmountToPay).toFixed(2)}
+            </div>
           </div>
           <div>
             <div className="payment-title">Balance after payment</div>

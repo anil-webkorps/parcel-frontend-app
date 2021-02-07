@@ -4,6 +4,7 @@ import {
   faLongArrowAltLeft,
   faUserCircle,
   faInfoCircle,
+  faLink,
 } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
@@ -35,7 +36,7 @@ import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { useActiveWeb3React } from "hooks";
-import CopyButton from "components/common/Copy";
+import CopyLink from "components/common/Copy/CopyLink";
 import Img from "components/common/Img";
 
 import { Title, Heading, ActionItem } from "components/People/styles";
@@ -111,7 +112,7 @@ export default function InviteOwners() {
         toAddress: ownerToBeInvited,
         fromAddress: account,
         toEmail: values.email || "",
-        fromEmail: "hello@parcel.money", // TODO: change this before launch
+        fromEmail: "hello@parcel.money", // TODO: change this later
       })
     );
   };
@@ -157,7 +158,14 @@ export default function InviteOwners() {
           className="invite-status"
           onClick={() => toggleShowEmail(idx, owner)}
         >
-          Invite to parcel
+          <Button
+            large
+            type="submit"
+            style={{ minHeight: "0", height: "100%", fontSize: "14px" }}
+            loading={creatingInvitation}
+          >
+            Invite to Parcel
+          </Button>
         </div>
       );
     }
@@ -168,19 +176,26 @@ export default function InviteOwners() {
         <div className="d-flex align-items-center">
           <div className="awaiting-status mr-2">Awaiting Confirmation</div>
           {invitationDetails.invitationLink && (
-            <CopyButton
+            <CopyLink
               id="invitation-link"
               tooltip="Invitation Link"
               value={invitationDetails.invitationLink}
-              size="md"
-              color="#7367f0"
-            />
+            >
+              <Button
+                large
+                type="button"
+                style={{ minHeight: "0", height: "100%", fontSize: "14px" }}
+              >
+                {/* Copy */}
+                <FontAwesomeIcon icon={faLink} color={"#fff"} />
+              </Button>
+            </CopyLink>
           )}
         </div>
       );
     }
     if (invitationDetails && invitationDetails.status === 1) {
-      // sent invite and awaiting confirmation
+      // approve
       return (
         <div
           className="approved-status"
@@ -192,13 +207,14 @@ export default function InviteOwners() {
     }
 
     if (invitationDetails && invitationDetails.status === 2) {
-      // sent invite and awaiting confirmation
+      // completed
       return <div className="joined-status">Owner</div>;
     }
 
     return null;
   };
 
+  // eslint-disable-next-line
   const renderEmail = () => (
     <div className="send-email">
       <Row>
@@ -282,7 +298,7 @@ export default function InviteOwners() {
                       </div>
                     </div>
                     {renderInvitationStatus(owner, invitationDetails, idx)}
-                    {showEmail === idx && renderEmail()}
+                    {/* {showEmail === idx && renderEmail()} */}
                   </OwnerDetails>
                 </Col>
               </Row>
