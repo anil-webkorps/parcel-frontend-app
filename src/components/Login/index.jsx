@@ -40,7 +40,7 @@ import {
   getSafeOwners,
 } from "store/loginWizard/actions";
 import { makeSelectFlag } from "store/login/selectors";
-import { setOwnerDetails } from "store/global/actions";
+import { setOwnerDetails, setOwnersAndThreshold } from "store/global/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
 import { Input, ErrorMessage } from "components/common/Form";
@@ -379,6 +379,7 @@ const Login = () => {
       };
 
       dispatch(setOwnerDetails(formData.name, chosenSafeAddress, account));
+      dispatch(setOwnersAndThreshold(encryptedOwners, threshold));
       dispatch(registerUser(body));
     }
   };

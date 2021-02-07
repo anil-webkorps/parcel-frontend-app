@@ -167,6 +167,7 @@ export default function InviteOwners() {
             type="submit"
             style={{ minHeight: "0", height: "100%", fontSize: "14px" }}
             loading={creatingInvitation}
+            className="px-3 py-2"
           >
             Invite to Parcel
           </Button>

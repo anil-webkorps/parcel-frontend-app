@@ -563,13 +563,13 @@ export default function Payments() {
                       alt={salaryToken}
                       width="16"
                     />{" "}
-                    {salaryAmount} {salaryToken} (US$
-                    {prices
-                      ? parseFloat(prices[salaryToken] * salaryAmount).toFixed(
-                          2
-                        )
-                      : 0}
-                    )
+                    {salaryAmount} {salaryToken}{" "}
+                    {prices &&
+                      prices[salaryToken] &&
+                      `(US$
+                       ${parseFloat(prices[salaryToken] * salaryAmount).toFixed(
+                         2
+                       )})`}
                   </div>
                   <div>{minifyAddress(address)}</div>
                   <div className="text-right">
@@ -653,9 +653,13 @@ export default function Payments() {
           </div>
           <div>
             <div className="payment-title">Total Amount</div>
-            <div className="payment-subtitle">
-              US$ {parseFloat(totalAmountToPay).toFixed(2)}
-            </div>
+            {!isNaN(totalAmountToPay) ? (
+              <div className="payment-subtitle">
+                US$ {parseFloat(totalAmountToPay).toFixed(2)}
+              </div>
+            ) : (
+              0
+            )}
           </div>
           <div>
             <div className="payment-title">Balance after payment</div>

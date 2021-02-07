@@ -21,7 +21,7 @@ import {
   makeSelectStep,
 } from "store/registerWizard/selectors";
 import { chooseStep, updateForm } from "store/registerWizard/actions";
-import { setOwnerDetails } from "store/global/actions";
+import { setOwnerDetails, setOwnersAndThreshold } from "store/global/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
 import { Input, ErrorMessage } from "components/common/Form";
@@ -298,6 +298,7 @@ const Register = () => {
               dispatch(
                 setOwnerDetails(formData.name, formData.safeAddress, account)
               );
+              dispatch(setOwnersAndThreshold(encryptedOwners, threshold));
               dispatch(registerUser(body));
             }
           });
@@ -465,6 +466,7 @@ const Register = () => {
           };
           dispatch(registerUser(body));
           dispatch(setOwnerDetails(formData.name, proxy, account));
+          dispatch(setOwnersAndThreshold(encryptedOwners, threshold));
           setLoadingTx(false);
           // history.push("/dashboard");
         }
