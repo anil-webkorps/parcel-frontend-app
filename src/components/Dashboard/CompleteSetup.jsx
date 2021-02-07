@@ -13,9 +13,7 @@ export default function CompleteSetup() {
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <div className="card-title">Complete Setup</div>
-            <div className="card-subtitle">
-              Invite all the owners to the dashboard
-            </div>
+            <div className="card-subtitle">Invite all the owners to Parcel</div>
           </div>
           <Link to="/dashboard/invite">
             <div className="circle">

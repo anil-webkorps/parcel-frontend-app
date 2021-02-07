@@ -13,9 +13,7 @@ export default function QuickTransferCard() {
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <div className="card-title">Quick Transfer</div>
-            <div className="card-subtitle">
-              Send money quickly with built in token swaps
-            </div>
+            <div className="card-subtitle">Send money quickly to anyone</div>
           </div>
           <Link to="/dashboard/quick-transfer">
             <div className="circle">

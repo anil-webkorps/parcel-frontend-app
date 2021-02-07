@@ -5,7 +5,7 @@ import { Col, Row } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 
 import Button from "components/common/Button";
-import { tokens, defaultTokenDetails } from "constants/index";
+import { defaultTokenDetails } from "constants/index";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import tokensReducer from "store/tokens/reducer";
@@ -50,7 +50,7 @@ function SelectTokenModal(props) {
   const tokenList = useSelector(makeSelectTokenList());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
-  const [tokenName, setTokenName] = useState(tokens.DAI);
+  const [tokenName, setTokenName] = useState();
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
 
   useEffect(() => {

@@ -193,7 +193,7 @@ export default function MultiSigTransactions() {
       (confirmedCount >= threshold || rejectedCount >= threshold) &&
       !isExecuted
     ) {
-      return <div className="pending">Pending</div>;
+      return <div className="pending">Transaction Submitted</div>;
     }
     if (isExecuted && confirmedCount >= threshold)
       return <div className="success">Success</div>;

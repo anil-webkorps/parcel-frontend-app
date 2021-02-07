@@ -59,7 +59,7 @@ import {
   // makeSelectError,
 } from "store/tokens/selectors";
 import Loading from "components/common/Loading";
-import { tokens, defaultTokenDetails } from "constants/index";
+import { defaultTokenDetails } from "constants/index";
 import SelectTokenModal, {
   MODAL_NAME as SELECT_TOKEN_MODAL,
 } from "components/Payments/SelectTokenModal";
@@ -85,8 +85,7 @@ export default function QuickTransfer() {
   const { account } = useActiveWeb3React();
   const [submittedTx, setSubmittedTx] = useState(false);
   const [selectedTokenDetails, setSelectedTokenDetails] = useState();
-  // eslint-disable-next-line
-  const [selectedTokenName, setSelectedTokenName] = useState(tokens.DAI);
+  const [selectedTokenName, setSelectedTokenName] = useState();
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
   const [payoutDetails, setPayoutDetails] = useState(null);
   const [metaTxHash, setMetaTxHash] = useState();
@@ -138,6 +137,7 @@ export default function QuickTransfer() {
   useEffect(() => {
     if (tokenList && tokenList.length > 0) {
       setTokenDetails(tokenList);
+      setSelectedTokenName(tokenList[0].name);
     }
   }, [tokenList]);
 

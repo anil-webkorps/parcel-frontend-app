@@ -10,6 +10,7 @@ import { useForm, Controller } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
+import { show } from "redux-modal";
 
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
@@ -19,7 +20,7 @@ import {
   Input,
   ErrorMessage,
   // Select,
-  SelectTokenDropdown,
+  CurrencyInput,
 } from "components/common/Form";
 import addTeammateReducer from "store/add-teammate/reducer";
 import { useLocalStorage } from "hooks";
@@ -48,7 +49,11 @@ import { makeSelectDepartments } from "store/view-departments/selectors";
 import { getTokens } from "store/tokens/actions";
 import tokensReducer from "store/tokens/reducer";
 import tokensSaga from "store/tokens/saga";
-import { makeSelectTokensDropdown } from "store/tokens/selectors";
+import {
+  makeSelectLoading as makeSelectLoadingTokens,
+  makeSelectTokenList,
+  makeSelectPrices,
+} from "store/tokens/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { numToOrd } from "utils/date-helpers";
@@ -56,6 +61,11 @@ import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Dropzone from "components/common/Dropzone";
 import { minifyAddress } from "components/common/Web3Utils";
 import TeamPng from "assets/images/user-team.png";
+import SelectTokenModal, {
+  MODAL_NAME as SELECT_TOKEN_MODAL,
+} from "components/Payments/SelectTokenModal";
+import Loading from "components/common/Loading";
+import Img from "components/common/Img";
 
 import {
   Container,
@@ -71,6 +81,7 @@ import {
   ChooseAddOption,
   Table,
 } from "./styles";
+import { ShowToken } from "components/QuickTransfer/styles";
 
 import { Circle } from "components/Header/styles";
 import { FIELD_NAMES, isValidField } from "store/add-teammate/utils";
@@ -109,6 +120,9 @@ export default function AddTeammate() {
   const [success, setSuccess] = useState(false);
   const [csvData, setCSVData] = useState();
   const [invalidCsvData, setInvalidCsvData] = useState(false);
+  const [selectedTokenDetails, setSelectedTokenDetails] = useState();
+  const [selectedTokenName, setSelectedTokenName] = useState();
+  const [tokenDetails, setTokenDetails] = useState();
 
   const { register, errors, handleSubmit, reset, formState, control } = useForm(
     {
@@ -137,8 +151,29 @@ export default function AddTeammate() {
   const flow = useSelector(makeSelectFlow());
   const addBulkSuccess = useSelector(makeSelectSuccess());
   const loading = useSelector(makeSelectLoading());
-  const tokensDropdownOptions = useSelector(makeSelectTokensDropdown());
+  const loadingTokens = useSelector(makeSelectLoadingTokens());
+  const tokenList = useSelector(makeSelectTokenList());
+  const prices = useSelector(makeSelectPrices());
 
+  useEffect(() => {
+    if (ownerSafeAddress) {
+      dispatch(getTokens(ownerSafeAddress));
+    }
+  }, [ownerSafeAddress, dispatch]);
+
+  useEffect(() => {
+    if (tokenList && tokenList.length > 0) {
+      setTokenDetails(tokenList);
+      setSelectedTokenName(tokenList[0].name);
+    }
+  }, [tokenList]);
+
+  useEffect(() => {
+    if (selectedTokenName)
+      setSelectedTokenDetails(
+        tokenDetails.filter(({ name }) => name === selectedTokenName)[0]
+      );
+  }, [tokenDetails, selectedTokenName]);
   const location = useLocation();
   const history = useHistory();
 
@@ -147,8 +182,8 @@ export default function AddTeammate() {
       firstName: formData.firstName || "",
       lastName: formData.lastName || "",
       address: formData.address || "",
-      salary: formData.salary || "",
-      currency: formData.currency || "",
+      amount: formData.amount || "",
+      // currency: selectedTokenDetails.name || "",
     });
   }, [reset, formData]);
 
@@ -226,8 +261,8 @@ export default function AddTeammate() {
       firstName: "",
       lastName: "",
       address: "",
-      salary: "",
-      currency: "",
+      amount: "",
+      // currency: "",
     });
     dispatch(updateForm(null));
     setSuccess(false);
@@ -252,8 +287,8 @@ export default function AddTeammate() {
       JSON.stringify({
         firstName: formData.firstName,
         lastName: formData.lastName,
-        salaryAmount: formData.salary,
-        salaryToken: formData.currency.value,
+        salaryAmount: formData.amount,
+        salaryToken: selectedTokenDetails.name,
         address: formData.address,
         payCycleDate: chosenDepartment.payCycleDate,
         joiningDate: Date.now(),
@@ -375,6 +410,16 @@ export default function AddTeammate() {
     setSuccess(true);
   };
 
+  const showTokenModal = () => {
+    dispatch(
+      show(SELECT_TOKEN_MODAL, {
+        selectedTokenDetails,
+        setSelectedTokenDetails,
+      })
+    );
+    reset({ address: "", amount: "" });
+  };
+
   const renderTeammateDetails = () => (
     <Card className="add-teammate">
       <Title className="mb-4">Add Teammate</Title>
@@ -401,7 +446,7 @@ export default function AddTeammate() {
         </Col>
       </Row>
 
-      <Heading>SALARY PAYMENT DETAILS</Heading>
+      <Heading>PAYMENT DETAILS</Heading>
       <Row className="mb-3">
         <Col lg="12">
           <Input
@@ -420,17 +465,41 @@ export default function AddTeammate() {
       </Row>
 
       <Row className="mb-4">
-        <Col lg="6" sm="12">
-          <Input
+        <Col lg="12" sm="12">
+          {/* <Input
             type="number"
             name="salary"
             register={register}
-            required={`Salary is required`}
-            placeholder="Salary"
+            required={`Amount is required`}
+            placeholder="Amount"
           />
-          <ErrorMessage name="salary" errors={errors} />
+          <ErrorMessage name="salary" errors={errors} /> */}
+          <Controller
+            control={control}
+            name="amount"
+            render={({ onChange, value }) => (
+              <CurrencyInput
+                type="number"
+                name="amount"
+                // register={register}
+                required={`Amount is required`}
+                value={value}
+                onChange={onChange}
+                placeholder="Amount"
+                convertionRate={
+                  prices &&
+                  selectedTokenDetails &&
+                  prices[selectedTokenDetails.name]
+                }
+                tokenName={
+                  selectedTokenDetails ? selectedTokenDetails.name : ""
+                }
+              />
+            )}
+          />
+          <ErrorMessage name="amount" errors={errors} />
         </Col>
-        <Col lg="6" sm="12">
+        <Col lg="12" sm="12">
           {/* <Select
             name="currency"
             register={register}
@@ -442,7 +511,7 @@ export default function AddTeammate() {
             ]}
           /> */}
           {/* <ErrorMessage name="currency" errors={errors} /> */}
-          <Controller
+          {/* <Controller
             name="currency"
             control={control}
             rules={{ required: true }}
@@ -454,7 +523,33 @@ export default function AddTeammate() {
               />
             )}
           />
-          <ErrorMessage name="currency" errors={errors} />
+          <ErrorMessage name="currency" errors={errors} /> */}
+          {loadingTokens && (
+            <ShowToken className="mb-0">
+              <Loading color="#7367f0" />
+            </ShowToken>
+          )}
+
+          {!loadingTokens && selectedTokenDetails && (
+            <ShowToken onClick={showTokenModal} className="mb-0">
+              <div>
+                <Img
+                  src={selectedTokenDetails.icon}
+                  alt="token icon"
+                  width="36"
+                />
+              </div>
+              <div className="token-balance">
+                <div className="value">
+                  {selectedTokenDetails.balance
+                    ? parseFloat(selectedTokenDetails.balance).toFixed(2)
+                    : "0.00"}
+                </div>
+                <div className="name">{selectedTokenDetails.name}</div>
+              </div>
+              <div className="change">Change</div>
+            </ShowToken>
+          )}
         </Col>
       </Row>
 
@@ -500,6 +595,7 @@ export default function AddTeammate() {
       >
         Add Teammate
       </Button>
+      <SelectTokenModal />
     </Card>
   );
 
@@ -658,7 +754,7 @@ export default function AddTeammate() {
         <div className="lower mt-3">
           <div className="choose-subtitle">Steps include:</div>
           <div className="choose-subtitle">
-            Teammate salary details, Team details, Wallet address
+            Teammate payment details, Team details, Wallet address
           </div>
         </div>
       </ChooseAddOption>
@@ -707,7 +803,7 @@ export default function AddTeammate() {
               <div>
                 <div className="section-title mb-1">Pay Amount</div>
                 <div className="section-desc">
-                  {formData.salary} {formData.currency.value}
+                  {formData.amount} {selectedTokenDetails.name}
                 </div>
               </div>
             </div>

@@ -24,19 +24,30 @@ const MultiCurrencyInputField = ({
 
   const handleUsdValueChange = (e) => {
     setConversionValue(e.target.value);
-    onChange(e.target.value / convertionRate);
+    const tokenValue = e.target.value
+      ? parseFloat(e.target.value / convertionRate).toFixed(4)
+      : "";
+    onChange(tokenValue);
   };
 
   const handleTokenValueChange = (e) => {
-    setConversionValue(parseFloat(e.target.value * convertionRate).toFixed(4));
+    const conversionValue = e.target.value
+      ? parseFloat(e.target.value * convertionRate).toFixed(4)
+      : "";
+    setConversionValue(conversionValue);
     onChange(e.target.value);
   };
 
   useEffect(() => {
     if (!value) {
       setConversionValue("");
+    } else {
+      const conversionValue = value
+        ? parseFloat(value * convertionRate).toFixed(4)
+        : "";
+      setConversionValue(conversionValue);
     }
-  }, [value]);
+  }, [value, convertionRate]);
 
   const handleToggleFlex = () => {
     setToggleFlex((flex) => !flex);

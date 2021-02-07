@@ -76,11 +76,7 @@ import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 import TeamPng from "assets/images/user-team.png";
 
-import {
-  tokens,
-  getDefaultIconIfPossible,
-  defaultTokenDetails,
-} from "constants/index";
+import { getDefaultIconIfPossible, defaultTokenDetails } from "constants/index";
 import { Container, Table, PaymentSummary, TokenBalance } from "./styles";
 import TransactionSubmitted from "./TransactionSubmitted";
 import SelectTokenModal, {
@@ -163,6 +159,7 @@ export default function Payments() {
   const [departmentStep, setDepartmentStep] = useState(0);
   const [metaTxHash, setMetaTxHash] = useState();
   const [submittedTx, setSubmittedTx] = useState(false);
+  const [selectedTokenName, setSelectedTokenName] = useState();
   const [selectedTokenDetails, setSelectedTokenDetails] = useState();
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
   const {
@@ -235,12 +232,25 @@ export default function Payments() {
     }
   }, [ownerSafeAddress, dispatch]);
 
+  // useEffect(() => {
+  //   setSelectedTokenDetails(
+  //     tokenDetails.filter(({ name }) => name === tokens.DAI)[0]
+  //   );
+  // }, [tokenDetails]);
 
   useEffect(() => {
-    setSelectedTokenDetails(
-      tokenDetails.filter(({ name }) => name === tokens.DAI)[0]
-    );
-  }, [tokenDetails]);
+    if (tokenList && tokenList.length > 0) {
+      setTokenDetails(tokenList);
+      setSelectedTokenName(tokenList[0].name);
+    }
+  }, [tokenList]);
+
+  useEffect(() => {
+    if (selectedTokenName)
+      setSelectedTokenDetails(
+        tokenDetails.filter(({ name }) => name === selectedTokenName)[0]
+      );
+  }, [tokenDetails, selectedTokenName]);
 
   useEffect(() => {
     // reset to initial state
@@ -394,12 +404,6 @@ export default function Payments() {
     history,
     prices,
   ]);
-
-  useEffect(() => {
-    if (tokenList && tokenList.length > 0) {
-      setTokenDetails(tokenList);
-    }
-  }, [tokenList]);
 
   const isNoneChecked = useMemo(() => checked.every((check) => !check), [
     checked,
