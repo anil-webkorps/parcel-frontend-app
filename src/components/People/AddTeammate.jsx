@@ -6,7 +6,7 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
@@ -15,7 +15,12 @@ import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
-import { Input, ErrorMessage, Select } from "components/common/Form";
+import {
+  Input,
+  ErrorMessage,
+  // Select,
+  SelectTokenDropdown,
+} from "components/common/Form";
 import addTeammateReducer from "store/add-teammate/reducer";
 import { useLocalStorage } from "hooks";
 import {
@@ -40,6 +45,10 @@ import viewDepartmentsReducer from "store/view-departments/reducer";
 import { getDepartments } from "store/view-departments/actions";
 import viewDepartmentsSaga from "store/view-departments/saga";
 import { makeSelectDepartments } from "store/view-departments/selectors";
+import { getTokens } from "store/tokens/actions";
+import tokensReducer from "store/tokens/reducer";
+import tokensSaga from "store/tokens/saga";
+import { makeSelectTokensDropdown } from "store/tokens/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { numToOrd } from "utils/date-helpers";
@@ -91,6 +100,7 @@ const ADD_SINGLE_TEAMMATE_STEPS = {
 
 const addTeammateKey = "addTeammate";
 const viewDepartmentsKey = "viewDepartments";
+const tokensKey = "tokens";
 
 export default function AddTeammate() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
@@ -100,19 +110,23 @@ export default function AddTeammate() {
   const [csvData, setCSVData] = useState();
   const [invalidCsvData, setInvalidCsvData] = useState(false);
 
-  const { register, errors, handleSubmit, reset, formState } = useForm({
-    mode: "onChange",
-  });
+  const { register, errors, handleSubmit, reset, formState, control } = useForm(
+    {
+      mode: "onChange",
+    }
+  );
 
   useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
   useInjectReducer({
     key: viewDepartmentsKey,
     reducer: viewDepartmentsReducer,
   });
+  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
 
   useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
+  useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const step = useSelector(makeSelectStep());
@@ -123,6 +137,7 @@ export default function AddTeammate() {
   const flow = useSelector(makeSelectFlow());
   const addBulkSuccess = useSelector(makeSelectSuccess());
   const loading = useSelector(makeSelectLoading());
+  const tokensDropdownOptions = useSelector(makeSelectTokensDropdown());
 
   const location = useLocation();
   const history = useHistory();
@@ -142,6 +157,9 @@ export default function AddTeammate() {
       dispatch(getDepartments(ownerSafeAddress));
     }
   }, [step, ownerSafeAddress, dispatch]);
+  useEffect(() => {
+    if (ownerSafeAddress) dispatch(getTokens(ownerSafeAddress));
+  }, [ownerSafeAddress, dispatch]);
 
   useEffect(() => {
     if (!chosenDepartment) dispatch(chooseStep(STEPS.ZERO));
@@ -235,7 +253,7 @@ export default function AddTeammate() {
         firstName: formData.firstName,
         lastName: formData.lastName,
         salaryAmount: formData.salary,
-        salaryToken: formData.currency,
+        salaryToken: formData.currency.value,
         address: formData.address,
         payCycleDate: chosenDepartment.payCycleDate,
         joiningDate: Date.now(),
@@ -413,7 +431,7 @@ export default function AddTeammate() {
           <ErrorMessage name="salary" errors={errors} />
         </Col>
         <Col lg="6" sm="12">
-          <Select
+          {/* <Select
             name="currency"
             register={register}
             required={`Token is required`}
@@ -422,6 +440,19 @@ export default function AddTeammate() {
               { name: "USDC", value: "USDC" },
               { name: "USDT", value: "USDT" },
             ]}
+          /> */}
+          {/* <ErrorMessage name="currency" errors={errors} /> */}
+          <Controller
+            name="currency"
+            control={control}
+            rules={{ required: true }}
+            render={(props) => (
+              <SelectTokenDropdown
+                name="currency"
+                options={tokensDropdownOptions}
+                {...props}
+              />
+            )}
           />
           <ErrorMessage name="currency" errors={errors} />
         </Col>
@@ -676,7 +707,7 @@ export default function AddTeammate() {
               <div>
                 <div className="section-title mb-1">Pay Amount</div>
                 <div className="section-desc">
-                  {formData.salary} {formData.currency}
+                  {formData.salary} {formData.currency.value}
                 </div>
               </div>
             </div>

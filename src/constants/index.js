@@ -40,7 +40,7 @@ export const getDefaultIconIfPossible = (tokenSymbol) => {
     case tokens.USDT:
       return USDTIcon;
     default:
-      return null;
+      return ETHIcon;
   }
 };
 

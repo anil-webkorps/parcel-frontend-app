@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import Select from "react-select";
 
-import { defaultTokenOptions } from "utils/massPayout";
-
 const inputStyles = {
   control: (styles) => ({
     ...styles,
@@ -39,7 +37,7 @@ const SelectTokenDropdownField = ({ name, options, ...rest }) => {
         name={name}
         defaultValue={selectedOption}
         onChange={setSelectedOption}
-        options={defaultTokenOptions}
+        options={options}
         styles={inputStyles}
         {...rest}
       />

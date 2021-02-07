@@ -11,6 +11,7 @@ import {
 } from "./action-types";
 import { getDefaultIconIfPossible } from "constants/index";
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
+import { constructLabel } from "utils/massPayout";
 
 export const initialState = {
   log: "",
@@ -20,6 +21,7 @@ export const initialState = {
   error: false,
   tokenList: [],
   prices: null,
+  tokensDropdown: [],
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -70,7 +72,19 @@ const reducer = (state = initialState, action) =>
               };
             })
             .filter(Boolean);
+
+        const dropdownList =
+          action.tokens &&
+          action.tokens.map(({ tokenDetails }) => ({
+            value: tokenDetails.tokenInfo.symbol,
+            label: constructLabel(
+              tokenDetails.tokenInfo.symbol,
+              getDefaultIconIfPossible(tokenDetails.tokenInfo.symbol) ||
+                tokenDetails.tokenInfo.logoUri
+            ),
+          }));
         draft.tokenList = allTokenDetails;
+        draft.tokensDropdown = dropdownList;
         draft.prices = action.prices;
         draft.loading = false;
         draft.log = action.log;
