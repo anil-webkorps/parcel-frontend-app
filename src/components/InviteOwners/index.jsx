@@ -33,7 +33,10 @@ import {
 } from "store/invitation/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOwnerSafeAddress,
+  makeSelectThreshold,
+} from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { useActiveWeb3React } from "hooks";
 import CopyLink from "components/common/Copy/CopyLink";
@@ -69,6 +72,7 @@ export default function InviteOwners() {
 
   // const dispatch = useDispatch();
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const threshold = useSelector(makeSelectThreshold());
   const safeOwners = useSelector(makeSelectSafeOwners());
   const createdBy = useSelector(makeSelectCreatedBy());
   const loading = useSelector(makeSelectLoading());
@@ -177,14 +181,15 @@ export default function InviteOwners() {
           <div className="awaiting-status mr-2">Awaiting Confirmation</div>
           {invitationDetails.invitationLink && (
             <CopyLink
-              id="invitation-link"
+              id={`invitation-link-${idx}`}
               tooltip="Invitation Link"
               value={invitationDetails.invitationLink}
             >
               <Button
                 large
                 type="button"
-                style={{ minHeight: "0", height: "100%", fontSize: "14px" }}
+                style={{ minHeight: "0", height: "100%", fontSize: "12px" }}
+                className="p-2"
               >
                 {/* Copy */}
                 <FontAwesomeIcon icon={faLink} color={"#fff"} />
@@ -303,6 +308,13 @@ export default function InviteOwners() {
                 </Col>
               </Row>
             ))}
+          <Heading className="payment-status-threshold">
+            Every transaction requires the confirmation of{" "}
+            <span>
+              {threshold} out of {safeOwners.length}
+            </span>{" "}
+            owners
+          </Heading>
         </Card>
       </form>
     );

@@ -35,4 +35,12 @@ export default styled.div`
     text-align: left;
     color: #373737;
   }
+
+  &.payment-status-threshold {
+    font-size: 16px;
+    margin-top: 8px;
+    span {
+      font-weight: bold;
+    }
+  }
 `;
