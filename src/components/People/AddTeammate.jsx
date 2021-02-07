@@ -312,8 +312,8 @@ export default function AddTeammate() {
   };
 
   const handleDrop = (data) => {
-    // checking for 7 columns in the csv
-    if (!data || (data.length === 0 && data.some((arr) => arr.length !== 6))) {
+    // checking for at least 6 columns in the csv
+    if (!data || data.length === 0 || data.some((arr) => arr.length < 6)) {
       setInvalidCsvData(true);
       return;
     }
@@ -845,7 +845,7 @@ export default function AddTeammate() {
     }
 
     return (
-      <TableRow key={`${address}-${idx}`}>
+      <TableRow key={`${address}-${idx}`} col={4}>
         <div className={`${invalidName && "text-danger"}`}>
           {firstName} {lastName}
         </div>
@@ -891,7 +891,7 @@ export default function AddTeammate() {
 
         {hasCsvData && (
           <div className="mb-4">
-            <TableHead>
+            <TableHead col={4}>
               <div>Teammate Name</div>
               <div>Address</div>
               <div>Disbursement</div>
@@ -900,6 +900,7 @@ export default function AddTeammate() {
 
             <TableBody
               style={{ minHeight: "100px", height: "300px", overflow: "auto" }}
+              col={4}
             >
               {csvData.map(
                 (
