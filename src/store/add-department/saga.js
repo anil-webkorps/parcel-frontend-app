@@ -12,7 +12,6 @@ function* addDepartment(action) {
       name: action.name,
       safeAddress: action.safeAddress,
       createdBy: action.createdBy,
-      payCycleDate: action.payCycleDate,
     }),
     // headers: {
     //   "content-type": "application/json",

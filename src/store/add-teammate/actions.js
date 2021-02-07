@@ -44,7 +44,6 @@ export function chooseDepartment(chosenDepartment) {
 
 export function addTeammate({
   encryptedEmployeeDetails,
-  payCycleDate,
   safeAddress,
   createdBy,
   departmentId,
@@ -55,7 +54,6 @@ export function addTeammate({
     type: ADD_TEAMMATE,
     body: {
       encryptedEmployeeDetails,
-      payCycleDate,
       safeAddress,
       createdBy,
       departmentId,

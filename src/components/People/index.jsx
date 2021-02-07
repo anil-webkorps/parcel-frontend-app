@@ -18,7 +18,6 @@ import {
 } from "store/view-departments/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 
@@ -70,9 +69,7 @@ export default function People() {
             className="mx-auto"
           >
             <div className="title">People</div>
-            <div className="subtitle">
-              You can add teams and manage people payroll
-            </div>
+            <div className="subtitle">You can add teams and manage payouts</div>
           </div>
         </Info>
         <Container
@@ -162,37 +159,32 @@ export default function People() {
             }}
           >
             {allDepartments &&
-              allDepartments.map(
-                ({ departmentId, name, payCycleDate, employees }) => (
-                  <Link
-                    to={`/dashboard/people/view/${departmentId}`}
-                    key={departmentId}
-                  >
-                    <Card className="department-card">
-                      <div className="upper">
-                        <div className="d-flex justify-content-between">
-                          <img src={TeamPng} alt={name} width="50" />
-                          <div className="circle circle-grey">
-                            <FontAwesomeIcon
-                              icon={faLongArrowAltRight}
-                              color="#7367f0"
-                            />
-                          </div>
+              allDepartments.map(({ departmentId, name, employees }) => (
+                <Link
+                  to={`/dashboard/people/view/${departmentId}`}
+                  key={departmentId}
+                >
+                  <Card className="department-card">
+                    <div className="upper">
+                      <div className="d-flex justify-content-between">
+                        <img src={TeamPng} alt={name} width="50" />
+                        <div className="circle circle-grey">
+                          <FontAwesomeIcon
+                            icon={faLongArrowAltRight}
+                            color="#7367f0"
+                          />
                         </div>
-                        <div className="mt-2">{name}</div>
                       </div>
+                      <div className="mt-2">{name}</div>
+                    </div>
 
-                      <div className="line" />
-                      <div className="lower">
-                        <div className="mb-3">Teammates : {employees}</div>
-                        <div>
-                          Paydate : {numToOrd(payCycleDate)} of every month
-                        </div>
-                      </div>
-                    </Card>
-                  </Link>
-                )
-              )}
+                    <div className="line" />
+                    <div className="lower">
+                      <div>Teammates : {employees}</div>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
             <Link to={`/dashboard/department/new`}>
               <Card className="department-card d-flex justify-content-center align-items-center">
                 <Button iconOnly className="d-block mx-auto">

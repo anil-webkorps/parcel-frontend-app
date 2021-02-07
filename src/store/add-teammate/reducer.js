@@ -22,7 +22,6 @@ export const initialState = {
   departments: [],
   error: false,
   chosenDepartment: null,
-  payCycleDate: "",
   totalEmployees: 0,
   flow: "", // SINGLE or BULK,
   success: false,
@@ -47,7 +46,6 @@ const reducer = (state = initialState, action) =>
 
       case CHOOSE_DEPARTMENT:
         draft.chosenDepartment = action.chosenDepartment;
-        draft.payCycleDate = action.payCycleDate;
         break;
 
       case ADD_TEAMMATE:

@@ -25,7 +25,6 @@ export function* createTeammate({ body }) {
     method: "POST",
     body: JSON.stringify({
       encryptedEmployeeDetails: body.encryptedEmployeeDetails,
-      payCycleDate: body.payCycleDate,
       safeAddress: body.safeAddress,
       createdBy: body.createdBy,
       departmentId: body.departmentId,

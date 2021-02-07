@@ -12,13 +12,12 @@ export function updateForm(formData) {
   };
 }
 
-export function addDepartment({ name, safeAddress, createdBy, payCycleDate }) {
+export function addDepartment({ name, safeAddress, createdBy }) {
   return {
     type: ADD_DEPARTMENT,
     name,
     safeAddress,
     createdBy,
-    payCycleDate,
   };
 }
 

@@ -24,7 +24,7 @@ export default styled.div`
   }
 
   &.choosen-dept {
-    margin-bottom: 8px;
+    margin-bottom: 0;
     margin-left: 10px;
     font-size: 16px;
     font-weight: bold;

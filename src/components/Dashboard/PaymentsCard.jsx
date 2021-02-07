@@ -218,7 +218,7 @@ export default function PaymentsCard() {
           <GreyCard>
             <img src={TeamMembersPng} alt="teams" width="320" />
             <div className="card-subtitle text-center">
-              You can add team members to set-up your teams and their payroll.
+              You can add team members to set-up your teams and their payouts.
             </div>
           </GreyCard>
         )}

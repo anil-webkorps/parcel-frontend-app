@@ -56,7 +56,6 @@ import {
 } from "store/tokens/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Dropzone from "components/common/Dropzone";
 import { minifyAddress } from "components/common/Web3Utils";
@@ -106,7 +105,7 @@ const FLOWS = {
 const ADD_SINGLE_TEAMMATE_STEPS = {
   [STEPS.ZERO]: "Add Teammate",
   [STEPS.ONE]: "Choose Team",
-  [STEPS.TWO]: "Payroll Details",
+  [STEPS.TWO]: "Summary",
 };
 
 const addTeammateKey = "addTeammate";
@@ -290,7 +289,6 @@ export default function AddTeammate() {
         salaryAmount: formData.amount,
         salaryToken: selectedTokenDetails.name,
         address: formData.address,
-        payCycleDate: chosenDepartment.payCycleDate,
         joiningDate: Date.now(),
       }),
       encryptionKey
@@ -298,7 +296,6 @@ export default function AddTeammate() {
 
     const body = {
       encryptedEmployeeDetails,
-      payCycleDate: chosenDepartment.payCycleDate,
       safeAddress: ownerSafeAddress,
       createdBy: ownerSafeAddress,
       departmentId: chosenDepartment.departmentId,
@@ -316,7 +313,7 @@ export default function AddTeammate() {
 
   const handleDrop = (data) => {
     // checking for 7 columns in the csv
-    if (!data || (data.length === 0 && data.some((arr) => arr.length !== 7))) {
+    if (!data || (data.length === 0 && data.some((arr) => arr.length !== 6))) {
       setInvalidCsvData(true);
       return;
     }
@@ -330,7 +327,6 @@ export default function AddTeammate() {
           salaryAmount: arr[3],
           salaryToken: arr[4],
           departmentName: arr[5],
-          payCycleDate: arr[6],
         },
       ];
     }, []);
@@ -361,7 +357,6 @@ export default function AddTeammate() {
             salaryAmount,
             salaryToken,
             address,
-            // payCycleDate,
             departmentName,
           } = csvData[i];
 
@@ -372,7 +367,6 @@ export default function AddTeammate() {
               salaryAmount,
               salaryToken,
               address,
-              // payCycleDate,
             }),
             encryptionKey
           );
@@ -417,7 +411,7 @@ export default function AddTeammate() {
         setSelectedTokenDetails,
       })
     );
-    reset({ address: "", amount: "" });
+    // reset({ address: "", amount: "" });
   };
 
   const renderTeammateDetails = () => (
@@ -558,8 +552,8 @@ export default function AddTeammate() {
         <ChooseDepartment type="submit">
           <div>
             <div className="choose-title">Choose Team</div>
-            <div className="choose-subtitle">
-              Teammates will be paid as per team paycycle date.
+            <div className="choose-subtitle mt-2">
+              Choose a team or create a new one
             </div>
           </div>
           <div className="p-0">
@@ -573,15 +567,11 @@ export default function AddTeammate() {
         </ChooseDepartment>
       ) : (
         <ChooseDepartment onClick={onChangeDepartmentClicked}>
-          <div>
-            <div className="text-left mb-2">
+          <div className="d-flex align-items-center">
+            <div className="text-left mr-2">
               <img src={TeamPng} alt={chosenDepartment.name} width="50" />
             </div>
-            <Title className="mb-1 choosen-dept">{chosenDepartment.name}</Title>
-            <Heading className="choosen-dept">
-              PAYROLL DATE : {numToOrd(chosenDepartment.payCycleDate)} of Every
-              Month
-            </Heading>
+            <Title className="choosen-dept">{chosenDepartment.name}</Title>
           </div>
           <div className="choose-title">EDIT</div>
         </ChooseDepartment>
@@ -590,7 +580,7 @@ export default function AddTeammate() {
       <Button
         large
         type="submit"
-        className="mt-5"
+        className="mt-4"
         disabled={!formState.isValid}
       >
         Add Teammate
@@ -645,20 +635,21 @@ export default function AddTeammate() {
     );
   };
 
-  const renderPaydate = () => {
+  const renderSummary = () => {
     return (
       chosenDepartment && (
         <Card className="paydate">
-          <Title>Team Paydate</Title>
-          <Heading>The user will be paid as per team pay date.</Heading>
+          <Title>Summary</Title>
+          <Heading>Please check the details of the teammate</Heading>
 
           <PayrollCard>
             <div className="dept-name">{chosenDepartment.name}</div>
             <div className="dept-info">
-              PAYROLL DATE : {numToOrd(chosenDepartment.payCycleDate)} of Every
-              Month
+              {formData.firstName} {formData.lastName}
             </div>
-            {/* <div className="change-date mt-4">Change Payroll date </div> */}
+            <div className="dept-info mb-0">
+              {formData.amount} {selectedTokenDetails.name}
+            </div>
           </PayrollCard>
 
           <Button
@@ -769,7 +760,7 @@ export default function AddTeammate() {
             {step > STEPS.ZERO && renderDoneSteps()}
             {step === STEPS.ZERO && renderTeammateDetails()}
             {step === STEPS.ONE && renderChooseDepartment()}
-            {step === STEPS.TWO && renderPaydate()}
+            {step === STEPS.TWO && renderSummary()}
           </StepsCard>
         </form>
       );
@@ -779,7 +770,7 @@ export default function AddTeammate() {
         <Card className="add-teammate">
           <Title className="mb-2">Teammate Saved!</Title>
           <Heading>Wow! You have a new champ on-board</Heading>
-          <Summary style={{ marginBottom: "13em" }}>
+          <Summary style={{ marginBottom: "16em" }}>
             <div className="left">
               <img src={TeamPng} alt="teammate" width="80" />
             </div>
@@ -793,12 +784,6 @@ export default function AddTeammate() {
               <div className="mb-3">
                 <div className="section-title mb-1">Team</div>
                 <div className="section-desc">{chosenDepartment.name}</div>
-              </div>
-              <div className="mb-3">
-                <div className="section-title mb-1">Pay Date</div>
-                <div className="section-desc">
-                  {numToOrd(chosenDepartment.payCycleDate)} of every month
-                </div>
               </div>
               <div>
                 <div className="section-title mb-1">Pay Amount</div>
@@ -838,7 +823,6 @@ export default function AddTeammate() {
     salaryAmount,
     salaryToken,
     departmentName,
-    payCycleDate,
     idx,
   }) => {
     const invalidName =
@@ -852,17 +836,9 @@ export default function AddTeammate() {
       FIELD_NAMES.DEPARTMENT_NAME,
       departmentName
     );
-    const invalidPayCycleDate = !isValidField(
-      FIELD_NAMES.PAYCYCLE_DATE,
-      payCycleDate
-    );
 
     const isCsvDataValid =
-      invalidName ||
-      invalidAddress ||
-      invalidPayDetails ||
-      invalidDepartment ||
-      invalidPayCycleDate;
+      invalidName || invalidAddress || invalidPayDetails || invalidDepartment;
 
     if (isCsvDataValid && !invalidCsvData) {
       setInvalidCsvData(true);
@@ -881,9 +857,6 @@ export default function AddTeammate() {
         </div>
         <div className={`${invalidDepartment && "text-danger"}`}>
           {departmentName}
-        </div>
-        <div className={`${invalidPayCycleDate && "text-danger"}`}>
-          {numToOrd(payCycleDate)} of every month
         </div>
       </TableRow>
     );
@@ -923,7 +896,6 @@ export default function AddTeammate() {
               <div>Address</div>
               <div>Disbursement</div>
               <div>Team</div>
-              <div>Payroll Cycle</div>
             </TableHead>
 
             <TableBody
@@ -938,7 +910,6 @@ export default function AddTeammate() {
                     salaryAmount,
                     salaryToken,
                     departmentName,
-                    payCycleDate,
                   },
                   idx
                 ) =>
@@ -949,7 +920,6 @@ export default function AddTeammate() {
                     salaryAmount,
                     salaryToken,
                     departmentName,
-                    payCycleDate,
                     idx,
                   })
               )}

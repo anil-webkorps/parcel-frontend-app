@@ -19,7 +19,7 @@ const MultiCurrencyInputField = ({
   tokenName,
   ...rest
 }) => {
-  const [convertionValue, setConversionValue] = useState("");
+  const [conversionValue, setConversionValue] = useState("");
   const [toggleFlex, setToggleFlex] = useState(false);
 
   const handleUsdValueChange = (e) => {
@@ -31,10 +31,10 @@ const MultiCurrencyInputField = ({
   };
 
   const handleTokenValueChange = (e) => {
-    const conversionValue = e.target.value
+    const newConversionValue = e.target.value
       ? parseFloat(e.target.value * convertionRate).toFixed(4)
       : "";
-    setConversionValue(conversionValue);
+    setConversionValue(newConversionValue);
     onChange(e.target.value);
   };
 
@@ -42,12 +42,12 @@ const MultiCurrencyInputField = ({
     if (!value) {
       setConversionValue("");
     } else {
-      const conversionValue = value
+      const newConversionValue = value
         ? parseFloat(value * convertionRate).toFixed(4)
         : "";
-      setConversionValue(conversionValue);
+      if (!conversionValue) setConversionValue(newConversionValue);
     }
-  }, [value, convertionRate]);
+  }, [value, convertionRate, conversionValue]);
 
   const handleToggleFlex = () => {
     setToggleFlex((flex) => !flex);
@@ -80,7 +80,7 @@ const MultiCurrencyInputField = ({
               name={"convertion"}
               type={"number"}
               placeholder="0.00"
-              value={convertionValue}
+              value={conversionValue}
               onChange={handleUsdValueChange}
             />
           </div>

@@ -7,7 +7,7 @@ export default styled.button`
   color: #ffffff;
   text-align: center;
   border: none;
-  padding: 10px 20px;
+  padding: 16px 20px;
   font-family: Montserrat;
   font-size: 16px;
   font-weight: 500;

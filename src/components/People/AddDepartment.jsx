@@ -5,7 +5,7 @@ import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
-import DayPicker from "react-day-picker";
+// import DayPicker from "react-day-picker";
 
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
@@ -27,49 +27,51 @@ import {
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 
-import { numToOrd } from "utils/date-helpers";
+// import { numToOrd } from "utils/date-helpers";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import TeamPng from "assets/images/user-team.png";
 
-import { Container, Title, Heading, Text, Summary, ActionItem } from "./styles";
+import { Container, Title, Heading, Summary, ActionItem } from "./styles";
 import { Circle } from "components/Header/styles";
 import "react-day-picker/lib/style.css";
 
-const dateStyles = `
-.DayPicker-Day--highlighted {
-  background-color: #7367f0;
-  color: white;
-}
+// const dateStyles = `
+// .DayPicker-Day--highlighted {
+//   background-color: #7367f0;
+//   color: white;
+// }
 
-.DayPicker-Caption, .DayPicker-Weekdays, .DayPicker-NavBar {
-  display: none;
-}
+// .DayPicker-Caption, .DayPicker-Weekdays, .DayPicker-NavBar {
+//   display: none;
+// }
 
-.DayPicker-Month {
-  margin: 0 auto;
-}
+// .DayPicker-Month {
+//   margin: 0 auto;
+// }
 
-.DayPicker-Day {
-  padding: 0.9em 1.05em;
-}
-.DayPicker-Day:focus, 
-.DayPicker-wrapper:focus, 
-.DayPicker:focus {
-  outline: none;
-}
+// .DayPicker-Day {
+//   padding: 0.9em 1.05em;
+// }
+// .DayPicker-Day:focus,
+// .DayPicker-wrapper:focus,
+// .DayPicker:focus {
+//   outline: none;
+// }
 
-.DayPicker-Day:hover {
-    color: #000;
-}
-`;
+// .DayPicker-Day:hover {
+//     color: #000;
+// }
+// `;
 
 const addDepartmentKey = "addDepartment";
 
 export default function AddDepartment() {
-  const [selectedDay, setSelectedDay] = useState();
+  const [selectedDay, setSelectedDay] = useState(); // eslint-disable-line
   const [success, setSuccess] = useState(false);
   const [toggled] = useContext(SideNavContext);
-  const { register, errors, handleSubmit } = useForm();
+  const { register, errors, handleSubmit, formState } = useForm({
+    mode: "onChange",
+  });
 
   useInjectReducer({ key: addDepartmentKey, reducer: addDepartmentReducer });
   useInjectSaga({ key: addDepartmentKey, saga: addDepartmentSaga });
@@ -98,13 +100,13 @@ export default function AddDepartment() {
     dispatch(
       addDepartment({
         name: values.departmentName,
-        payCycleDate: formData.payCycleDate,
         createdBy: ownerSafeAddress,
         safeAddress: ownerSafeAddress,
       })
     );
   };
 
+  // eslint-disable-next-line
   const handleDayClick = (day) => {
     dispatch(
       updateForm({ ...formData, payCycleDate: new Date(day).getDate() })
@@ -133,7 +135,7 @@ export default function AddDepartment() {
         </Col>
       </Row>
 
-      <Heading>SELECT PAY CYCLE DATE</Heading>
+      {/* <Heading>SELECT PAY CYCLE DATE</Heading>
 
       <style>{dateStyles}</style>
       <Row>
@@ -155,13 +157,13 @@ export default function AddDepartment() {
 
       <Text className="mt-4">
         All the teammates in this team will be paid on this date every month.
-      </Text>
+      </Text> */}
 
       <Button
         large
         type="submit"
         className="mt-3"
-        disabled={!selectedDay}
+        disabled={!formState.isValid}
         loading={loading}
       >
         Add Team
@@ -170,7 +172,7 @@ export default function AddDepartment() {
   );
 
   const renderSuccess = () => (
-    <Card className="add-department">
+    <Card className="add-success">
       <Title className="mb-2">Team Saved</Title>
       <Heading>Wow! You have a team on-board</Heading>
       <Summary>
@@ -178,15 +180,9 @@ export default function AddDepartment() {
           <img src={TeamPng} alt="department" width="70" />
         </div>
         <div className="right">
-          <div className="mb-4">
+          <div>
             <div className="section-title mb-1">Team Name</div>
             <div className="section-desc">{formData.name}</div>
-          </div>
-          <div>
-            <div className="section-title mb-1">Pay Date</div>
-            <div className="section-desc">
-              {numToOrd(formData.payCycleDate)} of every month
-            </div>
           </div>
         </div>
       </Summary>

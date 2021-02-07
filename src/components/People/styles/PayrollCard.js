@@ -6,7 +6,7 @@ export default styled.div`
   margin: 24px 0 120px;
   border-radius: 8px;
   border: solid 0.5px #aaaaaa;
-  padding: 24px 16px;
+  padding: 16px;
 
   .dept-name {
     margin-bottom: 8px;

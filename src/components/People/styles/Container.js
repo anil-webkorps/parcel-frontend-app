@@ -24,7 +24,7 @@ export default styled.div`
       .department-card {
         cursor: pointer;
         width: 298px;
-        min-height: 200px;
+        min-height: 140px;
         box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
         border-radius: 12px;
         border: solid 1px #f2f2f2;
@@ -110,15 +110,20 @@ export default styled.div`
     padding: 30px 36px;
   }
 
-  .add-department {
+  .add-department,
+  .add-success {
     width: 488px;
-    min-height: 656px;
+    min-height: 0;
     margin: 0 auto;
     border-radius: 16px;
     box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
     border: solid 1px #f2f2f2;
     background-color: #ffffff;
     padding: 30px 36px;
+  }
+
+  .add-department {
+    top: 140px;
   }
 
   .choose-department {

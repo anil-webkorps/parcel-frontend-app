@@ -9,7 +9,6 @@ export const FIELD_NAMES = {
   AMOUNT: "AMOUNT",
   TOKEN: "TOKEN",
   DEPARTMENT_NAME: "DEPARTMENT_NAME",
-  PAYCYCLE_DATE: "PAYCYCLE_DATE",
 };
 
 export const isValidField = (fieldName, value) => {
@@ -38,10 +37,6 @@ export const isValidField = (fieldName, value) => {
     }
     case FIELD_NAMES.DEPARTMENT_NAME: {
       if (!value || typeof value !== "string") return false;
-      return true;
-    }
-    case FIELD_NAMES.PAYCYCLE_DATE: {
-      if (value && isNaN(Number(value))) return false;
       return true;
     }
     default:

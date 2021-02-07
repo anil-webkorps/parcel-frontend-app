@@ -4,7 +4,6 @@ import { connectModal as reduxModal } from "redux-modal";
 
 import CopyButton from "components/common/Copy";
 import { minifyAddress } from "components/common/Web3Utils";
-import { numToOrd } from "utils/date-helpers";
 import TeamPng from "assets/images/user-team.png";
 
 import { Title, Heading, Summary } from "./styles";
@@ -27,10 +26,9 @@ function TeammateDetailsModal(props) {
     firstName,
     lastName,
     departmentName,
-    payCycleDate,
     salary,
     currency,
-    address = "0xBF5B1b3E6a41e26991fA49A34B2eA22b4ecf59c1",
+    address,
   } = props;
   return (
     <Modal isOpen={show} centered>
@@ -53,12 +51,6 @@ function TeammateDetailsModal(props) {
           <div className="mb-3">
             <div className="section-title mb-1">Team</div>
             <div className="section-desc">{departmentName}</div>
-          </div>
-          <div className="mb-3">
-            <div className="section-title mb-1">Pay Date</div>
-            <div className="section-desc">
-              {numToOrd(payCycleDate)} of every month
-            </div>
           </div>
           <div className="mb-3">
             <div className="section-title mb-1">Pay Amount</div>

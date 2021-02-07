@@ -2,7 +2,6 @@ import styled from "styled-components/macro";
 
 export default styled.div`
   width: 100%;
-  min-height: 161px;
   margin: 24px 0 307px;
   padding: 0 1px 0 24px;
   border-radius: 16px;
@@ -10,7 +9,7 @@ export default styled.div`
   border: solid 1px #f2f2f2;
   background-color: ${({ theme }) => theme.primary};
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   padding: 25px;
 
   .left {

@@ -66,7 +66,6 @@ import tokensReducer from "store/tokens/reducer";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { useActiveWeb3React, useLocalStorage, useMassPayout } from "hooks";
-import { numToOrd } from "utils/date-helpers";
 import {
   makeSelectOwnerSafeAddress,
   makeSelectThreshold,
@@ -613,34 +612,31 @@ export default function Payments() {
     return (
       <div className="department-cards">
         {allDepartments &&
-          allDepartments.map(
-            ({ departmentId, name, payCycleDate, employees }) => (
-              <Card
-                className="department-card mb-4"
-                key={departmentId}
-                onClick={() => handleSelectDepartment(departmentId)}
-              >
-                <div className="upper">
-                  <div className="d-flex justify-content-between">
-                    <img src={TeamPng} alt={name} width="50" />
-                    <div className="circle circle-grey">
-                      <FontAwesomeIcon
-                        icon={faLongArrowAltRight}
-                        color="#7367f0"
-                      />
-                    </div>
+          allDepartments.map(({ departmentId, name, employees }) => (
+            <Card
+              className="department-card mb-4"
+              key={departmentId}
+              onClick={() => handleSelectDepartment(departmentId)}
+            >
+              <div className="upper">
+                <div className="d-flex justify-content-between">
+                  <img src={TeamPng} alt={name} width="50" />
+                  <div className="circle circle-grey">
+                    <FontAwesomeIcon
+                      icon={faLongArrowAltRight}
+                      color="#7367f0"
+                    />
                   </div>
-                  <div className="mt-2">{name}</div>
                 </div>
+                <div className="mt-2">{name}</div>
+              </div>
 
-                <div className="line" />
-                <div className="lower">
-                  <div className="mb-3">Teammates : {employees}</div>
-                  <div>Paydate : {numToOrd(payCycleDate)} of every month</div>
-                </div>
-              </Card>
-            )
-          )}
+              <div className="line" />
+              <div className="lower">
+                <div className="mb-3">Teammates : {employees}</div>
+              </div>
+            </Card>
+          ))}
       </div>
     );
   };

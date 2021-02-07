@@ -31,7 +31,6 @@ import {
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
-import { numToOrd } from "utils/date-helpers";
 import Loading from "components/common/Loading";
 import { getDefaultIconIfPossible } from "constants/index";
 
@@ -40,6 +39,7 @@ import { Circle } from "components/Header/styles";
 import TeammateDetailsModal, {
   MODAL_NAME as TEAMMATE_DETAILS_MODAL,
 } from "./TeammateDetailsModal";
+import { minifyAddress } from "components/common/Web3Utils";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -89,7 +89,7 @@ export default function ViewTeammate() {
   const renderExportEmployeeData = () => {
     let csvData = [];
     if (teammates && teammates.length > 0) {
-      teammates.map(({ data, departmentName, payCycleDate }) => {
+      teammates.map(({ data, departmentName }) => {
         const teammateDetails = getDecryptedDetails(data);
         const {
           firstName,
@@ -102,10 +102,9 @@ export default function ViewTeammate() {
           "First Name": firstName,
           "Last Name": lastName,
           Address: address,
-          "Salary Amount": salaryAmount,
-          "Salary Token": salaryToken,
+          Amount: salaryAmount,
+          Token: salaryToken,
           Team: departmentName,
-          "Paycycle Date": payCycleDate,
         });
         return csvData;
       });
@@ -192,8 +191,8 @@ export default function ViewTeammate() {
           <TableHead>
             <div>Teammate Name</div>
             <div>Team</div>
-            <div>Payroll Cycle</div>
             <div>Disbursement</div>
+            <div>Address</div>
             <div></div>
           </TableHead>
 
@@ -206,7 +205,7 @@ export default function ViewTeammate() {
                 <Loading color="primary" width="50px" height="50px" />
               </div>
             ) : teammates && teammates.length > 0 ? (
-              teammates.map(({ data, departmentName, payCycleDate }, idx) => {
+              teammates.map(({ data, departmentName }, idx) => {
                 const {
                   firstName,
                   lastName,
@@ -220,7 +219,6 @@ export default function ViewTeammate() {
                       {firstName} {lastName}
                     </div>
                     <div>{departmentName}</div>
-                    <div>{numToOrd(payCycleDate)} of every month</div>
                     <div>
                       <img
                         src={getDefaultIconIfPossible(salaryToken)}
@@ -229,6 +227,7 @@ export default function ViewTeammate() {
                       />{" "}
                       {salaryAmount} {salaryToken}
                     </div>
+                    <div>{minifyAddress(address)}</div>
                     <div className="d-flex justify-content-end">
                       <Button
                         iconOnly
@@ -239,7 +238,6 @@ export default function ViewTeammate() {
                             salary: salaryAmount,
                             currency: salaryToken,
                             departmentName,
-                            payCycleDate,
                             address,
                           })
                         }
