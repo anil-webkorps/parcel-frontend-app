@@ -24,7 +24,7 @@ export default styled.div`
       .department-card {
         cursor: pointer;
         width: 298px;
-        min-height: 140px;
+        min-height: 160px;
         box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
         border-radius: 12px;
         border: solid 1px #f2f2f2;
