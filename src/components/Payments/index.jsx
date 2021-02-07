@@ -41,7 +41,6 @@ import {
   addTransaction,
   clearTransactionHash,
 } from "store/transactions/actions";
-import { getSafeBalances } from "store/dashboard/actions";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
 import invitationSaga from "store/invitation/saga";
@@ -230,16 +229,12 @@ export default function Payments() {
 
   useEffect(() => {
     if (ownerSafeAddress) {
-      // dispatch(getSafeBalances(ownerSafeAddress));
       dispatch(getTokens(ownerSafeAddress));
       dispatch(getInvitations(ownerSafeAddress));
       dispatch(getNonce(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
 
-  useEffect(() => {
-    dispatch(getSafeBalances(ownerSafeAddress));
-  }, [dispatch, ownerSafeAddress]);
 
   useEffect(() => {
     setSelectedTokenDetails(
