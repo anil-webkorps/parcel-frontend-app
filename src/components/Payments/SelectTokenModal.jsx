@@ -25,6 +25,7 @@ const modalStyles = `
     border-radius: 20px;
     border: none;
     padding: 20px;
+    // width: 650px;
   }
 `;
 
@@ -91,31 +92,34 @@ function SelectTokenModal(props) {
           <Loading color="primary" width="50px" height="50px" />
         </div>
       )}
-      {!loading &&
-        tokenDetails &&
-        tokenDetails.map(({ balance, icon, id, name, usd }) => (
-          <Row key={id}>
-            <TokenCard
-              active={tokenName === name}
-              onClick={() => setTokenName(name)}
-            >
-              <div className="token-icon">
-                <img src={icon} alt={name} width="35" />
-              </div>
-              <div>
-                <div className="value">{parseFloat(balance).toFixed(2)}</div>
-                <div className="text">{name}</div>
-              </div>
-              <div className="divider"></div>
-              <div>
-                <div className="value">US$ {parseFloat(usd).toFixed(2)}</div>
-                <div className="text">Balance</div>
-              </div>
-              <div className="radio"></div>
-              <div className="current">Selected</div>
-            </TokenCard>
-          </Row>
-        ))}
+      <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+        {!loading &&
+          tokenDetails &&
+          tokenDetails.map(({ balance, icon, id, name, usd }) => (
+            <Row key={id} className="col-12">
+              <TokenCard
+                active={tokenName === name}
+                onClick={() => setTokenName(name)}
+              >
+                <div className="token-icon">
+                  <img src={icon} alt={name} width="35" />
+                </div>
+                <div>
+                  <div className="value">{parseFloat(balance).toFixed(2)}</div>
+                  <div className="text">{name}</div>
+                </div>
+                <div className="divider"></div>
+                <div>
+                  <div className="value">US$ {parseFloat(usd).toFixed(2)}</div>
+                  <div className="text">Balance</div>
+                </div>
+                <div className="radio"></div>
+                <div className="current">Selected</div>
+              </TokenCard>
+            </Row>
+          ))}
+      </div>
+
       <Row className="mt-4">
         <Col lg="5" sm="12" className="pr-0">
           <Button
