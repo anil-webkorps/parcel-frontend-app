@@ -402,7 +402,7 @@ export default function QuickTransfer() {
       <Button
         large
         type="submit"
-        style={{ marginTop: "50px" }}
+        className="mt-3"
         disabled={!formState.isValid || loadingTx || addingTx}
         loading={loadingTx || addingTx}
       >
