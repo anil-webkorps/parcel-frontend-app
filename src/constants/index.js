@@ -4,8 +4,9 @@ import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 import USDCIcon from "assets/icons/tokens/USDC-icon.png";
 import USDTIcon from "assets/icons/tokens/USDT-icon.png";
-import GHOSTIcon from "assets/icons/tokens/GHOST-icon.png";
+import GHSTIcon from "assets/icons/tokens/GHST-icon.png";
 import SNXIcon from "assets/icons/tokens/SNX-icon.svg";
+import DefaultIcon from "assets/icons/tokens/Default-icon.jpg";
 import addresses from "./addresses";
 
 export const NetworkContextName = "NETWORK";
@@ -31,7 +32,7 @@ export const tokens = {
   USDC: "USDC",
   USDT: "USDT",
   ETH: "ETH",
-  GHOST: "GHOST",
+  GHST: "GHST",
   SNX: "SNX",
 };
 
@@ -43,12 +44,14 @@ export const getDefaultIconIfPossible = (tokenSymbol) => {
       return USDCIcon;
     case tokens.USDT:
       return USDTIcon;
-    case tokens.GHOST:
-      return GHOSTIcon;
+    case tokens.GHST:
+      return GHSTIcon;
     case tokens.SNX:
       return SNXIcon;
-    default:
+    case tokens.ETH:
       return ETHIcon;
+    default:
+      return DefaultIcon;
   }
 };
 

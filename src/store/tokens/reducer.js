@@ -10,7 +10,7 @@ import {
   SET_SUCCESS,
 } from "./action-types";
 import { getDefaultIconIfPossible } from "constants/index";
-import ETHIcon from "assets/icons/tokens/ETH-icon.png";
+import DefaultIcon from "assets/icons/tokens/Default-icon.jpg";
 import { constructLabel } from "utils/massPayout";
 
 export const initialState = {
@@ -47,7 +47,8 @@ const reducer = (state = initialState, action) =>
                 return {
                   id: idx,
                   name: tokenDetails.tokenInfo.symbol,
-                  icon: tokenIcon || tokenDetails.tokenInfo.logoUri || ETHIcon,
+                  icon:
+                    tokenIcon || tokenDetails.tokenInfo.logoUri || DefaultIcon,
                   balance: 0,
                   usd: 0,
                   address: tokenDetails.tokenInfo.address,
@@ -64,7 +65,8 @@ const reducer = (state = initialState, action) =>
               return {
                 id: idx,
                 name: tokenDetails.tokenInfo.symbol,
-                icon: tokenIcon || tokenDetails.tokenInfo.logoUri || ETHIcon,
+                icon:
+                  tokenIcon || tokenDetails.tokenInfo.logoUri || DefaultIcon,
                 balance,
                 usd: balance * balanceDetails.usdConversion,
                 address: tokenDetails.tokenInfo.address,
