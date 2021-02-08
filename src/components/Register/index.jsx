@@ -99,7 +99,7 @@ const COMPANY_REGISTER_STEPS = {
   [STEPS.ZERO]: "Connect",
   [STEPS.ONE]: "About you",
   [STEPS.TWO]: "Owner Details",
-  [STEPS.THREE]: "Oqnwe Name/Address",
+  [STEPS.THREE]: "Owner Name/Address",
   [STEPS.FOUR]: "Payment Threshold",
   [STEPS.FIVE]: "Privacy",
 };
