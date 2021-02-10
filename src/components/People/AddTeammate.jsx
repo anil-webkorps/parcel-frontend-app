@@ -494,17 +494,6 @@ export default function AddTeammate() {
           <ErrorMessage name="amount" errors={errors} />
         </Col>
         <Col lg="12" sm="12">
-          {/* <Select
-            name="currency"
-            register={register}
-            required={`Token is required`}
-            options={[
-              { name: "DAI", value: "DAI" },
-              { name: "USDC", value: "USDC" },
-              { name: "USDT", value: "USDT" },
-            ]}
-          /> */}
-          {/* <ErrorMessage name="currency" errors={errors} /> */}
           {/* <Controller
             name="currency"
             control={control}
@@ -534,12 +523,7 @@ export default function AddTeammate() {
                 />
               </div>
               <div className="token-balance">
-                <div className="value">
-                  {selectedTokenDetails.balance
-                    ? parseFloat(selectedTokenDetails.balance).toFixed(2)
-                    : "0.00"}
-                </div>
-                <div className="name">{selectedTokenDetails.name}</div>
+                <div className="value">{selectedTokenDetails.name}</div>
               </div>
               <div className="change">Change</div>
             </ShowToken>

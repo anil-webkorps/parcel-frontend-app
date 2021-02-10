@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 
 import { HeaderLink, NavBar, NavBarContent, NavGroup } from "./styles";
 
@@ -11,12 +11,20 @@ import ParcelSvg from "assets/icons/parcel.svg";
 
 function PlainHeader() {
   const location = useLocation();
+  const history = useHistory();
   const isLoginPage = location.pathname === "/";
   const isSignupPage = location.pathname === "/signup";
   const { account } = useActiveWeb3React();
 
   const renderSignUpButton = () => (
-    <Button type="button" to="/signup" className="secondary ml-3">
+    <Button
+      type="button"
+      onClick={() => {
+        const searchParams = new URLSearchParams(location.search);
+        history.push({ pathname: "/signup", search: searchParams.toString() });
+      }}
+      className="secondary ml-3"
+    >
       Sign Up
     </Button>
   );

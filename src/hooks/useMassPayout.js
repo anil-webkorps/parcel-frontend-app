@@ -653,6 +653,19 @@ export default function useMassPayout(props = {}) {
             salaryAmount,
             tokenDetails.decimals
           );
+
+          // ETH
+          if (salaryToken === tokens.ETH) {
+            tx.push({
+              operation: 0, // CALL
+              data: "0x",
+              to: address,
+              value: transferAmount,
+            });
+            return tx;
+          }
+
+          // ERC20
           tx.push({
             operation: 0, // CALL
             to: erc20.address,

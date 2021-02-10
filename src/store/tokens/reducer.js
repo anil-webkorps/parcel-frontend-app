@@ -1,5 +1,6 @@
 import produce from "immer";
-import { BigNumber } from "@ethersproject/bignumber";
+import { getAmountFromWei } from "utils/tx-helpers";
+
 import {
   GET_TOKENS,
   GET_TOKENS_ERROR,
@@ -56,11 +57,10 @@ const reducer = (state = initialState, action) =>
                 };
               }
               // erc20
-              const balance = BigNumber.from(balanceDetails.balance)
-                .div(
-                  BigNumber.from(String(10 ** tokenDetails.tokenInfo.decimals))
-                )
-                .toString();
+              const balance = getAmountFromWei(
+                balanceDetails.balance,
+                tokenDetails.tokenInfo.decimals
+              ).toString();
 
               return {
                 id: idx,
@@ -68,7 +68,7 @@ const reducer = (state = initialState, action) =>
                 icon:
                   tokenIcon || tokenDetails.tokenInfo.logoUri || DefaultIcon,
                 balance,
-                usd: balance * balanceDetails.usdConversion,
+                usd: balance * balanceDetails.fiatConversion,
                 address: tokenDetails.tokenInfo.address,
                 decimals: tokenDetails.tokenInfo.decimals,
               };
