@@ -29,7 +29,14 @@ function PlainHeader() {
     </Button>
   );
   const renderLoginButton = () => (
-    <Button type="button" to="/" className="secondary ml-3">
+    <Button
+      type="button"
+      onClick={() => {
+        const searchParams = new URLSearchParams(location.search);
+        history.push({ pathname: "/", search: searchParams.toString() });
+      }}
+      className="secondary ml-3"
+    >
       Login
     </Button>
   );
