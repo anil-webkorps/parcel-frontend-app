@@ -119,7 +119,8 @@ export default function useMassPayout(props = {}) {
   };
 
   const getERC20Contract = (contractAddress) => {
-    return customToken.attach(contractAddress);
+    if (contractAddress) return customToken.attach(contractAddress);
+    return customToken;
   };
 
   // if the tokens are different, add two transactions:

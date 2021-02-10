@@ -186,7 +186,7 @@ export default function QuickTransfer() {
             createdBy: ownerSafeAddress,
             transactionHash: txHash,
             tokenValue: payoutDetails.reduce(
-              (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+              (total, { salaryAmount }) => (total += parseFloat(salaryAmount)),
               0
             ),
             tokenCurrency: selectedTokenDetails.name,
@@ -237,7 +237,8 @@ export default function QuickTransfer() {
               createdBy: account,
               txData,
               tokenValue: payoutDetails.reduce(
-                (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+                (total, { salaryAmount }) =>
+                  (total += parseFloat(salaryAmount)),
                 0
               ),
               tokenCurrency: selectedTokenDetails.name,

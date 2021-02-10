@@ -324,7 +324,7 @@ export default function Payments() {
             createdBy: account,
             transactionHash: txHash,
             tokenValue: recievers.reduce(
-              (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+              (total, { salaryAmount }) => (total += parseFloat(salaryAmount)),
               0
             ),
             tokenCurrency: selectedTokenDetails.name,
@@ -355,7 +355,8 @@ export default function Payments() {
               createdBy: account,
               txData,
               tokenValue: recievers.reduce(
-                (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+                (total, { salaryAmount }) =>
+                  (total += parseFloat(salaryAmount)),
                 0
               ),
               tokenCurrency: selectedTokenDetails.name,
@@ -373,7 +374,8 @@ export default function Payments() {
               createdBy: account,
               txData,
               tokenValue: recievers.reduce(
-                (total, { salaryAmount }) => (total += parseInt(salaryAmount)),
+                (total, { salaryAmount }) =>
+                  (total += parseFloat(salaryAmount)),
                 0
               ),
               tokenCurrency: selectedTokenDetails.name,
@@ -565,7 +567,7 @@ export default function Payments() {
                     />{" "}
                     {salaryAmount} {salaryToken}{" "}
                     {prices &&
-                      prices[salaryToken] &&
+                      prices[salaryToken] !== undefined &&
                       `(US$
                        ${parseFloat(prices[salaryToken] * salaryAmount).toFixed(
                          2

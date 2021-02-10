@@ -186,7 +186,8 @@ export default function MultiSigTransactions() {
                           alt={tokenCurrency}
                           width="16"
                         />{" "}
-                        {tokenValue} {tokenCurrency} (US ${fiatValue})
+                        {tokenValue} {tokenCurrency} (US $
+                        {parseFloat(fiatValue).toFixed(2)})
                       </div>
                       <div>
                         {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}

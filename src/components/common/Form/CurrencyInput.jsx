@@ -71,6 +71,7 @@ const MultiCurrencyInputField = ({
               type={type}
               value={value}
               onChange={handleTokenValueChange}
+              step=".0001"
               {...rest}
             />
           </div>

@@ -181,7 +181,8 @@ export default function PaymentsCard() {
               <div className="detail b-right b-bottom">
                 <div className="title">Amount Paid</div>
                 <div className="desc">
-                  {transactionData.amountPaid} {transactionData.currency}
+                  {parseFloat(transactionData.amountPaid).toFixed(2)}{" "}
+                  {transactionData.currency}
                 </div>
               </div>
               <div className="detail b-bottom">

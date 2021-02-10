@@ -29,7 +29,7 @@ export function standardizeTransaction(tx) {
   return {
     operation: tx.operation ? tx.operation : defaultTxOperation,
     to: tx.to,
-    value: tx.value ? Number(tx.value.toString()) : defaultTxValue,
+    value: tx.value ? tx.value.toString() : defaultTxValue,
     data: tx.data ? tx.data : defaultTxData,
   };
 }
