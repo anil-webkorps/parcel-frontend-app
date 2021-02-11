@@ -216,6 +216,19 @@ const Login = () => {
   }, [reset, formData, account]);
 
   useEffect(() => {
+    if (sign) {
+      const msgHash = utils.hashMessage(MESSAGE_TO_SIGN);
+      const recoveredAddress = utils.recoverAddress(msgHash, sign);
+      if (recoveredAddress !== account) {
+        setHasAlreadySigned(false);
+        reset({});
+        setSign("");
+        dispatch(chooseStep(STEPS.ZERO));
+      }
+    }
+  }, [reset, account, dispatch, sign, setSign]);
+
+  useEffect(() => {
     reset({
       owners: gnosisSafeOwners.map((owner) => ({ name: "", owner })),
       ...formData,

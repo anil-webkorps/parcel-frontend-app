@@ -95,6 +95,18 @@ const AcceptInvite = () => {
   }, [active]);
 
   useEffect(() => {
+    if (sign) {
+      const msgHash = utils.hashMessage(MESSAGE_TO_SIGN);
+      const recoveredAddress = utils.recoverAddress(msgHash, sign);
+      if (recoveredAddress !== account) {
+        setHasAlreadySigned(false);
+        setSign("");
+        chooseStep(STEPS.ZERO);
+      }
+    }
+  }, [account, sign, setSign]);
+
+  useEffect(() => {
     if (step === STEPS.ONE && account) {
       if (sign) {
         const msgHash = utils.hashMessage(MESSAGE_TO_SIGN);
