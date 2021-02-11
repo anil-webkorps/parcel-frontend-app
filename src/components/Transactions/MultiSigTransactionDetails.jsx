@@ -43,6 +43,10 @@ import Loading from "components/common/Loading";
 import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
 import StatusText from "./StatusText";
 import { getDefaultIconIfPossible } from "constants/index";
+import { getTokens } from "store/tokens/actions";
+import { makeSelectTokenIcons } from "store/tokens/selectors";
+import tokensSaga from "store/tokens/saga";
+import tokensReducer from "store/tokens/reducer";
 import { Stepper, StepCircle } from "components/common/Stepper";
 import addresses from "constants/addresses";
 import TransactionSubmitted from "components/Payments/TransactionSubmitted";
@@ -57,6 +61,7 @@ const { TableBody, TableHead, TableRow } = Table;
 const multisigKey = "multisig";
 const safeKey = "safe";
 const metaTxKey = "metatx";
+const tokensKey = "tokens";
 
 const { MULTISEND_ADDRESS } = addresses;
 
@@ -84,11 +89,13 @@ export default function MultiSigTransactions() {
   useInjectReducer({ key: multisigKey, reducer: multisigReducer });
   useInjectReducer({ key: safeKey, reducer: safeReducer });
   useInjectReducer({ key: metaTxKey, reducer: metaTxReducer });
+  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   // Sagas
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
   useInjectSaga({ key: safeKey, saga: safeSaga });
   useInjectSaga({ key: metaTxKey, saga: metaTxSaga });
+  useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const params = useParams();
@@ -106,12 +113,19 @@ export default function MultiSigTransactions() {
     makeSelectMultisigTransactionDetails()
   );
   const executionAllowed = useSelector(makeSelectMultisigExecutionAllowed());
+  const icons = useSelector(makeSelectTokenIcons());
 
   useEffect(() => {
     if (ownerSafeAddress) {
       dispatch(getMetaTxEnabled(ownerSafeAddress));
     }
   }, [dispatch, ownerSafeAddress]);
+
+  useEffect(() => {
+    if (ownerSafeAddress && !icons) {
+      dispatch(getTokens(ownerSafeAddress));
+    }
+  }, [ownerSafeAddress, dispatch, icons]);
 
   useEffect(() => {
     const transactionId = params && params.transactionId;
@@ -693,7 +707,10 @@ export default function MultiSigTransactions() {
                               <div className="title">Disbursement</div>
                               <div className="desc">
                                 <img
-                                  src={getDefaultIconIfPossible(salaryToken)}
+                                  src={getDefaultIconIfPossible(
+                                    salaryToken,
+                                    icons
+                                  )}
                                   alt={salaryToken}
                                   width="16"
                                 />{" "}
@@ -719,7 +736,7 @@ export default function MultiSigTransactions() {
                         </div>
                         <div>
                           <img
-                            src={getDefaultIconIfPossible(salaryToken)}
+                            src={getDefaultIconIfPossible(salaryToken, icons)}
                             alt={salaryToken}
                             width="16"
                           />{" "}

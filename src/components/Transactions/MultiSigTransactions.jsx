@@ -23,7 +23,10 @@ import Loading from "components/common/Loading";
 import { minifyAddress } from "components/common/Web3Utils";
 import StatusText from "./StatusText";
 import { getDefaultIconIfPossible } from "constants/index";
-
+import { getTokens } from "store/tokens/actions";
+import { makeSelectTokenIcons } from "store/tokens/selectors";
+import tokensSaga from "store/tokens/saga";
+import tokensReducer from "store/tokens/reducer";
 import { Table, ActionItem } from "../People/styles";
 import { Circle } from "components/Header/styles";
 import { Info } from "components/Dashboard/styles";
@@ -32,15 +35,18 @@ import { Container } from "./styles";
 const { TableBody, TableHead, TableRow } = Table;
 
 const multisigKey = "multisig";
+const tokensKey = "tokens";
 
 export default function MultiSigTransactions() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
   // Reducers
   useInjectReducer({ key: multisigKey, reducer: multisigReducer });
+  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   // Sagas
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
+  useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -48,12 +54,19 @@ export default function MultiSigTransactions() {
   const transactions = useSelector(makeSelectMultisigTransactions());
   const loading = useSelector(makeSelectFetching());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const icons = useSelector(makeSelectTokenIcons());
 
   useEffect(() => {
     if (ownerSafeAddress) {
       dispatch(getMultisigTransactions(ownerSafeAddress));
     }
   }, [dispatch, ownerSafeAddress]);
+
+  useEffect(() => {
+    if (ownerSafeAddress && !icons) {
+      dispatch(getTokens(ownerSafeAddress));
+    }
+  }, [ownerSafeAddress, dispatch, icons]);
 
   const getDecryptedDetails = (data) => {
     if (!encryptionKey) return "";
@@ -182,12 +195,12 @@ export default function MultiSigTransactions() {
                     <TableRow key={`${transactionId}-${idx}`}>
                       <div>
                         <img
-                          src={getDefaultIconIfPossible(tokenCurrency)}
+                          src={getDefaultIconIfPossible(tokenCurrency, icons)}
                           alt={tokenCurrency}
                           width="16"
                         />{" "}
-                        {tokenValue} {tokenCurrency} (US $
-                        {parseFloat(fiatValue).toFixed(2)})
+                        {parseFloat(tokenValue).toFixed(2)} {tokenCurrency} (US
+                        ${parseFloat(fiatValue).toFixed(2)})
                       </div>
                       <div>
                         {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}

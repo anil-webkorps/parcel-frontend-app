@@ -36,7 +36,7 @@ export const tokens = {
   SNX: "SNX",
 };
 
-export const getDefaultIconIfPossible = (tokenSymbol) => {
+export const getDefaultIconIfPossible = (tokenSymbol, icons) => {
   switch (tokenSymbol) {
     case tokens.DAI:
       return DAIIcon;
@@ -51,6 +51,7 @@ export const getDefaultIconIfPossible = (tokenSymbol) => {
     case tokens.ETH:
       return ETHIcon;
     default:
+      if (icons && icons[tokenSymbol]) return icons[tokenSymbol];
       return DefaultIcon;
   }
 };

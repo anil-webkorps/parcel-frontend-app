@@ -48,7 +48,9 @@ function* fetchTokens(action) {
       // Error in payload
       yield put(getTokensError(result.log));
     } else {
-      yield put(getTokensSuccess(result.tokens, result.prices, result.log));
+      yield put(
+        getTokensSuccess(result.tokens, result.prices, result.icons, result.log)
+      );
     }
   } catch (err) {
     yield put(getTokensError(err.message));

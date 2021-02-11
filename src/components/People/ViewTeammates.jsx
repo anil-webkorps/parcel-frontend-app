@@ -33,7 +33,10 @@ import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { getDefaultIconIfPossible } from "constants/index";
-
+import { getTokens } from "store/tokens/actions";
+import { makeSelectTokenIcons } from "store/tokens/selectors";
+import tokensSaga from "store/tokens/saga";
+import tokensReducer from "store/tokens/reducer";
 import { Container, Table, ActionItem } from "./styles";
 import { Circle } from "components/Header/styles";
 import TeammateDetailsModal, {
@@ -44,12 +47,15 @@ import { minifyAddress } from "components/common/Web3Utils";
 const { TableBody, TableHead, TableRow } = Table;
 
 const viewTeammatesKey = "viewTeammates";
+const tokensKey = "tokens";
 
 export default function ViewTeammate() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
+  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
+  useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const params = useParams();
@@ -58,6 +64,7 @@ export default function ViewTeammate() {
   const teammates = useSelector(makeSelectTeammates());
   const loading = useSelector(makeSelectLoading());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const icons = useSelector(makeSelectTokenIcons());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -70,6 +77,12 @@ export default function ViewTeammate() {
       }
     }
   }, [dispatch, params, ownerSafeAddress]);
+
+  useEffect(() => {
+    if (ownerSafeAddress && !icons) {
+      dispatch(getTokens(ownerSafeAddress));
+    }
+  }, [ownerSafeAddress, dispatch, icons]);
 
   const getDecryptedDetails = (data) => {
     if (!encryptionKey) return "";
@@ -221,7 +234,7 @@ export default function ViewTeammate() {
                     <div>{departmentName}</div>
                     <div>
                       <img
-                        src={getDefaultIconIfPossible(salaryToken)}
+                        src={getDefaultIconIfPossible(salaryToken, icons)}
                         alt={salaryToken}
                         width="16"
                       />{" "}

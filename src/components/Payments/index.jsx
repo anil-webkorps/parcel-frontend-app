@@ -60,6 +60,7 @@ import {
   makeSelectLoading as makeSelectLoadingTokens,
   makeSelectTokenList,
   makeSelectPrices,
+  makeSelectTokenIcons,
 } from "store/tokens/selectors";
 import tokensSaga from "store/tokens/saga";
 import tokensReducer from "store/tokens/reducer";
@@ -215,6 +216,7 @@ export default function Payments() {
   const tokenList = useSelector(makeSelectTokenList());
   const loadingTokens = useSelector(makeSelectLoadingTokens());
   const isSetupComplete = useSelector(makeSelectIsSetupComplete());
+  const icons = useSelector(makeSelectTokenIcons());
 
   useEffect(() => {
     if (txHashFromMetaTx) {
@@ -225,11 +227,16 @@ export default function Payments() {
 
   useEffect(() => {
     if (ownerSafeAddress) {
-      dispatch(getTokens(ownerSafeAddress));
       dispatch(getInvitations(ownerSafeAddress));
       dispatch(getNonce(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
+
+  useEffect(() => {
+    if (ownerSafeAddress && !icons) {
+      dispatch(getTokens(ownerSafeAddress));
+    }
+  }, [ownerSafeAddress, dispatch, icons]);
 
   // useEffect(() => {
   //   setSelectedTokenDetails(
@@ -561,7 +568,7 @@ export default function Payments() {
                   {/* <div>{salaryToken}</div> */}
                   <div>
                     <img
-                      src={getDefaultIconIfPossible(salaryToken)}
+                      src={getDefaultIconIfPossible(salaryToken, icons)}
                       alt={salaryToken}
                       width="16"
                     />{" "}

@@ -24,7 +24,10 @@ import Loading from "components/common/Loading";
 import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
 import StatusText from "./StatusText";
 import { getDefaultIconIfPossible } from "constants/index";
-
+import { getTokens } from "store/tokens/actions";
+import { makeSelectTokenIcons } from "store/tokens/selectors";
+import tokensSaga from "store/tokens/saga";
+import tokensReducer from "store/tokens/reducer";
 import { Table, ActionItem } from "../People/styles";
 import { Circle } from "components/Header/styles";
 import { Info } from "components/Dashboard/styles";
@@ -33,13 +36,17 @@ import { Container, Detail } from "./styles";
 const { TableBody, TableHead, TableRow } = Table;
 
 const transactionsKey = "transactions";
+const tokensKey = "tokens";
 
 export default function TransactionDetails() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
+  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
+  // Sagas
   useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
+  useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -48,6 +55,7 @@ export default function TransactionDetails() {
   const loading = useSelector(makeSelectFetching());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const transactionDetails = useSelector(makeSelectTransactionDetails());
+  const icons = useSelector(makeSelectTokenIcons());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -55,6 +63,12 @@ export default function TransactionDetails() {
       dispatch(getTransactionById(ownerSafeAddress, transactionId));
     }
   }, [dispatch, ownerSafeAddress, params]);
+
+  useEffect(() => {
+    if (ownerSafeAddress && !icons) {
+      dispatch(getTokens(ownerSafeAddress));
+    }
+  }, [ownerSafeAddress, dispatch, icons]);
 
   const goBack = () => {
     history.push("/dashboard/transactions");
@@ -186,7 +200,10 @@ export default function TransactionDetails() {
                               <div className="title">Disbursement</div>
                               <div className="desc">
                                 <img
-                                  src={getDefaultIconIfPossible(salaryToken)}
+                                  src={getDefaultIconIfPossible(
+                                    salaryToken,
+                                    icons
+                                  )}
                                   alt={salaryToken}
                                   width="16"
                                 />{" "}
@@ -212,7 +229,7 @@ export default function TransactionDetails() {
                         </div>
                         <div>
                           <img
-                            src={getDefaultIconIfPossible(salaryToken)}
+                            src={getDefaultIconIfPossible(salaryToken, icons)}
                             alt={salaryToken}
                             width="16"
                           />{" "}

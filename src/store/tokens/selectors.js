@@ -25,6 +25,9 @@ const makeSelectUpdating = () =>
 const makeSelectPrices = () =>
   createSelector(selectTokens, (tokensState) => tokensState.prices);
 
+const makeSelectTokenIcons = () =>
+  createSelector(selectTokens, (tokensState) => tokensState.icons);
+
 const makeSelectTokensDropdown = () =>
   createSelector(selectTokens, (tokensState) => tokensState.tokensDropdown);
 
@@ -34,6 +37,7 @@ const makeSelectError = () =>
 export {
   selectTokens,
   makeSelectTokensDropdown,
+  makeSelectTokenIcons,
   makeSelectTokens,
   makeSelectSuccess,
   makeSelectTokenList,

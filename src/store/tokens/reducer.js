@@ -23,6 +23,7 @@ export const initialState = {
   tokenList: [],
   prices: null,
   tokensDropdown: [],
+  icons: null,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -41,7 +42,8 @@ const reducer = (state = initialState, action) =>
             .map(({ tokenDetails, balanceDetails }, idx) => {
               if (!tokenDetails) return null;
               const tokenIcon = getDefaultIconIfPossible(
-                tokenDetails.tokenInfo.symbol
+                tokenDetails.tokenInfo.symbol,
+                action.icons
               );
               // eslint-disable-next-line
               if (balanceDetails && balanceDetails.balance == 0) {
@@ -81,8 +83,10 @@ const reducer = (state = initialState, action) =>
             value: tokenDetails.tokenInfo.symbol,
             label: constructLabel(
               tokenDetails.tokenInfo.symbol,
-              getDefaultIconIfPossible(tokenDetails.tokenInfo.symbol) ||
-                tokenDetails.tokenInfo.logoUri
+              getDefaultIconIfPossible(
+                tokenDetails.tokenInfo.symbol,
+                action.icons
+              )
             ),
           }));
         draft.tokenList = allTokenDetails;
@@ -90,6 +94,7 @@ const reducer = (state = initialState, action) =>
         draft.prices = action.prices;
         draft.loading = false;
         draft.log = action.log;
+        draft.icons = action.icons;
         break;
 
       case GET_TOKENS_ERROR:

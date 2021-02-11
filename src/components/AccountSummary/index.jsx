@@ -19,6 +19,7 @@ import {
   makeSelectSuccess,
   makeSelectUpdating,
   makeSelectError,
+  makeSelectTokenIcons,
 } from "store/tokens/selectors";
 import { getTokens, addCustomToken } from "store/tokens/actions";
 import { useInjectReducer } from "utils/injectReducer";
@@ -58,12 +59,13 @@ export default function AccountSummary() {
   const tokenList = useSelector(makeSelectTokenList());
   const addedSuccessfully = useSelector(makeSelectSuccess());
   const error = useSelector(makeSelectError());
+  const icons = useSelector(makeSelectTokenIcons());
 
   useEffect(() => {
-    if (ownerSafeAddress) {
+    if (ownerSafeAddress && !icons) {
       dispatch(getTokens(ownerSafeAddress));
     }
-  }, [ownerSafeAddress, dispatch]);
+  }, [ownerSafeAddress, dispatch, icons]);
 
   useEffect(() => {
     const total = tokenList.reduce(
