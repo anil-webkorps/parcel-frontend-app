@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from "react";
 import { Route, Switch } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import io from "socket.io-client";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 
 import Dashboard from "components/Dashboard";
 import People from "components/People";
@@ -24,7 +26,7 @@ import {
 } from "store/global/selectors";
 import { networkId } from "constants/networks";
 import { ROOT_BE_URL } from "constants/endpoints";
-import { showToast, ToastMessage } from "components/common/Toast";
+import { showToast, ToastMessage, toaster } from "components/common/Toast";
 import { getTransactionByIdSuccess } from "store/transactions/actions";
 import { getMultisigTransactionByIdSuccess } from "store/multisig/actions";
 import Button from "components/common/Button";
@@ -43,41 +45,68 @@ const DashboardPage = ({ match }) => {
       socketRef.current.on(
         `${safeAddress}_${networkId}_txConfirmed`,
         (message) => {
-          if (message) {
-            if (!isMultiOwner) {
-              showToast(
+          if (!isMultiOwner) {
+            toaster.dismiss();
+            showToast(
+              <div className="d-flex align-items-center">
                 <div>
+                  <FontAwesomeIcon
+                    className="arrow"
+                    icon={faCheckCircle}
+                    color="#3bd800"
+                    style={{ fontSize: "18px" }}
+                  />
+                </div>
+                <div className="ml-3">
                   <div>Transaction Confirmed</div>
                   <Button
                     iconOnly
                     to={`/dashboard/transactions/${message.transaction[0].transactionId}`}
+                    className="p-0 mt-1"
                   >
-                    View
+                    View Transaction
                   </Button>
                 </div>
-              );
-              dispatch(
-                getTransactionByIdSuccess(message.transaction[0], message.log)
-              );
-            } else {
-              showToast(
+              </div>,
+              { toastId: `${message.transaction[0].transactionId}-txConfirmed` }
+            );
+            // repopulate transaction details
+            dispatch(
+              getTransactionByIdSuccess(message.transaction[0], message.log)
+            );
+          } else {
+            toaster.dismiss();
+            showToast(
+              <div className="d-flex align-items-center">
                 <div>
+                  <FontAwesomeIcon
+                    className="arrow"
+                    icon={faCheckCircle}
+                    color="#3bd800"
+                    style={{ fontSize: "18px" }}
+                  />
+                </div>
+                <div className="ml-3">
                   <div>Transaction Confirmed</div>
                   <Button
                     iconOnly
                     to={`/dashboard/transactions/${message.transaction.txDetails.transactionId}`}
+                    className="p-0 mt-1"
                   >
-                    View
+                    View Transaction
                   </Button>
                 </div>
-              );
-              dispatch(
-                getMultisigTransactionByIdSuccess(
-                  message.transaction,
-                  message.executionAllowed
-                )
-              );
-            }
+              </div>,
+              {
+                toastId: `${message.transaction.txDetails.transactionId}-txConfirmed`,
+              }
+            );
+            dispatch(
+              getMultisigTransactionByIdSuccess(
+                message.transaction,
+                message.executionAllowed
+              )
+            );
           }
         }
       );
