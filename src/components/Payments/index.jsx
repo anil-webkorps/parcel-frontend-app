@@ -35,6 +35,7 @@ import transactionsSaga from "store/transactions/saga";
 import {
   makeSelectMetaTransactionHash,
   makeSelectError as makeSelectErrorInCreateTx,
+  makeSelectTransactionId as makeSelectSingleOwnerTransactionId,
 } from "store/transactions/selectors";
 import {
   addTransaction,
@@ -217,6 +218,9 @@ export default function Payments() {
   const loadingTokens = useSelector(makeSelectLoadingTokens());
   const isSetupComplete = useSelector(makeSelectIsSetupComplete());
   const icons = useSelector(makeSelectTokenIcons());
+  const singleOwnerTransactionId = useSelector(
+    makeSelectSingleOwnerTransactionId()
+  );
 
   useEffect(() => {
     if (txHashFromMetaTx) {
@@ -863,6 +867,7 @@ export default function Payments() {
     <TransactionSubmitted
       txHash={txHash ? txHash : metaTxHash}
       selectedCount={getSelectedCount()}
+      transactionId={singleOwnerTransactionId}
     />
   );
 }

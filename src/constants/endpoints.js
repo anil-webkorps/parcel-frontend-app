@@ -1,6 +1,6 @@
 import { networkNames } from "./networks";
 
-const ROOT_BE_URL = process.env.REACT_APP_BE_URL;
+export const ROOT_BE_URL = process.env.REACT_APP_BE_URL;
 
 // REGISTER
 export const registerEndpoint = `${ROOT_BE_URL}/api/v1/users/create`;

@@ -13,6 +13,7 @@ export default function TransactionSubmitted({
   txHash,
   selectedCount,
   clearTxHash,
+  transactionId,
 }) {
   return (
     <div
@@ -47,7 +48,7 @@ export default function TransactionSubmitted({
               <Button
                 large
                 type="button"
-                to="/dashboard/transactions"
+                to={`/dashboard/transactions/${transactionId}`}
                 onClick={() => clearTxHash && clearTxHash()}
               >
                 Track Status

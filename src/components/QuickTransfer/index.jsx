@@ -30,6 +30,7 @@ import {
 import {
   makeSelectMetaTransactionHash,
   makeSelectError as makeSelectErrorInCreateTx,
+  makeSelectTransactionId as makeSelectSingleOwnerTransactionId,
 } from "store/transactions/selectors";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
@@ -126,6 +127,9 @@ export default function QuickTransfer() {
   const isMultiOwner = useSelector(makeSelectIsMultiOwner());
   const loadingSafeDetails = useSelector(makeSelectLoadingSafeDetails());
   const prices = useSelector(makeSelectPrices());
+  const singleOwnerTransactionId = useSelector(
+    makeSelectSingleOwnerTransactionId()
+  );
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -478,6 +482,7 @@ export default function QuickTransfer() {
     <TransactionSubmitted
       txHash={txHash ? txHash : metaTxHash}
       selectedCount={1}
+      transactionId={singleOwnerTransactionId}
     />
   );
 }

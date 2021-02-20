@@ -16,6 +16,7 @@ export const initialState = {
   transactions: undefined,
   transactionDetails: null,
   metaTransactionHash: "",
+  transactionId: "",
   log: "",
   errorInFetch: false,
   fetching: false,
@@ -29,17 +30,20 @@ const reducer = (state = initialState, action) =>
       case ADD_TRANSACTION:
         draft.loading = true;
         draft.error = false;
+        draft.transactionId = "";
         break;
 
       case ADD_TRANSACTION_SUCCESS:
         draft.loading = false;
         draft.log = action.log;
         draft.metaTransactionHash = action.metaTransactionHash;
+        draft.transactionId = action.transactionId;
         break;
 
       case ADD_TRANSACTION_ERROR:
         draft.loading = false;
         draft.error = action.error;
+        draft.transactionId = "";
         break;
 
       case VIEW_TRANSACTIONS:

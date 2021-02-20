@@ -78,7 +78,7 @@ function* createMultisigTransaction(action) {
     yield put(
       createMultisigTransactionSuccess(result.transactionId, result.log)
     );
-    yield put(push("/dashboard/transactions"));
+    yield put(push(`/dashboard/transactions/${result.transactionId}`));
   } catch (err) {
     yield put(createMultisigTransactionError(err));
   }
@@ -119,7 +119,11 @@ function* submitMultisigTransaction(action) {
   try {
     const result = yield call(request, requestURL, options);
     yield put(
-      submitMultisigTransactionSuccess(result.transactionHash, result.log)
+      submitMultisigTransactionSuccess(
+        result.transactionHash,
+        result.transactionId,
+        result.log
+      )
     );
   } catch (err) {
     yield put(submitMultisigTransactionError(err));

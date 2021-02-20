@@ -23,6 +23,7 @@ export const initialState = {
   updating: false,
   transactions: [],
   transactionDetails: null, // tx by id
+  transactionId: "",
   log: "",
   error: false,
   success: false,
@@ -106,12 +107,14 @@ const reducer = (state = initialState, action) =>
         draft.updating = true;
         draft.success = false;
         draft.error = false;
+        draft.transactionId = "";
         break;
 
       case SUBMIT_MULTISIG_TRANSACTION_SUCCESS:
         draft.updating = false;
         draft.log = action.log;
         draft.transactionHash = action.transactionHash;
+        draft.transactionId = action.transactionId;
         draft.success = true;
         break;
 
@@ -119,6 +122,7 @@ const reducer = (state = initialState, action) =>
         draft.updating = false;
         draft.error = action.error;
         draft.success = false;
+        draft.transactionId = "";
         break;
 
       case CLEAR_MULTISIG_TRANSACTION:

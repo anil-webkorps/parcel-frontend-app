@@ -60,7 +60,13 @@ function* addTransaction({ body }) {
       // Error in payload
       yield put(addTransactionError(result.log));
     } else {
-      yield put(addTransactionSuccess(result.log, result.transactionHash));
+      yield put(
+        addTransactionSuccess(
+          result.transactionHash,
+          result.transactionId,
+          result.log
+        )
+      );
     }
   } catch (err) {
     yield put(addTransactionError("Error in creating transaction."));

@@ -39,6 +39,12 @@ const makeSelectConfirmed = () =>
 const makeSelectError = () =>
   createSelector(selectMultisig, (multisigState) => multisigState.error);
 
+const makeSelectTransactionId = () =>
+  createSelector(
+    selectMultisig,
+    (multisigState) => multisigState.transactionId
+  );
+
 export {
   selectMultisig,
   makeSelectMultisigTransactions,
@@ -50,4 +56,5 @@ export {
   makeSelectUpdating,
   makeSelectConfirmed,
   makeSelectError,
+  makeSelectTransactionId,
 };

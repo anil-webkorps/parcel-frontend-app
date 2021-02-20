@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Route, Switch } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import io from "socket.io-client";
 
 import Dashboard from "components/Dashboard";
 import People from "components/People";
@@ -17,10 +18,71 @@ import QuickTransfer from "components/QuickTransfer";
 import InviteOwners from "components/InviteOwners";
 import Authenticated from "components/hoc/Authenticated";
 import NotFoundPage from "pages/NotFound";
-import { makeSelectIsMultiOwner } from "store/global/selectors";
+import {
+  makeSelectIsMultiOwner,
+  makeSelectOwnerSafeAddress,
+} from "store/global/selectors";
+import { networkId } from "constants/networks";
+import { ROOT_BE_URL } from "constants/endpoints";
+import { showToast, ToastMessage } from "components/common/Toast";
+import { getTransactionByIdSuccess } from "store/transactions/actions";
+import { getMultisigTransactionByIdSuccess } from "store/multisig/actions";
+import Button from "components/common/Button";
 
 const DashboardPage = ({ match }) => {
   const isMultiOwner = useSelector(makeSelectIsMultiOwner());
+  const safeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const socketRef = useRef();
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (safeAddress) {
+      socketRef.current = io.connect(ROOT_BE_URL);
+
+      socketRef.current.on(
+        `${safeAddress}_${networkId}_txConfirmed`,
+        (message) => {
+          if (message) {
+            if (!isMultiOwner) {
+              showToast(
+                <div>
+                  <div>Transaction Confirmed</div>
+                  <Button
+                    iconOnly
+                    to={`/dashboard/transactions/${message.transaction[0].transactionId}`}
+                  >
+                    View
+                  </Button>
+                </div>
+              );
+              dispatch(
+                getTransactionByIdSuccess(message.transaction[0], message.log)
+              );
+            } else {
+              showToast(
+                <div>
+                  <div>Transaction Confirmed</div>
+                  <Button
+                    iconOnly
+                    to={`/dashboard/transactions/${message.transaction.txDetails.transactionId}`}
+                  >
+                    View
+                  </Button>
+                </div>
+              );
+              dispatch(
+                getMultisigTransactionByIdSuccess(
+                  message.transaction,
+                  message.executionAllowed
+                )
+              );
+            }
+          }
+        }
+      );
+    }
+  }, [safeAddress, dispatch, isMultiOwner]);
 
   return (
     <Authenticated>
@@ -73,6 +135,7 @@ const DashboardPage = ({ match }) => {
         <Route exact path={`${match.path}/invite`} component={InviteOwners} />
         <Route component={NotFoundPage} />
       </Switch>
+      <ToastMessage />
     </Authenticated>
   );
 };

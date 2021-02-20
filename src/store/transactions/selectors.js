@@ -37,6 +37,12 @@ const makeSelectMetaTransactionHash = () =>
     (transactionsState) => transactionsState.metaTransactionHash
   );
 
+const makeSelectTransactionId = () =>
+  createSelector(
+    selectTransactions,
+    (transactionsState) => transactionsState.transactionId
+  );
+
 const makeSelectError = () =>
   createSelector(
     selectTransactions,
@@ -51,4 +57,5 @@ export {
   makeSelectMetaTransactionHash,
   makeSelectError,
   makeSelectTransactionDetails,
+  makeSelectTransactionId,
 };

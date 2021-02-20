@@ -25,6 +25,7 @@ import {
   makeSelectUpdating,
   makeSelectMultisigTransactionDetails,
   makeSelectMultisigExecutionAllowed,
+  makeSelectTransactionId as makeSelectMultisigTransactionId,
 } from "store/multisig/selectors";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
@@ -114,6 +115,7 @@ export default function MultiSigTransactions() {
   );
   const executionAllowed = useSelector(makeSelectMultisigExecutionAllowed());
   const icons = useSelector(makeSelectTokenIcons());
+  const multisigTransactionId = useSelector(makeSelectMultisigTransactionId());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -205,6 +207,11 @@ export default function MultiSigTransactions() {
   };
 
   const renderFinalStatus = (confirmedCount, rejectedCount, isExecuted) => {
+    // status
+    // 0 => default, show nothing
+    // 1 => Tx Submitted
+    // 2 => Success
+    // 3 => Rejected
     if (
       (confirmedCount >= threshold || rejectedCount >= threshold) &&
       !isExecuted
@@ -834,6 +841,10 @@ export default function MultiSigTransactions() {
     );
   };
 
+  const clearTxHash = () => {
+    setFinalTxHash("");
+  };
+
   const noOfPeoplePaid = useMemo(() => {
     return transactionDetails && transactionDetails.txDetails
       ? transactionDetails.txDetails.addresses.length
@@ -844,7 +855,8 @@ export default function MultiSigTransactions() {
     <TransactionSubmitted
       txHash={finalTxHash}
       selectedCount={noOfPeoplePaid}
-      // clearTxHash={clearTxHash}
+      clearTxHash={clearTxHash}
+      transactionId={multisigTransactionId}
     />
   ) : (
     renderTransactionDetails()

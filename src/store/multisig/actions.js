@@ -115,10 +115,15 @@ export function submitMultisigTransaction(body) {
   };
 }
 
-export function submitMultisigTransactionSuccess(transactionHash, log) {
+export function submitMultisigTransactionSuccess(
+  transactionHash,
+  transactionId,
+  log
+) {
   return {
     type: SUBMIT_MULTISIG_TRANSACTION_SUCCESS,
     transactionHash,
+    transactionId,
     log,
   };
 }

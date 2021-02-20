@@ -42,11 +42,12 @@ export function addTransaction({
   };
 }
 
-export function addTransactionSuccess(log, metaTransactionHash) {
+export function addTransactionSuccess(metaTransactionHash, transactionId, log) {
   return {
     type: ADD_TRANSACTION_SUCCESS,
     log,
     metaTransactionHash,
+    transactionId,
   };
 }
 
