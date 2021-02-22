@@ -25,11 +25,15 @@ const makeSelectThreshold = () =>
 const makeSelectIsMultiOwner = () =>
   createSelector(selectGlobal, (globalState) => globalState.threshold > 1);
 
+const makeSelectOrganisationType = () =>
+  createSelector(selectGlobal, (globalState) => globalState.organisationType);
+
 export {
   makeSelectOwnerName,
   makeSelectOwnerSafeAddress,
   makeSelectCreatedBy,
   makeSelectSafeOwners,
   makeSelectThreshold,
+  makeSelectOrganisationType,
   makeSelectIsMultiOwner,
 };

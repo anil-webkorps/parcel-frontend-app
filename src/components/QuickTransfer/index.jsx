@@ -51,6 +51,7 @@ import {
   makeSelectOwnerSafeAddress,
   makeSelectIsMultiOwner,
   makeSelectThreshold,
+  makeSelectOrganisationType,
 } from "store/global/selectors";
 import { getTokens } from "store/tokens/actions";
 import {
@@ -130,6 +131,7 @@ export default function QuickTransfer() {
   const singleOwnerTransactionId = useSelector(
     makeSelectSingleOwnerTransactionId()
   );
+  const organisationType = useSelector(makeSelectOrganisationType());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -179,7 +181,8 @@ export default function QuickTransfer() {
       ) {
         const to = cryptoUtils.encryptDataUsingEncryptionKey(
           JSON.stringify(payoutDetails),
-          encryptionKey
+          encryptionKey,
+          organisationType
         );
         // const to = selectedTeammates;
 
@@ -210,7 +213,8 @@ export default function QuickTransfer() {
       ) {
         const to = cryptoUtils.encryptDataUsingEncryptionKey(
           JSON.stringify(payoutDetails),
-          encryptionKey
+          encryptionKey,
+          organisationType
         );
 
         if (!isMultiOwner) {
@@ -269,6 +273,7 @@ export default function QuickTransfer() {
     isMultiOwner,
     nonce,
     history,
+    organisationType,
   ]);
 
   const onSubmit = async (values) => {

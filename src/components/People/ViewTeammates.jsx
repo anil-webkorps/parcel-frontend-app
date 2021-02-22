@@ -30,7 +30,10 @@ import {
 } from "store/view-teammates/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOrganisationType,
+  makeSelectOwnerSafeAddress,
+} from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { getDefaultIconIfPossible } from "constants/index";
 import { getTokens } from "store/tokens/actions";
@@ -65,6 +68,7 @@ export default function ViewTeammate() {
   const loading = useSelector(makeSelectLoading());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const icons = useSelector(makeSelectTokenIcons());
+  const organisationType = useSelector(makeSelectOrganisationType());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -87,7 +91,11 @@ export default function ViewTeammate() {
   const getDecryptedDetails = (data) => {
     if (!encryptionKey) return "";
     return JSON.parse(
-      cryptoUtils.decryptDataUsingEncryptionKey(data, encryptionKey)
+      cryptoUtils.decryptDataUsingEncryptionKey(
+        data,
+        encryptionKey,
+        organisationType
+      )
     );
   };
 

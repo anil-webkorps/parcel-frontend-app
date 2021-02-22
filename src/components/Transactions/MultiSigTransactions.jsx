@@ -18,7 +18,10 @@ import {
 } from "store/multisig/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOrganisationType,
+  makeSelectOwnerSafeAddress,
+} from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { minifyAddress } from "components/common/Web3Utils";
 import StatusText from "./StatusText";
@@ -55,6 +58,7 @@ export default function MultiSigTransactions() {
   const loading = useSelector(makeSelectFetching());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const icons = useSelector(makeSelectTokenIcons());
+  const organisationType = useSelector(makeSelectOrganisationType());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -71,7 +75,11 @@ export default function MultiSigTransactions() {
   const getDecryptedDetails = (data) => {
     if (!encryptionKey) return "";
     return JSON.parse(
-      cryptoUtils.decryptDataUsingEncryptionKey(data, encryptionKey)
+      cryptoUtils.decryptDataUsingEncryptionKey(
+        data,
+        encryptionKey,
+        organisationType
+      )
     );
   };
 

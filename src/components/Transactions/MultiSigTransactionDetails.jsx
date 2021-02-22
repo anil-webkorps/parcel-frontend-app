@@ -39,6 +39,7 @@ import {
   makeSelectOwnerSafeAddress,
   makeSelectThreshold,
   makeSelectSafeOwners,
+  makeSelectOrganisationType,
 } from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
@@ -116,6 +117,7 @@ export default function MultiSigTransactions() {
   const executionAllowed = useSelector(makeSelectMultisigExecutionAllowed());
   const icons = useSelector(makeSelectTokenIcons());
   const multisigTransactionId = useSelector(makeSelectMultisigTransactionId());
+  const organisationType = useSelector(makeSelectOrganisationType());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -202,7 +204,11 @@ export default function MultiSigTransactions() {
   const getDecryptedDetails = (data) => {
     if (!encryptionKey) return "";
     return JSON.parse(
-      cryptoUtils.decryptDataUsingEncryptionKey(data, encryptionKey)
+      cryptoUtils.decryptDataUsingEncryptionKey(
+        data,
+        encryptionKey,
+        organisationType
+      )
     );
   };
 
@@ -256,7 +262,8 @@ export default function MultiSigTransactions() {
             ...confirmedOwner,
             title: cryptoUtils.decryptDataUsingEncryptionKey(
               confirmedOwner.ownerInfo.name,
-              encryptionKey
+              encryptionKey,
+              organisationType
             ),
             subtitle: getStatusText(
               confirmedOwner.approved,
@@ -272,7 +279,8 @@ export default function MultiSigTransactions() {
           ownerInfo: safeOwner,
           title: cryptoUtils.decryptDataUsingEncryptionKey(
             safeOwner.name,
-            encryptionKey
+            encryptionKey,
+            organisationType
           ),
           subtitle: getStatusText(safeOwner.approved, safeOwner.rejected),
           backgroundColor: getStatusColor(

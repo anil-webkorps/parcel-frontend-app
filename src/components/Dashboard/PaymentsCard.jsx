@@ -24,7 +24,10 @@ import {
 } from "store/view-teammates/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOrganisationType,
+  makeSelectOwnerSafeAddress,
+} from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { TransactionUrl } from "components/common/Web3Utils";
 import StatusText from "components/Transactions/StatusText";
@@ -60,16 +63,21 @@ export default function PaymentsCard() {
   const loadingTransactions = useSelector(makeSelectLoadingTransactions());
   const loadingTeammates = useSelector(makeSelectLoadingTeammates());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const organisationType = useSelector(makeSelectOrganisationType());
   const teammates = useSelector(makeSelectTeammates());
 
   const getDecryptedDetails = useCallback(
     (data) => {
       if (!encryptionKey) return "";
       return JSON.parse(
-        cryptoUtils.decryptDataUsingEncryptionKey(data, encryptionKey)
+        cryptoUtils.decryptDataUsingEncryptionKey(
+          data,
+          encryptionKey,
+          organisationType
+        )
       );
     },
-    [encryptionKey]
+    [encryptionKey, organisationType]
   );
 
   useEffect(() => {

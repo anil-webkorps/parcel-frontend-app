@@ -4,6 +4,7 @@ import {
   SET_OWNER_DETAILS,
   SET_OWNERS_AND_THRESHOLD,
   CLEAR_GLOBAL_STATE,
+  SET_ORGANISATION_TYPE,
 } from "./action-types";
 
 export function setOwnerName(name) {
@@ -34,6 +35,13 @@ export function setOwnersAndThreshold(owners, threshold) {
     type: SET_OWNERS_AND_THRESHOLD,
     owners,
     threshold,
+  };
+}
+
+export function setOrganisationType(organisationType) {
+  return {
+    type: SET_ORGANISATION_TYPE,
+    organisationType,
   };
 }
 

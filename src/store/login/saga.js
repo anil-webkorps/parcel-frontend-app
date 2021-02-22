@@ -8,7 +8,7 @@ import jwt_decode from "jwt-decode";
 
 import { LOGIN_USER } from "./action-types";
 import { loginUserSuccess, loginUserError, setImportSafeFlag } from "./actions";
-import { setOwnersAndThreshold } from "../global/actions";
+import { setOrganisationType, setOwnersAndThreshold } from "../global/actions";
 import request from "utils/request";
 // import { makeSelectUsername } from "containers/HomePage/selectors";
 import { loginEndpoint } from "constants/endpoints";
@@ -40,6 +40,7 @@ export function* loginUser(action) {
       }
 
       yield put(setOwnersAndThreshold(decoded.owners, decoded.threshold));
+      yield put(setOrganisationType(decoded.organisationType));
       yield put(loginUserSuccess(result.transactionHash, result.log));
       yield put(push("/dashboard"));
     }

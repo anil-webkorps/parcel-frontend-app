@@ -56,7 +56,10 @@ import {
 } from "store/tokens/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOrganisationType,
+  makeSelectOwnerSafeAddress,
+} from "store/global/selectors";
 import Dropzone from "components/common/Dropzone";
 import { minifyAddress } from "components/common/Web3Utils";
 import TeamPng from "assets/images/user-team.png";
@@ -153,6 +156,7 @@ export default function AddTeammate() {
   const loadingTokens = useSelector(makeSelectLoadingTokens());
   const tokenList = useSelector(makeSelectTokenList());
   const prices = useSelector(makeSelectPrices());
+  const organisationType = useSelector(makeSelectOrganisationType());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -291,7 +295,8 @@ export default function AddTeammate() {
         address: formData.address,
         joiningDate: Date.now(),
       }),
-      encryptionKey
+      encryptionKey,
+      organisationType
     );
 
     const body = {
@@ -368,7 +373,8 @@ export default function AddTeammate() {
               salaryToken,
               address,
             }),
-            encryptionKey
+            encryptionKey,
+            organisationType
           );
 
           const uniqueIndex = uniqueDepartmentsHashmap[uniqueDepartmentName];

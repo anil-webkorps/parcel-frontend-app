@@ -40,7 +40,11 @@ import {
   getSafeOwners,
 } from "store/loginWizard/actions";
 import { makeSelectFlag } from "store/login/selectors";
-import { setOwnerDetails, setOwnersAndThreshold } from "store/global/actions";
+import {
+  setOwnerDetails,
+  setOwnersAndThreshold,
+  setOrganisationType,
+} from "store/global/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
 import { Input, ErrorMessage } from "components/common/Form";
@@ -99,6 +103,11 @@ const FLOWS = {
   IMPORT_INDIVIDUAL: "IMPORT_INDIVIDUAL",
 };
 
+const ORGANISATION_TYPE = {
+  PRIVATE: "0",
+  PUBLIC: "1",
+};
+
 const getStepsByFlow = (flow) => {
   switch (flow) {
     case FLOWS.IMPORT:
@@ -136,7 +145,8 @@ const IMPORT_STEPS = {
   [STEPS.TWO]: "Choose Safe",
   [STEPS.THREE]: "Owner Address/Name",
   [STEPS.FOUR]: "Owner Details",
-  [STEPS.FIVE]: "Threshold",
+  [STEPS.FIVE]: "Organisation Type",
+  [STEPS.SIX]: "Threshold",
 };
 
 const IMPORT_INDIVIDUAL_STEPS = {
@@ -144,6 +154,7 @@ const IMPORT_INDIVIDUAL_STEPS = {
   [STEPS.ONE]: "Privacy",
   [STEPS.TWO]: "Choose Safe",
   [STEPS.THREE]: "Company Name",
+  [STEPS.FOUR]: "Organisation Type",
 };
 
 const Login = () => {
@@ -341,12 +352,15 @@ const Login = () => {
       // set encryptionKey
       setEncryptionKey(encryptionKey);
 
+      const organisationType = parseInt(formData.organisationType);
+
       const encryptedOwners =
         formData.owners && formData.owners.length
           ? formData.owners.map(({ name, owner }) => ({
               name: cryptoUtils.encryptDataUsingEncryptionKey(
                 name,
-                encryptionKey
+                encryptionKey,
+                organisationType
               ),
               owner,
             }))
@@ -354,7 +368,8 @@ const Login = () => {
               {
                 name: cryptoUtils.encryptDataUsingEncryptionKey(
                   formData.name,
-                  encryptionKey
+                  encryptionKey,
+                  organisationType
                 ),
                 owner: account,
               },
@@ -380,7 +395,8 @@ const Login = () => {
       const body = {
         name: cryptoUtils.encryptDataUsingEncryptionKey(
           formData.name,
-          encryptionKey
+          encryptionKey,
+          organisationType
         ),
         safeAddress: chosenSafeAddress,
         createdBy: account,
@@ -389,10 +405,12 @@ const Login = () => {
         threshold,
         publicKey,
         encryptionKeyData,
+        organisationType,
       };
 
       dispatch(setOwnerDetails(formData.name, chosenSafeAddress, account));
       dispatch(setOwnersAndThreshold(encryptedOwners, threshold));
+      dispatch(setOrganisationType(organisationType));
       dispatch(registerUser(body));
     }
   };
@@ -649,6 +667,54 @@ const Login = () => {
     );
   };
 
+  const renderOrganisationType = () => {
+    return (
+      <StepDetails>
+        <Img
+          src={CompanyPng}
+          alt="individual"
+          className="my-3"
+          width="130px"
+          style={{ minWidth: "130px" }}
+        />
+        <h3 className="title">Which type of organisation would you like?</h3>
+        <p className="subtitle mb-2">
+          If you choose Private, all your data would be encrypted and
+          inaccessible outside Parcel.
+        </p>
+        <div
+          className="row mr-4 align-items-center justify-content-between radio-toolbar"
+          style={{ padding: "10px 16px 0" }}
+        >
+          <Input
+            name={`organisationType`}
+            register={register}
+            type="radio"
+            id={`organisation-private`}
+            value={ORGANISATION_TYPE.PRIVATE}
+            defaultChecked
+            label={"Private"}
+            labelStyle={{ minWidth: "265px" }}
+          />
+          <Input
+            name={`organisationType`}
+            register={register}
+            type="radio"
+            id={`organisation-public`}
+            value={ORGANISATION_TYPE.PUBLIC}
+            label={"Public"}
+            labelStyle={{ minWidth: "265px" }}
+          />
+        </div>
+
+        <ErrorMessage name="organisationType" errors={errors} />
+        <Button large type="submit" className="mt-2">
+          Proceed
+        </Button>
+      </StepDetails>
+    );
+  };
+
   const getEncryptionKey = async (data, sign) => {
     const encryptionKey = await cryptoUtils.decryptUsingSignatures(data, sign);
     return encryptionKey;
@@ -672,6 +738,10 @@ const Login = () => {
           createdBy,
         });
       } else {
+        console.log({
+          data: safes[i].encryptionKeyData,
+          sign,
+        });
         const encryptionKey = await getEncryptionKey(
           safes[i].encryptionKeyData,
           sign
@@ -681,7 +751,8 @@ const Login = () => {
           safe: safes[i].safeAddress,
           name: cryptoUtils.decryptDataUsingEncryptionKey(
             safes[i].name,
-            encryptionKey
+            encryptionKey,
+            safes[i].organisationType
           ),
           balance: "0",
           encryptionKeyData: safes[i].encryptionKeyData,
@@ -831,10 +902,16 @@ const Login = () => {
 
       case STEPS.FOUR: {
         if (flow === FLOWS.IMPORT) return renderCompanyName();
+        if (flow === FLOWS.IMPORT_INDIVIDUAL) return renderOrganisationType();
         return null;
       }
 
       case STEPS.FIVE: {
+        if (flow === FLOWS.IMPORT) return renderOrganisationType();
+        return null;
+      }
+
+      case STEPS.SIX: {
         if (flow === FLOWS.IMPORT) return renderThreshold();
         return null;
       }

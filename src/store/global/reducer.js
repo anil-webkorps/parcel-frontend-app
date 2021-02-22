@@ -5,6 +5,7 @@ import {
   SET_OWNER_DETAILS,
   SET_OWNERS_AND_THRESHOLD,
   CLEAR_GLOBAL_STATE,
+  SET_ORGANISATION_TYPE,
 } from "./action-types";
 
 export const initialState = {
@@ -13,6 +14,7 @@ export const initialState = {
   createdBy: "",
   owners: [], // [{name: "123", owner: "0x123"}]
   threshold: 0,
+  organisationType: 0,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -36,6 +38,10 @@ const reducer = (state = initialState, action) =>
       case SET_OWNERS_AND_THRESHOLD:
         draft.owners = action.owners;
         draft.threshold = action.threshold;
+        break;
+
+      case SET_ORGANISATION_TYPE:
+        draft.organisationType = action.organisationType;
         break;
 
       case CLEAR_GLOBAL_STATE:

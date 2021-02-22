@@ -19,7 +19,10 @@ import {
 } from "store/transactions/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOrganisationType,
+  makeSelectOwnerSafeAddress,
+} from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { minifyAddress, TransactionUrl } from "components/common/Web3Utils";
 import StatusText from "./StatusText";
@@ -56,6 +59,7 @@ export default function TransactionDetails() {
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const transactionDetails = useSelector(makeSelectTransactionDetails());
   const icons = useSelector(makeSelectTokenIcons());
+  const organisationType = useSelector(makeSelectOrganisationType());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -77,7 +81,11 @@ export default function TransactionDetails() {
   const getDecryptedDetails = (data) => {
     if (!encryptionKey) return "";
     return JSON.parse(
-      cryptoUtils.decryptDataUsingEncryptionKey(data, encryptionKey)
+      cryptoUtils.decryptDataUsingEncryptionKey(
+        data,
+        encryptionKey,
+        organisationType
+      )
     );
   };
 

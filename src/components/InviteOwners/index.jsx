@@ -34,6 +34,7 @@ import {
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import {
+  makeSelectOrganisationType,
   makeSelectOwnerSafeAddress,
   makeSelectThreshold,
 } from "store/global/selectors";
@@ -78,6 +79,7 @@ export default function InviteOwners() {
   const loading = useSelector(makeSelectLoading());
   const creatingInvitation = useSelector(makeSelectCreating());
   const successfullyInvited = useSelector(makeSelectSuccess());
+  const organisationType = useSelector(makeSelectOrganisationType());
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -295,7 +297,8 @@ export default function InviteOwners() {
                         <div className="name">
                           {cryptoUtils.decryptDataUsingEncryptionKey(
                             name,
-                            encryptionKey
+                            encryptionKey,
+                            organisationType
                           )}
                         </div>
                         <div className="address">

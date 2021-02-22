@@ -72,6 +72,7 @@ import {
   makeSelectOwnerSafeAddress,
   makeSelectThreshold,
   makeSelectIsMultiOwner,
+  makeSelectOrganisationType,
 } from "store/global/selectors";
 import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
@@ -221,6 +222,7 @@ export default function Payments() {
   const singleOwnerTransactionId = useSelector(
     makeSelectSingleOwnerTransactionId()
   );
+  const organisationType = useSelector(makeSelectOrganisationType());
 
   useEffect(() => {
     if (txHashFromMetaTx) {
@@ -324,7 +326,8 @@ export default function Payments() {
       ) {
         const to = cryptoUtils.encryptDataUsingEncryptionKey(
           JSON.stringify(recievers),
-          encryptionKey
+          encryptionKey,
+          organisationType
         );
         // const to = selectedTeammates;
 
@@ -355,7 +358,8 @@ export default function Payments() {
       ) {
         const to = cryptoUtils.encryptDataUsingEncryptionKey(
           JSON.stringify(recievers),
-          encryptionKey
+          encryptionKey,
+          organisationType
         );
         if (!isMultiOwner) {
           // threshold = 1 or single owner
@@ -415,6 +419,7 @@ export default function Payments() {
     nonce,
     history,
     prices,
+    organisationType,
   ]);
 
   const isNoneChecked = useMemo(() => checked.every((check) => !check), [
@@ -424,7 +429,11 @@ export default function Payments() {
   const getDecryptedDetails = (data) => {
     if (!encryptionKey) return "";
     return JSON.parse(
-      cryptoUtils.decryptDataUsingEncryptionKey(data, encryptionKey)
+      cryptoUtils.decryptDataUsingEncryptionKey(
+        data,
+        encryptionKey,
+        organisationType
+      )
     );
   };
 
