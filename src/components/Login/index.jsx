@@ -715,8 +715,12 @@ const Login = () => {
     );
   };
 
-  const getEncryptionKey = async (data, sign) => {
-    const encryptionKey = await cryptoUtils.decryptUsingSignatures(data, sign);
+  const getEncryptionKey = async (data, sign, organisationType) => {
+    const encryptionKey = await cryptoUtils.decryptUsingSignatures(
+      data,
+      sign,
+      organisationType
+    );
     return encryptionKey;
   };
 
@@ -738,13 +742,10 @@ const Login = () => {
           createdBy,
         });
       } else {
-        console.log({
-          data: safes[i].encryptionKeyData,
-          sign,
-        });
         const encryptionKey = await getEncryptionKey(
           safes[i].encryptionKeyData,
-          sign
+          sign,
+          safes[i].organisationType
         );
 
         safeDetails.push({
@@ -757,6 +758,7 @@ const Login = () => {
           balance: "0",
           encryptionKeyData: safes[i].encryptionKeyData,
           createdBy,
+          organisationType: safes[i].organisationType,
         });
       }
     }
@@ -771,12 +773,22 @@ const Login = () => {
     }
   }, [step, getSafeDetails]);
 
-  const handleSelectSafe = async (name, safe, encryptionKeyData, createdBy) => {
+  const handleSelectSafe = async (
+    name,
+    safe,
+    encryptionKeyData,
+    createdBy,
+    organisationType
+  ) => {
     dispatch(chooseSafe(safe));
     dispatch(setOwnerDetails(name, safe, createdBy));
 
     if (sign) {
-      const encryptionKey = await getEncryptionKey(encryptionKeyData, sign);
+      const encryptionKey = await getEncryptionKey(
+        encryptionKeyData,
+        sign,
+        organisationType
+      );
       setEncryptionKey(encryptionKey);
     }
 
@@ -826,26 +838,33 @@ const Login = () => {
           Select the safe with which you would like to continue
         </p>
         {safeDetails &&
-          safeDetails.map(({ safe, name, balance, encryptionKeyData }) => (
-            <Safe
-              key={safe}
-              onClick={() =>
-                encryptionKeyData
-                  ? handleSelectSafe(name, safe, encryptionKeyData, createdBy)
-                  : handleImportSelectedSafe(safe)
-              }
-            >
-              <div className="top">
-                <div className="details">
-                  <div className="icon">
-                    <img src={TeamPng} alt="user" width="50" />
+          safeDetails.map(
+            ({ safe, name, balance, encryptionKeyData, organisationType }) => (
+              <Safe
+                key={safe}
+                onClick={() =>
+                  encryptionKeyData
+                    ? handleSelectSafe(
+                        name,
+                        safe,
+                        encryptionKeyData,
+                        createdBy,
+                        organisationType
+                      )
+                    : handleImportSelectedSafe(safe)
+                }
+              >
+                <div className="top">
+                  <div className="details">
+                    <div className="icon">
+                      <img src={TeamPng} alt="user" width="50" />
+                    </div>
+                    <div className="info">
+                      <div className="desc">Name</div>
+                      <div className="val">{name}</div>
+                    </div>
                   </div>
-                  <div className="info">
-                    <div className="desc">Name</div>
-                    <div className="val">{name}</div>
-                  </div>
-                </div>
-                {/* <div className="details">
+                  {/* <div className="details">
                 <div className="icon">
                   <FontAwesomeIcon icon={faWallet} color="#aaa" />
                 </div>
@@ -854,27 +873,28 @@ const Login = () => {
                   <div className="val">{balance} ETH</div>
                 </div>
               </div> */}
-              </div>
+                </div>
 
-              <div className="bottom">
-                <div className="details">
-                  <div className="icon">
-                    <FontAwesomeIcon icon={faLock} color="#aaa" />
-                  </div>
-                  <div className="info">
-                    <div className="desc">Address</div>
-                    <div className="val">{safe}</div>
+                <div className="bottom">
+                  <div className="details">
+                    <div className="icon">
+                      <FontAwesomeIcon icon={faLock} color="#aaa" />
+                    </div>
+                    <div className="info">
+                      <div className="desc">Address</div>
+                      <div className="val">{safe}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="select-safe">
-                <Button iconOnly onClick={goBack} className="px-0">
-                  <FontAwesomeIcon icon={faArrowRight} color="#fff" />
-                </Button>
-              </div>
-            </Safe>
-          ))}
+                <div className="select-safe">
+                  <Button iconOnly onClick={goBack} className="px-0">
+                    <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+                  </Button>
+                </div>
+              </Safe>
+            )
+          )}
         <RetryText onClick={handleRefetch}>Safe not loaded?</RetryText>
       </StepDetails>
     );

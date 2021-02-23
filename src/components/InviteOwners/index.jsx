@@ -37,6 +37,7 @@ import {
   makeSelectOrganisationType,
   makeSelectOwnerSafeAddress,
   makeSelectThreshold,
+  makeSelectIsOrganisationPrivate,
 } from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { useActiveWeb3React } from "hooks";
@@ -80,6 +81,7 @@ export default function InviteOwners() {
   const creatingInvitation = useSelector(makeSelectCreating());
   const successfullyInvited = useSelector(makeSelectSuccess());
   const organisationType = useSelector(makeSelectOrganisationType());
+  const isOrganisationPrivate = useSelector(makeSelectIsOrganisationPrivate());
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -98,12 +100,15 @@ export default function InviteOwners() {
   }, [dispatch, successfullyInvited, ownerSafeAddress]);
 
   useEffect(() => {
-    if (safeOwners && safeOwners.some((owner) => owner.invitationDetails)) {
+    if (
+      (safeOwners && safeOwners.some((owner) => owner.invitationDetails)) ||
+      !isOrganisationPrivate
+    ) {
       setDisplayInviteSteps(false);
     } else {
       setDisplayInviteSteps(true);
     }
-  }, [safeOwners]);
+  }, [safeOwners, isOrganisationPrivate]);
 
   const toggleShowOwners = () => {
     setDisplayInviteSteps((displayInviteSteps) => !displayInviteSteps);
@@ -155,6 +160,10 @@ export default function InviteOwners() {
       return <div className="highlighted-status">You</div>;
     }
     if (owner === createdBy) {
+      return <div className="highlighted-status">Owner</div>;
+    }
+
+    if (!isOrganisationPrivate) {
       return <div className="highlighted-status">Owner</div>;
     }
 
@@ -324,13 +333,94 @@ export default function InviteOwners() {
     );
   };
 
+  const renderStepsForPrivateOrganisation = () => (
+    <React.Fragment>
+      <Row className="align-items-center mt-4">
+        <Col lg="2" className="pr-0">
+          <Img src={Step1Png} alt="step1" width="64" />
+        </Col>
+        <Col lg="10" className="pl-0">
+          <StepDetails>
+            <div className="step-title">STEP 1</div>
+            <div className="step-subtitle">Invite the Owners to Parcel</div>
+          </StepDetails>
+        </Col>
+      </Row>
+      <Row className="align-items-center mt-4">
+        <Col lg="2" className="pr-0">
+          <Img src={Step2Png} alt="step2" width="64" />
+        </Col>
+        <Col lg="10" className="pl-0">
+          <StepDetails>
+            <div className="step-title">STEP 2</div>
+            <div className="step-subtitle">Owner Accepts the Invite</div>
+          </StepDetails>
+        </Col>
+      </Row>
+      <Row className="align-items-center mt-4">
+        <Col lg="2" className="pr-0">
+          <Img src={Step3Png} alt="step3" width="64" />
+        </Col>
+        <Col lg="10" className="pl-0">
+          <StepDetails>
+            <div className="step-title">STEP 3</div>
+            <div className="step-subtitle">
+              You Give Final Approval To The Owner
+            </div>
+          </StepDetails>
+        </Col>
+      </Row>
+    </React.Fragment>
+  );
+
+  const renderStepsForPublicOrganisation = () => (
+    <React.Fragment>
+      <Row className="align-items-center mt-5 pt-5 mb-5 pb-5">
+        {/* <Col lg="2" className="pr-0">
+          <Img src={Step3Png} alt="step1" width="64" />
+        </Col> */}
+        <Col lg="12">
+          <StepDetails>
+            <div className="step-title d-flex justify-content-center align-items-center">
+              {/* <div className="mr-2">SETUP COMPLETED</div> */}
+              <CopyLink
+                id={`invitation-link-final`}
+                tooltip="Login Link"
+                value={window.location.origin}
+              >
+                <Button
+                  type="button"
+                  style={{ minHeight: "0", height: "100%", fontSize: "12px" }}
+                  className="p-2"
+                >
+                  <FontAwesomeIcon
+                    icon={faLink}
+                    color={"#fff"}
+                    className="mx-1"
+                  />
+                  Copy Login Link
+                </Button>
+              </CopyLink>
+            </div>
+            <div className="step-subtitle mt-2 text-center">
+              Share this link with the other owners and they can login to
+              Parcel.
+            </div>
+          </StepDetails>
+        </Col>
+      </Row>
+    </React.Fragment>
+  );
+
   const renderInviteSteps = () => {
     return (
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="invite-owners">
           <Title className="mb-2">Owners</Title>
           <Heading>
-            To allow other owners to use Parcel, follow these simple steps
+            {isOrganisationPrivate
+              ? `To allow other owners to use Parcel, follow these simple steps`
+              : `All the owners can directly login to Parcel`}
           </Heading>
           {loading && (
             <div
@@ -342,45 +432,9 @@ export default function InviteOwners() {
           )}
           {!loading && (
             <React.Fragment>
-              <Row className="align-items-center mt-4">
-                <Col lg="2" className="pr-0">
-                  <Img src={Step1Png} alt="step1" width="64" />
-                </Col>
-                <Col lg="10" className="pl-0">
-                  <StepDetails>
-                    <div className="step-title">STEP 1</div>
-                    <div className="step-subtitle">
-                      Invite the Owners to Parcel
-                    </div>
-                  </StepDetails>
-                </Col>
-              </Row>
-              <Row className="align-items-center mt-4">
-                <Col lg="2" className="pr-0">
-                  <Img src={Step2Png} alt="step2" width="64" />
-                </Col>
-                <Col lg="10" className="pl-0">
-                  <StepDetails>
-                    <div className="step-title">STEP 2</div>
-                    <div className="step-subtitle">
-                      Owner Accepts the Invite
-                    </div>
-                  </StepDetails>
-                </Col>
-              </Row>
-              <Row className="align-items-center mt-4">
-                <Col lg="2" className="pr-0">
-                  <Img src={Step3Png} alt="step3" width="64" />
-                </Col>
-                <Col lg="10" className="pl-0">
-                  <StepDetails>
-                    <div className="step-title">STEP 3</div>
-                    <div className="step-subtitle">
-                      You Give Final Approval To The Owner
-                    </div>
-                  </StepDetails>
-                </Col>
-              </Row>
+              {isOrganisationPrivate
+                ? renderStepsForPrivateOrganisation()
+                : renderStepsForPublicOrganisation()}
 
               <Button
                 large

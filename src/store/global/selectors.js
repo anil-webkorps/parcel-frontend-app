@@ -28,6 +28,18 @@ const makeSelectIsMultiOwner = () =>
 const makeSelectOrganisationType = () =>
   createSelector(selectGlobal, (globalState) => globalState.organisationType);
 
+const makeSelectIsOrganisationPrivate = () =>
+  createSelector(
+    selectGlobal,
+    (globalState) => globalState.organisationType === 0
+  );
+
+const makeSelectIsOrganisationPublic = () =>
+  createSelector(
+    selectGlobal,
+    (globalState) => globalState.organisationType === 1
+  );
+
 export {
   makeSelectOwnerName,
   makeSelectOwnerSafeAddress,
@@ -36,4 +48,6 @@ export {
   makeSelectThreshold,
   makeSelectOrganisationType,
   makeSelectIsMultiOwner,
+  makeSelectIsOrganisationPublic,
+  makeSelectIsOrganisationPrivate,
 };
