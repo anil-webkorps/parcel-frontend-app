@@ -13,26 +13,28 @@ const MultiCurrencyInputField = ({
   pattern,
   type,
   labelStyle = {},
-  convertionRate,
+  conversionRate,
   onChange,
   value,
   tokenName,
+  selectedTokenDetails,
   ...rest
 }) => {
   const [conversionValue, setConversionValue] = useState("");
   const [toggleFlex, setToggleFlex] = useState(false);
+  const [currentTokenName, setCurrentTokenName] = useState();
 
   const handleUsdValueChange = (e) => {
     setConversionValue(e.target.value);
     const tokenValue = e.target.value
-      ? parseFloat(e.target.value / convertionRate).toFixed(4)
+      ? parseFloat(e.target.value / conversionRate).toFixed(4)
       : "";
     onChange(tokenValue);
   };
 
   const handleTokenValueChange = (e) => {
     const newConversionValue = e.target.value
-      ? parseFloat(e.target.value * convertionRate).toFixed(4)
+      ? parseFloat(e.target.value * conversionRate).toFixed(4)
       : "";
     setConversionValue(newConversionValue);
     onChange(e.target.value);
@@ -43,11 +45,18 @@ const MultiCurrencyInputField = ({
       setConversionValue("");
     } else {
       const newConversionValue = value
-        ? parseFloat(value * convertionRate).toFixed(4)
+        ? parseFloat(value * conversionRate).toFixed(4)
         : "";
       if (!conversionValue) setConversionValue(newConversionValue);
     }
-  }, [value, convertionRate, conversionValue]);
+  }, [value, conversionRate, conversionValue]);
+
+  useEffect(() => {
+    // reset the conversion value so that it gets
+    // calculated automatically
+    if (!currentTokenName) setCurrentTokenName(tokenName);
+    else setConversionValue("");
+  }, [tokenName, currentTokenName]);
 
   const handleToggleFlex = () => {
     setToggleFlex((flex) => !flex);

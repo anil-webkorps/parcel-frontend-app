@@ -107,11 +107,9 @@ export default function QuickTransfer() {
   useInjectSaga({ key: safeKey, saga: safeSaga });
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
 
-  const { register, errors, handleSubmit, formState, control, reset } = useForm(
-    {
-      mode: "onChange",
-    }
-  );
+  const { register, errors, handleSubmit, formState, control } = useForm({
+    mode: "onChange",
+  });
 
   const dispatch = useDispatch();
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
@@ -309,7 +307,6 @@ export default function QuickTransfer() {
         setSelectedTokenDetails,
       })
     );
-    reset({ address: "", amount: "" });
   };
 
   const renderTransferDetails = () => (
@@ -363,16 +360,30 @@ export default function QuickTransfer() {
           <Controller
             control={control}
             name="amount"
+            rules={{
+              required: "Amount is required",
+              validate: (value) => {
+                if (value <= 0) return "Please check your input";
+                else if (
+                  selectedTokenDetails &&
+                  parseFloat(value) > parseFloat(selectedTokenDetails.balance)
+                )
+                  return "Insufficient balance";
+
+                return true;
+              },
+            }}
+            defaultValue=""
             render={({ onChange, value }) => (
               <CurrencyInput
                 type="number"
                 name="amount"
                 // register={register}
-                required={`Amount is required`}
+                // required={`Amount is required`}
                 value={value}
                 onChange={onChange}
                 placeholder="Amount"
-                convertionRate={
+                conversionRate={
                   prices &&
                   selectedTokenDetails &&
                   prices[selectedTokenDetails.name]

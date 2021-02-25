@@ -477,6 +477,13 @@ export default function AddTeammate() {
           <Controller
             control={control}
             name="amount"
+            rules={{
+              required: "Amount is required",
+              validate: (value) => {
+                if (value <= 0) return "Please check your input";
+                return true;
+              },
+            }}
             render={({ onChange, value }) => (
               <CurrencyInput
                 type="number"
@@ -486,7 +493,7 @@ export default function AddTeammate() {
                 value={value}
                 onChange={onChange}
                 placeholder="Amount"
-                convertionRate={
+                conversionRate={
                   prices &&
                   selectedTokenDetails &&
                   prices[selectedTokenDetails.name]
