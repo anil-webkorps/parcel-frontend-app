@@ -58,7 +58,15 @@ import DeleteSvg from "assets/icons/delete-bin.svg";
 import LightbulbIcon from "assets/icons/lightbulb.svg";
 import LoadingSafeIcon from "assets/images/register/safe-loading.svg";
 import OrganisationInfoModal, { MODAL_NAME as INFO_MODAL } from "./InfoModal";
-import organisationInfo from "./info";
+import {
+  STEPS,
+  COMPANY_REGISTER_STEPS,
+  INDIVIDUAL_REGISTER_STEPS,
+  DAO_REGISTER_STEPS,
+  FLOWS,
+  ORGANISATION_TYPE,
+  organisationInfo,
+} from "store/register/resources";
 
 import {
   Background,
@@ -79,27 +87,6 @@ const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
 const registerKey = "register";
 const registerWizardKey = "registerWizard";
 const gasPriceKey = "gas";
-
-const STEPS = {
-  ZERO: 0,
-  ONE: 1,
-  TWO: 2,
-  THREE: 3,
-  FOUR: 4,
-  FIVE: 5,
-  SIX: 6,
-};
-
-const FLOWS = {
-  COMPANY: "COMPANY",
-  INDIVIDUAL: "INDIVIDUAL",
-  DAO: "DAO",
-};
-
-const ORGANISATION_TYPE = {
-  PRIVATE: "0",
-  PUBLIC: "1",
-};
 
 const getStepsByFlow = (flow) => {
   switch (flow) {
@@ -125,99 +112,6 @@ const getStepsCountByFlow = (flow) => {
     default:
       return Object.keys(COMPANY_REGISTER_STEPS).length - 1;
   }
-};
-
-const COMPANY_REGISTER_STEPS = {
-  [STEPS.ZERO]: {
-    title: "Connect",
-    subtitle: "",
-  },
-  [STEPS.ONE]: {
-    title: "About you",
-    subtitle: "Please choose what defines you the best.",
-  },
-  [STEPS.TWO]: {
-    title: "Company Name",
-    subtitle: "You’ll be registered with this name on Parcel.",
-  },
-  [STEPS.THREE]: {
-    title: "Owner Name and Address",
-    subtitle: "You can add multiple owners",
-  },
-  [STEPS.FOUR]: {
-    title: "Threshold",
-    subtitle: "How many people should authorize transactions?",
-  },
-  [STEPS.FIVE]: {
-    title: "Privacy",
-    subtitle: "Please sign this message.",
-  },
-  [STEPS.SIX]: {
-    title: "Review your entry",
-    subtitle: "Kindly verify the details before creating an account.",
-  },
-};
-
-const DAO_REGISTER_STEPS = {
-  [STEPS.ZERO]: {
-    title: "Connect",
-    subtitle: "",
-  },
-  [STEPS.ONE]: {
-    title: "About you",
-    subtitle: "Please choose what defines you the best.",
-  },
-  [STEPS.TWO]: {
-    title: "Organization Name",
-    subtitle: "You’ll be registered with this name on Parcel.",
-  },
-  [STEPS.THREE]: {
-    title: "Owner Name and Address",
-    subtitle: "You can add multiple owners",
-  },
-  [STEPS.FOUR]: {
-    title: "Threshold",
-    subtitle: "How many people should authorize transactions?",
-  },
-  [STEPS.FIVE]: {
-    title: "Privacy",
-    subtitle: "Please sign this message.",
-  },
-  [STEPS.SIX]: {
-    title: "Review your entry",
-    subtitle: "Kindly verify the details before creating an account.",
-  },
-};
-
-const INDIVIDUAL_REGISTER_STEPS = {
-  [STEPS.ZERO]: {
-    title: "Connect",
-    subtitle: "",
-  },
-  [STEPS.ONE]: {
-    title: "About you",
-    subtitle: "Please choose what defines you the best.",
-  },
-  [STEPS.TWO]: {
-    title: "Your Name",
-    subtitle: "You’ll be registered with this name on Parcel.",
-  },
-  [STEPS.THREE]: {
-    title: "Owner Name and Address",
-    subtitle: "You can add multiple owners",
-  },
-  [STEPS.FOUR]: {
-    title: "Threshold",
-    subtitle: "How many people should authorize transactions?",
-  },
-  [STEPS.FIVE]: {
-    title: "Privacy",
-    subtitle: "Please sign this message.",
-  },
-  [STEPS.SIX]: {
-    title: "Review your entry",
-    subtitle: "Kindly verify the details before creating an account.",
-  },
 };
 
 const Register = () => {
@@ -305,7 +199,7 @@ const Register = () => {
       dispatch(updateForm({ referralId }));
       setIsMetaTxEnabled(true);
     }
-  }, [location, dispatch]); // eslint-disable-line
+  }, [location, dispatch]);
 
   useEffect(() => {
     if (errorInRegister) setLoadingTx(false);
@@ -406,7 +300,7 @@ const Register = () => {
             creationData,
           })
         );
-        await createSafeWithNormalTransaction();
+        await registerUserToParcel();
       });
 
       setLoadingTx(true);
@@ -528,9 +422,9 @@ const Register = () => {
     }
   };
 
-  const createSafeWithNormalTransaction = async (signature) => {
+  const registerUserToParcel = async () => {
     const encryptionKey = cryptoUtils.getEncryptionKey(
-      signature,
+      sign,
       formData.safeAddress
     );
     const organisationType = parseInt(formData.organisationType);
@@ -558,13 +452,13 @@ const Register = () => {
             },
           ];
 
-    const publicKey = getPublicKey(signature);
+    const publicKey = getPublicKey(sign);
 
     let encryptionKeyData;
     try {
       encryptionKeyData = await cryptoUtils.encryptUsingSignatures(
         encryptionKey,
-        signature
+        sign
       );
     } catch (error) {
       console.error(error);
@@ -682,7 +576,7 @@ const Register = () => {
     );
   };
 
-  const renderCompanyName = () => {
+  const renderName = ({ required, placeholder }) => {
     return (
       <StepDetails>
         <Img
@@ -696,8 +590,8 @@ const Register = () => {
           <Input
             name="name"
             register={register}
-            required={`Company Name is required`}
-            placeholder="Awesome Company Inc"
+            required={required}
+            placeholder={placeholder}
             style={{ width: "400px" }}
             defaultValue={formData.name || ""}
           />
@@ -705,71 +599,6 @@ const Register = () => {
 
         <ErrorMessage name="name" errors={errors} />
         <Button type="submit" className="proceed-btn">
-          <span>Proceed</span>
-          <span className="ml-3">
-            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
-          </span>
-        </Button>
-      </StepDetails>
-    );
-  };
-
-  const renderDAOName = () => {
-    return (
-      <StepDetails>
-        <Img
-          src={CompanyPng}
-          alt="company"
-          className="my-4"
-          width="130px"
-          style={{ minWidth: "130px" }}
-        />
-        <div className="mt-2">
-          <Input
-            name="name"
-            register={register}
-            required={`Organization Name is required`}
-            placeholder="Awesome DAO"
-            style={{ width: "400px" }}
-          />
-        </div>
-        <ErrorMessage name="name" errors={errors} />
-        <Button type="submit" className="proceed-btn">
-          <span>Proceed</span>
-          <span className="ml-3">
-            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
-          </span>
-        </Button>
-      </StepDetails>
-    );
-  };
-
-  const renderIndividualName = () => {
-    return (
-      <StepDetails>
-        <Img
-          src={CompanyPng}
-          alt="company"
-          className="my-4"
-          width="130px"
-          style={{ minWidth: "130px" }}
-        />
-        <div className="mt-2">
-          <Input
-            name="name"
-            register={register}
-            required={`Individual Name is required`}
-            placeholder="John Doe"
-            style={{ width: "400px" }}
-          />
-        </div>
-        <ErrorMessage name="name" errors={errors} />
-        <Button
-          type="submit"
-          className="proceed-btn"
-          loading={loadingTx}
-          disabled={loadingTx}
-        >
           <span>Proceed</span>
           <span className="ml-3">
             <FontAwesomeIcon icon={faArrowRight} color="#fff" />
@@ -845,8 +674,6 @@ const Register = () => {
                         }}
                       >
                         <img src={DeleteSvg} alt="remove" width="18" />
-
-                        {/* <FontAwesomeIcon icon={faMinus} color="#fff" /> */}
                       </Button>
                     </div>
                   )}
@@ -870,7 +697,7 @@ const Register = () => {
           </div>
         </div>
 
-        <HighlightedText className="mb-5">
+        <HighlightedText style={{ marginBottom: "100px" }}>
           <div>
             <Img src={LightbulbIcon} alt="lightbulb" />
           </div>
@@ -1086,9 +913,21 @@ const Register = () => {
       }
 
       case STEPS.TWO: {
-        if (formData.flow === FLOWS.COMPANY) return renderCompanyName();
-        else if (formData.flow === FLOWS.DAO) return renderDAOName();
-        else return renderIndividualName();
+        if (formData.flow === FLOWS.COMPANY)
+          return renderName({
+            required: "Company Name is required",
+            placeholder: "Awesome Company Inc",
+          });
+        else if (formData.flow === FLOWS.DAO)
+          return renderName({
+            required: "Organization Name is required",
+            placeholder: "Awesome DAO Inc",
+          });
+        else
+          return renderName({
+            required: "Name is required",
+            placeholder: "John Doe",
+          });
       }
 
       case STEPS.THREE: {
