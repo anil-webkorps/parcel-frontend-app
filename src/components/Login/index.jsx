@@ -888,7 +888,7 @@ const Login = () => {
                 </div>
 
                 <div className="select-safe">
-                  <Button iconOnly onClick={goBack} className="px-0">
+                  <Button iconOnly className="px-0">
                     <FontAwesomeIcon icon={faArrowRight} color="#fff" />
                   </Button>
                 </div>

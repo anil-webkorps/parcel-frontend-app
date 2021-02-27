@@ -4,9 +4,11 @@ import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
-  faMinus,
-  faPlus,
+  faQuestionCircle,
+  faArrowRight,
+  faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import { show } from "redux-modal";
 
 import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage, useContract } from "hooks";
@@ -15,7 +17,6 @@ import { Card } from "components/common/Card";
 import { useInjectReducer } from "utils/injectReducer";
 import registerWizardReducer from "store/registerWizard/reducer";
 import registerReducer from "store/register/reducer";
-import { Background, InnerCard, Image, StepDetails, StepInfo } from "./styles";
 import {
   makeSelectFormData,
   makeSelectStep,
@@ -33,8 +34,8 @@ import { useForm, useFieldArray } from "react-hook-form";
 import Img from "components/common/Img";
 import CompanyPng from "assets/images/register/company.png";
 import OwnerPng from "assets/images/register/owner.png";
-import ThresholdPng from "assets/images/register/threshold.png";
-import PrivacyPng from "assets/images/register/privacy.png";
+import ThresholdJpg from "assets/images/register/threshold.jpg";
+import PrivacySvg from "assets/images/register/privacy.svg";
 import { Error } from "components/common/Form/styles";
 import { getPublicKey } from "utils/encryption";
 import addresses from "constants/addresses";
@@ -53,6 +54,25 @@ import { makeSelectAverageGasPrice } from "store/gas/selectors";
 import { getGasPrice } from "store/gas/actions";
 import NoReferralModal from "./NoReferralModal";
 import ParcelLogo from "assets/images/parcel-logo-purple.png";
+import DeleteSvg from "assets/icons/delete-bin.svg";
+import LightbulbIcon from "assets/icons/lightbulb.svg";
+import LoadingSafeIcon from "assets/images/register/safe-loading.svg";
+import OrganisationInfoModal, { MODAL_NAME as INFO_MODAL } from "./InfoModal";
+import organisationInfo from "./info";
+
+import {
+  Background,
+  InnerCard,
+  Image,
+  StepDetails,
+  StepInfo,
+  OrganisationCards,
+  OrganisationCard,
+  HighlightedText,
+  ReviewContent,
+  ReviewOwnerDetails,
+  LoadingTransaction,
+} from "./styles";
 
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
 
@@ -72,8 +92,8 @@ const STEPS = {
 
 const FLOWS = {
   COMPANY: "COMPANY",
-  INDIVIDUAL_WITH_COMPANY: "INDIVIDUAL_WITH_COMPANY", // a temporary flow for company, till multi owner is supported
   INDIVIDUAL: "INDIVIDUAL",
+  DAO: "DAO",
 };
 
 const ORGANISATION_TYPE = {
@@ -86,8 +106,9 @@ const getStepsByFlow = (flow) => {
     case FLOWS.COMPANY:
       return COMPANY_REGISTER_STEPS;
     case FLOWS.INDIVIDUAL:
-    case FLOWS.INDIVIDUAL_WITH_COMPANY:
       return INDIVIDUAL_REGISTER_STEPS;
+    case FLOWS.DAO:
+      return DAO_REGISTER_STEPS;
     default:
       return COMPANY_REGISTER_STEPS;
   }
@@ -98,36 +119,111 @@ const getStepsCountByFlow = (flow) => {
     case FLOWS.COMPANY:
       return Object.keys(COMPANY_REGISTER_STEPS).length - 1;
     case FLOWS.INDIVIDUAL:
-    case FLOWS.INDIVIDUAL_WITH_COMPANY:
       return Object.keys(INDIVIDUAL_REGISTER_STEPS).length - 1;
+    case FLOWS.DAO:
+      return Object.keys(DAO_REGISTER_STEPS).length - 1;
     default:
       return Object.keys(COMPANY_REGISTER_STEPS).length - 1;
   }
 };
 
 const COMPANY_REGISTER_STEPS = {
-  [STEPS.ZERO]: "Connect",
-  [STEPS.ONE]: "About you",
-  [STEPS.TWO]: "Owner Details",
-  [STEPS.THREE]: "Owner Name/Address",
-  [STEPS.FOUR]: "Payment Threshold",
-  [STEPS.FIVE]: "Organisation Type",
-  [STEPS.SIX]: "Privacy",
+  [STEPS.ZERO]: {
+    title: "Connect",
+    subtitle: "",
+  },
+  [STEPS.ONE]: {
+    title: "About you",
+    subtitle: "Please choose what defines you the best.",
+  },
+  [STEPS.TWO]: {
+    title: "Company Name",
+    subtitle: "You’ll be registered with this name on Parcel.",
+  },
+  [STEPS.THREE]: {
+    title: "Owner Name and Address",
+    subtitle: "You can add multiple owners",
+  },
+  [STEPS.FOUR]: {
+    title: "Threshold",
+    subtitle: "How many people should authorize transactions?",
+  },
+  [STEPS.FIVE]: {
+    title: "Privacy",
+    subtitle: "Please sign this message.",
+  },
+  [STEPS.SIX]: {
+    title: "Review your entry",
+    subtitle: "Kindly verify the details before creating an account.",
+  },
+};
+
+const DAO_REGISTER_STEPS = {
+  [STEPS.ZERO]: {
+    title: "Connect",
+    subtitle: "",
+  },
+  [STEPS.ONE]: {
+    title: "About you",
+    subtitle: "Please choose what defines you the best.",
+  },
+  [STEPS.TWO]: {
+    title: "Organization Name",
+    subtitle: "You’ll be registered with this name on Parcel.",
+  },
+  [STEPS.THREE]: {
+    title: "Owner Name and Address",
+    subtitle: "You can add multiple owners",
+  },
+  [STEPS.FOUR]: {
+    title: "Threshold",
+    subtitle: "How many people should authorize transactions?",
+  },
+  [STEPS.FIVE]: {
+    title: "Privacy",
+    subtitle: "Please sign this message.",
+  },
+  [STEPS.SIX]: {
+    title: "Review your entry",
+    subtitle: "Kindly verify the details before creating an account.",
+  },
 };
 
 const INDIVIDUAL_REGISTER_STEPS = {
-  [STEPS.ZERO]: "Connect",
-  [STEPS.ONE]: "About you",
-  [STEPS.TWO]: "Owner Details",
-  [STEPS.THREE]: "Organisation Type",
-  [STEPS.FOUR]: "Privacy",
+  [STEPS.ZERO]: {
+    title: "Connect",
+    subtitle: "",
+  },
+  [STEPS.ONE]: {
+    title: "About you",
+    subtitle: "Please choose what defines you the best.",
+  },
+  [STEPS.TWO]: {
+    title: "Your Name",
+    subtitle: "You’ll be registered with this name on Parcel.",
+  },
+  [STEPS.THREE]: {
+    title: "Owner Name and Address",
+    subtitle: "You can add multiple owners",
+  },
+  [STEPS.FOUR]: {
+    title: "Threshold",
+    subtitle: "How many people should authorize transactions?",
+  },
+  [STEPS.FIVE]: {
+    title: "Privacy",
+    subtitle: "Please sign this message.",
+  },
+  [STEPS.SIX]: {
+    title: "Review your entry",
+    subtitle: "Kindly verify the details before creating an account.",
+  },
 };
 
 const Register = () => {
-  const [sign, setSign] = useLocalStorage("SIGNATURE"); //eslint-disable-line
+  const [sign, setSign] = useLocalStorage("SIGNATURE");
   const setEncryptionKey = useLocalStorage("ENCRYPTION_KEY")[1];
   const [loadingTx, setLoadingTx] = useState(false);
-  const [createSafeLoading, setCreateSafeLoading] = useState(false);
   const [loadingAccount, setLoadingAccount] = useState(true);
   const [isMetaTxEnabled, setIsMetaTxEnabled] = useState(false);
 
@@ -218,19 +314,21 @@ const Register = () => {
   const onSubmit = async (values) => {
     // console.log(values);
     dispatch(updateForm(values));
-    // const lastStep = getStepsCountByFlow(formData.flow);
-    if (
-      (((formData.flow === FLOWS.INDIVIDUAL ||
-        formData.flow === FLOWS.INDIVIDUAL_WITH_COMPANY) &&
-        step === STEPS.TWO) ||
-        (formData.flow === FLOWS.COMPANY && step === STEPS.FOUR)) &&
-      !formData.referralId
-    ) {
-      try {
-        await createSafe(values.threshold || 1); // ugly hack - TODO: Fix race condition and remove arg
-        dispatch(chooseStep(step + 1));
-      } catch (err) {
-        console.error(err);
+    const lastStep = getStepsCountByFlow(formData.flow);
+    if (step === lastStep) {
+      if (!formData.referralId) {
+        try {
+          await createSafe();
+          // dispatch(chooseStep(step + 1));
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        try {
+          await createSafeWithMetaTransaction();
+        } catch (err) {
+          console.error(err);
+        }
       }
     } else {
       dispatch(chooseStep(step + 1));
@@ -245,102 +343,32 @@ const Register = () => {
           .signMessage(MESSAGE_TO_SIGN)
           .then(async (signature) => {
             setSign(signature);
-            if (formData.referralId)
-              await createSafeWithMetaTransaction(signature);
-            else {
-              const encryptionKey = cryptoUtils.getEncryptionKey(
-                signature,
-                formData.safeAddress
-              );
-              const organisationType = parseInt(formData.organisationType);
-
-              // set encryptionKey
-              setEncryptionKey(encryptionKey);
-              const encryptedOwners =
-                formData.owners && formData.owners.length
-                  ? formData.owners.map(({ name, owner }) => ({
-                      name: cryptoUtils.encryptDataUsingEncryptionKey(
-                        name,
-                        encryptionKey,
-                        organisationType
-                      ),
-                      owner,
-                    }))
-                  : [
-                      {
-                        owner: account,
-                        name: cryptoUtils.encryptDataUsingEncryptionKey(
-                          formData.name,
-                          encryptionKey,
-                          organisationType
-                        ),
-                      },
-                    ];
-
-              const publicKey = getPublicKey(signature);
-
-              let encryptionKeyData;
-              try {
-                encryptionKeyData = await cryptoUtils.encryptUsingSignatures(
-                  encryptionKey,
-                  signature
-                );
-              } catch (error) {
-                console.error(error);
-                return;
-              }
-
-              const threshold = formData.threshold
-                ? parseInt(formData.threshold)
-                : 1;
-
-              const body = {
-                name: cryptoUtils.encryptDataUsingEncryptionKey(
-                  formData.name,
-                  encryptionKey,
-                  organisationType
-                ),
-                safeAddress: formData.safeAddress,
-                createdBy: account,
-                owners: encryptedOwners,
-                proxyData: {
-                  from: account,
-                  params: [GNOSIS_SAFE_ADDRESS, formData.creationData],
-                },
-                email: "",
-                encryptionKeyData,
-                publicKey,
-                threshold,
-                organisationType,
-              };
-              dispatch(
-                setOwnerDetails(formData.name, formData.safeAddress, account)
-              );
-              dispatch(setOwnersAndThreshold(encryptedOwners, threshold));
-              dispatch(setOrganisationType(organisationType));
-              dispatch(registerUser(body));
-            }
+            dispatch(chooseStep(step + 1));
           });
       } catch (error) {
         console.error("Transaction Failed");
       }
     }
-  }, [library, account, setSign, dispatch, formData]); //eslint-disable-line
+  }, [library, account, setSign, dispatch, step]);
 
   const goBack = () => {
     dispatch(chooseStep(step - 1));
   };
 
-  const createSafe = async (_threshold) => {
+  const getReviewHeading = () => {
+    if (formData.flow === FLOWS.INDIVIDUAL) return `Your Name`;
+    else if (formData.flow === FLOWS.COMPANY) return `Name of your Company`;
+    else if (formData.flow === FLOWS.DAO) return `Name of your Organization`;
+  };
+
+  const createSafe = async () => {
     if (gnosisSafeMasterContract && proxyFactory && account) {
       const ownerAddresses =
         formData.owners && formData.owners.length
           ? formData.owners.map(({ owner }) => owner)
           : [account];
 
-      const threshold = formData.threshold
-        ? parseInt(formData.threshold)
-        : _threshold;
+      const threshold = formData.threshold ? parseInt(formData.threshold) : 1;
       const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
         "setup",
         [
@@ -371,23 +399,24 @@ const Register = () => {
         }
       );
 
-      proxyFactory.once("ProxyCreation", (proxy) => {
+      proxyFactory.once("ProxyCreation", async (proxy) => {
         dispatch(
           updateForm({
             safeAddress: proxy,
             creationData,
           })
         );
+        await createSafeWithNormalTransaction();
       });
 
-      setCreateSafeLoading(true);
+      setLoadingTx(true);
       const result = await tx.wait();
-      setCreateSafeLoading(false);
+      setLoadingTx(false);
       console.log("tx success", result);
     }
   };
 
-  const createSafeWithMetaTransaction = async (sign) => {
+  const createSafeWithMetaTransaction = async () => {
     let body;
 
     if (account && sign) {
@@ -499,6 +528,104 @@ const Register = () => {
     }
   };
 
+  const createSafeWithNormalTransaction = async (signature) => {
+    const encryptionKey = cryptoUtils.getEncryptionKey(
+      signature,
+      formData.safeAddress
+    );
+    const organisationType = parseInt(formData.organisationType);
+
+    // set encryptionKey
+    setEncryptionKey(encryptionKey);
+    const encryptedOwners =
+      formData.owners && formData.owners.length
+        ? formData.owners.map(({ name, owner }) => ({
+            name: cryptoUtils.encryptDataUsingEncryptionKey(
+              name,
+              encryptionKey,
+              organisationType
+            ),
+            owner,
+          }))
+        : [
+            {
+              owner: account,
+              name: cryptoUtils.encryptDataUsingEncryptionKey(
+                formData.name,
+                encryptionKey,
+                organisationType
+              ),
+            },
+          ];
+
+    const publicKey = getPublicKey(signature);
+
+    let encryptionKeyData;
+    try {
+      encryptionKeyData = await cryptoUtils.encryptUsingSignatures(
+        encryptionKey,
+        signature
+      );
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+
+    const threshold = formData.threshold ? parseInt(formData.threshold) : 1;
+
+    const body = {
+      name: cryptoUtils.encryptDataUsingEncryptionKey(
+        formData.name,
+        encryptionKey,
+        organisationType
+      ),
+      safeAddress: formData.safeAddress,
+      createdBy: account,
+      owners: encryptedOwners,
+      proxyData: {
+        from: account,
+        params: [GNOSIS_SAFE_ADDRESS, formData.creationData],
+      },
+      email: "",
+      encryptionKeyData,
+      publicKey,
+      threshold,
+      organisationType,
+    };
+    dispatch(setOwnerDetails(formData.name, formData.safeAddress, account));
+    dispatch(setOwnersAndThreshold(encryptedOwners, threshold));
+    dispatch(setOrganisationType(organisationType));
+    dispatch(registerUser(body));
+  };
+
+  const showOrganisationInfo = (info) => {
+    dispatch(show(INFO_MODAL, { info }));
+  };
+
+  const handleSelectOrganisation = (id) => {
+    let flow;
+    let organisationType;
+
+    switch (id) {
+      case 1:
+        flow = FLOWS.INDIVIDUAL;
+        organisationType = ORGANISATION_TYPE.PRIVATE;
+        break;
+      case 2:
+        flow = FLOWS.COMPANY;
+        organisationType = ORGANISATION_TYPE.PRIVATE;
+        break;
+      case 3:
+        flow = FLOWS.DAO;
+        organisationType = ORGANISATION_TYPE.PUBLIC;
+        break;
+      default:
+        flow = FLOWS.INDIVIDUAL;
+    }
+    dispatch(updateForm({ flow, organisationType }));
+    dispatch(chooseStep(step + 1));
+  };
+
   const renderConnect = () => {
     return (
       <div>
@@ -538,12 +665,10 @@ const Register = () => {
         </div>
         <StepInfo>
           <div>
-            <h3 className="title">Sign Up</h3>
-            <p className="next">
-              {steps[step + 1] ? `Next: ${steps[step + 1]}` : `Finish`}
-            </p>
+            <h3 className="title">{steps[step].title}</h3>
+            <p className="next">{steps[step].subtitle}</p>
           </div>
-          {step > STEPS.ONE && (
+          {step >= STEPS.ONE && (
             <div className="step-progress">
               <CircularProgress
                 current={step}
@@ -563,23 +688,57 @@ const Register = () => {
         <Img
           src={CompanyPng}
           alt="company"
-          className="my-3"
+          className="my-4"
           width="130px"
           style={{ minWidth: "130px" }}
         />
-        <h3 className="title">What is your Company Name</h3>
-        <p className="subtitle">
-          You’ll be registered with this name on Parcel.
-        </p>
-        <Input
-          name="name"
-          register={register}
-          required={`Company Name is required`}
-          placeholder="Awesome Company Inc"
-        />
+        <div className="mt-2">
+          <Input
+            name="name"
+            register={register}
+            required={`Company Name is required`}
+            placeholder="Awesome Company Inc"
+            style={{ width: "400px" }}
+            defaultValue={formData.name || ""}
+          />
+        </div>
+
         <ErrorMessage name="name" errors={errors} />
-        <Button large type="submit" className="mt-4">
-          Proceed
+        <Button type="submit" className="proceed-btn">
+          <span>Proceed</span>
+          <span className="ml-3">
+            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+          </span>
+        </Button>
+      </StepDetails>
+    );
+  };
+
+  const renderDAOName = () => {
+    return (
+      <StepDetails>
+        <Img
+          src={CompanyPng}
+          alt="company"
+          className="my-4"
+          width="130px"
+          style={{ minWidth: "130px" }}
+        />
+        <div className="mt-2">
+          <Input
+            name="name"
+            register={register}
+            required={`Organization Name is required`}
+            placeholder="Awesome DAO"
+            style={{ width: "400px" }}
+          />
+        </div>
+        <ErrorMessage name="name" errors={errors} />
+        <Button type="submit" className="proceed-btn">
+          <span>Proceed</span>
+          <span className="ml-3">
+            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+          </span>
         </Button>
       </StepDetails>
     );
@@ -591,63 +750,30 @@ const Register = () => {
         <Img
           src={CompanyPng}
           alt="company"
-          className="my-3"
+          className="my-4"
           width="130px"
           style={{ minWidth: "130px" }}
         />
-        <h3 className="title">What is your Name</h3>
-        <p className="subtitle">
-          You’ll be registered with this name on Parcel.
-        </p>
-        <Input
-          name="name"
-          register={register}
-          required={`Individual Name is required`}
-          placeholder="John Doe"
-        />
+        <div className="mt-2">
+          <Input
+            name="name"
+            register={register}
+            required={`Individual Name is required`}
+            placeholder="John Doe"
+            style={{ width: "400px" }}
+          />
+        </div>
         <ErrorMessage name="name" errors={errors} />
         <Button
-          large
           type="submit"
-          className="mt-4"
-          loading={createSafeLoading}
-          disabled={createSafeLoading}
+          className="proceed-btn"
+          loading={loadingTx}
+          disabled={loadingTx}
         >
-          {isMetaTxEnabled ? `Proceed` : `Create Safe and Proceed`}
-        </Button>
-      </StepDetails>
-    );
-  };
-
-  const renderIndividualWithCompanyName = () => {
-    return (
-      <StepDetails>
-        <Img
-          src={CompanyPng}
-          alt="company"
-          className="my-3"
-          width="130px"
-          style={{ minWidth: "130px" }}
-        />
-        <h3 className="title">What is your Company Name</h3>
-        <p className="subtitle">
-          You’ll be registered with this name on Parcel.
-        </p>
-        <Input
-          name="name"
-          register={register}
-          required={`Individual Name is required`}
-          placeholder="John Doe"
-        />
-        <ErrorMessage name="name" errors={errors} />
-        <Button
-          large
-          type="submit"
-          className="mt-4"
-          loading={createSafeLoading}
-          disabled={createSafeLoading}
-        >
-          {isMetaTxEnabled ? `Proceed` : `Create Safe and Proceed`}
+          <span>Proceed</span>
+          <span className="ml-3">
+            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+          </span>
         </Button>
       </StepDetails>
     );
@@ -660,88 +786,104 @@ const Register = () => {
           <Img
             src={OwnerPng}
             alt="owner"
-            className="my-2"
-            width="130px"
-            style={{ minWidth: "130px" }}
+            className="my-3"
+            width="100px"
+            style={{ minWidth: "100px" }}
           />
         )}
-        <h3 className="title">Owner Name & Address</h3>
-        <p className="subtitle">You can add multiple owners</p>
-        {fields.map(({ id, name, owner }, index) => {
-          return (
-            <div
-              key={id}
-              className="row mb-3 align-items-baseline"
-              style={{ minHeight: "60px" }}
-            >
-              <div className="col-5">
-                <Input
-                  name={`owners[${index}].name`}
-                  register={register}
-                  required={`Owner Name is required`}
-                  placeholder="John Doe"
-                  defaultValue={name}
-                />
-                {errors["owners"] &&
-                  errors["owners"][index] &&
-                  errors["owners"][index].name && (
-                    <Error>{errors["owners"][index].name.message}</Error>
-                  )}
-              </div>
-              <div className="col-5">
-                <Input
-                  name={`owners[${index}].owner`}
-                  register={register}
-                  required={`Owner Address is required`}
-                  pattern={{
-                    value: /^0x[a-fA-F0-9]{40}$/g,
-                    message: "Invalid Ethereum Address",
-                  }}
-                  placeholder="0x32Be...2D88"
-                  defaultValue={owner}
-                />
-                {errors["owners"] &&
-                  errors["owners"][index] &&
-                  errors["owners"][index].owner && (
-                    <Error>{errors["owners"][index].owner.message}</Error>
-                  )}
-              </div>
-              <div className="px-1">
-                {index === fields.length - 1 && (
-                  <div>
-                    <Button
-                      type="button"
-                      iconOnly
-                      onClick={() => append({})}
-                      style={{ backgroundColor: "#7367f0" }}
-                      className="px-2 py-2"
-                    >
-                      <FontAwesomeIcon icon={faPlus} color="#fff" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              <div className="px-1">
-                {fields.length > 1 && index === fields.length - 1 && (
-                  <div>
-                    <Button
-                      type="button"
-                      iconOnly
-                      onClick={() => remove(index)}
-                      style={{ backgroundColor: "#ff1c46" }}
-                      className="px-2 py-2"
-                    >
-                      <FontAwesomeIcon icon={faMinus} color="#fff" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        <div
+          style={{ maxHeight: "200px", overflowY: "auto", overflowX: "hidden" }}
+          className="my-2"
+        >
+          {fields.map(({ id, name, owner }, index) => {
+            return (
+              <div key={id} className="row mb-3 align-items-baseline">
+                <div className="col-4">
+                  <Input
+                    name={`owners[${index}].name`}
+                    register={register}
+                    required={`Owner Name is required`}
+                    placeholder="John Doe"
+                    defaultValue={name}
+                  />
+                  {errors["owners"] &&
+                    errors["owners"][index] &&
+                    errors["owners"][index].name && (
+                      <Error>{errors["owners"][index].name.message}</Error>
+                    )}
+                </div>
+                <div className="col-7">
+                  <Input
+                    name={`owners[${index}].owner`}
+                    register={register}
+                    required={`Owner Address is required`}
+                    pattern={{
+                      value: /^0x[a-fA-F0-9]{40}$/g,
+                      message: "Invalid Ethereum Address",
+                    }}
+                    placeholder="0x32Be...2D88"
+                    defaultValue={owner}
+                  />
+                  {errors["owners"] &&
+                    errors["owners"][index] &&
+                    errors["owners"][index].owner && (
+                      <Error>{errors["owners"][index].owner.message}</Error>
+                    )}
+                </div>
+                <div className="px-1">
+                  {fields.length > 1 && index === fields.length - 1 && (
+                    <div>
+                      <Button
+                        type="button"
+                        iconOnly
+                        onClick={() => remove(index)}
+                        style={{
+                          backgroundColor: "#fff",
+                          borderRadius: "6px",
+                          border: "solid 0.5px #dedede",
+                          padding: "12px",
+                        }}
+                      >
+                        <img src={DeleteSvg} alt="remove" width="18" />
 
-        <Button large type="submit" className="mt-3">
-          Add Owners
+                        {/* <FontAwesomeIcon icon={faMinus} color="#fff" /> */}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="px-1">
+          <div>
+            <Button
+              type="button"
+              onClick={() => append({})}
+              className="px-3 py-2 secondary"
+            >
+              <span className="mr-2" style={{ fontSize: "24px" }}>
+                +
+              </span>
+              <span>Add More</span>
+            </Button>
+          </div>
+        </div>
+
+        <HighlightedText className="mb-5">
+          <div>
+            <Img src={LightbulbIcon} alt="lightbulb" />
+          </div>
+          <div className="ml-2">
+            To get maximum security, add more than one owner.
+          </div>
+        </HighlightedText>
+
+        <Button type="submit" className="proceed-btn">
+          <span>Proceed</span>
+          <span className="ml-3">
+            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+          </span>
         </Button>
       </StepDetails>
     );
@@ -751,16 +893,12 @@ const Register = () => {
     return (
       <StepDetails>
         <Img
-          src={ThresholdPng}
+          src={ThresholdJpg}
           alt="threshold"
-          className="my-2"
-          width="130px"
-          style={{ minWidth: "130px" }}
+          className="my-4"
+          width="140px"
+          style={{ minWidth: "140px" }}
         />
-        <h3 className="title">Threshold</h3>
-        <p className="subtitle">
-          How many people should authorize transactions?
-        </p>
         <div
           className="row mr-4 align-items-center radio-toolbar"
           style={{ padding: "10px 16px 0" }}
@@ -780,14 +918,12 @@ const Register = () => {
         </div>
 
         <ErrorMessage name="threshold" errors={errors} />
-        <Button
-          large
-          type="submit"
-          className="mt-3"
-          loading={createSafeLoading}
-          disabled={createSafeLoading}
-        >
-          {isMetaTxEnabled ? `Proceed` : `Create Safe and Proceed`}
+        <Button type="submit" className="proceed-btn">
+          <span>Proceed</span>
+          <span className="ml-3">
+            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+          </span>
+          {/* {isMetaTxEnabled ? `Proceed` : `Create Safe and Proceed`} */}
         </Button>
       </StepDetails>
     );
@@ -797,35 +933,26 @@ const Register = () => {
     return (
       <StepDetails>
         <Img
-          src={PrivacyPng}
+          src={PrivacySvg}
           alt="privacy"
-          className="my-2"
-          width="130px"
-          style={{ minWidth: "130px" }}
+          className="my-4"
+          width="100px"
+          style={{ minWidth: "100px" }}
         />
         <h3 className="title">We care for Your Privacy </h3>
-        <p className="subtitle mb-5 pb-5">
+        <p className="subtitle">
           Please sign this message using your private key and authorize Parcel.
         </p>
 
         <Button
           type="button"
           onClick={signTerms}
-          large
-          className="mx-auto d-block"
+          className="proceed-btn"
           disabled={loadingTx}
           loading={loadingTx}
         >
           I'm in
         </Button>
-        {loadingTx && (
-          <div className="ml-2 my-3">
-            Waiting for transaction confirmation...
-          </div>
-        )}
-        {errorInRegister && (
-          <div className="text-danger ml-2 my-3">{errorInRegister}</div>
-        )}
       </StepDetails>
     );
   };
@@ -833,91 +960,117 @@ const Register = () => {
   const renderAboutYou = () => {
     return (
       <StepDetails>
-        <Img
-          src={CompanyPng}
-          alt="individual"
-          className="my-3"
-          width="130px"
-          style={{ minWidth: "130px" }}
-        />
-        <h3 className="title mb-4">What best defines you?</h3>
-        <div
-          className="row mr-4 align-items-center justify-content-between radio-toolbar"
-          style={{ padding: "10px 16px 0" }}
-        >
-          <Input
-            name={`flow`}
-            register={register}
-            type="radio"
-            id={`flow-individual`}
-            value={FLOWS.INDIVIDUAL}
-            defaultChecked
-            label={"I'm an Individual"}
-            labelStyle={{ minWidth: "265px" }}
-          />
-          <Input
-            name={`flow`}
-            register={register}
-            type="radio"
-            id={`flow-company`}
-            value={FLOWS.COMPANY}
-            label={"I have a Company"}
-            labelStyle={{ minWidth: "265px" }}
-          />
-        </div>
+        <OrganisationCards>
+          {organisationInfo.map((info) => (
+            <OrganisationCard key={info.id}>
+              <Img
+                src={info.img}
+                alt={info.name}
+                width="100%"
+                style={{ minWidth: "130px" }}
+              />
+              <div className="px-3">
+                <div className="d-flex justify-content-between mt-3">
+                  <div className="org-title">{info.name}</div>
+                  <Button
+                    iconOnly
+                    className="p-0"
+                    onClick={() => showOrganisationInfo(info)}
+                    type="button"
+                  >
+                    <FontAwesomeIcon icon={faQuestionCircle} color="#7367f0" />
+                  </Button>
+                </div>
+                <div className="org-subtitle">{info.subtitle}</div>
+              </div>
 
-        <ErrorMessage name="flow" errors={errors} />
-        <Button large type="submit" className="mt-4">
-          Proceed
-        </Button>
+              <div
+                className="select-org"
+                onClick={() => handleSelectOrganisation(info.id)}
+              >
+                <Button iconOnly className="px-0" type="button">
+                  <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+                </Button>
+              </div>
+            </OrganisationCard>
+          ))}
+          <OrganisationInfoModal />
+        </OrganisationCards>
       </StepDetails>
     );
   };
 
-  const renderOrganisationType = () => {
-    return (
-      <StepDetails>
-        <Img
-          src={CompanyPng}
-          alt="individual"
-          className="my-3"
-          width="130px"
-          style={{ minWidth: "130px" }}
-        />
-        <h3 className="title">Which type of organisation would you like?</h3>
-        <p className="subtitle mb-2">
-          If you choose Private, all your data would be encrypted and
-          inaccessible outside Parcel.
-        </p>
-        <div
-          className="row mr-4 align-items-center justify-content-between radio-toolbar"
-          style={{ padding: "10px 16px 0" }}
-        >
-          <Input
-            name={`organisationType`}
-            register={register}
-            type="radio"
-            id={`organisation-private`}
-            value={ORGANISATION_TYPE.PRIVATE}
-            defaultChecked
-            label={"Private"}
-            labelStyle={{ minWidth: "265px" }}
-          />
-          <Input
-            name={`organisationType`}
-            register={register}
-            type="radio"
-            id={`organisation-public`}
-            value={ORGANISATION_TYPE.PUBLIC}
-            label={"Public"}
-            labelStyle={{ minWidth: "265px" }}
-          />
+  const renderReview = () => {
+    return loadingTx ? (
+      <LoadingTransaction>
+        <Img src={LoadingSafeIcon} alt="loading-tx" className="loading-img" />
+        <div className="loading-heading">Generating Safe</div>
+        <div className="loading-title">Please do not leave this page</div>
+        <div className="loading-subtitle">
+          This process should take a couple of minutes
         </div>
+      </LoadingTransaction>
+    ) : (
+      <StepDetails>
+        <ReviewContent className="row mt-4">
+          <div className="col-5">
+            <div>
+              <div className="review-heading">{getReviewHeading()}</div>
+              <div className="review-title">{formData.name}</div>
+            </div>
+            <div className="mt-4">
+              <div className="review-heading">
+                Any transaction requires the confirmation of:
+              </div>
+              <div className="review-title">
+                {formData.threshold} out of {formData.owners.length} owners
+              </div>
+            </div>
+          </div>
+          <div className="col-6">
+            <div className="review-heading">Owner Details</div>
+            <ReviewOwnerDetails>
+              {formData.owners.map(({ name, owner }, idx) => (
+                <div className="owner-card" key={`${owner}-${idx}`}>
+                  <div>
+                    <FontAwesomeIcon
+                      icon={faUserCircle}
+                      color="#7367f0"
+                      style={{ fontSize: "24px" }}
+                    />
+                  </div>
+                  <div>
+                    <div className="owner-name">{name}</div>
+                    <div className="owner-address">{owner}</div>
+                  </div>
+                </div>
+              ))}
+            </ReviewOwnerDetails>
+          </div>
+        </ReviewContent>
 
-        <ErrorMessage name="organisationType" errors={errors} />
-        <Button large type="submit" className="mt-2">
-          Proceed
+        <HighlightedText className="mt-4">
+          {isMetaTxEnabled ? (
+            <div>You’re about to create a new safe.</div>
+          ) : (
+            <div>
+              You’re about to create a new safe and will have to sign a
+              transaction with your currently connected wallet.
+            </div>
+          )}
+        </HighlightedText>
+
+        <Button
+          type="submit"
+          className="proceed-btn"
+          loading={loadingTx}
+          disabled={loadingTx}
+        >
+          <span>Create Account</span>
         </Button>
+        {errorInRegister && (
+          <div className="text-danger ml-2 my-3">{errorInRegister}</div>
+        )}
       </StepDetails>
     );
   };
@@ -934,27 +1087,24 @@ const Register = () => {
 
       case STEPS.TWO: {
         if (formData.flow === FLOWS.COMPANY) return renderCompanyName();
-        else if (formData.flow === FLOWS.INDIVIDUAL_WITH_COMPANY)
-          return renderIndividualWithCompanyName();
+        else if (formData.flow === FLOWS.DAO) return renderDAOName();
         else return renderIndividualName();
       }
 
       case STEPS.THREE: {
-        if (formData.flow === FLOWS.COMPANY) return renderOwnerDetails();
-        return renderOrganisationType();
+        return renderOwnerDetails();
       }
 
       case STEPS.FOUR: {
-        if (formData.flow === FLOWS.COMPANY) return renderThreshold();
-        return renderPrivacy();
+        return renderThreshold();
       }
 
       case STEPS.FIVE: {
-        return renderOrganisationType();
+        return renderPrivacy();
       }
 
       case STEPS.SIX: {
-        return renderPrivacy();
+        return renderReview();
       }
 
       default:
@@ -968,11 +1118,13 @@ const Register = () => {
         <Card
           className="mx-auto"
           style={{
-            maxWidth: "668px",
-            minHeight: "580px",
+            minHeight: "600px",
+            width: "90%",
+            maxHeight: "650px",
+            marginTop: "80px",
           }}
         >
-          {step !== STEPS.ZERO && renderStepHeader()}
+          {step !== STEPS.ZERO && !loadingTx && renderStepHeader()}
           <form onSubmit={handleSubmit(onSubmit)}>{renderSteps()}</form>
         </Card>
       </Container>
