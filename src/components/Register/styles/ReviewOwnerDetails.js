@@ -6,7 +6,7 @@ export default styled.div`
   border-radius: 8px;
   border: solid 1px rgba(168, 168, 168, 0.5);
   background-color: #ffffff;
-  max-height: 250px;
+  max-height: 200px;
   overflow-y: auto;
 
   .owner-card {
