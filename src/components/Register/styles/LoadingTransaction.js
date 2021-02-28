@@ -59,4 +59,32 @@ export default styled.div`
       opacity: 1;
     }
   }
+
+  @-webkit-keyframes flickerAnimation {
+    0% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.6;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @-moz-keyframes flickerAnimation {
+    0% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.6;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
 `;

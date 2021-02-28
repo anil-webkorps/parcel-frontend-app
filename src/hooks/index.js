@@ -7,3 +7,4 @@ export { default as useFetch } from "./useFetch";
 export { default as useLocalStorage } from "./useLocalStorage";
 export { default as useAuth } from "./useAuth";
 export { default as useMassPayout } from "./useMassPayout";
+export { default as useSocket } from "./useSocket";

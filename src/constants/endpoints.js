@@ -52,6 +52,10 @@ export const getTokenPricesEndpoint = `${ROOT_BE_URL}/api/v1/tokenPrices/usd`;
 export const getTokensEndpoint = `${ROOT_BE_URL}/api/v1/tokens/get`;
 export const addCustomTokenEndpoint = `${ROOT_BE_URL}/api/v1/tokens/add`;
 
+// notifications
+export const getNotificationsEndpoint = `${ROOT_BE_URL}/api/v1/notifications/get`;
+export const updateNotificationsEndpoint = `${ROOT_BE_URL}/api/v1/notifications/get`;
+
 // GNOSIS
 export const gnosisSafeTransactionEndpoint =
   process.env.REACT_APP_NETWORK_NAME === networkNames.MAINNET
