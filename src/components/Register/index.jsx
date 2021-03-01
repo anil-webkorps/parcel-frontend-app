@@ -34,7 +34,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import Img from "components/common/Img";
 import CompanyPng from "assets/images/register/company.png";
 import OwnerPng from "assets/images/register/owner.png";
-import ThresholdJpg from "assets/images/register/threshold.jpg";
+import ThresholdIcon from "assets/images/register/threshold.png";
 import PrivacySvg from "assets/images/register/privacy.svg";
 import { Error } from "components/common/Form/styles";
 import { getPublicKey } from "utils/encryption";
@@ -57,6 +57,7 @@ import ParcelLogo from "assets/images/parcel-logo-purple.png";
 import DeleteSvg from "assets/icons/delete-bin.svg";
 import LightbulbIcon from "assets/icons/lightbulb.svg";
 import LoadingSafeIcon from "assets/images/register/safe-loading.svg";
+import WelcomeImage from "assets/images/welcome.png";
 import OrganisationInfoModal, { MODAL_NAME as INFO_MODAL } from "./InfoModal";
 import {
   STEPS,
@@ -71,7 +72,6 @@ import {
 import {
   Background,
   InnerCard,
-  Image,
   StepDetails,
   StepInfo,
   OrganisationCards,
@@ -523,7 +523,12 @@ const Register = () => {
   const renderConnect = () => {
     return (
       <div>
-        <Image minHeight="323px" />
+        <Img
+          src={WelcomeImage}
+          alt="welcome"
+          height="370px"
+          className="d-block mx-auto"
+        />
         <InnerCard height="257px">
           <h2 className="text-center mb-4">
             <img src={ParcelLogo} alt="parcel" width="240" />
@@ -559,8 +564,10 @@ const Register = () => {
         </div>
         <StepInfo>
           <div>
-            <h3 className="title">{steps[step].title}</h3>
-            <p className="next">{steps[step].subtitle}</p>
+            <h3 className="title">Signup</h3>
+            <p className="next">
+              {steps[step + 1] ? `Next: ${steps[step + 1]}` : `Finish`}
+            </p>
           </div>
           {step >= STEPS.ONE && (
             <div className="step-progress">
@@ -576,6 +583,51 @@ const Register = () => {
     );
   };
 
+  const renderAboutYou = () => {
+    return (
+      <StepDetails>
+        <p className="subtitle">Please choose what defines you the best.</p>
+
+        <OrganisationCards>
+          {organisationInfo.map((info) => (
+            <OrganisationCard key={info.id}>
+              <Img
+                src={info.img}
+                alt={info.name}
+                width="100%"
+                style={{ minWidth: "130px" }}
+              />
+              <div className="px-3">
+                <div className="d-flex justify-content-between mt-3">
+                  <div className="org-title">{info.name}</div>
+                  <Button
+                    iconOnly
+                    className="p-0"
+                    onClick={() => showOrganisationInfo(info)}
+                    type="button"
+                  >
+                    <FontAwesomeIcon icon={faQuestionCircle} color="#7367f0" />
+                  </Button>
+                </div>
+                <div className="org-subtitle">{info.subtitle}</div>
+              </div>
+
+              <div
+                className="select-org"
+                onClick={() => handleSelectOrganisation(info.id)}
+              >
+                <Button iconOnly className="px-0" type="button">
+                  <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+                </Button>
+              </div>
+            </OrganisationCard>
+          ))}
+          <OrganisationInfoModal />
+        </OrganisationCards>
+      </StepDetails>
+    );
+  };
+
   const renderName = ({ required, placeholder }) => {
     return (
       <StepDetails>
@@ -586,6 +638,9 @@ const Register = () => {
           width="130px"
           style={{ minWidth: "130px" }}
         />
+        <p className="subtitle">
+          You’ll be registered with this name on Parcel.
+        </p>
         <div className="mt-2">
           <Input
             name="name"
@@ -620,10 +675,10 @@ const Register = () => {
             style={{ minWidth: "100px" }}
           />
         )}
-        <div
-          style={{ maxHeight: "200px", overflowY: "auto", overflowX: "hidden" }}
-          className="my-2"
-        >
+        <p className="subtitle">
+          Please enter the name and address of the owners.
+        </p>
+        <div className="my-2">
           {fields.map(({ id, name, owner }, index) => {
             return (
               <div key={id} className="row mb-3 align-items-baseline">
@@ -650,7 +705,7 @@ const Register = () => {
                       value: /^0x[a-fA-F0-9]{40}$/g,
                       message: "Invalid Ethereum Address",
                     }}
-                    placeholder="0x32Be...2D88"
+                    placeholder={ZERO_ADDRESS}
                     defaultValue={owner}
                   />
                   {errors["owners"] &&
@@ -697,7 +752,7 @@ const Register = () => {
           </div>
         </div>
 
-        <HighlightedText style={{ marginBottom: "100px" }}>
+        <HighlightedText style={{ marginBottom: "20px" }}>
           <div>
             <Img src={LightbulbIcon} alt="lightbulb" />
           </div>
@@ -720,12 +775,15 @@ const Register = () => {
     return (
       <StepDetails>
         <Img
-          src={ThresholdJpg}
+          src={ThresholdIcon}
           alt="threshold"
-          className="my-4"
+          className="my-0"
           width="140px"
           style={{ minWidth: "140px" }}
         />
+        <p className="subtitle">
+          How many people should authorize transactions?
+        </p>
         <div
           className="row mr-4 align-items-center radio-toolbar"
           style={{ padding: "10px 16px 0" }}
@@ -780,49 +838,6 @@ const Register = () => {
         >
           I'm in
         </Button>
-      </StepDetails>
-    );
-  };
-
-  const renderAboutYou = () => {
-    return (
-      <StepDetails>
-        <OrganisationCards>
-          {organisationInfo.map((info) => (
-            <OrganisationCard key={info.id}>
-              <Img
-                src={info.img}
-                alt={info.name}
-                width="100%"
-                style={{ minWidth: "130px" }}
-              />
-              <div className="px-3">
-                <div className="d-flex justify-content-between mt-3">
-                  <div className="org-title">{info.name}</div>
-                  <Button
-                    iconOnly
-                    className="p-0"
-                    onClick={() => showOrganisationInfo(info)}
-                    type="button"
-                  >
-                    <FontAwesomeIcon icon={faQuestionCircle} color="#7367f0" />
-                  </Button>
-                </div>
-                <div className="org-subtitle">{info.subtitle}</div>
-              </div>
-
-              <div
-                className="select-org"
-                onClick={() => handleSelectOrganisation(info.id)}
-              >
-                <Button iconOnly className="px-0" type="button">
-                  <FontAwesomeIcon icon={faArrowRight} color="#fff" />
-                </Button>
-              </div>
-            </OrganisationCard>
-          ))}
-          <OrganisationInfoModal />
-        </OrganisationCards>
       </StepDetails>
     );
   };
@@ -959,7 +974,6 @@ const Register = () => {
           style={{
             minHeight: "600px",
             width: "90%",
-            maxHeight: "650px",
             marginTop: "80px",
           }}
         >

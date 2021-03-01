@@ -32,6 +32,10 @@ import LogoutPng from "assets/icons/logout.png";
 import SettingsPng from "assets/icons/settings.png";
 import ParcelSvg from "assets/icons/parcel.svg";
 import GreenDot from "assets/icons/notifications/green-dot.svg";
+import RedDot from "assets/icons/notifications/red-dot.svg";
+// import BlackDot from "assets/icons/notifications/black-dot.svg";
+import YellowDot from "assets/icons/notifications/yellow-dot.svg";
+import PurpleDot from "assets/icons/notifications/purple-dot.svg";
 import { findNetworkNameByWeb3ChainId } from "constants/networks";
 import Img from "components/common/Img";
 import Loading from "components/common/Loading";
@@ -87,6 +91,25 @@ export default function DashboardHeader() {
 
   const getNetworkName = () => {
     return startCase(findNetworkNameByWeb3ChainId(chainId));
+  };
+
+  const renderDotByStatus = (status) => {
+    switch (status) {
+      case 0: // created
+        return <Img src={YellowDot} alt="yellow-dot" />;
+
+      case 1: // approved
+        return <Img src={PurpleDot} alt="purple-dot" />;
+
+      case 2: // rejected
+        return <Img src={RedDot} alt="red-dot" />;
+
+      case 3: // submitted
+        return <Img src={GreenDot} alt="red-dot" />;
+
+      default:
+        return <Img src={GreenDot} alt="green-dot" />;
+    }
   };
 
   return (
@@ -185,7 +208,7 @@ export default function DashboardHeader() {
                     }) => (
                       <div className="notification" key={notificationId}>
                         <div className="dot">
-                          <Img src={GreenDot} alt="green-dot" />
+                          {renderDotByStatus(data.status)}
                         </div>
                         <div className="content">
                           <div className="notification-heading">

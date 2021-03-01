@@ -6,9 +6,12 @@ import {
   faArrowLeft,
   faArrowRight,
   faLock,
+  faQuestionCircle,
+  faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { cryptoUtils } from "parcel-sdk";
 import { utils } from "ethers";
+import { show } from "redux-modal";
 
 import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage } from "hooks";
@@ -52,8 +55,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import Img from "components/common/Img";
 import CompanyPng from "assets/images/register/company.png";
 // import OwnerPng from "assets/images/register/owner.png";
-import ThresholdPng from "assets/images/register/threshold.png";
-import PrivacyPng from "assets/images/register/privacy.png";
+import PrivacySvg from "assets/images/register/privacy.svg";
 import { Error } from "components/common/Form/styles";
 import { getPublicKey } from "utils/encryption";
 
@@ -72,11 +74,33 @@ import { registerUser } from "store/register/actions";
 import Loading from "components/common/Loading";
 import TeamPng from "assets/images/user-team.png";
 import ParcelLogo from "assets/images/parcel-logo-purple.png";
+import WelcomeImage from "assets/images/welcome.png";
+import {
+  STEPS,
+  ORGANISATION_TYPE,
+  FLOWS as OWNER_FLOWS,
+  organisationInfo,
+} from "store/register/resources";
+import {
+  FLOWS,
+  LOGIN_STEPS,
+  IMPORT_STEPS,
+  IMPORT_INDIVIDUAL_STEPS,
+} from "store/login/resources";
+import OrganisationInfoModal, {
+  MODAL_NAME as INFO_MODAL,
+} from "components/Register/InfoModal";
+import {
+  OrganisationCards,
+  OrganisationCard,
+  HighlightedText,
+  ReviewContent,
+  ReviewOwnerDetails,
+} from "components/Register/styles";
 
 import {
   Background,
   InnerCard,
-  Image,
   StepDetails,
   StepInfo,
   Safe,
@@ -86,27 +110,6 @@ import {
 const loginKey = "login";
 const loginWizardKey = "loginWizard";
 const registerKey = "register";
-
-const STEPS = {
-  ZERO: 0,
-  ONE: 1,
-  TWO: 2,
-  THREE: 3,
-  FOUR: 4,
-  FIVE: 5,
-  SIX: 6,
-};
-
-const FLOWS = {
-  IMPORT: "IMPORT",
-  LOGIN: "LOGIN",
-  IMPORT_INDIVIDUAL: "IMPORT_INDIVIDUAL",
-};
-
-const ORGANISATION_TYPE = {
-  PRIVATE: "0",
-  PUBLIC: "1",
-};
 
 const getStepsByFlow = (flow) => {
   switch (flow) {
@@ -132,29 +135,6 @@ const getStepsCountByFlow = (flow) => {
     default:
       return Object.keys(LOGIN_STEPS).length - 1;
   }
-};
-const LOGIN_STEPS = {
-  [STEPS.ZERO]: "Connect",
-  [STEPS.ONE]: "Privacy",
-  [STEPS.TWO]: "Choose Safe",
-};
-
-const IMPORT_STEPS = {
-  [STEPS.ZERO]: "Connect",
-  [STEPS.ONE]: "Privacy",
-  [STEPS.TWO]: "Choose Safe",
-  [STEPS.THREE]: "Owner Address/Name",
-  [STEPS.FOUR]: "Owner Details",
-  [STEPS.FIVE]: "Organisation Type",
-  [STEPS.SIX]: "Threshold",
-};
-
-const IMPORT_INDIVIDUAL_STEPS = {
-  [STEPS.ZERO]: "Connect",
-  [STEPS.ONE]: "Privacy",
-  [STEPS.TWO]: "Choose Safe",
-  [STEPS.THREE]: "Company Name",
-  [STEPS.FOUR]: "Organisation Type",
 };
 
 const Login = () => {
@@ -241,8 +221,8 @@ const Login = () => {
 
   useEffect(() => {
     reset({
-      owners: gnosisSafeOwners.map((owner) => ({ name: "", owner })),
       ...formData,
+      owners: gnosisSafeOwners.map((owner) => ({ name: "", owner })),
     });
   }, [reset, gnosisSafeOwners, formData]);
 
@@ -300,7 +280,7 @@ const Login = () => {
   }, [location, dispatch]);
 
   const completeImport = async () => {
-    await signup(gnosisSafeThreshold);
+    await signup();
   };
 
   const onSubmit = async (values) => {
@@ -341,7 +321,7 @@ const Login = () => {
     dispatch(chooseStep(step + 1));
   };
 
-  const signup = async (_threshold) => {
+  const signup = async () => {
     // let body;
     if (account) {
       // set encryptionKey
@@ -375,9 +355,7 @@ const Login = () => {
               },
             ];
 
-      const threshold = formData.threshold
-        ? parseInt(formData.threshold)
-        : _threshold;
+      const threshold = gnosisSafeThreshold ? parseInt(gnosisSafeThreshold) : 1;
 
       const publicKey = getPublicKey(sign);
 
@@ -420,9 +398,42 @@ const Login = () => {
     goNext();
   };
 
+  const showOrganisationInfo = (info) => {
+    dispatch(show(INFO_MODAL, { info }));
+  };
+
+  const handleSelectOrganisation = (id) => {
+    let ownerFlow;
+    let organisationType;
+
+    switch (id) {
+      case 1:
+        ownerFlow = OWNER_FLOWS.INDIVIDUAL;
+        organisationType = ORGANISATION_TYPE.PRIVATE;
+        break;
+      case 2:
+        ownerFlow = OWNER_FLOWS.COMPANY;
+        organisationType = ORGANISATION_TYPE.PRIVATE;
+        break;
+      case 3:
+        ownerFlow = OWNER_FLOWS.DAO;
+        organisationType = ORGANISATION_TYPE.PUBLIC;
+        break;
+      default:
+        ownerFlow = OWNER_FLOWS.INDIVIDUAL;
+    }
+    dispatch(updateForm({ ownerFlow, organisationType }));
+    dispatch(chooseStep(step + 1));
+  };
+
   const renderConnect = () => (
     <div>
-      <Image minHeight="323px" />
+      <Img
+        src={WelcomeImage}
+        alt="welcome"
+        height="370px"
+        className="d-block mx-auto"
+      />
       <InnerCard height="257px">
         <h2 className="text-center mb-4">
           <img src={ParcelLogo} alt="parcel" width="240" />
@@ -499,7 +510,52 @@ const Login = () => {
     );
   };
 
-  const renderCompanyName = () => {
+  const renderAboutYou = () => {
+    return (
+      <StepDetails>
+        <p className="subtitle">Please choose what defines you the best.</p>
+
+        <OrganisationCards>
+          {organisationInfo.map((info) => (
+            <OrganisationCard key={info.id}>
+              <Img
+                src={info.img}
+                alt={info.name}
+                width="100%"
+                style={{ minWidth: "130px" }}
+              />
+              <div className="px-3">
+                <div className="d-flex justify-content-between mt-3">
+                  <div className="org-title">{info.name}</div>
+                  <Button
+                    iconOnly
+                    className="p-0"
+                    onClick={() => showOrganisationInfo(info)}
+                    type="button"
+                  >
+                    <FontAwesomeIcon icon={faQuestionCircle} color="#7367f0" />
+                  </Button>
+                </div>
+                <div className="org-subtitle">{info.subtitle}</div>
+              </div>
+
+              <div
+                className="select-org"
+                onClick={() => handleSelectOrganisation(info.id)}
+              >
+                <Button iconOnly className="px-0" type="button">
+                  <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+                </Button>
+              </div>
+            </OrganisationCard>
+          ))}
+          <OrganisationInfoModal />
+        </OrganisationCards>
+      </StepDetails>
+    );
+  };
+
+  const renderName = ({ required, placeholder }) => {
     return (
       <StepDetails>
         <Img
@@ -509,19 +565,26 @@ const Login = () => {
           width="130px"
           style={{ minWidth: "130px" }}
         />
-        <h3 className="title">What is your Company Name</h3>
         <p className="subtitle">
           You’ll be registered with this name on Parcel.
         </p>
-        <Input
-          name="name"
-          register={register}
-          required={`Company Name is required`}
-          placeholder="Awesome Company Inc"
-        />
+        <div className="mt-2">
+          <Input
+            name="name"
+            register={register}
+            required={required}
+            placeholder={placeholder}
+            style={{ width: "400px" }}
+            defaultValue={formData.name || ""}
+          />
+        </div>
+
         <ErrorMessage name="name" errors={errors} />
-        <Button large type="submit" className="mt-4">
-          Proceed
+        <Button type="submit" className="proceed-btn">
+          <span>Proceed</span>
+          <span className="ml-3">
+            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+          </span>
         </Button>
       </StepDetails>
     );
@@ -538,7 +601,7 @@ const Login = () => {
     return (
       <StepDetails>
         <h3 className="title">Owner Name & Address</h3>
-        <p className="subtitle">Please enter the name of the owners</p>
+        <p className="subtitle mb-3">Please enter the name of the owners</p>
         {fields.map(({ id, name, owner }, index) => {
           return (
             <div
@@ -582,41 +645,12 @@ const Login = () => {
           );
         })}
 
-        <Button large type="submit" className="mt-3">
-          Add Owners
+        <Button type="submit" className="mt-3 proceed-btn">
+          <span>Proceed</span>
+          <span className="ml-3">
+            <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+          </span>
         </Button>
-      </StepDetails>
-    );
-  };
-
-  const renderThreshold = () => {
-    return (
-      <StepDetails>
-        <Img
-          src={ThresholdPng}
-          alt="threshold"
-          className="my-2"
-          width="130px"
-          style={{ minWidth: "130px" }}
-        />
-        <h3 className="title">Threshold</h3>
-        <p className="subtitle pb-5">
-          Any transaction requires the confirmation of {gnosisSafeThreshold} out
-          of {gnosisSafeOwners && gnosisSafeOwners.length} owners.
-        </p>
-        <Button
-          large
-          type="button"
-          onClick={completeImport}
-          loading={creating}
-          disabled={creating}
-          className="mt-5"
-        >
-          Complete Import
-        </Button>
-        {errorInRegister && (
-          <div className="text-danger ml-2 my-3">{errorInRegister}</div>
-        )}
       </StepDetails>
     );
   };
@@ -625,11 +659,11 @@ const Login = () => {
     return (
       <StepDetails>
         <Img
-          src={PrivacyPng}
+          src={PrivacySvg}
           alt="privacy"
           className="my-2"
-          width="130px"
-          style={{ minWidth: "130px" }}
+          width="100px"
+          style={{ minWidth: "100px" }}
         />
         <h3 className="title">We care for Your Privacy </h3>
 
@@ -642,8 +676,7 @@ const Login = () => {
             <Button
               type="button"
               onClick={signTerms}
-              large
-              className="mx-auto d-block"
+              className="mx-auto d-block proceed-btn"
             >
               I'm in
             </Button>
@@ -651,66 +684,21 @@ const Login = () => {
         ) : (
           <React.Fragment>
             <p className="subtitle mb-5 pb-5">
-              You have already authorized Parcel. Simply click Next to continue.
+              You have already authorized Parcel. Simply click Proceed to
+              continue.
             </p>
             <Button
               type="button"
               onClick={goNext}
-              large
-              className="mx-auto d-block"
+              className="mx-auto d-block proceed-btn"
             >
-              Next
+              <span>Proceed</span>
+              <span className="ml-3">
+                <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+              </span>
             </Button>
           </React.Fragment>
         )}
-      </StepDetails>
-    );
-  };
-
-  const renderOrganisationType = () => {
-    return (
-      <StepDetails>
-        <Img
-          src={CompanyPng}
-          alt="individual"
-          className="my-3"
-          width="130px"
-          style={{ minWidth: "130px" }}
-        />
-        <h3 className="title">Which type of organisation would you like?</h3>
-        <p className="subtitle mb-2">
-          If you choose Private, all your data would be encrypted and
-          inaccessible outside Parcel.
-        </p>
-        <div
-          className="row mr-4 align-items-center justify-content-between radio-toolbar"
-          style={{ padding: "10px 16px 0" }}
-        >
-          <Input
-            name={`organisationType`}
-            register={register}
-            type="radio"
-            id={`organisation-private`}
-            value={ORGANISATION_TYPE.PRIVATE}
-            defaultChecked
-            label={"Private"}
-            labelStyle={{ minWidth: "265px" }}
-          />
-          <Input
-            name={`organisationType`}
-            register={register}
-            type="radio"
-            id={`organisation-public`}
-            value={ORGANISATION_TYPE.PUBLIC}
-            label={"Public"}
-            labelStyle={{ minWidth: "265px" }}
-          />
-        </div>
-
-        <ErrorMessage name="organisationType" errors={errors} />
-        <Button large type="submit" className="mt-2">
-          Proceed
-        </Button>
       </StepDetails>
     );
   };
@@ -900,6 +888,73 @@ const Login = () => {
     );
   };
 
+  const getReviewHeading = () => {
+    if (formData.flow === FLOWS.INDIVIDUAL) return `Your Name`;
+    else if (formData.flow === FLOWS.COMPANY) return `Name of your Company`;
+    else if (formData.flow === FLOWS.DAO) return `Name of your Organization`;
+  };
+
+  const renderReview = () => {
+    return (
+      <StepDetails>
+        <ReviewContent className="row mt-4">
+          <div className="col-5">
+            <div>
+              <div className="review-heading">{getReviewHeading()}</div>
+              <div className="review-title">{formData.name}</div>
+            </div>
+            <div className="mt-4">
+              <div className="review-heading">
+                Any transaction requires the confirmation of:
+              </div>
+              <div className="review-title">
+                {gnosisSafeThreshold} out of{" "}
+                {gnosisSafeOwners && gnosisSafeOwners.length} owners
+              </div>
+            </div>
+          </div>
+          <div className="col-6">
+            <div className="review-heading">Owner Details</div>
+            <ReviewOwnerDetails>
+              {formData.owners.map(({ name, owner }, idx) => (
+                <div className="owner-card" key={`${owner}-${idx}`}>
+                  <div>
+                    <FontAwesomeIcon
+                      icon={faUserCircle}
+                      color="#7367f0"
+                      style={{ fontSize: "24px" }}
+                    />
+                  </div>
+                  <div>
+                    <div className="owner-name">{name}</div>
+                    <div className="owner-address">{owner}</div>
+                  </div>
+                </div>
+              ))}
+            </ReviewOwnerDetails>
+          </div>
+        </ReviewContent>
+
+        <HighlightedText className="mt-4">
+          <div>You’re about to import this safe to Parcel.</div>
+        </HighlightedText>
+
+        <Button
+          type="button"
+          className="proceed-btn"
+          onClick={completeImport}
+          loading={creating}
+          disabled={creating}
+        >
+          <span>Complete Import</span>
+        </Button>
+        {errorInRegister && (
+          <div className="text-danger ml-2 my-3">{errorInRegister}</div>
+        )}
+      </StepDetails>
+    );
+  };
+
   const renderSteps = () => {
     switch (step) {
       case STEPS.ZERO: {
@@ -915,24 +970,35 @@ const Login = () => {
       }
 
       case STEPS.THREE: {
-        if (flow === FLOWS.IMPORT) return renderOwnerDetails();
-        if (flow === FLOWS.IMPORT_INDIVIDUAL) return renderCompanyName();
+        if (flow === FLOWS.IMPORT) return renderAboutYou();
         return null;
       }
 
       case STEPS.FOUR: {
-        if (flow === FLOWS.IMPORT) return renderCompanyName();
-        if (flow === FLOWS.IMPORT_INDIVIDUAL) return renderOrganisationType();
-        return null;
+        if (formData.ownerFlow === OWNER_FLOWS.COMPANY)
+          return renderName({
+            required: "Company Name is required",
+            placeholder: "Awesome Company Inc",
+          });
+        else if (formData.ownerFlow === OWNER_FLOWS.DAO)
+          return renderName({
+            required: "Organization Name is required",
+            placeholder: "Awesome DAO Inc",
+          });
+        else
+          return renderName({
+            required: "Name is required",
+            placeholder: "John Doe",
+          });
       }
 
       case STEPS.FIVE: {
-        if (flow === FLOWS.IMPORT) return renderOrganisationType();
+        if (flow === FLOWS.IMPORT) return renderOwnerDetails();
         return null;
       }
 
       case STEPS.SIX: {
-        if (flow === FLOWS.IMPORT) return renderThreshold();
+        if (flow === FLOWS.IMPORT) return renderReview();
         return null;
       }
 
@@ -942,13 +1008,14 @@ const Login = () => {
   };
 
   return (
-    <Background withImage minHeight="92vh" className="py-3">
+    <Background withImage minHeight="92vh">
       <Container>
         <Card
           className="mx-auto"
           style={{
-            maxWidth: "668px",
-            minHeight: "580px",
+            minHeight: "600px",
+            width: "90%",
+            marginTop: "80px",
           }}
         >
           {step !== STEPS.ZERO && renderStepHeader()}

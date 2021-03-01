@@ -61,94 +61,31 @@ export const STEPS = {
 };
 
 export const COMPANY_REGISTER_STEPS = {
-  [STEPS.ZERO]: {
-    title: "Connect",
-    subtitle: "",
-  },
-  [STEPS.ONE]: {
-    title: "About you",
-    subtitle: "Please choose what defines you the best.",
-  },
-  [STEPS.TWO]: {
-    title: "Company Name",
-    subtitle: "You’ll be registered with this name on Parcel.",
-  },
-  [STEPS.THREE]: {
-    title: "Owner Name and Address",
-    subtitle: "You can add multiple owners",
-  },
-  [STEPS.FOUR]: {
-    title: "Threshold",
-    subtitle: "How many people should authorize transactions?",
-  },
-  [STEPS.FIVE]: {
-    title: "Privacy",
-    subtitle: "Please sign this message.",
-  },
-  [STEPS.SIX]: {
-    title: "Review your entry",
-    subtitle: "Kindly verify the details before creating an account.",
-  },
+  [STEPS.ZERO]: "Connect",
+  [STEPS.ONE]: "About you",
+  [STEPS.TWO]: "Owner Details",
+  [STEPS.THREE]: "Owner Name and Address",
+  [STEPS.FOUR]: "Threshold",
+  [STEPS.FIVE]: "Privacy",
+  [STEPS.SIX]: "Review your entry",
 };
 
 export const DAO_REGISTER_STEPS = {
-  [STEPS.ZERO]: {
-    title: "Connect",
-    subtitle: "",
-  },
-  [STEPS.ONE]: {
-    title: "About you",
-    subtitle: "Please choose what defines you the best.",
-  },
-  [STEPS.TWO]: {
-    title: "Organization Name",
-    subtitle: "You’ll be registered with this name on Parcel.",
-  },
-  [STEPS.THREE]: {
-    title: "Owner Name and Address",
-    subtitle: "You can add multiple owners",
-  },
-  [STEPS.FOUR]: {
-    title: "Threshold",
-    subtitle: "How many people should authorize transactions?",
-  },
-  [STEPS.FIVE]: {
-    title: "Privacy",
-    subtitle: "Please sign this message.",
-  },
-  [STEPS.SIX]: {
-    title: "Review your entry",
-    subtitle: "Kindly verify the details before creating an account.",
-  },
+  [STEPS.ZERO]: "Connect",
+  [STEPS.ONE]: "About you",
+  [STEPS.TWO]: "Owner Details",
+  [STEPS.THREE]: "Owner Name and Address",
+  [STEPS.FOUR]: "Threshold",
+  [STEPS.FIVE]: "Privacy",
+  [STEPS.SIX]: "Review your entry",
 };
 
 export const INDIVIDUAL_REGISTER_STEPS = {
-  [STEPS.ZERO]: {
-    title: "Connect",
-    subtitle: "",
-  },
-  [STEPS.ONE]: {
-    title: "About you",
-    subtitle: "Please choose what defines you the best.",
-  },
-  [STEPS.TWO]: {
-    title: "Your Name",
-    subtitle: "You’ll be registered with this name on Parcel.",
-  },
-  [STEPS.THREE]: {
-    title: "Owner Name and Address",
-    subtitle: "You can add multiple owners",
-  },
-  [STEPS.FOUR]: {
-    title: "Threshold",
-    subtitle: "How many people should authorize transactions?",
-  },
-  [STEPS.FIVE]: {
-    title: "Privacy",
-    subtitle: "Please sign this message.",
-  },
-  [STEPS.SIX]: {
-    title: "Review your entry",
-    subtitle: "Kindly verify the details before creating an account.",
-  },
+  [STEPS.ZERO]: "Connect",
+  [STEPS.ONE]: "About you",
+  [STEPS.TWO]: "Owner Details",
+  [STEPS.THREE]: "Owner Name and Address",
+  [STEPS.FOUR]: "Threshold",
+  [STEPS.FIVE]: "Privacy",
+  [STEPS.SIX]: "Review your entry",
 };

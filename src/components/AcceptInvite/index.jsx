@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { utils } from "ethers";
 
 import Container from "react-bootstrap/Container";
@@ -21,18 +21,18 @@ import { acceptInvitation } from "store/invitation/actions";
 import Button from "components/common/Button";
 import CircularProgress from "components/common/CircularProgress";
 import Img from "components/common/Img";
-import PrivacyPng from "assets/images/register/privacy.png";
+import PrivacySvg from "assets/images/register/privacy.svg";
 import { MESSAGE_TO_SIGN } from "constants/index";
 import { useInjectSaga } from "utils/injectSaga";
 import Loading from "components/common/Loading";
 import TeamMembersPng from "assets/images/team-members.png";
 import { getPublicKey } from "utils/encryption";
 import ParcelLogo from "assets/images/parcel-logo-purple.png";
+import WelcomeImage from "assets/images/welcome.png";
 
 import {
   Background,
   InnerCard,
-  Image,
   StepDetails,
   StepInfo,
 } from "components/Login/styles";
@@ -153,7 +153,12 @@ const AcceptInvite = () => {
 
   const renderConnect = () => (
     <div>
-      <Image minHeight="323px" />
+      <Img
+        src={WelcomeImage}
+        alt="welcome"
+        height="370px"
+        className="d-block mx-auto"
+      />
       <InnerCard height="257px">
         <h2 className="text-center mb-4">
           <img src={ParcelLogo} alt="parcel" width="240" />
@@ -222,7 +227,7 @@ const AcceptInvite = () => {
     return (
       <StepDetails>
         <Img
-          src={PrivacyPng}
+          src={PrivacySvg}
           alt="privacy"
           className="my-2"
           width="130px"
@@ -239,8 +244,7 @@ const AcceptInvite = () => {
             <Button
               type="button"
               onClick={signTerms}
-              large
-              className="mx-auto d-block"
+              className="mx-auto d-block proceed-btn"
             >
               I'm in
             </Button>
@@ -253,10 +257,12 @@ const AcceptInvite = () => {
             <Button
               type="button"
               onClick={goNext}
-              large
-              className="mx-auto d-block"
+              className="mx-auto d-block proceed-btn"
             >
-              Next
+              <span>Proceed</span>
+              <span className="ml-3">
+                <FontAwesomeIcon icon={faArrowRight} color="#fff" />
+              </span>
             </Button>
           </React.Fragment>
         )}
@@ -281,8 +287,7 @@ const AcceptInvite = () => {
         <Button
           type="button"
           onClick={handleAccept}
-          large
-          className="mx-auto d-block"
+          className="mx-auto d-block proceed-btn"
           loading={loading}
           disabled={loading}
         >
@@ -295,7 +300,12 @@ const AcceptInvite = () => {
 
   const renderSuccess = () => (
     <div>
-      <Image minHeight="323px" />
+      <Img
+        src={WelcomeImage}
+        alt="welcome"
+        height="370px"
+        className="d-block mx-auto"
+      />
       <InnerCard height="257px">
         <h2 className="text-center">Invitation Accepted</h2>
         <div className="mt-2 mb-5 text-center">
@@ -327,14 +337,15 @@ const AcceptInvite = () => {
   };
 
   return (
-    <Background withImage minHeight="92vh" className="py-3">
+    <Background withImage minHeight="92vh">
       <Container>
         {!success ? (
           <Card
             className="mx-auto"
             style={{
-              maxWidth: "668px",
-              minHeight: "580px",
+              minHeight: "600px",
+              width: "90%",
+              marginTop: "80px",
             }}
           >
             {step !== STEPS.ZERO && renderStepHeader()}
@@ -344,8 +355,9 @@ const AcceptInvite = () => {
           <Card
             className="mx-auto"
             style={{
-              maxWidth: "668px",
-              minHeight: "580px",
+              minHeight: "600px",
+              width: "90%",
+              marginTop: "80px",
             }}
           >
             {renderSuccess()}

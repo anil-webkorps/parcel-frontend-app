@@ -7,7 +7,7 @@ import ConnectButton from "components/Connect";
 import DashboardHeader from "./DashboardHeader";
 import { useActiveWeb3React } from "hooks";
 import Button from "components/common/Button";
-import ParcelSvg from "assets/icons/parcel.svg";
+import ParcelLogo from "assets/images/parcel-logo-purple.png";
 
 function PlainHeader() {
   const location = useLocation();
@@ -23,7 +23,7 @@ function PlainHeader() {
         const searchParams = new URLSearchParams(location.search);
         history.push({ pathname: "/signup", search: searchParams.toString() });
       }}
-      className="secondary ml-3"
+      className="secondary ml-3 py-2 px-4"
     >
       Sign Up
     </Button>
@@ -35,7 +35,7 @@ function PlainHeader() {
         const searchParams = new URLSearchParams(location.search);
         history.push({ pathname: "/", search: searchParams.toString() });
       }}
-      className="secondary ml-3"
+      className="secondary ml-3 py-2 px-4"
     >
       Login
     </Button>
@@ -43,15 +43,19 @@ function PlainHeader() {
 
   return (
     <div>
-      <NavBar>
+      <NavBar white>
         <NavBarContent>
           <div className="d-flex justify-content-center align-items-center">
             <HeaderLink to="/" className="dashboard-link">
-              <img src={ParcelSvg} alt="parcel" width="160" />
+              <img src={ParcelLogo} alt="parcel" width="160" />
             </HeaderLink>
           </div>
           <NavGroup>
-            {!account && <ConnectButton>Connect</ConnectButton>}
+            {!account && (
+              <ConnectButton className="py-2 px-4 secondary">
+                Connect
+              </ConnectButton>
+            )}
             {isLoginPage && renderSignUpButton()}
             {isSignupPage && renderLoginButton()}
           </NavGroup>
