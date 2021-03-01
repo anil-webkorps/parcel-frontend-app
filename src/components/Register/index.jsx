@@ -586,7 +586,10 @@ const Register = () => {
   const renderAboutYou = () => {
     return (
       <StepDetails>
-        <p className="subtitle">Please choose what defines you the best.</p>
+        <p className="title">About You</p>
+        <p className="subtitle mb-4">
+          Please choose what defines you the best.
+        </p>
 
         <OrganisationCards>
           {organisationInfo.map((info) => (
@@ -628,7 +631,7 @@ const Register = () => {
     );
   };
 
-  const renderName = ({ required, placeholder }) => {
+  const renderName = ({ required, placeholder, name }) => {
     return (
       <StepDetails>
         <Img
@@ -638,6 +641,7 @@ const Register = () => {
           width="130px"
           style={{ minWidth: "130px" }}
         />
+        <p className="title">{name}</p>
         <p className="subtitle">
           You’ll be registered with this name on Parcel.
         </p>
@@ -705,7 +709,7 @@ const Register = () => {
                       value: /^0x[a-fA-F0-9]{40}$/g,
                       message: "Invalid Ethereum Address",
                     }}
-                    placeholder={ZERO_ADDRESS}
+                    placeholder={"Enter Address"}
                     defaultValue={owner}
                   />
                   {errors["owners"] &&
@@ -752,7 +756,7 @@ const Register = () => {
           </div>
         </div>
 
-        <HighlightedText style={{ marginBottom: "20px" }}>
+        <HighlightedText style={{ marginBottom: "40px" }}>
           <div>
             <Img src={LightbulbIcon} alt="lightbulb" />
           </div>
@@ -781,6 +785,7 @@ const Register = () => {
           width="140px"
           style={{ minWidth: "140px" }}
         />
+        <p className="title">Threshold</p>
         <p className="subtitle">
           How many people should authorize transactions?
         </p>
@@ -825,9 +830,7 @@ const Register = () => {
           style={{ minWidth: "100px" }}
         />
         <h3 className="title">We care for Your Privacy </h3>
-        <p className="subtitle">
-          Please sign this message using your private key and authorize Parcel.
-        </p>
+        <p className="subtitle">Please sign to authorize Parcel.</p>
 
         <Button
           type="button"
@@ -932,16 +935,19 @@ const Register = () => {
           return renderName({
             required: "Company Name is required",
             placeholder: "Awesome Company Inc",
+            name: "Company Name",
           });
         else if (formData.flow === FLOWS.DAO)
           return renderName({
             required: "Organization Name is required",
             placeholder: "Awesome DAO Inc",
+            name: "Organization Name",
           });
         else
           return renderName({
             required: "Name is required",
             placeholder: "John Doe",
+            name: "Your Name",
           });
       }
 

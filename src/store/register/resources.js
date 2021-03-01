@@ -6,7 +6,8 @@ export const organisationInfo = [
   {
     id: 1,
     name: "Individual",
-    subtitle: "Manage your personal crypto assets",
+    subtitle:
+      "Secure your personal crypto assets with best security and convenience",
     img: IndividualImg,
     points: [
       "Proactively reintermediate impactful platforms vis-a-vis multidisciplinary leadership skills. Distinctively drive error-free ROI and 2.0.",
@@ -17,7 +18,7 @@ export const organisationInfo = [
   {
     id: 2,
     name: "Company",
-    subtitle: "Fully customize how you manage your company crypto assets",
+    subtitle: "Frictionless management of your corporate crypto treasury",
     img: CompanyImg,
     points: [
       "Proactively reintermediate impactful platforms vis-a-vis multidisciplinary leadership skills. Distinctively drive error-free ROI and 2.0.",
@@ -29,7 +30,7 @@ export const organisationInfo = [
     id: 3,
     name: "DAO",
     subtitle:
-      "Collaborate with people all over the world and work toward shared goals.",
+      "Collaborate with co-signers of your multisig and manage payouts seamlessly",
     img: DaoImg,
     points: [
       "Proactively reintermediate impactful platforms vis-a-vis multidisciplinary leadership skills. Distinctively drive error-free ROI and 2.0.",

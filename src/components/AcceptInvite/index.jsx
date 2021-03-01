@@ -238,8 +238,7 @@ const AcceptInvite = () => {
         {!hasAlreadySigned ? (
           <React.Fragment>
             <p className="subtitle mb-5 pb-5">
-              Please sign this message using your private key and authorize
-              Parcel.
+              Please sign to authorize Parcel.
             </p>
             <Button
               type="button"

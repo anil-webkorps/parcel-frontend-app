@@ -513,7 +513,8 @@ const Login = () => {
   const renderAboutYou = () => {
     return (
       <StepDetails>
-        <p className="subtitle">Please choose what defines you the best.</p>
+        <p className="title">About You</p>
+        <p className="subtitle mb-5">Please choose what defines you the best</p>
 
         <OrganisationCards>
           {organisationInfo.map((info) => (
@@ -555,7 +556,7 @@ const Login = () => {
     );
   };
 
-  const renderName = ({ required, placeholder }) => {
+  const renderName = ({ required, placeholder, name }) => {
     return (
       <StepDetails>
         <Img
@@ -565,6 +566,7 @@ const Login = () => {
           width="130px"
           style={{ minWidth: "130px" }}
         />
+        <p className="title">{name}</p>
         <p className="subtitle">
           You’ll be registered with this name on Parcel.
         </p>
@@ -670,8 +672,7 @@ const Login = () => {
         {!hasAlreadySigned ? (
           <React.Fragment>
             <p className="subtitle mb-5 pb-5">
-              Please sign this message using your private key and authorize
-              Parcel.
+              Please sign to authorize Parcel.
             </p>
             <Button
               type="button"
@@ -979,16 +980,19 @@ const Login = () => {
           return renderName({
             required: "Company Name is required",
             placeholder: "Awesome Company Inc",
+            name: "Company Name",
           });
         else if (formData.ownerFlow === OWNER_FLOWS.DAO)
           return renderName({
             required: "Organization Name is required",
             placeholder: "Awesome DAO Inc",
+            name: "Organization Name",
           });
         else
           return renderName({
             required: "Name is required",
             placeholder: "John Doe",
+            name: "Your Name",
           });
       }
 
