@@ -10,3 +10,6 @@ export const UPDATE_NOTIFICATION_STATUS_SUCCESS =
   "parcel/notifications/UPDATE_NOTIFICATION_STATUS_SUCCESS";
 export const UPDATE_NOTIFICATION_STATUS_ERROR =
   "parcel/notifications/UPDATE_NOTIFICATION_STATUS_ERROR";
+
+export const OPEN_NOTIFICATIONS = "parcel/notifications/OPEN_NOTIFICATIONS";
+export const CLOSE_NOTIFICATIONS = "parcel/notifications/CLOSE_NOTIFICATIONS";

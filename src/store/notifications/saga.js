@@ -1,7 +1,6 @@
 import { takeLatest, put, call, fork } from "redux-saga/effects";
 import { GET_NOTIFICATIONS, UPDATE_NOTIFICATION_STATUS } from "./action-types";
 import {
-  getNotifications,
   getNotificationsSuccess,
   getNotificationsError,
   updateNotificationStatusSuccess,
@@ -19,6 +18,7 @@ function* updateNotification(action) {
     method: "POST",
     body: JSON.stringify({
       safeAddress: action.safeAddress,
+      userAddress: action.userAddress,
     }),
     headers: {
       "content-type": "application/json",
@@ -30,8 +30,13 @@ function* updateNotification(action) {
       // Error in payload
       yield put(updateNotificationStatusError(result.log));
     } else {
-      yield put(updateNotificationStatusSuccess(result.log));
-      yield put(getNotifications(action.safeAddress));
+      yield put(
+        updateNotificationStatusSuccess(
+          result.notifications,
+          result.hasSeen,
+          result.log
+        )
+      );
     }
   } catch (err) {
     yield put(updateNotificationStatusError(err));
@@ -39,7 +44,7 @@ function* updateNotification(action) {
 }
 
 function* fetchNotifications(action) {
-  const requestURL = `${getNotificationsEndpoint}?safeAddress=${action.safeAddress}`;
+  const requestURL = `${getNotificationsEndpoint}?safeAddress=${action.safeAddress}&userAddress=${action.userAddress}`;
   const options = {
     method: "GET",
   };

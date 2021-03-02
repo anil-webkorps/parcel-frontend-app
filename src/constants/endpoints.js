@@ -54,7 +54,7 @@ export const addCustomTokenEndpoint = `${ROOT_BE_URL}/api/v1/tokens/add`;
 
 // notifications
 export const getNotificationsEndpoint = `${ROOT_BE_URL}/api/v1/notifications/get`;
-export const updateNotificationsEndpoint = `${ROOT_BE_URL}/api/v1/notifications/get`;
+export const updateNotificationsEndpoint = `${ROOT_BE_URL}/api/v1/notifications/update`;
 
 // GNOSIS
 export const gnosisSafeTransactionEndpoint =

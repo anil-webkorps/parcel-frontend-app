@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { cryptoUtils } from "parcel-sdk";
 import { show } from "redux-modal";
-import { useHistory, Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import { Info } from "components/Dashboard/styles";
 import { Card } from "components/common/Card";
@@ -46,7 +46,6 @@ import safeSaga from "store/safe/saga";
 import invitationSaga from "store/invitation/saga";
 import invitationReducer from "store/invitation/reducer";
 import { getInvitations } from "store/invitation/actions";
-import { makeSelectIsSetupComplete } from "store/invitation/selectors";
 import { getNonce } from "store/safe/actions";
 import {
   makeSelectNonce,
@@ -203,8 +202,8 @@ export default function Payments() {
 
   // Selectors
   const allDepartments = useSelector(makeSelectDepartments());
-  const loadingDepartments = useSelector(makeSelectDepartmentsLoading()); // eslint-disable-line
-  const loadingTeammates = useSelector(makeSelectTeammatesLoading()); // eslint-disable-line
+  const loadingDepartments = useSelector(makeSelectDepartmentsLoading());
+  const loadingTeammates = useSelector(makeSelectTeammatesLoading());
   const teammates = useSelector(makeSelectTeammates());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const prices = useSelector(makeSelectPrices());
@@ -217,7 +216,6 @@ export default function Payments() {
   const loadingSafeDetails = useSelector(makeSelectLoadingSafeDetails());
   const tokenList = useSelector(makeSelectTokenList());
   const loadingTokens = useSelector(makeSelectLoadingTokens());
-  const isSetupComplete = useSelector(makeSelectIsSetupComplete());
   const icons = useSelector(makeSelectTokenIcons());
   const singleOwnerTransactionId = useSelector(
     makeSelectSingleOwnerTransactionId()
@@ -603,8 +601,7 @@ export default function Payments() {
                           !checked[idx] ||
                           loadingTx ||
                           isNoneChecked ||
-                          !isMassPayoutAllowed ||
-                          !isSetupComplete
+                          !isMassPayoutAllowed
                         }
                         className="py-0"
                       >
@@ -704,8 +701,7 @@ export default function Payments() {
               loadingTx ||
               insufficientBalance ||
               addingTx ||
-              !isMassPayoutAllowed ||
-              !isSetupComplete
+              !isMassPayoutAllowed
             }
           >
             {(loadingSafeDetails || loadingTokens) && (
@@ -858,12 +854,12 @@ export default function Payments() {
                   token
                 </div>
               )}
-              {!isNoneChecked && !isSetupComplete && (
+              {/* {!isNoneChecked && !isSetupComplete && (
                 <div className="mt-3">
                   Please <Link to="/dashboard/invite">complete your setup</Link>{" "}
                   before creating a transaction
                 </div>
-              )}
+              )} */}
               {!loadingTx && errorFromMetaTx && (
                 <div className="text-danger mt-3">{errorFromMetaTx}</div>
               )}

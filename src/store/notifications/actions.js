@@ -5,12 +5,15 @@ import {
   UPDATE_NOTIFICATION_STATUS,
   UPDATE_NOTIFICATION_STATUS_SUCCESS,
   UPDATE_NOTIFICATION_STATUS_ERROR,
+  OPEN_NOTIFICATIONS,
+  CLOSE_NOTIFICATIONS,
 } from "./action-types";
 
-export function getNotifications(safeAddress) {
+export function getNotifications(safeAddress, userAddress) {
   return {
     type: GET_NOTIFICATIONS,
     safeAddress,
+    userAddress,
   };
 }
 
@@ -30,10 +33,11 @@ export function getNotificationsError(error) {
   };
 }
 
-export function updateNotificationStatus(safeAddress) {
+export function updateNotificationStatus(safeAddress, userAddress) {
   return {
     type: UPDATE_NOTIFICATION_STATUS,
     safeAddress,
+    userAddress,
   };
 }
 
@@ -50,5 +54,16 @@ export function updateNotificationStatusError(error) {
   return {
     type: UPDATE_NOTIFICATION_STATUS_ERROR,
     error,
+  };
+}
+
+export function openNotifications() {
+  return {
+    type: OPEN_NOTIFICATIONS,
+  };
+}
+export function closeNotifications() {
+  return {
+    type: CLOSE_NOTIFICATIONS,
   };
 }

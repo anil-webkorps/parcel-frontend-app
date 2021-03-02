@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { startCase } from "lodash";
@@ -20,11 +20,17 @@ import { logoutUser } from "store/logout/actions";
 import logoutSaga from "store/logout/saga";
 import notificationsSaga from "store/notifications/saga";
 import notificationsReducer from "store/notifications/reducer";
-import { getNotifications } from "store/notifications/actions";
+import {
+  closeNotifications,
+  getNotifications,
+  openNotifications,
+  updateNotificationStatus,
+} from "store/notifications/actions";
 import {
   makeSelectNotifications,
   makeSelectHasSeen,
   makeSelectLoading,
+  makeSelectShowNotifications,
 } from "store/notifications/selectors";
 import { useInjectSaga } from "utils/injectSaga";
 import { useInjectReducer } from "utils/injectReducer";
@@ -61,14 +67,13 @@ export default function DashboardHeader() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   const { account, chainId } = useActiveWeb3React();
 
-  const [showNotifications, setShowNotifications] = useState(false);
-
   const ownerName = useSelector(makeSelectOwnerName());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const organisationType = useSelector(makeSelectOrganisationType());
   const notifications = useSelector(makeSelectNotifications());
   const hasSeen = useSelector(makeSelectHasSeen());
   const loadingNotifications = useSelector(makeSelectLoading());
+  const showNotifications = useSelector(makeSelectShowNotifications());
 
   const dispatch = useDispatch();
 
@@ -78,11 +83,22 @@ export default function DashboardHeader() {
   useInjectSaga({ key: notificationsKey, saga: notificationsSaga });
 
   useEffect(() => {
-    if (ownerSafeAddress) dispatch(getNotifications(ownerSafeAddress));
-  }, [dispatch, ownerSafeAddress]);
+    if (ownerSafeAddress && account)
+      dispatch(getNotifications(ownerSafeAddress, account));
+  }, [dispatch, ownerSafeAddress, account]);
 
   const toggleNotifications = () => {
-    setShowNotifications((showNotifications) => !showNotifications);
+    if (showNotifications) dispatch(closeNotifications());
+    else {
+      dispatch(openNotifications());
+      if (account && ownerSafeAddress && !hasSeen) {
+        dispatch(updateNotificationStatus(ownerSafeAddress, account));
+      }
+    }
+  };
+
+  const closeNotificationsIfOpen = () => {
+    if (showNotifications) dispatch(closeNotifications());
   };
 
   const logout = () => {
@@ -112,9 +128,11 @@ export default function DashboardHeader() {
     }
   };
 
+  console.log({ notifications });
+
   return (
     <div>
-      <NavBar className="dashboard">
+      <NavBar className="dashboard" onClick={closeNotificationsIfOpen}>
         <NavBarContent>
           <div className="d-flex justify-content-center align-items-center">
             <SideNav />
@@ -195,9 +213,12 @@ export default function DashboardHeader() {
                     <Loading color="primary" width="50px" height="50px" />
                   </div>
                 )}
-                {!loadingNotifications && notifications.length === 0 ? (
+                {!loadingNotifications &&
+                notifications &&
+                notifications.length === 0 ? (
                   <div className="no-notifications">Nothing to see here...</div>
                 ) : (
+                  notifications &&
                   notifications.map(
                     ({
                       notificationId,

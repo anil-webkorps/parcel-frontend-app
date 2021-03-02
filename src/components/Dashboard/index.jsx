@@ -50,6 +50,7 @@ export default function Dashboard() {
       className="position-relative"
       style={{
         transition: "all 0.25s linear",
+        minHeight: "100vh",
       }}
     >
       <Info>

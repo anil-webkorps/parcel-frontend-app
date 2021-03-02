@@ -8,7 +8,7 @@ export default styled.div`
   box-shadow: 10px 10px 20px 0 rgba(0, 0, 0, 0.16);
   border: solid 1px rgba(168, 168, 168, 0.2);
   background-color: #f6f6f6;
-  position: fixed;
+  position: absolute;
   top: 5em;
   right: 3em;
   z-index: 1;

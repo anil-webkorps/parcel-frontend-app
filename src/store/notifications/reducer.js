@@ -7,6 +7,8 @@ import {
   UPDATE_NOTIFICATION_STATUS,
   UPDATE_NOTIFICATION_STATUS_SUCCESS,
   UPDATE_NOTIFICATION_STATUS_ERROR,
+  OPEN_NOTIFICATIONS,
+  CLOSE_NOTIFICATIONS,
 } from "./action-types";
 
 export const initialState = {
@@ -15,6 +17,7 @@ export const initialState = {
   updating: false,
   notifications: undefined,
   hasSeen: false,
+  show: false,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -53,6 +56,13 @@ const reducer = (state = initialState, action) =>
       case UPDATE_NOTIFICATION_STATUS_ERROR:
         draft.error = action.error;
         draft.updating = false;
+        break;
+
+      case OPEN_NOTIFICATIONS:
+        draft.show = true;
+        break;
+      case CLOSE_NOTIFICATIONS:
+        draft.show = false;
         break;
     }
   });

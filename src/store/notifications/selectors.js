@@ -40,10 +40,17 @@ const makeSelectError = () =>
     (notificationsState) => notificationsState.error
   );
 
+const makeSelectShowNotifications = () =>
+  createSelector(
+    selectNotifications,
+    (notificationsState) => notificationsState.show
+  );
+
 export {
   selectNotifications,
   makeSelectHasSeen,
   makeSelectNotifications,
+  makeSelectShowNotifications,
   makeSelectLoading,
   makeSelectUpdating,
   makeSelectError,
