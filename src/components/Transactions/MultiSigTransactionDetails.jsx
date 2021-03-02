@@ -136,7 +136,7 @@ export default function MultiSigTransactions() {
     if (ownerSafeAddress && transactionId) {
       dispatch(getMultisigTransactionById(ownerSafeAddress, transactionId));
     }
-  }, [dispatch, ownerSafeAddress]); //eslint-disable-line
+  }, [dispatch, ownerSafeAddress, params]);
 
   useEffect(() => {
     if (txHashFromMetaTx) {

@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import Dashboard from "components/Dashboard";
 import People from "components/People";
@@ -23,24 +23,24 @@ import {
 } from "store/global/selectors";
 import { ToastMessage } from "components/common/Toast";
 import { useSocket } from "hooks";
-import { closeNotifications } from "store/notifications/actions";
-import { makeSelectShowNotifications } from "store/notifications/selectors";
+// import { closeNotifications } from "store/notifications/actions";
+// import { makeSelectShowNotifications } from "store/notifications/selectors";
 
 const DashboardPage = ({ match }) => {
   const isMultiOwner = useSelector(makeSelectIsMultiOwner());
   const safeAddress = useSelector(makeSelectOwnerSafeAddress());
   useSocket({ isMultiOwner, safeAddress });
 
-  const showNotifications = useSelector(makeSelectShowNotifications());
-  const dispatch = useDispatch();
+  // const showNotifications = useSelector(makeSelectShowNotifications());
+  // const dispatch = useDispatch();
 
-  const closeNotificationsIfOpen = () => {
-    if (showNotifications) dispatch(closeNotifications());
-  };
+  // const closeNotificationsIfOpen = () => {
+  //   if (showNotifications) dispatch(closeNotifications());
+  // };
 
   return (
     <Authenticated>
-      <div onClick={closeNotificationsIfOpen}>
+      <div>
         <Switch>
           <Route exact path={`${match.path}`} component={Dashboard} />
           <Route exact path={`${match.path}/people`} component={People} />

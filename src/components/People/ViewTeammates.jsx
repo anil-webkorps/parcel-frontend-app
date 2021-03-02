@@ -80,7 +80,7 @@ export default function ViewTeammate() {
         dispatch(getAllTeammates(ownerSafeAddress));
       }
     }
-  }, [dispatch, params, ownerSafeAddress]);
+  }, [dispatch, ownerSafeAddress]); // eslint-disable-line
 
   useEffect(() => {
     if (ownerSafeAddress && !icons) {

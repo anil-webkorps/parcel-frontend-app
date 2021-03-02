@@ -128,8 +128,6 @@ export default function DashboardHeader() {
     }
   };
 
-  console.log({ notifications });
-
   return (
     <div>
       <NavBar className="dashboard" onClick={closeNotificationsIfOpen}>
