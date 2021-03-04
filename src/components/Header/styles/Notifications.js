@@ -74,6 +74,18 @@ export default styled.div`
       color: #373737;
     }
 
+    .notification-date {
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: normal;
+      font-stretch: normal;
+      font-style: normal;
+      line-height: normal;
+      letter-spacing: normal;
+      text-align: left;
+      color: #373737;
+    }
+
     .notification-view {
       font-size: 14px;
       font-weight: 600;

@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlug, faBell } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
+import formatDistance from "date-fns/formatDistance";
 
 import CopyButton from "components/common/Copy";
 import SideNav from "components/SideNav";
@@ -97,10 +98,6 @@ export default function DashboardHeader() {
     }
   };
 
-  const closeNotificationsIfOpen = () => {
-    if (showNotifications) dispatch(closeNotifications());
-  };
-
   const logout = () => {
     dispatch(logoutUser());
   };
@@ -150,6 +147,9 @@ export default function DashboardHeader() {
               )}{" "}
               {data.message}
             </div>
+            <div className="notification-date">
+              {formatDistance(new Date(), new Date(createdOn))} ago
+            </div>
           </div>
           <Link to={`/dashboard/transactions/${transactionId}`}>
             <div className="notification-view" onClick={toggleNotifications}>
@@ -166,6 +166,9 @@ export default function DashboardHeader() {
           <div className="content">
             <div className="notification-heading">{data.headline}</div>
             <div className="notification-description">{data.message}</div>
+            <div className="notification-date">
+              {formatDistance(new Date(), new Date(createdOn))} ago
+            </div>
           </div>
           <a
             href={data.etherscanUrl}
@@ -183,7 +186,7 @@ export default function DashboardHeader() {
 
   return (
     <div>
-      <NavBar className="dashboard" onClick={closeNotificationsIfOpen}>
+      <NavBar className="dashboard">
         <NavBarContent>
           <div className="d-flex justify-content-center align-items-center">
             <SideNav />
