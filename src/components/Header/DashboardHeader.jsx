@@ -128,6 +128,59 @@ export default function DashboardHeader() {
     }
   };
 
+  const renderNotification = ({
+    notificationId,
+    data,
+    type,
+    transactionId,
+    createdOn,
+  }) => {
+    if (type === 0) {
+      // Transaction
+      return (
+        <div className="notification" key={notificationId}>
+          <div className="dot">{renderDotByStatus(data.status)}</div>
+          <div className="content">
+            <div className="notification-heading">{data.headline}</div>
+            <div className="notification-description">
+              {cryptoUtils.decryptDataUsingEncryptionKey(
+                data.name,
+                encryptionKey,
+                organisationType
+              )}{" "}
+              {data.message}
+            </div>
+          </div>
+          <Link to={`/dashboard/transactions/${transactionId}`}>
+            <div className="notification-view" onClick={toggleNotifications}>
+              View
+            </div>
+          </Link>
+        </div>
+      );
+    } else if (type === 1) {
+      // Incoming Transaction
+      return (
+        <div className="notification" key={notificationId}>
+          <div className="dot">{renderDotByStatus(data.status)}</div>
+          <div className="content">
+            <div className="notification-heading">{data.headline}</div>
+            <div className="notification-description">{data.message}</div>
+          </div>
+          <a
+            href={data.etherscanUrl}
+            target="_blank"
+            rel="noreferrer noopenner"
+          >
+            <div className="notification-view" onClick={toggleNotifications}>
+              View
+            </div>
+          </a>
+        </div>
+      );
+    }
+  };
+
   return (
     <div>
       <NavBar className="dashboard" onClick={closeNotificationsIfOpen}>
@@ -217,41 +270,8 @@ export default function DashboardHeader() {
                   <div className="no-notifications">Nothing to see here...</div>
                 ) : (
                   notifications &&
-                  notifications.map(
-                    ({
-                      notificationId,
-                      data,
-                      type,
-                      transactionId,
-                      createdOn,
-                    }) => (
-                      <div className="notification" key={notificationId}>
-                        <div className="dot">
-                          {renderDotByStatus(data.status)}
-                        </div>
-                        <div className="content">
-                          <div className="notification-heading">
-                            {data.headline}
-                          </div>
-                          <div className="notification-description">
-                            {cryptoUtils.decryptDataUsingEncryptionKey(
-                              data.name,
-                              encryptionKey,
-                              organisationType
-                            )}{" "}
-                            {data.message}
-                          </div>
-                        </div>
-                        <Link to={`/dashboard/transactions/${transactionId}`}>
-                          <div
-                            className="notification-view"
-                            onClick={toggleNotifications}
-                          >
-                            View
-                          </div>
-                        </Link>
-                      </div>
-                    )
+                  notifications.map((notification) =>
+                    renderNotification(notification)
                   )
                 )}
               </Notifications>

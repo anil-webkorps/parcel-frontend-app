@@ -10,6 +10,7 @@ import { showToast, toaster } from "components/common/Toast";
 import { getTransactionByIdSuccess } from "store/transactions/actions";
 import { getMultisigTransactionByIdSuccess } from "store/multisig/actions";
 import { getNotificationsSuccess } from "store/notifications/actions";
+import { getTokensSuccess } from "store/tokens/actions";
 import Button from "components/common/Button";
 
 export default function useSocket(props) {
@@ -103,6 +104,21 @@ export default function useSocket(props) {
       socketRef.current.on(
         `${safeAddress}_${networkId}_notifications`,
         (message) => {
+          console.log({ message });
+          if (
+            message.notifications.length > 0 &&
+            message.notifications[0].type === 1
+          ) {
+            const { data } = message.notifications[0];
+            dispatch(
+              getTokensSuccess(
+                data.tokenBalances.tokens,
+                data.tokenBalances.prices,
+                data.tokenBalances.icons,
+                data.tokenBalances.log
+              )
+            );
+          }
           dispatch(
             getNotificationsSuccess(
               message.notifications,

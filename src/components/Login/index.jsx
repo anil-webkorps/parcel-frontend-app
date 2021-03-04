@@ -822,7 +822,7 @@ const Login = () => {
 
     return (
       <StepDetails>
-        <h3 className="title">Choose Safe</h3>
+        <h3 className="title">Choose Account</h3>
         <p className="subtitle">
           Select the safe with which you would like to continue
         </p>

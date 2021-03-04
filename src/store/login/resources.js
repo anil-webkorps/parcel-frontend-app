@@ -22,13 +22,13 @@ export const ORGANISATION_TYPE = {
 export const LOGIN_STEPS = {
   [STEPS.ZERO]: "Connect",
   [STEPS.ONE]: "Privacy",
-  [STEPS.TWO]: "Choose Safe",
+  [STEPS.TWO]: "Choose Account",
 };
 
 export const IMPORT_STEPS = {
   [STEPS.ZERO]: "Connect",
   [STEPS.ONE]: "Privacy",
-  [STEPS.TWO]: "Choose Safe",
+  [STEPS.TWO]: "Choose Account",
   [STEPS.THREE]: "About You",
   [STEPS.FOUR]: "Owner Details",
   [STEPS.FIVE]: "Owner Address/Name",
@@ -38,7 +38,7 @@ export const IMPORT_STEPS = {
 export const IMPORT_INDIVIDUAL_STEPS = {
   [STEPS.ZERO]: "Connect",
   [STEPS.ONE]: "Privacy",
-  [STEPS.TWO]: "Choose Safe",
+  [STEPS.TWO]: "Choose Account",
   [STEPS.THREE]: "Company Name",
   [STEPS.FOUR]: "Organisation Type",
 };
