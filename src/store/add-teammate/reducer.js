@@ -13,6 +13,12 @@ import {
   GET_DEPARTMENT_BY_ID,
   GET_DEPARTMENT_BY_ID_SUCCESS,
   GET_DEPARTMENT_BY_ID_ERROR,
+  EDIT_TEAMMATE,
+  EDIT_TEAMMATE_SUCCESS,
+  EDIT_TEAMMATE_ERROR,
+  DELETE_TEAMMATE,
+  DELETE_TEAMMATE_SUCCESS,
+  DELETE_TEAMMATE_ERROR,
 } from "./action-types";
 
 export const initialState = {
@@ -25,6 +31,7 @@ export const initialState = {
   totalEmployees: 0,
   flow: "", // SINGLE or BULK,
   success: false,
+  updating: false,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -75,6 +82,21 @@ const reducer = (state = initialState, action) =>
       case GET_DEPARTMENT_BY_ID_SUCCESS:
         draft.chosenDepartment = action.chosenDepartment;
         draft.loading = false;
+        break;
+
+      case EDIT_TEAMMATE:
+      case DELETE_TEAMMATE:
+        draft.updating = true;
+        break;
+
+      case EDIT_TEAMMATE_SUCCESS:
+      case DELETE_TEAMMATE_SUCCESS:
+        draft.updating = false;
+        break;
+
+      case EDIT_TEAMMATE_ERROR:
+      case DELETE_TEAMMATE_ERROR:
+        draft.updating = false;
         break;
     }
   });

@@ -19,3 +19,12 @@ export const ADD_BULK_TEAMMATE_SUCCESS =
   "parcel/addTeammate/ADD_BULK_TEAMMATE_SUCCESS";
 export const ADD_BULK_TEAMMATE_ERROR =
   "parcel/addTeammate/ADD_BULK_TEAMMATE_ERROR";
+
+export const EDIT_TEAMMATE = "parcel/addTeammate/EDIT_TEAMMATE";
+export const EDIT_TEAMMATE_SUCCESS = "parcel/addTeammate/EDIT_TEAMMATE_SUCCESS";
+export const EDIT_TEAMMATE_ERROR = "parcel/addTeammate/EDIT_TEAMMATE_ERROR";
+
+export const DELETE_TEAMMATE = "parcel/addTeammate/DELETE_TEAMMATE";
+export const DELETE_TEAMMATE_SUCCESS =
+  "parcel/addTeammate/DELETE_TEAMMATE_SUCCESS";
+export const DELETE_TEAMMATE_ERROR = "parcel/addTeammate/DELETE_TEAMMATE_ERROR";

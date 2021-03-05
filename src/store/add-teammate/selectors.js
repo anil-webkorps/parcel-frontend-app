@@ -39,6 +39,12 @@ const makeSelectChosenDepartment = () =>
     (addTeammateState) => addTeammateState.chosenDepartment
   );
 
+const makeSelectUpdating = () =>
+  createSelector(
+    selectAddTeammate,
+    (addTeammateState) => addTeammateState.updating
+  );
+
 const makeSelectError = () =>
   createSelector(
     selectAddTeammate,
@@ -53,5 +59,6 @@ export {
   makeSelectSuccess,
   makeSelectChosenDepartment,
   makeSelectLoading,
+  makeSelectUpdating,
   makeSelectError,
 };

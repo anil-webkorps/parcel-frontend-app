@@ -2,7 +2,6 @@ import styled from "styled-components/macro";
 
 export default styled.div`
   width: 100%;
-  margin: 24px 0 307px;
   padding: 0 1px 0 24px;
   border-radius: 16px;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);

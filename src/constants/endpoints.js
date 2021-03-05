@@ -18,6 +18,8 @@ export const getAllTeammatesEndpoint = `${ROOT_BE_URL}/api/v1/people/get`;
 export const createTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/create`;
 export const createBulkTeammatesEndpoint = `${ROOT_BE_URL}/api/v1/people/add-multiple`;
 export const getTeammatesByDepartmentIdEndpoint = `${ROOT_BE_URL}/api/v1/people/getByDepartment`;
+export const editTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/update`;
+export const deleteTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/remove`;
 
 // DEPARTMENT
 export const createDepartmentEndpoint = `${ROOT_BE_URL}/api/v1/departments/create`;

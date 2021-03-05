@@ -5,6 +5,8 @@ import {
   faEye,
   faLongArrowAltLeft,
   faPlus,
+  faEdit,
+  faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { show } from "redux-modal";
 import { CSVLink } from "react-csv";
@@ -45,6 +47,9 @@ import { Circle } from "components/Header/styles";
 import TeammateDetailsModal, {
   MODAL_NAME as TEAMMATE_DETAILS_MODAL,
 } from "./TeammateDetailsModal";
+import DeleteTeammateModal, {
+  MODAL_NAME as DELETE_TEAMMATE_MODAL,
+} from "./DeleteModal";
 import { minifyAddress } from "components/common/Web3Utils";
 
 const { TableBody, TableHead, TableRow } = Table;
@@ -105,6 +110,10 @@ export default function ViewTeammate() {
 
   const showDetails = (props) => {
     dispatch(show(TEAMMATE_DETAILS_MODAL, { ...props }));
+  };
+
+  const showDeleteConfirmation = (props) => {
+    dispatch(show(DELETE_TEAMMATE_MODAL, { ...props }));
   };
 
   const renderExportEmployeeData = () => {
@@ -226,7 +235,7 @@ export default function ViewTeammate() {
                 <Loading color="primary" width="50px" height="50px" />
               </div>
             ) : teammates && teammates.length > 0 ? (
-              teammates.map(({ data, departmentName }, idx) => {
+              teammates.map(({ data, departmentName, peopleId }, idx) => {
                 const {
                   firstName,
                   lastName,
@@ -269,9 +278,44 @@ export default function ViewTeammate() {
                         </div>
                       </Button>
 
-                      {/* <div className="circle circle-grey">
-                        <FontAwesomeIcon icon={faEdit} color="#7367f0" />
-                      </div> */}
+                      <Button
+                        iconOnly
+                        onClick={() =>
+                          showDetails({
+                            firstName,
+                            lastName,
+                            salary: salaryAmount,
+                            currency: salaryToken,
+                            departmentName,
+                            address,
+                          })
+                        }
+                        className="p-0"
+                      >
+                        <div className="circle circle-grey mr-3">
+                          <FontAwesomeIcon icon={faEdit} color="#7367f0" />
+                        </div>
+                      </Button>
+
+                      <Button
+                        iconOnly
+                        onClick={() =>
+                          showDeleteConfirmation({
+                            firstName,
+                            lastName,
+                            salary: salaryAmount,
+                            currency: salaryToken,
+                            departmentName,
+                            address,
+                            peopleId,
+                          })
+                        }
+                        className="p-0"
+                      >
+                        <div className="circle circle-grey">
+                          <FontAwesomeIcon icon={faTrashAlt} color="#ff0a0a" />
+                        </div>
+                      </Button>
                     </div>
                   </TableRow>
                 );
@@ -288,6 +332,7 @@ export default function ViewTeammate() {
         </div>
       </Container>
       <TeammateDetailsModal />
+      <DeleteTeammateModal />
     </div>
   );
 }
