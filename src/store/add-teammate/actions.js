@@ -18,6 +18,7 @@ import {
   DELETE_TEAMMATE,
   DELETE_TEAMMATE_SUCCESS,
   DELETE_TEAMMATE_ERROR,
+  SET_PEOPLE_ID,
 } from "./action-types";
 
 export function chooseStep(step) {
@@ -134,6 +135,7 @@ export function editTeammate({
   departmentId,
   departmentName,
   joiningDate,
+  peopleId,
 }) {
   return {
     type: EDIT_TEAMMATE,
@@ -144,6 +146,7 @@ export function editTeammate({
       departmentId,
       departmentName,
       joiningDate,
+      peopleId,
     },
   };
 }
@@ -162,11 +165,12 @@ export function editTeammateError(error) {
   };
 }
 
-export function deleteTeammate(safeAddress, peopleId) {
+export function deleteTeammate(safeAddress, peopleId, departmentId = "") {
   return {
     type: DELETE_TEAMMATE,
     safeAddress,
     peopleId,
+    departmentId,
   };
 }
 
@@ -181,5 +185,11 @@ export function deleteTeammateError(error) {
   return {
     type: DELETE_TEAMMATE_ERROR,
     error,
+  };
+}
+export function setPeopleId(peopleId) {
+  return {
+    type: SET_PEOPLE_ID,
+    peopleId,
   };
 }

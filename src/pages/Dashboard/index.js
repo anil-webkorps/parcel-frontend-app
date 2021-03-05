@@ -7,6 +7,7 @@ import People from "components/People";
 import AddTeammate from "components/People/AddTeammate";
 import AddDepartment from "components/People/AddDepartment";
 import ViewTeammates from "components/People/ViewTeammates";
+import EditTeammate from "components/People/EditTeammate";
 import Payments from "components/Payments";
 import Transactions from "components/Transactions";
 import AccountSummary from "components/AccountSummary";
@@ -63,6 +64,11 @@ const DashboardPage = ({ match }) => {
             exact
             path={`${match.path}/people/view/:departmentId`}
             component={ViewTeammates}
+          />
+          <Route
+            exact
+            path={`${match.path}/people/edit`}
+            component={EditTeammate}
           />
           <Route exact path={`${match.path}/payments`} component={Payments} />
           <Route

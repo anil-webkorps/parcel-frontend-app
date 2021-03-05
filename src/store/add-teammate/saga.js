@@ -28,7 +28,10 @@ import {
   editTeammateEndpoint,
   deleteTeammateEndpoint,
 } from "constants/endpoints";
-import { getAllTeammates } from "store/view-teammates/actions";
+import {
+  getAllTeammates,
+  getTeammatesByDepartment,
+} from "store/view-teammates/actions";
 import { MODAL_NAME as DELETE_TEAMMATE_MODAL } from "components/People/DeleteModal";
 
 export function* createTeammate({ body }) {
@@ -110,7 +113,7 @@ export function* getDepartmentById(action) {
 export function* editTeammate({ body }) {
   const requestURL = `${editTeammateEndpoint}`;
   const options = {
-    method: "POST",
+    method: "PUT",
     body: JSON.stringify({
       encryptedEmployeeDetails: body.encryptedEmployeeDetails,
       safeAddress: body.safeAddress,
@@ -118,6 +121,7 @@ export function* editTeammate({ body }) {
       departmentId: body.departmentId,
       departmentName: body.departmentName,
       joiningDate: Date.now(),
+      peopleId: body.peopleId,
     }),
     headers: {
       "content-type": "application/json",
@@ -136,7 +140,7 @@ export function* editTeammate({ body }) {
     yield put(editTeammateError(err));
   }
 }
-export function* deleteTeammate({ peopleId, safeAddress }) {
+export function* deleteTeammate({ peopleId, safeAddress, departmentId }) {
   const requestURL = `${deleteTeammateEndpoint}`;
   const options = {
     method: "POST",
@@ -157,7 +161,11 @@ export function* deleteTeammate({ peopleId, safeAddress }) {
     } else {
       yield put(deleteTeammateSuccess(result.log));
       yield put(hide(DELETE_TEAMMATE_MODAL));
-      yield put(getAllTeammates(safeAddress));
+      if (departmentId) {
+        yield put(getTeammatesByDepartment(safeAddress, departmentId));
+      } else {
+        yield put(getAllTeammates(safeAddress));
+      }
     }
   } catch (err) {
     yield put(deleteTeammateError(err));

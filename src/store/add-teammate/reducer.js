@@ -19,6 +19,7 @@ import {
   DELETE_TEAMMATE,
   DELETE_TEAMMATE_SUCCESS,
   DELETE_TEAMMATE_ERROR,
+  SET_PEOPLE_ID,
 } from "./action-types";
 
 export const initialState = {
@@ -32,6 +33,7 @@ export const initialState = {
   flow: "", // SINGLE or BULK,
   success: false,
   updating: false,
+  peopleId: "",
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -97,6 +99,10 @@ const reducer = (state = initialState, action) =>
       case EDIT_TEAMMATE_ERROR:
       case DELETE_TEAMMATE_ERROR:
         draft.updating = false;
+        break;
+
+      case SET_PEOPLE_ID:
+        draft.peopleId = action.peopleId;
         break;
     }
   });

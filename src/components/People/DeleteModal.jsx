@@ -39,6 +39,7 @@ function TeammateDetailsModal(props) {
     currency,
     address,
     peopleId,
+    params,
   } = props;
 
   useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
@@ -51,7 +52,9 @@ function TeammateDetailsModal(props) {
   const updating = useSelector(makeSelectUpdating());
 
   const confirmDelete = () => {
-    dispatch(deleteTeammate(ownerSafeAddress, peopleId));
+    dispatch(
+      deleteTeammate(ownerSafeAddress, peopleId, params && params.departmentId)
+    );
   };
 
   return (

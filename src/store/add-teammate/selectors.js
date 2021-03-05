@@ -45,6 +45,12 @@ const makeSelectUpdating = () =>
     (addTeammateState) => addTeammateState.updating
   );
 
+const makeSelectPeopleId = () =>
+  createSelector(
+    selectAddTeammate,
+    (addTeammateState) => addTeammateState.peopleId
+  );
+
 const makeSelectError = () =>
   createSelector(
     selectAddTeammate,
@@ -59,6 +65,7 @@ export {
   makeSelectSuccess,
   makeSelectChosenDepartment,
   makeSelectLoading,
+  makeSelectPeopleId,
   makeSelectUpdating,
   makeSelectError,
 };

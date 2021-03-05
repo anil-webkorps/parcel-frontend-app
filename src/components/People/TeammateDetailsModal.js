@@ -69,7 +69,7 @@ function TeammateDetailsModal(props) {
                 <CopyButton
                   id="address"
                   tooltip="teammate address"
-                  value={address}
+                  value={address || ""}
                 />
               </Circle>
             </div>

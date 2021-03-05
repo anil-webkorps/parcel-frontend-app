@@ -11,7 +11,8 @@ import {
 import { show } from "redux-modal";
 import { CSVLink } from "react-csv";
 import { format } from "date-fns";
-
+import { updateForm, setPeopleId } from "store/add-teammate/actions";
+import addTeammateReducer from "store/add-teammate/reducer";
 // import { Col, Row } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams, useHistory } from "react-router-dom";
@@ -55,11 +56,13 @@ import { minifyAddress } from "components/common/Web3Utils";
 const { TableBody, TableHead, TableRow } = Table;
 
 const viewTeammatesKey = "viewTeammates";
+const addTeammateKey = "addTeammate";
 const tokensKey = "tokens";
 
 export default function ViewTeammate() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
+  useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
   useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
@@ -110,6 +113,20 @@ export default function ViewTeammate() {
 
   const showDetails = (props) => {
     dispatch(show(TEAMMATE_DETAILS_MODAL, { ...props }));
+  };
+
+  const redirectToEdit = (props) => {
+    dispatch(
+      updateForm({
+        firstName: props.firstName,
+        lastName: props.lastName,
+        address: props.address,
+        amount: props.salary,
+        currency: props.currency,
+      })
+    );
+    dispatch(setPeopleId(props.peopleId));
+    history.push(`/dashboard/people/edit?departmentId=${props.departmentId}`);
   };
 
   const showDeleteConfirmation = (props) => {
@@ -235,91 +252,99 @@ export default function ViewTeammate() {
                 <Loading color="primary" width="50px" height="50px" />
               </div>
             ) : teammates && teammates.length > 0 ? (
-              teammates.map(({ data, departmentName, peopleId }, idx) => {
-                const {
-                  firstName,
-                  lastName,
-                  salaryAmount,
-                  salaryToken,
-                  address,
-                } = getDecryptedDetails(data);
-                return (
-                  <TableRow key={`${address}-${idx}`}>
-                    <div>
-                      {firstName} {lastName}
-                    </div>
-                    <div>{departmentName}</div>
-                    <div>
-                      <img
-                        src={getDefaultIconIfPossible(salaryToken, icons)}
-                        alt={salaryToken}
-                        width="16"
-                      />{" "}
-                      {salaryAmount} {salaryToken}
-                    </div>
-                    <div>{minifyAddress(address)}</div>
-                    <div className="d-flex justify-content-end">
-                      <Button
-                        iconOnly
-                        onClick={() =>
-                          showDetails({
-                            firstName,
-                            lastName,
-                            salary: salaryAmount,
-                            currency: salaryToken,
-                            departmentName,
-                            address,
-                          })
-                        }
-                        className="p-0"
-                      >
-                        <div className="circle circle-grey mr-3">
-                          <FontAwesomeIcon icon={faEye} color="#7367f0" />
-                        </div>
-                      </Button>
+              teammates.map(
+                ({ data, departmentName, peopleId, departmentId }, idx) => {
+                  const {
+                    firstName,
+                    lastName,
+                    salaryAmount,
+                    salaryToken,
+                    address,
+                  } = getDecryptedDetails(data);
+                  return (
+                    <TableRow key={`${address}-${idx}`}>
+                      <div>
+                        {firstName} {lastName}
+                      </div>
+                      <div>{departmentName}</div>
+                      <div>
+                        <img
+                          src={getDefaultIconIfPossible(salaryToken, icons)}
+                          alt={salaryToken}
+                          width="16"
+                        />{" "}
+                        {salaryAmount} {salaryToken}
+                      </div>
+                      <div>{minifyAddress(address)}</div>
+                      <div className="d-flex justify-content-end">
+                        <Button
+                          iconOnly
+                          onClick={() =>
+                            showDetails({
+                              firstName,
+                              lastName,
+                              salary: salaryAmount,
+                              currency: salaryToken,
+                              departmentName,
+                              address,
+                            })
+                          }
+                          className="p-0"
+                        >
+                          <div className="circle circle-grey mr-3">
+                            <FontAwesomeIcon icon={faEye} color="#7367f0" />
+                          </div>
+                        </Button>
 
-                      <Button
-                        iconOnly
-                        onClick={() =>
-                          showDetails({
-                            firstName,
-                            lastName,
-                            salary: salaryAmount,
-                            currency: salaryToken,
-                            departmentName,
-                            address,
-                          })
-                        }
-                        className="p-0"
-                      >
-                        <div className="circle circle-grey mr-3">
-                          <FontAwesomeIcon icon={faEdit} color="#7367f0" />
-                        </div>
-                      </Button>
+                        <Button
+                          iconOnly
+                          onClick={() =>
+                            redirectToEdit({
+                              firstName,
+                              lastName,
+                              salary: salaryAmount,
+                              currency: salaryToken,
+                              departmentName,
+                              departmentId,
+                              address,
+                              peopleId,
+                            })
+                          }
+                          className="p-0"
+                        >
+                          <div className="circle circle-grey mr-3">
+                            <FontAwesomeIcon icon={faEdit} color="#7367f0" />
+                          </div>
+                        </Button>
 
-                      <Button
-                        iconOnly
-                        onClick={() =>
-                          showDeleteConfirmation({
-                            firstName,
-                            lastName,
-                            salary: salaryAmount,
-                            currency: salaryToken,
-                            departmentName,
-                            address,
-                            peopleId,
-                          })
-                        }
-                        className="p-0"
-                      >
-                        <div className="circle circle-grey">
-                          <FontAwesomeIcon icon={faTrashAlt} color="#ff0a0a" />
-                        </div>
-                      </Button>
-                    </div>
-                  </TableRow>
-                );
-              })
+                        <Button
+                          iconOnly
+                          onClick={() =>
+                            showDeleteConfirmation({
+                              firstName,
+                              lastName,
+                              salary: salaryAmount,
+                              currency: salaryToken,
+                              departmentName,
+                              address,
+                              peopleId,
+                              params,
+                            })
+                          }
+                          className="p-0"
+                        >
+                          <div className="circle circle-grey">
+                            <FontAwesomeIcon
+                              icon={faTrashAlt}
+                              color="#ff0a0a"
+                            />
+                          </div>
+                        </Button>
+                      </div>
+                    </TableRow>
+                  );
+                }
+              )
             ) : (
               <div
                 className="d-flex align-items-center justify-content-center"
