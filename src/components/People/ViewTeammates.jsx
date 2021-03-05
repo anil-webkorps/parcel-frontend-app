@@ -336,7 +336,7 @@ export default function ViewTeammate() {
                           <div className="circle circle-grey">
                             <FontAwesomeIcon
                               icon={faTrashAlt}
-                              color="#ff0a0a"
+                              color="#7367f0"
                             />
                           </div>
                         </Button>

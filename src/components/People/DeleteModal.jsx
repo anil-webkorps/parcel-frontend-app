@@ -103,7 +103,7 @@ function TeammateDetailsModal(props) {
           </div>
         </div>
       </Summary>
-      <div className="d-flex justify-content-center align-items-center">
+      <div className="d-flex justify-content-center align-items-center mt-3">
         <div className="col-6">
           <Button large onClick={handleHide} className="secondary">
             Close
@@ -112,7 +112,6 @@ function TeammateDetailsModal(props) {
         <div className="col-6">
           <Button
             large
-            style={{ backgroundColor: "#ff0a0a" }}
             onClick={confirmDelete}
             loading={updating}
             disabled={updating}
