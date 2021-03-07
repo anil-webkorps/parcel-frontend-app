@@ -140,7 +140,7 @@ export default function DashboardHeader() {
           <div className="content">
             <div className="notification-heading">{data.headline}</div>
             <div className="notification-description">
-              {cryptoUtils.decryptDataUsingEncryptionKey(
+              {data.name && cryptoUtils.decryptDataUsingEncryptionKey(
                 data.name,
                 encryptionKey,
                 organisationType

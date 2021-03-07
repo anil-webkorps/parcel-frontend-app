@@ -31,6 +31,7 @@ import {
   makeSelectMetaTransactionHash,
   makeSelectError as makeSelectErrorInCreateTx,
   makeSelectTransactionId as makeSelectSingleOwnerTransactionId,
+  makeSelectLoading as makeSelectSingleOwnerAddTxLoading,
 } from "store/transactions/selectors";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
@@ -120,7 +121,8 @@ export default function QuickTransfer() {
   const tokenList = useSelector(makeSelectTokenList());
   const txHashFromMetaTx = useSelector(makeSelectMetaTransactionHash());
   const errorFromMetaTx = useSelector(makeSelectErrorInCreateTx());
-  const addingTx = useSelector(makeSelectAddTxLoading());
+  const addingMultisigTx = useSelector(makeSelectAddTxLoading());
+  const addingSingleOwnerTx = useSelector(makeSelectSingleOwnerAddTxLoading());
   const nonce = useSelector(makeSelectNonce());
   const threshold = useSelector(makeSelectThreshold());
   const isMultiOwner = useSelector(makeSelectIsMultiOwner());
@@ -424,8 +426,8 @@ export default function QuickTransfer() {
         large
         type="submit"
         className="mt-3"
-        disabled={!formState.isValid || loadingTx || addingTx}
-        loading={loadingTx || addingTx}
+        disabled={!formState.isValid || loadingTx || addingMultisigTx || addingSingleOwnerTx}
+        loading={loadingTx || addingMultisigTx || addingSingleOwnerTx}
       >
         {threshold > 1 ? `Create Transaction` : `Send`}
       </Button>
