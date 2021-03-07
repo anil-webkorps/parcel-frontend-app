@@ -28,7 +28,7 @@ import Loading from "components/common/Loading";
 import TeamMembersPng from "assets/images/team-members.png";
 import { getPublicKey } from "utils/encryption";
 import ParcelLogo from "assets/images/parcel-logo-purple.png";
-import WelcomeImage from "assets/images/welcome.png";
+import WelcomeImage from "assets/images/welcome-new.png";
 
 import {
   Background,
@@ -156,40 +156,35 @@ const AcceptInvite = () => {
       <Img
         src={WelcomeImage}
         alt="welcome"
-        height="370px"
-        className="d-block mx-auto"
+        width="70%"
+        className="d-block mx-auto py-4"
       />
-      <InnerCard height="257px">
+      <InnerCard height="260px">
         <h2 className="text-center mb-4">
           <img src={ParcelLogo} alt="parcel" width="240" />
         </h2>
-        <div className="mt-2 mb-5 text-center">
+        <div className="mt-2 title">
           Your one stop for crypto treasury management.
-          <br />
+        </div>
+        <div className="subtitle">
           {!active && `Please connect your Ethereum wallet to proceed.`}
         </div>
         {loadingAccount && (
-          <div className="d-flex align-items-center justify-content-center mt-5">
+          <div className="d-flex align-items-center justify-content-center">
             <Loading color="primary" width="50px" height="50px" />
           </div>
         )}
-
         {!loadingAccount &&
           (!active ? (
-            <ConnectButton large className="mx-auto d-block mt-3" />
+            <ConnectButton className="mx-auto d-block mt-4 connect" />
           ) : (
-            <div className="row mt-3">
-              <div className="col-12">
-                <Button
-                  type="button"
-                  large
-                  className="primary"
-                  onClick={goNext}
-                >
-                  Proceed
-                </Button>
-              </div>
-            </div>
+            <Button
+              type="button"
+              className="mx-auto d-block mt-4 connect"
+              onClick={goNext}
+            >
+              Proceed
+            </Button>
           ))}
       </InnerCard>
     </div>

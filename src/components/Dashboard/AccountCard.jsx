@@ -18,7 +18,7 @@ import {
 import { Card } from "components/common/Card";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 
-import { defaultTokenDetails } from "constants/index";
+import { defaultTokenDetails, isTestnet } from "constants/index";
 import Loading from "components/common/Loading";
 
 const tokensKey = "tokens";
@@ -125,6 +125,11 @@ export default function AccountCard() {
                 </div>
               </Assets>
             ))}
+            {isTestnet && (
+              <Link to="/dashboard/account" className="see-token">
+                <span>Can't see your token?</span>
+              </Link>
+            )}
           </React.Fragment>
         )}
       </Card>

@@ -74,7 +74,7 @@ import { registerUser } from "store/register/actions";
 import Loading from "components/common/Loading";
 import TeamPng from "assets/images/user-team.png";
 import ParcelLogo from "assets/images/parcel-logo-purple.png";
-import WelcomeImage from "assets/images/welcome.png";
+import WelcomeImage from "assets/images/welcome-new.png";
 import {
   STEPS,
   ORGANISATION_TYPE,
@@ -431,34 +431,34 @@ const Login = () => {
       <Img
         src={WelcomeImage}
         alt="welcome"
-        height="370px"
-        className="d-block mx-auto"
+        width="70%"
+        className="d-block mx-auto py-4"
       />
-      <InnerCard height="257px">
+      <InnerCard height="260px">
         <h2 className="text-center mb-4">
           <img src={ParcelLogo} alt="parcel" width="240" />
         </h2>
-        <div className="mt-2 mb-4 text-center">
+        <div className="mt-2 title">
           Your one stop for crypto treasury management.
-          <br />
+        </div>
+        <div className="subtitle">
           {!active && `Please connect your Ethereum wallet to proceed.`}
         </div>
         {loadingAccount && (
-          <div className="d-flex align-items-center justify-content-center mt-5">
+          <div className="d-flex align-items-center justify-content-center mt-4">
             <Loading color="primary" width="50px" height="50px" />
           </div>
         )}
 
         {!loadingAccount &&
           (!active ? (
-            <ConnectButton large className="mx-auto d-block mt-3" />
+            <ConnectButton className="mx-auto d-block mt-3 connect" />
           ) : (
             <div className="row mt-3">
               <div className="col-6">
                 <Button
                   type="button"
-                  large
-                  className="secondary"
+                  className="secondary import"
                   onClick={() => handleSelectFlow(FLOWS.IMPORT)}
                   disabled={!formData.referralId}
                 >
@@ -468,7 +468,7 @@ const Login = () => {
               <div className="col-6">
                 <Button
                   type="button"
-                  large
+                  className="login"
                   onClick={() => handleSelectFlow(FLOWS.LOGIN)}
                 >
                   Login

@@ -10,6 +10,8 @@ import DefaultIcon from "assets/icons/tokens/Default-icon.jpg";
 import addresses from "./addresses";
 
 export const NetworkContextName = "NETWORK";
+export const isMainnet = process.env.REACT_APP_NETWORK_NAME === "MAINNET";
+export const isTestnet = process.env.REACT_APP_NETWORK_NAME !== "MAINNET";
 
 export const supportedWallets = [
   {

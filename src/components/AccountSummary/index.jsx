@@ -30,6 +30,7 @@ import Loading from "components/common/Loading";
 import { Title, Heading, ActionItem, Table } from "components/People/styles";
 import { Circle } from "components/Header/styles";
 import { Container } from "./styles";
+import { isTestnet } from "constants/index";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -199,7 +200,7 @@ export default function AccountSummary() {
               ))}
           </TableBody>
         </div>
-        {renderAddCustomToken()}
+        {isTestnet && renderAddCustomToken()}
       </form>
     );
   };

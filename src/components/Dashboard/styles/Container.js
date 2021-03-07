@@ -106,6 +106,17 @@ export default styled.div`
     }
   }
 
+  .see-token {
+    font-size: 14px;
+    font-weight: 400;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.19;
+    letter-spacing: normal;
+    text-align: center;
+    color: ${({ theme }) => theme.primary};
+  }
+
   @media (max-width: 1280px) {
     grid-template-columns: 1fr;
 

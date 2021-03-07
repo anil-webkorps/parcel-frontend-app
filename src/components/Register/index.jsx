@@ -57,7 +57,7 @@ import ParcelLogo from "assets/images/parcel-logo-purple.png";
 import DeleteSvg from "assets/icons/delete-bin.svg";
 import LightbulbIcon from "assets/icons/lightbulb.svg";
 import LoadingSafeIcon from "assets/images/register/safe-loading.svg";
-import WelcomeImage from "assets/images/welcome.png";
+import WelcomeImage from "assets/images/welcome-new.png";
 import OrganisationInfoModal, { MODAL_NAME as INFO_MODAL } from "./InfoModal";
 import {
   STEPS,
@@ -526,16 +526,17 @@ const Register = () => {
         <Img
           src={WelcomeImage}
           alt="welcome"
-          height="370px"
-          className="d-block mx-auto"
+          width="70%"
+          className="d-block mx-auto py-4"
         />
-        <InnerCard height="257px">
+        <InnerCard height="260px">
           <h2 className="text-center mb-4">
             <img src={ParcelLogo} alt="parcel" width="240" />
           </h2>
-          <div className="mt-2 mb-4 text-center">
+          <div className="mt-2 title">
             Your one stop for crypto treasury management.
-            <br />
+          </div>
+          <div className="subtitle">
             {!active && `Please connect your Ethereum wallet to proceed.`}
           </div>
           {loadingAccount && (
@@ -544,7 +545,7 @@ const Register = () => {
             </div>
           )}
           {!loadingAccount && (
-            <ConnectButton large className="mx-auto d-block mt-3" />
+            <ConnectButton className="mx-auto d-block mt-3 connect" />
           )}
         </InnerCard>
       </div>
