@@ -10,9 +10,10 @@ export const organisationInfo = [
       "Secure your personal crypto assets with best security and convenience",
     img: IndividualImg,
     points: [
-      "Proactively reintermediate impactful platforms vis-a-vis multidisciplinary leadership skills. Distinctively drive error-free ROI and 2.0.",
-      'Continually integrate visionary applications before e-business platforms. Rapidiously simplify inexpensive partnerships vis-a-vis accurate bandwidth. Phosfluorescently incubate transparent internal or "organic" sources for vertical functionalities.',
-      "Completely engage fully tested infrastructures via worldwide experiences. Holisticly deploy enterprise-wide collaboration and idea-sharing with economically sound paradigms. Distinctively administrate just.",
+      "Ideal for individuals",
+      "A safe will be created for you where you can manage your personal crypto assets",
+      "You can keep a single address as the owner or even have multiple owners for the safe",
+      "All your information like personal details and transaction history would be fully encrypted. Only the owners of the safe can view them.",
     ],
   },
   {
@@ -21,9 +22,10 @@ export const organisationInfo = [
     subtitle: "Frictionless management of your corporate crypto treasury",
     img: CompanyImg,
     points: [
-      "Proactively reintermediate impactful platforms vis-a-vis multidisciplinary leadership skills. Distinctively drive error-free ROI and 2.0.",
-      'Continually integrate visionary applications before e-business platforms. Rapidiously simplify inexpensive partnerships vis-a-vis accurate bandwidth. Phosfluorescently incubate transparent internal or "organic" sources for vertical functionalities.',
-      "Completely engage fully tested infrastructures via worldwide experiences. Holisticly deploy enterprise-wide collaboration and idea-sharing with economically sound paradigms. Distinctively administrate just.",
+      "Ideal for companies",
+      "A safe will be created for your company where you can manage your crypto treasury",
+      "You can keep a single address as the owner or even have multiple owners for the safe",
+      "All your information like teammate details and transaction history would be fully encrypted. Only the owners of the safe can view them.",
     ],
   },
   {
@@ -33,9 +35,10 @@ export const organisationInfo = [
       "Collaborate with co-signers of your multisig and manage payouts seamlessly",
     img: DaoImg,
     points: [
-      "Proactively reintermediate impactful platforms vis-a-vis multidisciplinary leadership skills. Distinctively drive error-free ROI and 2.0.",
-      'Continually integrate visionary applications before e-business platforms. Rapidiously simplify inexpensive partnerships vis-a-vis accurate bandwidth. Phosfluorescently incubate transparent internal or "organic" sources for vertical functionalities.',
-      "Completely engage fully tested infrastructures via worldwide experiences. Holisticly deploy enterprise-wide collaboration and idea-sharing with economically sound paradigms. Distinctively administrate just.",
+      "Ideal for Decentralized Autonomous Organizations (DAOs)",
+      "A safe will be created for your organization where you can manage your funds",
+      "You can keep a single address as the owner or even have multiple owners for the safe",
+      "All your information like organization details and transaction history would be publicly available even outside Parcel",
     ],
   },
 ];
