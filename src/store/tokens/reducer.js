@@ -10,7 +10,7 @@ import {
   ADD_CUSTOM_TOKEN_SUCCESS,
   SET_SUCCESS,
 } from "./action-types";
-import { getDefaultIconIfPossible } from "constants/index";
+import { defaultTokenDetails, getDefaultIconIfPossible } from "constants/index";
 import DefaultIcon from "assets/icons/tokens/Default-icon.jpg";
 import { constructLabel } from "utils/massPayout";
 
@@ -89,6 +89,17 @@ const reducer = (state = initialState, action) =>
               )
             ),
           }));
+        if (allTokenDetails.length < 3) {
+          for (let i = 0; i < defaultTokenDetails.length; i++) {
+            if (
+              !allTokenDetails.find(
+                ({ name }) => name === defaultTokenDetails[i].name
+              )
+            ) {
+              allTokenDetails.push(defaultTokenDetails[i]);
+            }
+          }
+        }
         draft.tokenList = allTokenDetails;
         draft.tokensDropdown = dropdownList;
         draft.prices = action.prices;
