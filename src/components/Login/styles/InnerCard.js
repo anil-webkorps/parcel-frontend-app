@@ -52,7 +52,7 @@ export default styled.div`
 
   .title {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 400;
     font-stretch: normal;
     font-style: normal;
     line-height: normal;

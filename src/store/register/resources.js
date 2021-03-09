@@ -10,10 +10,20 @@ export const organisationInfo = [
       "Secure your personal crypto assets with best security and convenience",
     img: IndividualImg,
     points: [
-      "Ideal for individuals",
-      "A safe will be created for you where you can manage your personal crypto assets",
-      "You can keep a single address as the owner or even have multiple owners for the safe",
-      "All your information like personal details and transaction history would be fully encrypted. Only the owners of the safe can view them.",
+      <span>Ideal for individuals</span>,
+      <span>
+        A <span className="bold">gnosis safe</span> will be created for you
+        where you can manage your personal crypto assets
+      </span>,
+      <span>
+        You can keep a single address as the owner or even have multiple owners
+        for the gnosis safe
+      </span>,
+      <span>
+        All your information like personal details and transaction history would
+        be <span className="bold">end to end encrypted</span>. Only the owners
+        of the gnosis safe can view data.
+      </span>,
     ],
   },
   {
@@ -22,10 +32,20 @@ export const organisationInfo = [
     subtitle: "Frictionless management of your corporate crypto treasury",
     img: CompanyImg,
     points: [
-      "Ideal for companies",
-      "A safe will be created for your company where you can manage your crypto treasury",
-      "You can keep a single address as the owner or even have multiple owners for the safe",
-      "All your information like teammate details and transaction history would be fully encrypted. Only the owners of the safe can view them.",
+      <span>Ideal for companies</span>,
+      <span>
+        A <span className="bold">gnosis safe</span> will be created for your
+        company where you can manage your crypto treasury
+      </span>,
+      <span>
+        You can keep a single address as the owner or even have multiple owners
+        for the gnosis safe
+      </span>,
+      <span>
+        All your information like teammate details and transaction history would
+        be <span className="bold">end to end encrypted</span>. Only the owners
+        of the gnosis safe can view data.
+      </span>,
     ],
   },
   {
@@ -35,10 +55,20 @@ export const organisationInfo = [
       "Collaborate with co-signers of your multisig and manage payouts seamlessly",
     img: DaoImg,
     points: [
-      "Ideal for Decentralized Autonomous Organizations (DAOs)",
-      "A safe will be created for your organization where you can manage your funds",
-      "You can keep a single address as the owner or even have multiple owners for the safe",
-      "All your information like organization details and transaction history would be publicly available even outside Parcel",
+      <span>Ideal for Decentralized Autonomous Organizations (DAOs)</span>,
+      <span>
+        A <span className="bold">gnosis safe</span> will be created for your
+        organization where you can manage your funds
+      </span>,
+      <span>
+        You can keep a single address as the owner or even have multiple owners
+        for the gnosis safe
+      </span>,
+      <span>
+        All your information like organization details and transaction history
+        would be <span className="bold">publicly available</span> even outside
+        Parcel
+      </span>,
     ],
   },
 ];

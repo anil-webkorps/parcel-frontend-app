@@ -50,5 +50,9 @@ export default styled.div`
         margin-left: -1em;
       }
     }
+
+    .bold {
+      font-weight: 500;
+    }
   }
 `;
