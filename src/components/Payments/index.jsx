@@ -77,7 +77,7 @@ import { minifyAddress } from "components/common/Web3Utils";
 import Loading from "components/common/Loading";
 import TeamPng from "assets/images/user-team.png";
 
-import { getDefaultIconIfPossible, defaultTokenDetails } from "constants/index";
+import { defaultTokenDetails } from "constants/index";
 import { Container, Table, PaymentSummary, TokenBalance } from "./styles";
 import TransactionSubmitted from "./TransactionSubmitted";
 import SelectTokenModal, {
@@ -170,6 +170,7 @@ export default function Payments() {
     massPayout,
     txData,
     setTxData,
+    tokenFrom,
   } = useMassPayout({ tokenDetails: selectedTokenDetails });
 
   const toggle = (tab) => {
@@ -282,10 +283,9 @@ export default function Payments() {
   }, [teammates]);
 
   const totalAmountToPay = useMemo(() => {
-    if (prices) {
+    if (prices && selectedTokenDetails) {
       return selectedRows.reduce(
-        (total, { salaryAmount, salaryToken }) =>
-          (total += prices[salaryToken] * salaryAmount),
+        (total, { salaryAmount }) => (total += parseFloat(salaryAmount)),
         0
       );
     }
@@ -294,22 +294,22 @@ export default function Payments() {
       (total, { salaryAmount }) => (total += Number(salaryAmount)),
       0
     );
-  }, [prices, selectedRows]);
+  }, [prices, selectedRows, selectedTokenDetails]);
 
-  const isMassPayoutAllowed = useMemo(() => {
-    const hashmap = selectedRows.reduce((hashmap, token) => {
-      if (!hashmap[token.salaryToken]) {
-        hashmap[token.salaryToken] = true;
-      }
-      return hashmap;
-    }, {});
+  // const isMassPayoutAllowed = useMemo(() => {
+  //   const hashmap = selectedRows.reduce((hashmap, token) => {
+  //     if (!hashmap[selectedTokenDetails.name]) {
+  //       hashmap[selectedTokenDetails.name] = true;
+  //     }
+  //     return hashmap;
+  //   }, {});
 
-    return selectedTokenDetails &&
-      Object.keys(hashmap).length === 1 &&
-      hashmap[selectedTokenDetails.name]
-      ? true
-      : false;
-  }, [selectedRows, selectedTokenDetails]);
+  //   return selectedTokenDetails &&
+  //     Object.keys(hashmap).length === 1 &&
+  //     hashmap[selectedTokenDetails.name]
+  //     ? true
+  //     : false;
+  // }, [selectedRows, selectedTokenDetails]);
 
   useEffect(() => {
     if (txHash) {
@@ -319,7 +319,6 @@ export default function Payments() {
         recievers &&
         ownerSafeAddress &&
         totalAmountToPay &&
-        selectedTokenDetails &&
         account
       ) {
         const to = cryptoUtils.encryptDataUsingEncryptionKey(
@@ -336,11 +335,12 @@ export default function Payments() {
             createdBy: account,
             transactionHash: txHash,
             tokenValue: recievers.reduce(
-              (total, { salaryAmount }) => (total += parseFloat(salaryAmount)),
+              (total, { salaryAmount }) =>
+                (total += parseFloat(salaryAmount * prices[tokenFrom])),
               0
             ),
-            tokenCurrency: selectedTokenDetails.name,
-            fiatValue: parseFloat(totalAmountToPay).toFixed(5),
+            tokenCurrency: tokenFrom,
+            fiatValue: parseFloat(totalAmountToPay),
             addresses: recievers.map(({ address }) => address),
           })
         );
@@ -351,7 +351,6 @@ export default function Payments() {
         recievers &&
         ownerSafeAddress &&
         totalAmountToPay &&
-        selectedTokenDetails &&
         account
       ) {
         const to = cryptoUtils.encryptDataUsingEncryptionKey(
@@ -367,12 +366,10 @@ export default function Payments() {
               safeAddress: ownerSafeAddress,
               createdBy: account,
               txData,
-              tokenValue: recievers.reduce(
-                (total, { salaryAmount }) =>
-                  (total += parseFloat(salaryAmount)),
-                0
-              ),
-              tokenCurrency: selectedTokenDetails.name,
+              tokenValue: parseFloat(
+                totalAmountToPay / prices[tokenFrom]
+              ).toFixed(5),
+              tokenCurrency: tokenFrom,
               fiatValue: parseFloat(totalAmountToPay).toFixed(5),
               addresses: recievers.map(({ address }) => address),
             })
@@ -380,19 +377,24 @@ export default function Payments() {
           setTxData(undefined);
         } else {
           // threshold > 1
+          console.log({
+            tokenFrom,
+            prices,
+            tokenValue: parseFloat(
+              totalAmountToPay / prices[tokenFrom]
+            ).toFixed(5),
+          });
           dispatch(
             createMultisigTransaction({
               to,
               safeAddress: ownerSafeAddress,
               createdBy: account,
               txData,
-              tokenValue: recievers.reduce(
-                (total, { salaryAmount }) =>
-                  (total += parseFloat(salaryAmount)),
-                0
-              ),
-              tokenCurrency: selectedTokenDetails.name,
-              fiatValue: totalAmountToPay,
+              tokenValue: parseFloat(
+                totalAmountToPay / prices[tokenFrom]
+              ).toFixed(5),
+              tokenCurrency: tokenFrom,
+              fiatValue: parseFloat(totalAmountToPay).toFixed(5),
               fiatCurrency: "USD",
               addresses: recievers.map(({ address }) => address),
               nonce: nonce,
@@ -409,7 +411,6 @@ export default function Payments() {
     dispatch,
     ownerSafeAddress,
     totalAmountToPay,
-    selectedTokenDetails,
     txData,
     setTxData,
     account,
@@ -418,6 +419,7 @@ export default function Payments() {
     history,
     prices,
     organisationType,
+    tokenFrom,
   ]);
 
   const isNoneChecked = useMemo(() => checked.every((check) => !check), [
@@ -548,7 +550,7 @@ export default function Payments() {
                 firstName,
                 lastName,
                 salaryAmount,
-                salaryToken,
+                usd,
                 address,
               } = getDecryptedDetails(data);
               return (
@@ -564,7 +566,7 @@ export default function Payments() {
                         const teammateDetails = {
                           firstName,
                           lastName,
-                          salaryToken,
+                          usd,
                           salaryAmount,
                           address,
                         };
@@ -578,18 +580,13 @@ export default function Payments() {
                   <div>{departmentName}</div>
                   {/* <div>{salaryToken}</div> */}
                   <div>
-                    <img
-                      src={getDefaultIconIfPossible(salaryToken, icons)}
-                      alt={salaryToken}
-                      width="16"
-                    />{" "}
-                    {salaryAmount} {salaryToken}{" "}
-                    {prices &&
+                    {salaryAmount} USD
+                    {/* {prices &&
                       prices[salaryToken] !== undefined &&
                       `(US$
                        ${parseFloat(prices[salaryToken] * salaryAmount).toFixed(
                          2
-                       )})`}
+                       )})`} */}
                   </div>
                   <div>{minifyAddress(address)}</div>
                   <div className="text-right">
@@ -597,12 +594,7 @@ export default function Payments() {
                       <Button
                         type="submit"
                         iconOnly
-                        disabled={
-                          !checked[idx] ||
-                          loadingTx ||
-                          isNoneChecked ||
-                          !isMassPayoutAllowed
-                        }
+                        disabled={!checked[idx] || loadingTx || isNoneChecked}
                         className="py-0"
                       >
                         <span className="pay-text">PAY</span>
@@ -674,7 +666,11 @@ export default function Payments() {
             <div className="payment-title">Total Amount</div>
             {!isNaN(totalAmountToPay) ? (
               <div className="payment-subtitle">
-                US$ {parseFloat(totalAmountToPay).toFixed(2)}
+                US$ {parseFloat(totalAmountToPay).toFixed(2)}{" "}
+                {selectedTokenDetails &&
+                  `(${parseFloat(
+                    totalAmountToPay / prices[selectedTokenDetails.name]
+                  ).toFixed(2)} ${selectedTokenDetails.name})`}
               </div>
             ) : (
               0
@@ -697,12 +693,7 @@ export default function Payments() {
             type="submit"
             large
             loading={loadingTx || addingTx}
-            disabled={
-              loadingTx ||
-              insufficientBalance ||
-              addingTx ||
-              !isMassPayoutAllowed
-            }
+            disabled={loadingTx || insufficientBalance || addingTx}
           >
             {(loadingSafeDetails || loadingTokens) && (
               <div className="d-flex align-items-center justify-content-center">
@@ -848,12 +839,12 @@ export default function Payments() {
               {!isNoneChecked && renderPaymentSummary()}
             </Card>
             <div style={{ minHeight: "20vh" }}>
-              {!isNoneChecked && !isMassPayoutAllowed && (
+              {/* {!isNoneChecked && !isMassPayoutAllowed && (
                 <div className="text-danger mt-3">
                   Please make sure all the teammate's token match your selected
                   token
                 </div>
-              )}
+              )} */}
               {/* {!isNoneChecked && !isSetupComplete && (
                 <div className="mt-3">
                   Please <Link to="/dashboard/invite">complete your setup</Link>{" "}

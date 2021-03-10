@@ -10,18 +10,12 @@ import { useForm, Controller } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
-import { show } from "redux-modal";
 
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
-import {
-  Input,
-  ErrorMessage,
-  // Select,
-  CurrencyInput,
-} from "components/common/Form";
+import { Input, ErrorMessage, CurrencyInput } from "components/common/Form";
 import addTeammateReducer from "store/add-teammate/reducer";
 import { useLocalStorage } from "hooks";
 import {
@@ -46,14 +40,7 @@ import viewDepartmentsReducer from "store/view-departments/reducer";
 import { getDepartments } from "store/view-departments/actions";
 import viewDepartmentsSaga from "store/view-departments/saga";
 import { makeSelectDepartments } from "store/view-departments/selectors";
-import { getTokens } from "store/tokens/actions";
-import tokensReducer from "store/tokens/reducer";
-import tokensSaga from "store/tokens/saga";
-import {
-  makeSelectLoading as makeSelectLoadingTokens,
-  makeSelectTokenList,
-  makeSelectPrices,
-} from "store/tokens/selectors";
+
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import {
@@ -63,10 +50,6 @@ import {
 import Dropzone from "components/common/Dropzone";
 import { minifyAddress } from "components/common/Web3Utils";
 import TeamPng from "assets/images/user-team.png";
-import SelectTokenModal, {
-  MODAL_NAME as SELECT_TOKEN_MODAL,
-} from "components/Payments/SelectTokenModal";
-import Loading from "components/common/Loading";
 import Img from "components/common/Img";
 
 import {
@@ -83,7 +66,6 @@ import {
   ChooseAddOption,
   Table,
 } from "./styles";
-import { ShowToken } from "components/QuickTransfer/styles";
 
 import { Circle } from "components/Header/styles";
 import { FIELD_NAMES, isValidField } from "store/add-teammate/utils";
@@ -113,7 +95,6 @@ const ADD_SINGLE_TEAMMATE_STEPS = {
 
 const addTeammateKey = "addTeammate";
 const viewDepartmentsKey = "viewDepartments";
-const tokensKey = "tokens";
 
 export default function AddTeammate() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
@@ -122,9 +103,6 @@ export default function AddTeammate() {
   const [success, setSuccess] = useState(false);
   const [csvData, setCSVData] = useState();
   const [invalidCsvData, setInvalidCsvData] = useState(false);
-  const [selectedTokenDetails, setSelectedTokenDetails] = useState();
-  const [selectedTokenName, setSelectedTokenName] = useState();
-  const [tokenDetails, setTokenDetails] = useState();
 
   const { register, errors, handleSubmit, reset, formState, control } = useForm(
     {
@@ -137,12 +115,10 @@ export default function AddTeammate() {
     key: viewDepartmentsKey,
     reducer: viewDepartmentsReducer,
   });
-  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
 
   useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
-  useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const step = useSelector(makeSelectStep());
@@ -153,30 +129,8 @@ export default function AddTeammate() {
   const flow = useSelector(makeSelectFlow());
   const addBulkSuccess = useSelector(makeSelectSuccess());
   const loading = useSelector(makeSelectLoading());
-  const loadingTokens = useSelector(makeSelectLoadingTokens());
-  const tokenList = useSelector(makeSelectTokenList());
-  const prices = useSelector(makeSelectPrices());
   const organisationType = useSelector(makeSelectOrganisationType());
 
-  useEffect(() => {
-    if (ownerSafeAddress) {
-      dispatch(getTokens(ownerSafeAddress));
-    }
-  }, [ownerSafeAddress, dispatch]);
-
-  useEffect(() => {
-    if (tokenList && tokenList.length > 0) {
-      setTokenDetails(tokenList);
-      setSelectedTokenName(tokenList[0].name);
-    }
-  }, [tokenList]);
-
-  useEffect(() => {
-    if (selectedTokenName)
-      setSelectedTokenDetails(
-        tokenDetails.filter(({ name }) => name === selectedTokenName)[0]
-      );
-  }, [tokenDetails, selectedTokenName]);
   const location = useLocation();
   const history = useHistory();
 
@@ -186,7 +140,6 @@ export default function AddTeammate() {
       lastName: formData.lastName || "",
       address: formData.address || "",
       amount: formData.amount || "",
-      // currency: selectedTokenDetails.name || "",
     });
   }, [reset, formData]);
 
@@ -195,9 +148,6 @@ export default function AddTeammate() {
       dispatch(getDepartments(ownerSafeAddress));
     }
   }, [step, ownerSafeAddress, dispatch]);
-  useEffect(() => {
-    if (ownerSafeAddress) dispatch(getTokens(ownerSafeAddress));
-  }, [ownerSafeAddress, dispatch]);
 
   useEffect(() => {
     if (!chosenDepartment) dispatch(chooseStep(STEPS.ZERO));
@@ -291,7 +241,6 @@ export default function AddTeammate() {
         firstName: formData.firstName,
         lastName: formData.lastName,
         salaryAmount: formData.amount,
-        salaryToken: selectedTokenDetails.name,
         address: formData.address,
         joiningDate: Date.now(),
       }),
@@ -317,8 +266,8 @@ export default function AddTeammate() {
   };
 
   const handleDrop = (data) => {
-    // checking for at least 6 columns in the csv
-    if (!data || data.length === 0 || data.some((arr) => arr.length < 6)) {
+    // checking for at least 5 columns in the csv
+    if (!data || data.length === 0 || data.some((arr) => arr.length < 5)) {
       setInvalidCsvData(true);
       return;
     }
@@ -330,8 +279,7 @@ export default function AddTeammate() {
           lastName: arr[1],
           address: arr[2],
           salaryAmount: arr[3],
-          salaryToken: arr[4],
-          departmentName: arr[5],
+          departmentName: arr[4],
         },
       ];
     }, []);
@@ -360,7 +308,6 @@ export default function AddTeammate() {
             firstName,
             lastName,
             salaryAmount,
-            salaryToken,
             address,
             departmentName,
           } = csvData[i];
@@ -370,7 +317,6 @@ export default function AddTeammate() {
               firstName,
               lastName,
               salaryAmount,
-              salaryToken,
               address,
             }),
             encryptionKey,
@@ -408,16 +354,6 @@ export default function AddTeammate() {
       })
     );
     setSuccess(true);
-  };
-
-  const showTokenModal = () => {
-    dispatch(
-      show(SELECT_TOKEN_MODAL, {
-        selectedTokenDetails,
-        setSelectedTokenDetails,
-      })
-    );
-    // reset({ address: "", amount: "" });
   };
 
   const renderTeammateDetails = () => (
@@ -466,14 +402,6 @@ export default function AddTeammate() {
 
       <Row className="mb-4">
         <Col lg="12" sm="12">
-          {/* <Input
-            type="number"
-            name="salary"
-            register={register}
-            required={`Amount is required`}
-            placeholder="Amount"
-          />
-          <ErrorMessage name="salary" errors={errors} /> */}
           <Controller
             control={control}
             name="amount"
@@ -488,59 +416,14 @@ export default function AddTeammate() {
               <CurrencyInput
                 type="number"
                 name="amount"
-                // register={register}
                 required={`Amount is required`}
                 value={value}
                 onChange={onChange}
-                placeholder="Amount"
-                conversionRate={
-                  prices &&
-                  selectedTokenDetails &&
-                  prices[selectedTokenDetails.name]
-                }
-                tokenName={
-                  selectedTokenDetails ? selectedTokenDetails.name : ""
-                }
+                showUsdOnly={true}
               />
             )}
           />
           <ErrorMessage name="amount" errors={errors} />
-        </Col>
-        <Col lg="12" sm="12">
-          {/* <Controller
-            name="currency"
-            control={control}
-            rules={{ required: true }}
-            render={(props) => (
-              <SelectTokenDropdown
-                name="currency"
-                options={tokensDropdownOptions}
-                {...props}
-              />
-            )}
-          />
-          <ErrorMessage name="currency" errors={errors} /> */}
-          {loadingTokens && (
-            <ShowToken className="mb-0">
-              <Loading color="#7367f0" />
-            </ShowToken>
-          )}
-
-          {!loadingTokens && selectedTokenDetails && (
-            <ShowToken onClick={showTokenModal} className="mb-0">
-              <div>
-                <Img
-                  src={selectedTokenDetails.icon}
-                  alt="token icon"
-                  width="36"
-                />
-              </div>
-              <div className="token-balance">
-                <div className="value">{selectedTokenDetails.name}</div>
-              </div>
-              <div className="change">Change</div>
-            </ShowToken>
-          )}
         </Col>
       </Row>
 
@@ -566,7 +449,7 @@ export default function AddTeammate() {
         <ChooseDepartment onClick={onChangeDepartmentClicked}>
           <div className="d-flex align-items-center">
             <div className="text-left mr-2">
-              <img src={TeamPng} alt={chosenDepartment.name} width="50" />
+              <Img src={TeamPng} alt={chosenDepartment.name} width="50" />
             </div>
             <Title className="choosen-dept">{chosenDepartment.name}</Title>
           </div>
@@ -582,7 +465,6 @@ export default function AddTeammate() {
       >
         Add Teammate
       </Button>
-      <SelectTokenModal />
     </Card>
   );
 
@@ -600,7 +482,7 @@ export default function AddTeammate() {
                 onClick={() => onSelectDepartment(department)}
               >
                 <div className="small-card">
-                  <img src={TeamPng} alt={department.name} width="50" />
+                  <Img src={TeamPng} alt={department.name} width="50" />
                 </div>
                 <div className="department-name">{department.name}</div>
               </div>
@@ -644,9 +526,7 @@ export default function AddTeammate() {
             <div className="dept-info">
               {formData.firstName} {formData.lastName}
             </div>
-            <div className="dept-info mb-0">
-              {formData.amount} {selectedTokenDetails.name}
-            </div>
+            <div className="dept-info mb-0">{formData.amount} USD</div>
           </PayrollCard>
 
           <Button
@@ -769,7 +649,7 @@ export default function AddTeammate() {
           <Heading>Wow! You have a new champ on-board</Heading>
           <Summary style={{ marginBottom: "16em" }}>
             <div className="left">
-              <img src={TeamPng} alt="teammate" width="80" />
+              <Img src={TeamPng} alt="teammate" width="80" />
             </div>
             <div className="right">
               <div className="mb-3">
@@ -784,9 +664,7 @@ export default function AddTeammate() {
               </div>
               <div>
                 <div className="section-title mb-1">Pay Amount</div>
-                <div className="section-desc">
-                  {formData.amount} {selectedTokenDetails.name}
-                </div>
+                <div className="section-desc">{formData.amount} USD</div>
               </div>
             </div>
           </Summary>
@@ -818,7 +696,6 @@ export default function AddTeammate() {
     lastName,
     address,
     salaryAmount,
-    salaryToken,
     departmentName,
     idx,
   }) => {
@@ -826,9 +703,7 @@ export default function AddTeammate() {
       !isValidField(FIELD_NAMES.FIRST_NAME, firstName) ||
       !isValidField(FIELD_NAMES.LAST_NAME, lastName);
     const invalidAddress = !isValidField(FIELD_NAMES.ADDRESS, address);
-    const invalidPayDetails =
-      !isValidField(FIELD_NAMES.AMOUNT, salaryAmount) ||
-      !isValidField(FIELD_NAMES.TOKEN, salaryToken);
+    const invalidPayDetails = !isValidField(FIELD_NAMES.AMOUNT, salaryAmount);
     const invalidDepartment = !isValidField(
       FIELD_NAMES.DEPARTMENT_NAME,
       departmentName
@@ -850,7 +725,7 @@ export default function AddTeammate() {
           {minifyAddress(address)}
         </div>
         <div className={`${invalidPayDetails && "text-danger"}`}>
-          {salaryAmount} {salaryToken}
+          {salaryAmount} USD
         </div>
         <div className={`${invalidDepartment && "text-danger"}`}>
           {departmentName}
@@ -871,7 +746,7 @@ export default function AddTeammate() {
         <div className="text-left mt-4">
           <a
             className="sample-csv"
-            href="https://drive.google.com/file/d/1uf1Ms8VkJkAC8kX9AM6XGC7gGIVZOBRB/view?usp=sharing"
+            href="https://drive.google.com/file/d/1YaEF4b0Q7y3Lo3s1t7JFQZyze9gfny3r/view?usp=sharing"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -906,7 +781,6 @@ export default function AddTeammate() {
                     lastName,
                     address,
                     salaryAmount,
-                    salaryToken,
                     departmentName,
                   },
                   idx
@@ -916,7 +790,6 @@ export default function AddTeammate() {
                     lastName,
                     address,
                     salaryAmount,
-                    salaryToken,
                     departmentName,
                     idx,
                   })

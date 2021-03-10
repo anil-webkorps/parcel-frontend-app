@@ -108,10 +108,13 @@ export default function TransactionDetails() {
       safeAddress,
       to,
       fiatValue,
+      fiatCurrency,
       transactionFees,
       status,
       createdOn,
       transactionMode,
+      tokenValue,
+      tokenCurrency,
     } = transactionDetails;
     const paidTeammates = getDecryptedDetails(to);
     const isQuickTransfer = transactionMode === 1;
@@ -215,7 +218,8 @@ export default function TransactionDetails() {
                                   alt={salaryToken}
                                   width="16"
                                 />{" "}
-                                {salaryAmount} {salaryToken}
+                                {fiatValue} {fiatCurrency} ({tokenValue}{" "}
+                                {tokenCurrency})
                               </div>
                             </Detail>
                           </div>
@@ -236,12 +240,7 @@ export default function TransactionDetails() {
                           {firstName} {lastName}
                         </div>
                         <div>
-                          <img
-                            src={getDefaultIconIfPossible(salaryToken, icons)}
-                            alt={salaryToken}
-                            width="16"
-                          />{" "}
-                          {salaryAmount} {salaryToken}
+                          {salaryAmount} {fiatCurrency}
                         </div>
                         <div>{minifyAddress(address)}</div>
                       </TableRow>
@@ -301,7 +300,14 @@ export default function TransactionDetails() {
               </Detail>
               <Detail style={{ width: "300px" }}>
                 <div className="title">Total Amount</div>
-                <div className="desc">US ${fiatValue}</div>
+                <div className="desc">
+                  <img
+                    src={getDefaultIconIfPossible(tokenCurrency, icons)}
+                    alt={tokenCurrency}
+                    width="16"
+                  />{" "}
+                  US ${fiatValue} ({tokenValue} {tokenCurrency})
+                </div>
               </Detail>
               <Detail style={{ width: "300px" }}>
                 <div className="title">Transaction Fees</div>

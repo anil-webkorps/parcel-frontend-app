@@ -2,7 +2,7 @@
  * useMassPayout hook
  * the massPayout function takes two params:
  * an array of objects, `recievers` with the keys:
- * address, salaryToken("DAI"/"USDC" etc), salaryAmount(in ETH, "10"/"500" etc.)
+ * address, salaryToken("USD"), salaryAmount(in ETH, "10"/"500" etc.)
  * and the token to pay them from ("DAI"/"USDC" etc)
  * [{address: String, salaryToken: String, salaryAmount: String}]
  */
@@ -127,6 +127,7 @@ export default function useMassPayout(props = {}) {
   // 1. approve uniswap router to spend the token (eg DAI)
   // 2. swap the input token for the output token using uniswap
   // TODO: revisit this for swapping from custom token
+  // eslint-disable-next-line
   const getUniswapTransactions = (
     tokenTo,
     tokenAmount,
@@ -635,51 +636,48 @@ export default function useMassPayout(props = {}) {
 
       // If input and output tokens are different, swap using uniswap
       // If input and output tokens are same, simply call transfer
-      const transactions = recievers.reduce(
-        (tx, { address, salaryToken, salaryAmount }) => {
-          if (salaryToken !== tokenFrom) {
-            tx.push(
-              ...getUniswapTransactions(
-                salaryToken,
-                salaryAmount,
-                address,
-                tokenFrom,
-                tokenDetails
-              )
-            );
-            return tx;
-          }
+      const transactions = recievers.reduce((tx, { address, salaryAmount }) => {
+        // if (salaryToken !== tokenFrom) {
+        //   tx.push(
+        //     ...getUniswapTransactions(
+        //       salaryToken,
+        //       salaryAmount,
+        //       address,
+        //       tokenFrom,
+        //       tokenDetails
+        //     )
+        //   );
+        //   return tx;
+        // }
 
-          const transferAmount = getAmountInWei(
-            salaryAmount,
-            tokenDetails.decimals
-          );
+        const transferAmount = getAmountInWei(
+          salaryAmount,
+          tokenDetails.decimals
+        );
 
-          // ETH
-          if (salaryToken === tokens.ETH) {
-            tx.push({
-              operation: 0, // CALL
-              data: "0x",
-              to: address,
-              value: transferAmount,
-            });
-            return tx;
-          }
-
-          // ERC20
+        // ETH
+        if (tokenFrom === tokens.ETH) {
           tx.push({
             operation: 0, // CALL
-            to: erc20.address,
-            value: 0,
-            data: erc20.interface.encodeFunctionData("transfer", [
-              address,
-              transferAmount,
-            ]),
+            data: "0x",
+            to: address,
+            value: transferAmount,
           });
           return tx;
-        },
-        []
-      );
+        }
+
+        // ERC20
+        tx.push({
+          operation: 0, // CALL
+          to: erc20.address,
+          value: 0,
+          data: erc20.interface.encodeFunctionData("transfer", [
+            address,
+            transferAmount,
+          ]),
+        });
+        return tx;
+      }, []);
 
       const dataHash = encodeMultiSendCallData(transactions, ethLibAdapter);
 
@@ -852,6 +850,7 @@ export default function useMassPayout(props = {}) {
     loadingTx,
     txHash,
     recievers,
+    tokenFrom,
     massPayout,
     submitMassPayout,
     txData,

@@ -101,14 +101,13 @@ export default function MultiSigTransactions() {
               firstName,
               lastName,
               salaryAmount,
-              salaryToken,
+              usd,
               address,
             } = paidTeammates[i];
             csvData.push({
               "First Name": firstName,
               "Last Name": lastName,
-              "Salary Token": salaryToken,
-              "Salary Amount": salaryAmount,
+              "Amount in USD": usd ? usd : salaryAmount,
               Address: address,
               "Transaction Hash": transactionHash || "",
               "Created On": format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss"),
@@ -207,8 +206,8 @@ export default function MultiSigTransactions() {
                           alt={tokenCurrency}
                           width="16"
                         />{" "}
-                        {parseFloat(tokenValue).toFixed(2)} {tokenCurrency} (US
-                        ${parseFloat(fiatValue).toFixed(2)})
+                        US ${parseFloat(fiatValue).toFixed(2)} (
+                        {parseFloat(tokenValue).toFixed(2)} {tokenCurrency})
                       </div>
                       <div>
                         {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}

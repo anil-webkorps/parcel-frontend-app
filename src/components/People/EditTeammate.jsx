@@ -9,18 +9,12 @@ import { useForm, Controller } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
-import { show } from "redux-modal";
 
 import { Info } from "components/Dashboard/styles";
 import { SideNavContext } from "context/SideNavContext";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
-import {
-  Input,
-  ErrorMessage,
-  // Select,
-  CurrencyInput,
-} from "components/common/Form";
+import { Input, ErrorMessage, CurrencyInput } from "components/common/Form";
 import addTeammateReducer from "store/add-teammate/reducer";
 import { useLocalStorage } from "hooks";
 import {
@@ -41,14 +35,6 @@ import viewDepartmentsReducer from "store/view-departments/reducer";
 import { getDepartments } from "store/view-departments/actions";
 import viewDepartmentsSaga from "store/view-departments/saga";
 import { makeSelectDepartments } from "store/view-departments/selectors";
-import { getTokens } from "store/tokens/actions";
-import tokensReducer from "store/tokens/reducer";
-import tokensSaga from "store/tokens/saga";
-import {
-  makeSelectLoading as makeSelectLoadingTokens,
-  makeSelectTokenList,
-  makeSelectPrices,
-} from "store/tokens/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import {
@@ -56,11 +42,6 @@ import {
   makeSelectOwnerSafeAddress,
 } from "store/global/selectors";
 import TeamPng from "assets/images/user-team.png";
-import SelectTokenModal, {
-  MODAL_NAME as SELECT_TOKEN_MODAL,
-} from "components/Payments/SelectTokenModal";
-import Loading from "components/common/Loading";
-import Img from "components/common/Img";
 
 import {
   Container,
@@ -74,7 +55,6 @@ import {
   Summary,
   ActionItem,
 } from "./styles";
-import { ShowToken } from "components/QuickTransfer/styles";
 
 import { Circle } from "components/Header/styles";
 
@@ -96,16 +76,12 @@ const ADD_SINGLE_TEAMMATE_STEPS = {
 
 const addTeammateKey = "addTeammate";
 const viewDepartmentsKey = "viewDepartments";
-const tokensKey = "tokens";
 
 export default function EditTeammate() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   const [toggled] = useContext(SideNavContext);
 
   const [success, setSuccess] = useState(false);
-  const [selectedTokenDetails, setSelectedTokenDetails] = useState();
-  const [selectedTokenName, setSelectedTokenName] = useState();
-  const [tokenDetails, setTokenDetails] = useState();
 
   const { register, errors, handleSubmit, reset, formState, control } = useForm(
     {
@@ -118,12 +94,10 @@ export default function EditTeammate() {
     key: viewDepartmentsKey,
     reducer: viewDepartmentsReducer,
   });
-  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
 
   useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
-  useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const step = useSelector(makeSelectStep());
@@ -131,31 +105,9 @@ export default function EditTeammate() {
   const chosenDepartment = useSelector(makeSelectChosenDepartment());
   const allDepartments = useSelector(makeSelectDepartments());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
-  const loadingTokens = useSelector(makeSelectLoadingTokens());
-  const tokenList = useSelector(makeSelectTokenList());
-  const prices = useSelector(makeSelectPrices());
   const organisationType = useSelector(makeSelectOrganisationType());
   const peopleId = useSelector(makeSelectPeopleId());
 
-  useEffect(() => {
-    if (ownerSafeAddress) {
-      dispatch(getTokens(ownerSafeAddress));
-    }
-  }, [ownerSafeAddress, dispatch]);
-
-  useEffect(() => {
-    if (tokenList && tokenList.length > 0) {
-      setTokenDetails(tokenList);
-      setSelectedTokenName(formData.currency);
-    }
-  }, [tokenList, formData]);
-
-  useEffect(() => {
-    if (selectedTokenName)
-      setSelectedTokenDetails(
-        tokenDetails.filter(({ name }) => name === selectedTokenName)[0]
-      );
-  }, [tokenDetails, selectedTokenName]);
   const location = useLocation();
   const history = useHistory();
 
@@ -165,7 +117,6 @@ export default function EditTeammate() {
       lastName: formData.lastName || "",
       address: formData.address || "",
       amount: formData.amount || "",
-      // currency: selectedTokenDetails.name || "",
     });
   }, [reset, formData]);
 
@@ -174,9 +125,6 @@ export default function EditTeammate() {
       dispatch(getDepartments(ownerSafeAddress));
     }
   }, [step, ownerSafeAddress, dispatch]);
-  useEffect(() => {
-    if (ownerSafeAddress) dispatch(getTokens(ownerSafeAddress));
-  }, [ownerSafeAddress, dispatch]);
 
   useEffect(() => {
     if (!chosenDepartment) dispatch(chooseStep(STEPS.ZERO));
@@ -206,10 +154,6 @@ export default function EditTeammate() {
     dispatch(chooseStep(step + 1));
   };
 
-  // const onAddNewDepartmentClick = () => {
-  //   dispatch(chooseStep(step + 1));
-  // };
-
   const onSelectDepartment = (chosenDepartment) => {
     dispatch(chooseDepartment(chosenDepartment));
     dispatch(chooseStep(STEPS.ZERO));
@@ -228,7 +172,6 @@ export default function EditTeammate() {
       lastName: "",
       address: "",
       amount: "",
-      // currency: "",
     });
     dispatch(updateForm(null));
     setSuccess(false);
@@ -245,7 +188,7 @@ export default function EditTeammate() {
     history.push("/dashboard/people/view");
   };
 
-  const handleCreateTeammate = () => {
+  const handleEditTeammate = () => {
     if (!encryptionKey || !ownerSafeAddress) return;
     console.log({ formData });
     const encryptedEmployeeDetails = cryptoUtils.encryptDataUsingEncryptionKey(
@@ -253,7 +196,6 @@ export default function EditTeammate() {
         firstName: formData.firstName,
         lastName: formData.lastName,
         salaryAmount: formData.amount,
-        salaryToken: selectedTokenDetails.name,
         address: formData.address,
         joiningDate: Date.now(),
       }),
@@ -273,16 +215,6 @@ export default function EditTeammate() {
 
     dispatch(editTeammate(body));
     setSuccess(true);
-  };
-
-  const showTokenModal = () => {
-    dispatch(
-      show(SELECT_TOKEN_MODAL, {
-        selectedTokenDetails,
-        setSelectedTokenDetails,
-      })
-    );
-    // reset({ address: "", amount: "" });
   };
 
   const renderTeammateDetails = () => (
@@ -345,46 +277,14 @@ export default function EditTeammate() {
               <CurrencyInput
                 type="number"
                 name="amount"
-                // register={register}
                 required={`Amount is required`}
                 value={value}
                 onChange={onChange}
-                placeholder="Amount"
-                conversionRate={
-                  prices &&
-                  selectedTokenDetails &&
-                  prices[selectedTokenDetails.name]
-                }
-                tokenName={
-                  selectedTokenDetails ? selectedTokenDetails.name : ""
-                }
+                showUsdOnly={true}
               />
             )}
           />
           <ErrorMessage name="amount" errors={errors} />
-        </Col>
-        <Col lg="12" sm="12">
-          {loadingTokens && (
-            <ShowToken className="mb-0">
-              <Loading color="#7367f0" />
-            </ShowToken>
-          )}
-
-          {!loadingTokens && selectedTokenDetails && (
-            <ShowToken onClick={showTokenModal} className="mb-0">
-              <div>
-                <Img
-                  src={selectedTokenDetails.icon}
-                  alt="token icon"
-                  width="36"
-                />
-              </div>
-              <div className="token-balance">
-                <div className="value">{selectedTokenDetails.name}</div>
-              </div>
-              <div className="change">Change</div>
-            </ShowToken>
-          )}
         </Col>
       </Row>
 
@@ -424,7 +324,6 @@ export default function EditTeammate() {
       >
         Next
       </Button>
-      <SelectTokenModal />
     </Card>
   );
 
@@ -448,28 +347,6 @@ export default function EditTeammate() {
               </div>
             ))}
         </Departments>
-        {/* <Link to="/dashboard/department/new">
-          <Button
-            type="button"
-            className="mx-auto my-5"
-            style={{
-              borderRadius: "24px",
-              backgroundColor: "#f2f2f2",
-              color: "#7367f0",
-            }}
-            onClick={onAddNewDepartmentClick}
-          >
-            <span>
-              <FontAwesomeIcon
-                icon={faPlus}
-                size="sm"
-                color="#7367f0"
-                className="mr-2"
-              />
-            </span>
-            Add New Team
-          </Button>
-        </Link> */}
       </Card>
     );
   };
@@ -486,15 +363,13 @@ export default function EditTeammate() {
             <div className="dept-info">
               {formData.firstName} {formData.lastName}
             </div>
-            <div className="dept-info mb-0">
-              {formData.amount} {selectedTokenDetails.name}
-            </div>
+            <div className="dept-info mb-0">{formData.amount} USD</div>
           </PayrollCard>
 
           <Button
             large
             type="button"
-            onClick={handleCreateTeammate}
+            onClick={handleEditTeammate}
             className="mt-5"
           >
             Confirm
@@ -567,9 +442,7 @@ export default function EditTeammate() {
               </div>
               <div>
                 <div className="section-title mb-1">Pay Amount</div>
-                <div className="section-desc">
-                  {formData.amount} {selectedTokenDetails.name}
-                </div>
+                <div className="section-desc">{formData.amount} USD</div>
               </div>
             </div>
           </Summary>

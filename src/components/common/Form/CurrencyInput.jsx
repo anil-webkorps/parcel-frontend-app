@@ -18,51 +18,76 @@ const MultiCurrencyInputField = ({
   value,
   tokenName,
   selectedTokenDetails,
+  showUsdOnly = false,
   ...rest
 }) => {
-  const [conversionValue, setConversionValue] = useState("");
+  const [usdValueConvertedToTokens, setUsdValueConvertedToTokens] = useState(
+    ""
+  );
   const [toggleFlex, setToggleFlex] = useState(false);
   const [currentTokenName, setCurrentTokenName] = useState();
 
-  const handleUsdValueChange = (e) => {
-    setConversionValue(e.target.value);
+  const handleTokenValueChange = (e) => {
+    setUsdValueConvertedToTokens(e.target.value);
     const tokenValue = e.target.value
-      ? parseFloat(e.target.value / conversionRate).toFixed(4)
+      ? parseFloat(e.target.value * conversionRate).toFixed(4)
       : "";
     onChange(tokenValue);
   };
 
-  const handleTokenValueChange = (e) => {
+  const handleUsdValueChange = (e) => {
     const newConversionValue = e.target.value
-      ? parseFloat(e.target.value * conversionRate).toFixed(4)
+      ? parseFloat(e.target.value / conversionRate).toFixed(4)
       : "";
-    setConversionValue(newConversionValue);
+    setUsdValueConvertedToTokens(newConversionValue);
     onChange(e.target.value);
   };
 
   useEffect(() => {
     if (!value) {
-      setConversionValue("");
+      setUsdValueConvertedToTokens("");
     } else {
       const newConversionValue = value
-        ? parseFloat(value * conversionRate).toFixed(4)
+        ? parseFloat(value / conversionRate).toFixed(4)
         : "";
-      if (!conversionValue) setConversionValue(newConversionValue);
+      if (!usdValueConvertedToTokens)
+        setUsdValueConvertedToTokens(newConversionValue);
     }
-  }, [value, conversionRate, conversionValue]);
+  }, [value, conversionRate, usdValueConvertedToTokens]);
 
   useEffect(() => {
     // reset the conversion value so that it gets
     // calculated automatically
     if (!currentTokenName) setCurrentTokenName(tokenName);
-    else setConversionValue("");
+    else setUsdValueConvertedToTokens("");
   }, [tokenName, currentTokenName]);
 
   const handleToggleFlex = () => {
     setToggleFlex((flex) => !flex);
   };
 
-  return (
+  const renderOnlyUsdInput = () => (
+    <CurrencyInput className="position-relative">
+      <div className="d-flex align-items-center">
+        <div className="usdAmount">
+          <span>US$</span>
+          <input
+            name={name}
+            id={id || name}
+            // ref={register({ required, pattern })}
+            type={type}
+            placeholder="0.00"
+            value={value}
+            onChange={handleUsdValueChange}
+            step=".0001"
+            {...rest}
+          />
+        </div>
+      </div>
+    </CurrencyInput>
+  );
+
+  const renderCurrencyInput = () => (
     <CurrencyInput className="position-relative">
       <div className="d-flex align-items-center">
         <div
@@ -71,27 +96,28 @@ const MultiCurrencyInputField = ({
             flexDirection: toggleFlex ? "column-reverse" : "column",
           }}
         >
-          <div className="tokenAmount">
-            <span>{tokenName}</span>
+          <div className="usdAmount">
+            <span>US$</span>
             <input
               name={name}
               id={id || name}
               // ref={register({ required, pattern })}
               type={type}
+              placeholder="0.00"
               value={value}
-              onChange={handleTokenValueChange}
+              onChange={handleUsdValueChange}
               step=".0001"
               {...rest}
             />
           </div>
-          <div className="usdAmount">
-            <span>US$</span>
+          <div className="tokenAmount">
+            <span>{tokenName}</span>
             <input
               name={"convertion"}
               type={"number"}
               placeholder="0.00"
-              value={conversionValue}
-              onChange={handleUsdValueChange}
+              value={usdValueConvertedToTokens}
+              onChange={handleTokenValueChange}
             />
           </div>
         </div>
@@ -110,6 +136,8 @@ const MultiCurrencyInputField = ({
       </div>
     </CurrencyInput>
   );
+
+  return showUsdOnly ? renderOnlyUsdInput() : renderCurrencyInput();
 };
 
 export default MultiCurrencyInputField;

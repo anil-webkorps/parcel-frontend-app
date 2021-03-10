@@ -281,14 +281,17 @@ export default function QuickTransfer() {
     const payoutDetails = [
       {
         address: values.address,
-        salaryAmount: values.amount,
+        salaryAmount: parseFloat(
+          (selectedTokenDetails.balance / selectedTokenDetails.usd) *
+            values.amount
+        ).toFixed(4),
         salaryToken: selectedTokenDetails.name,
         description: values.description || "",
-        usd:
-          (selectedTokenDetails.usd / selectedTokenDetails.balance) *
-          values.amount,
+        usd: values.amount,
       },
     ];
+
+    console.log({ payoutDetails });
     setPayoutDetails(payoutDetails);
     await massPayout(
       payoutDetails,
@@ -368,7 +371,8 @@ export default function QuickTransfer() {
                 if (value <= 0) return "Please check your input";
                 else if (
                   selectedTokenDetails &&
-                  parseFloat(value) > parseFloat(selectedTokenDetails.balance)
+                  parseFloat(value / prices[selectedTokenDetails.name]) >
+                    parseFloat(selectedTokenDetails.balance)
                 )
                   return "Insufficient balance";
 
@@ -384,7 +388,7 @@ export default function QuickTransfer() {
                 // required={`Amount is required`}
                 value={value}
                 onChange={onChange}
-                placeholder="Amount"
+                // placeholder="Amount"
                 conversionRate={
                   prices &&
                   selectedTokenDetails &&
@@ -426,7 +430,12 @@ export default function QuickTransfer() {
         large
         type="submit"
         className="mt-3"
-        disabled={!formState.isValid || loadingTx || addingMultisigTx || addingSingleOwnerTx}
+        disabled={
+          !formState.isValid ||
+          loadingTx ||
+          addingMultisigTx ||
+          addingSingleOwnerTx
+        }
         loading={loadingTx || addingMultisigTx || addingSingleOwnerTx}
       >
         {threshold > 1 ? `Create Transaction` : `Send`}

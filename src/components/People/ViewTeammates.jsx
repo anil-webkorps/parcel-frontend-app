@@ -38,7 +38,6 @@ import {
   makeSelectOwnerSafeAddress,
 } from "store/global/selectors";
 import Loading from "components/common/Loading";
-import { getDefaultIconIfPossible } from "constants/index";
 import { getTokens } from "store/tokens/actions";
 import { makeSelectTokenIcons } from "store/tokens/selectors";
 import tokensSaga from "store/tokens/saga";
@@ -122,7 +121,6 @@ export default function ViewTeammate() {
         lastName: props.lastName,
         address: props.address,
         amount: props.salary,
-        currency: props.currency,
       })
     );
     dispatch(setPeopleId(props.peopleId));
@@ -138,19 +136,12 @@ export default function ViewTeammate() {
     if (teammates && teammates.length > 0) {
       teammates.map(({ data, departmentName }) => {
         const teammateDetails = getDecryptedDetails(data);
-        const {
-          firstName,
-          lastName,
-          salaryAmount,
-          salaryToken,
-          address,
-        } = teammateDetails;
+        const { firstName, lastName, salaryAmount, address } = teammateDetails;
         csvData.push({
           "First Name": firstName,
           "Last Name": lastName,
           Address: address,
-          Amount: salaryAmount,
-          Token: salaryToken,
+          "Amount in USD": salaryAmount,
           Team: departmentName,
         });
         return csvData;
@@ -258,7 +249,6 @@ export default function ViewTeammate() {
                     firstName,
                     lastName,
                     salaryAmount,
-                    salaryToken,
                     address,
                   } = getDecryptedDetails(data);
                   return (
@@ -267,14 +257,7 @@ export default function ViewTeammate() {
                         {firstName} {lastName}
                       </div>
                       <div>{departmentName}</div>
-                      <div>
-                        <img
-                          src={getDefaultIconIfPossible(salaryToken, icons)}
-                          alt={salaryToken}
-                          width="16"
-                        />{" "}
-                        {salaryAmount} {salaryToken}
-                      </div>
+                      <div>{salaryAmount} USD</div>
                       <div>{minifyAddress(address)}</div>
                       <div className="d-flex justify-content-end">
                         <Button
@@ -284,7 +267,6 @@ export default function ViewTeammate() {
                               firstName,
                               lastName,
                               salary: salaryAmount,
-                              currency: salaryToken,
                               departmentName,
                               address,
                             })
@@ -303,7 +285,6 @@ export default function ViewTeammate() {
                               firstName,
                               lastName,
                               salary: salaryAmount,
-                              currency: salaryToken,
                               departmentName,
                               departmentId,
                               address,
@@ -324,7 +305,6 @@ export default function ViewTeammate() {
                               firstName,
                               lastName,
                               salary: salaryAmount,
-                              currency: salaryToken,
                               departmentName,
                               address,
                               peopleId,

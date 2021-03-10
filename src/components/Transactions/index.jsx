@@ -98,14 +98,13 @@ export default function Transactions() {
               firstName,
               lastName,
               salaryAmount,
-              salaryToken,
+              usd,
               address,
             } = paidTeammates[i];
             csvData.push({
               "First Name": firstName,
               "Last Name": lastName,
-              "Salary Token": salaryToken,
-              "Salary Amount": salaryAmount,
+              "Amount in USD": usd ? usd : salaryAmount,
               Address: address,
               "Transaction Hash": transactionHash,
               "Created On": format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss"),

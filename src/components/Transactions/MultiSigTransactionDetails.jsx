@@ -594,10 +594,10 @@ export default function MultiSigTransactions() {
       transactionHash: txDetailsHash,
       safeAddress,
       to,
-      // tokenValue,
-      // tokenCurrency,
+      tokenValue,
+      tokenCurrency,
       fiatValue,
-      // fiatCurrency,
+      fiatCurrency,
       transactionFees,
       status,
       createdOn,
@@ -605,6 +605,7 @@ export default function MultiSigTransactions() {
       // createdBy,
     } = txDetails;
     const paidTeammates = getDecryptedDetails(to);
+
     const isQuickTransfer = transactionMode === 1;
 
     return (
@@ -729,7 +730,8 @@ export default function MultiSigTransactions() {
                                   alt={salaryToken}
                                   width="16"
                                 />{" "}
-                                {salaryAmount} {salaryToken}
+                                {fiatValue} {fiatCurrency} ({salaryAmount}{" "}
+                                {salaryToken})
                               </div>
                             </Detail>
                           </div>
@@ -750,12 +752,7 @@ export default function MultiSigTransactions() {
                           {firstName} {lastName}
                         </div>
                         <div>
-                          <img
-                            src={getDefaultIconIfPossible(salaryToken, icons)}
-                            alt={salaryToken}
-                            width="16"
-                          />{" "}
-                          {salaryAmount} {salaryToken}
+                          {salaryAmount} {fiatCurrency}
                         </div>
                         <div>{minifyAddress(address)}</div>
                       </TableRow>
@@ -820,7 +817,14 @@ export default function MultiSigTransactions() {
                 </Detail>
                 <Detail style={{ width: "300px" }}>
                   <div className="title">Total Amount</div>
-                  <div className="desc">US ${fiatValue}</div>
+                  <div className="desc">
+                    <img
+                      src={getDefaultIconIfPossible(tokenCurrency, icons)}
+                      alt={tokenCurrency}
+                      width="16"
+                    />{" "}
+                    US ${fiatValue} ({tokenValue} {tokenCurrency})
+                  </div>
                 </Detail>
                 <Detail style={{ width: "300px" }}>
                   <div className="title">Transaction Fees</div>
