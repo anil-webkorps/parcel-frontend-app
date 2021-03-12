@@ -812,25 +812,57 @@ export default function useMassPayout(props = {}) {
               });
             }
           } else {
-            const tx = await proxyContract.execTransaction(
-              to,
-              valueWei,
-              data,
-              operation,
-              txGasEstimate,
-              baseGasEstimate,
-              gasPrice,
-              gasToken,
-              executor,
-              autoApprovedSignature,
-              {
+            if (!isMultiOwner) {
+              const approvedSign = await signTransaction(
+                to,
+                valueWei,
+                data,
+                operation,
+                0, // set gasLimit as 0 for sign
+                baseGasEstimate,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                nonce
+              );
+              setTxData({
+                to: ownerSafeAddress,
+                from: ownerSafeAddress,
+                params: [
+                  to,
+                  valueWei,
+                  data,
+                  operation,
+                  txGasEstimate,
+                  baseGasEstimate,
+                  gasPrice,
+                  gasToken,
+                  executor,
+                  approvedSign,
+                ],
                 gasLimit,
-                gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
-              }
-            );
-            setTxHash(tx.hash);
+              });
+            } else {
+              const tx = await proxyContract.execTransaction(
+                to,
+                valueWei,
+                data,
+                operation,
+                txGasEstimate,
+                baseGasEstimate,
+                gasPrice,
+                gasToken,
+                executor,
+                autoApprovedSignature,
+                {
+                  gasLimit,
+                  gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
+                }
+              );
+              setTxHash(tx.hash);
 
-            await tx.wait();
+              await tx.wait();
+            }
           }
         } catch (err) {
           setLoadingTx(false);
