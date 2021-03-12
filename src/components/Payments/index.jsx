@@ -55,6 +55,10 @@ import { createMultisigTransaction } from "store/multisig/actions";
 import multisigSaga from "store/multisig/saga";
 import multisigReducer from "store/multisig/reducer";
 import { makeSelectUpdating as makeSelectAddTxLoading } from "store/multisig/selectors";
+import metaTxReducer from "store/metatx/reducer";
+import metaTxSaga from "store/metatx/saga";
+import { getMetaTxEnabled } from "store/metatx/actions";
+import { makeSelectIsMetaTxEnabled } from "store/metatx/selectors";
 import { getTokens } from "store/tokens/actions";
 import {
   makeSelectLoading as makeSelectLoadingTokens,
@@ -94,6 +98,7 @@ const safeKey = "safe";
 const multisigKey = "multisig";
 const tokensKey = "tokens";
 const invitationKey = "invitation";
+const metaTxKey = "metatx";
 
 const TABS = {
   PEOPLE: "1",
@@ -187,6 +192,7 @@ export default function Payments() {
   useInjectReducer({ key: multisigKey, reducer: multisigReducer });
   useInjectReducer({ key: tokensKey, reducer: tokensReducer });
   useInjectReducer({ key: invitationKey, reducer: invitationReducer });
+  useInjectReducer({ key: metaTxKey, reducer: metaTxReducer });
 
   // Sagas
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
@@ -196,6 +202,7 @@ export default function Payments() {
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
   useInjectSaga({ key: tokensKey, saga: tokensSaga });
   useInjectSaga({ key: invitationKey, saga: invitationSaga });
+  useInjectSaga({ key: metaTxKey, saga: metaTxSaga });
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -221,6 +228,7 @@ export default function Payments() {
     makeSelectSingleOwnerTransactionId()
   );
   const organisationType = useSelector(makeSelectOrganisationType());
+  const isMetaEnabled = useSelector(makeSelectIsMetaTxEnabled());
 
   useEffect(() => {
     if (txHashFromMetaTx) {
@@ -233,6 +241,7 @@ export default function Payments() {
     if (ownerSafeAddress) {
       dispatch(getInvitations(ownerSafeAddress));
       dispatch(getNonce(ownerSafeAddress));
+      dispatch(getMetaTxEnabled(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
 
@@ -440,7 +449,8 @@ export default function Payments() {
       selectedTeammates,
       selectedTokenDetails.name,
       isMultiOwner,
-      nonce
+      nonce,
+      isMetaEnabled
     );
   };
 

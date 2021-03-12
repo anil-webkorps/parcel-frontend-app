@@ -33,6 +33,10 @@ import {
   makeSelectTransactionId as makeSelectSingleOwnerTransactionId,
   makeSelectLoading as makeSelectSingleOwnerAddTxLoading,
 } from "store/transactions/selectors";
+import metaTxReducer from "store/metatx/reducer";
+import metaTxSaga from "store/metatx/saga";
+import { getMetaTxEnabled } from "store/metatx/actions";
+import { makeSelectIsMetaTxEnabled } from "store/metatx/selectors";
 import safeReducer from "store/safe/reducer";
 import safeSaga from "store/safe/saga";
 import { getNonce } from "store/safe/actions";
@@ -81,6 +85,7 @@ const transactionsKey = "transactions";
 const safeKey = "safe";
 const multisigKey = "multisig";
 const tokensKey = "tokens";
+const metaTxKey = "metatx";
 
 export default function QuickTransfer() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
@@ -101,12 +106,14 @@ export default function QuickTransfer() {
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
   useInjectReducer({ key: safeKey, reducer: safeReducer });
   useInjectReducer({ key: multisigKey, reducer: multisigReducer });
+  useInjectReducer({ key: metaTxKey, reducer: metaTxReducer });
 
   // Sagas
   useInjectSaga({ key: tokensKey, saga: tokensSaga });
   useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
   useInjectSaga({ key: safeKey, saga: safeSaga });
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
+  useInjectSaga({ key: metaTxKey, saga: metaTxSaga });
 
   const { register, errors, handleSubmit, formState, control } = useForm({
     mode: "onChange",
@@ -132,11 +139,13 @@ export default function QuickTransfer() {
     makeSelectSingleOwnerTransactionId()
   );
   const organisationType = useSelector(makeSelectOrganisationType());
+  const isMetaEnabled = useSelector(makeSelectIsMetaTxEnabled());
 
   useEffect(() => {
     if (ownerSafeAddress) {
       dispatch(getTokens(ownerSafeAddress));
       dispatch(getNonce(ownerSafeAddress));
+      dispatch(getMetaTxEnabled(ownerSafeAddress));
     }
   }, [ownerSafeAddress, dispatch]);
 
@@ -294,7 +303,8 @@ export default function QuickTransfer() {
       payoutDetails,
       selectedTokenDetails.name,
       isMultiOwner,
-      nonce
+      nonce,
+      isMetaEnabled
     );
   };
 
@@ -426,7 +436,12 @@ export default function QuickTransfer() {
         large
         type="submit"
         className="mt-3"
-        disabled={!formState.isValid || loadingTx || addingMultisigTx || addingSingleOwnerTx}
+        disabled={
+          !formState.isValid ||
+          loadingTx ||
+          addingMultisigTx ||
+          addingSingleOwnerTx
+        }
         loading={loadingTx || addingMultisigTx || addingSingleOwnerTx}
       >
         {threshold > 1 ? `Create Transaction` : `Send`}

@@ -619,7 +619,8 @@ export default function useMassPayout(props = {}) {
     recievers,
     tokenFrom,
     isMultiOwner = false,
-    createNonce
+    createNonce,
+    isMetaEnabled = false
   ) => {
     setRecievers(recievers);
     setTokenFrom(tokenFrom);
@@ -731,9 +732,7 @@ export default function useMassPayout(props = {}) {
           const { safeTxGas, baseGas, lastUsedNonce } = estimateResult;
           const gasLimit = Number(safeTxGas) + Number(baseGas) + 21000; // giving a little higher gas limit just in case
           const nonce = lastUsedNonce === null ? 0 : lastUsedNonce + 1;
-          if (to) {
-            // TODO: check if meta tx is enabled
-
+          if (isMetaEnabled) {
             if (!isMultiOwner) {
               const approvedSign = await signTransaction(
                 to,
@@ -767,9 +766,7 @@ export default function useMassPayout(props = {}) {
             } else {
               // Multiowner
 
-              // Case 1: Initiate new tx
-              // Case 2: Accept or reject existing tx
-              // Case 3: Submit final tx
+              // Create new tx
               const approvedSign = await signTransaction(
                 to,
                 valueWei,
