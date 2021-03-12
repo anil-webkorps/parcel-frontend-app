@@ -36,6 +36,8 @@ export const tokens = {
   ETH: "ETH",
   GHST: "GHST",
   SNX: "SNX",
+  sUSD: "sUSD",
+  sAUD: "sAUD",
 };
 
 export const getDefaultIconIfPossible = (tokenSymbol, icons) => {

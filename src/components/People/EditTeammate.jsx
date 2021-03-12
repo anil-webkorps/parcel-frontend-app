@@ -153,7 +153,8 @@ export default function EditTeammate() {
   useEffect(() => {
     if (selectedTokenName)
       setSelectedTokenDetails(
-        tokenDetails.filter(({ name }) => name === selectedTokenName)[0]
+        tokenDetails.filter(({ name }) => name === selectedTokenName)[0] ||
+          tokenDetails[0]
       );
   }, [tokenDetails, selectedTokenName]);
   const location = useLocation();
