@@ -6,6 +6,8 @@ import USDCIcon from "assets/icons/tokens/USDC-icon.png";
 import USDTIcon from "assets/icons/tokens/USDT-icon.png";
 import GHSTIcon from "assets/icons/tokens/GHST-icon.png";
 import SNXIcon from "assets/icons/tokens/SNX-icon.svg";
+import sUSDIcon from "assets/icons/tokens/sUSD-icon.webp";
+import sAUDIcon from "assets/icons/tokens/sAUD-icon.png";
 import DefaultIcon from "assets/icons/tokens/Default-icon.jpg";
 import addresses from "./addresses";
 
@@ -52,6 +54,10 @@ export const getDefaultIconIfPossible = (tokenSymbol, icons) => {
       return GHSTIcon;
     case tokens.SNX:
       return SNXIcon;
+    case tokens.sUSD:
+      return sUSDIcon;
+    case tokens.sAUD:
+      return sAUDIcon;
     case tokens.ETH:
       return ETHIcon;
     default:
