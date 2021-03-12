@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faLongArrowAltLeft,
@@ -259,7 +259,7 @@ export default function AddTeammate() {
     history.goBack();
   };
 
-  const resetAll = () => {
+  const resetAll = useCallback(() => {
     reset({
       firstName: "",
       lastName: "",
@@ -271,7 +271,11 @@ export default function AddTeammate() {
     setSuccess(false);
     dispatch(chooseStep(STEPS.ZERO));
     dispatch(chooseDepartment(null));
-  };
+  }, [reset, dispatch]);
+
+  useEffect(() => {
+    return () => resetAll();
+  }, [resetAll]);
 
   const onAddMoreTeammates = () => {
     resetAll();
