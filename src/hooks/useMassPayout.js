@@ -732,87 +732,8 @@ export default function useMassPayout(props = {}) {
           const { safeTxGas, baseGas, lastUsedNonce } = estimateResult;
           const gasLimit = Number(safeTxGas) + Number(baseGas) + 21000; // giving a little higher gas limit just in case
           const nonce = lastUsedNonce === null ? 0 : lastUsedNonce + 1;
-          if (isMetaEnabled) {
-            if (!isMultiOwner) {
-              const approvedSign = await signTransaction(
-                to,
-                valueWei,
-                data,
-                operation,
-                0, // set gasLimit as 0 for sign
-                baseGasEstimate,
-                gasPrice,
-                gasToken,
-                refundReceiver,
-                nonce
-              );
-              setTxData({
-                to: ownerSafeAddress,
-                from: ownerSafeAddress,
-                params: [
-                  to,
-                  valueWei,
-                  data,
-                  operation,
-                  txGasEstimate,
-                  baseGasEstimate,
-                  gasPrice,
-                  gasToken,
-                  executor,
-                  approvedSign,
-                ],
-                gasLimit,
-              });
-            } else {
-              // Multiowner
-
-              // Create new tx
-              const approvedSign = await signTransaction(
-                to,
-                valueWei,
-                data,
-                operation,
-                0, // set gasLimit as 0 for sign
-                baseGasEstimate,
-                gasPrice,
-                gasToken,
-                refundReceiver,
-                createNonce
-              );
-              const contractTransactionHash = await proxyContract.getTransactionHash(
-                to,
-                valueWei,
-                data,
-                operation,
-                0,
-                baseGasEstimate,
-                gasPrice,
-                gasToken,
-                executor,
-                createNonce
-              );
-
-              setTxData({
-                // safe: ownerSafeAddress,
-                to,
-                value: String(valueWei),
-                data,
-                operation,
-                gasToken,
-                safeTxGas: 0,
-                baseGas: baseGasEstimate,
-                gasPrice: String(gasPrice),
-                refundReceiver,
-                nonce: createNonce,
-                contractTransactionHash,
-                sender: account,
-                signature: approvedSign.replace("0x", ""),
-                origin: null,
-                transactionHash: null,
-              });
-            }
-          } else {
-            if (!isMultiOwner) {
+          if (!isMultiOwner) {
+            if (isMetaEnabled) {
               const approvedSign = await signTransaction(
                 to,
                 valueWei,
@@ -863,6 +784,53 @@ export default function useMassPayout(props = {}) {
 
               await tx.wait();
             }
+          } else {
+            // Multiowner
+
+            // Create new tx
+            const approvedSign = await signTransaction(
+              to,
+              valueWei,
+              data,
+              operation,
+              0, // set gasLimit as 0 for sign
+              baseGasEstimate,
+              gasPrice,
+              gasToken,
+              refundReceiver,
+              createNonce
+            );
+            const contractTransactionHash = await proxyContract.getTransactionHash(
+              to,
+              valueWei,
+              data,
+              operation,
+              0,
+              baseGasEstimate,
+              gasPrice,
+              gasToken,
+              executor,
+              createNonce
+            );
+
+            setTxData({
+              // safe: ownerSafeAddress,
+              to,
+              value: String(valueWei),
+              data,
+              operation,
+              gasToken,
+              safeTxGas: 0,
+              baseGas: baseGasEstimate,
+              gasPrice: String(gasPrice),
+              refundReceiver,
+              nonce: createNonce,
+              contractTransactionHash,
+              sender: account,
+              signature: approvedSign.replace("0x", ""),
+              origin: null,
+              transactionHash: null,
+            });
           }
         } catch (err) {
           setLoadingTx(false);
