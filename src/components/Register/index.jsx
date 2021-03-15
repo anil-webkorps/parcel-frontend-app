@@ -42,7 +42,11 @@ import addresses from "constants/addresses";
 import GnosisSafeABI from "constants/abis/GnosisSafe.json";
 import ProxyFactoryABI from "constants/abis/ProxyFactory.json";
 import registerSaga from "store/register/saga";
-import { makeSelectError as makeSelectRegisterError } from "store/register/selectors";
+import {
+  makeSelectError as makeSelectRegisterError,
+  makeSelectTransactionHash,
+  makeSelectRegistering,
+} from "store/register/selectors";
 import { useInjectSaga } from "utils/injectSaga";
 import { registerUser, createMetaTx } from "store/register/actions";
 import { cryptoUtils } from "parcel-sdk";
@@ -56,7 +60,9 @@ import NoReferralModal from "./NoReferralModal";
 import ParcelLogo from "assets/images/parcel-logo-purple.png";
 import DeleteSvg from "assets/icons/delete-bin.svg";
 import LightbulbIcon from "assets/icons/lightbulb.svg";
-import LoadingSafeIcon from "assets/images/register/safe-loading.svg";
+import LoadingSafeIcon1 from "assets/images/register/loading-1.svg";
+import LoadingSafeIcon2 from "assets/images/register/loading-2.svg";
+import LoadingSafeIcon3 from "assets/images/register/loading-3.svg";
 import WelcomeImage from "assets/images/welcome-new.png";
 import OrganisationInfoModal, { MODAL_NAME as INFO_MODAL } from "./InfoModal";
 import {
@@ -81,6 +87,11 @@ import {
   ReviewOwnerDetails,
   LoadingTransaction,
 } from "./styles";
+import { TransactionUrl } from "components/common/Web3Utils";
+import {
+  StepperContent,
+  Stepper,
+} from "components/common/Stepper/SimpleStepper";
 
 const { GNOSIS_SAFE_ADDRESS, PROXY_FACTORY_ADDRESS, ZERO_ADDRESS } = addresses;
 
@@ -120,6 +131,7 @@ const Register = () => {
   const [loadingTx, setLoadingTx] = useState(false);
   const [loadingAccount, setLoadingAccount] = useState(true);
   const [isMetaTxEnabled, setIsMetaTxEnabled] = useState(false);
+  const [txLoadingStep, setTxLoadingStep] = useState(0);
 
   const { active, account, library } = useActiveWeb3React();
   // Reducers
@@ -141,6 +153,8 @@ const Register = () => {
   const formData = useSelector(makeSelectFormData());
   const averageGasPrice = useSelector(makeSelectAverageGasPrice());
   const errorInRegister = useSelector(makeSelectRegisterError());
+  const txHash = useSelector(makeSelectTransactionHash());
+  const registering = useSelector(makeSelectRegistering());
 
   // Form
   const { register, handleSubmit, errors, reset, control } = useForm();
@@ -204,6 +218,14 @@ const Register = () => {
   useEffect(() => {
     if (errorInRegister) setLoadingTx(false);
   }, [errorInRegister]);
+
+  useEffect(() => {
+    if (txHash) setTxLoadingStep(2); // Creating Wallet
+  }, [txHash]);
+
+  useEffect(() => {
+    if (registering) setTxLoadingStep(3); // Transaction Complete
+  }, [registering]);
 
   const onSubmit = async (values) => {
     // console.log(values);
@@ -340,6 +362,7 @@ const Register = () => {
       // Execute Meta transaction
 
       setLoadingTx(true);
+      setTxLoadingStep(1); // Transaction Submitted
       // const publicKey = getPublicKey(sign);
 
       const metaTxBody = {
@@ -415,7 +438,7 @@ const Register = () => {
           dispatch(setOwnerDetails(formData.name, proxy, account));
           dispatch(setOwnersAndThreshold(encryptedOwners, threshold));
           dispatch(setOrganisationType(organisationType));
-          setLoadingTx(false);
+          // setLoadingTx(false);
           // history.push("/dashboard");
         }
       });
@@ -846,15 +869,69 @@ const Register = () => {
     );
   };
 
+  const renderLoadingImageByStep = (step) => {
+    switch (step) {
+      case 1:
+        return (
+          <Img
+            src={LoadingSafeIcon1}
+            alt="loading-tx1"
+            className="loading-img"
+          />
+        );
+      case 2:
+        return (
+          <Img
+            src={LoadingSafeIcon2}
+            alt="loading-tx2"
+            className="loading-img"
+          />
+        );
+      case 3:
+        return (
+          <Img
+            src={LoadingSafeIcon3}
+            alt="loading-tx3"
+            className="loading-img"
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   const renderReview = () => {
     return loadingTx ? (
       <LoadingTransaction>
-        <Img src={LoadingSafeIcon} alt="loading-tx" className="loading-img" />
-        <div className="loading-heading">Generating Safe</div>
+        <div className="loading-heading">Creating account on Parcel</div>
+        {renderLoadingImageByStep(txLoadingStep)}
         <div className="loading-title">Please do not leave this page</div>
         <div className="loading-subtitle">
           This process should take a couple of minutes
         </div>
+
+        <div className="loading-hash my-3">
+          {txHash && (
+            <TransactionUrl hash={txHash}>
+              View Transaction on Etherscan
+            </TransactionUrl>
+          )}
+        </div>
+        <Stepper>
+          <StepperContent
+            active={txLoadingStep >= 1}
+            text={"Transaction Submitted"}
+          />
+          <StepperContent
+            active={txLoadingStep >= 2}
+            text={"Creating Wallet"}
+          />
+          <StepperContent
+            active={txLoadingStep >= 3}
+            text={"Transaction Completed"}
+            last
+          />
+        </Stepper>
       </LoadingTransaction>
     ) : (
       <StepDetails>

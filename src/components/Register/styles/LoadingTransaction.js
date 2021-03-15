@@ -7,25 +7,25 @@ export default styled.div`
   flex-direction: column;
 
   .loading-img {
-    margin-top: 130px;
+    margin: 50px auto;
   }
 
   .loading-heading {
-    margin: 50px auto 30px;
+    margin: 120px auto 0;
     font-size: 20px;
     font-weight: 600;
     font-stretch: normal;
     font-style: normal;
     line-height: normal;
     letter-spacing: normal;
+    color: #373737;
     text-align: center;
-    color: #8b8b8b;
     animation: flickerAnimation 1.5s infinite;
   }
 
   .loading-title {
-    font-size: 25px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 500;
     font-stretch: normal;
     font-style: normal;
     line-height: normal;
@@ -36,7 +36,7 @@ export default styled.div`
   }
 
   .loading-subtitle {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: normal;
     font-stretch: normal;
     font-style: normal;
@@ -44,6 +44,21 @@ export default styled.div`
     letter-spacing: normal;
     text-align: center;
     color: #8b8b8b;
+  }
+
+  .loading-hash {
+    font-size: 16px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    min-height: 30px;
+    a {
+      color: ${({ theme }) => theme.primary} !important;
+    }
+    margin-top: 15px;
   }
 
   @keyframes flickerAnimation {
