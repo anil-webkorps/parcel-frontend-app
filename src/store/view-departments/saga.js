@@ -14,7 +14,7 @@ export function* getDepartments(action) {
     const result = yield call(request, requestURL, options);
     if (result.flag !== 200) {
       // Error in payload
-      yield put(getDepartmentsError(result.log));
+      yield put(getDepartmentsSuccess([], 0, result.log));
     } else {
       yield put(
         getDepartmentsSuccess(

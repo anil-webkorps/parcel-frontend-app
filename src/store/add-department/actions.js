@@ -66,12 +66,11 @@ export function editDepartmentError(error) {
   };
 }
 
-export function deleteDepartment({ name, safeAddress, createdBy }) {
+export function deleteDepartment({ departmentId, safeAddress }) {
   return {
     type: DELETE_DEPARTMENT,
-    name,
+    departmentId,
     safeAddress,
-    createdBy,
   };
 }
 

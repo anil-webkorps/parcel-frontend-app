@@ -25,6 +25,7 @@ export const deleteTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/remove`;
 export const createDepartmentEndpoint = `${ROOT_BE_URL}/api/v1/departments/create`;
 export const getAllDepartmentsEndpoint = `${ROOT_BE_URL}/api/v1/departments/get`;
 export const getDepartmentByIdEndpoint = `${ROOT_BE_URL}/api/v1/departments/getByDepartmentId`;
+export const deleteDepartmentEndpoint = `${ROOT_BE_URL}/api/v1/departments/remove`;
 
 // TRANSACTIONS
 export const createTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/create`;

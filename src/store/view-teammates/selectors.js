@@ -19,6 +19,12 @@ const makeSelectLoading = () =>
     (viewTeammatesState) => viewTeammatesState.loading
   );
 
+const makeSelectDepartmentName = () =>
+  createSelector(
+    selectViewTeammates,
+    (viewTeammatesState) => viewTeammatesState.departmentName
+  );
+
 const makeSelectError = () =>
   createSelector(
     selectViewTeammates,
@@ -29,5 +35,6 @@ export {
   selectViewTeammates,
   makeSelectTeammates,
   makeSelectLoading,
+  makeSelectDepartmentName,
   makeSelectError,
 };

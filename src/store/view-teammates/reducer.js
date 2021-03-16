@@ -12,6 +12,7 @@ export const initialState = {
   loading: false,
   error: false,
   teammates: undefined,
+  departmentName: "",
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -34,6 +35,7 @@ const reducer = (state = initialState, action) =>
       case GET_TEAMMATES_BY_DEPARTMENT_SUCCESS:
         draft.loading = false;
         draft.teammates = action.teammates;
+        draft.departmentName = action.departmentName || "";
         break;
     }
   });

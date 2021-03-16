@@ -36,10 +36,11 @@ export function getTeammatesByDepartment(safeAddress, departmentId) {
   };
 }
 
-export function getTeammatesByDepartmentSuccess(teammates) {
+export function getTeammatesByDepartmentSuccess(teammates, departmentName) {
   return {
     type: GET_TEAMMATES_BY_DEPARTMENT_SUCCESS,
     teammates,
+    departmentName,
   };
 }
 

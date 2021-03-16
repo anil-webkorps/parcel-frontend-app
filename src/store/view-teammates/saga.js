@@ -42,11 +42,13 @@ function* fetchTeammatesByDepartmentId(action) {
   try {
     const result = yield call(request, requestURL, options);
     if (result.flag === 400) {
-      yield put(getTeammatesByDepartmentSuccess([]));
+      yield put(getTeammatesByDepartmentSuccess([], result.departmentName));
     } else if (result.flag !== 200) {
       yield put(getTeammatesByDepartmentError(result.log));
     } else {
-      yield put(getTeammatesByDepartmentSuccess(result.employees));
+      yield put(
+        getTeammatesByDepartmentSuccess(result.employees, result.departmentName)
+      );
     }
   } catch (err) {
     yield put(getTeammatesByDepartmentError(err));

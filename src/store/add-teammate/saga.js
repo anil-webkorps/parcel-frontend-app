@@ -32,7 +32,7 @@ import {
   getAllTeammates,
   getTeammatesByDepartment,
 } from "store/view-teammates/actions";
-import { MODAL_NAME as DELETE_TEAMMATE_MODAL } from "components/People/DeleteModal";
+import { MODAL_NAME as DELETE_TEAMMATE_MODAL } from "components/People/DeleteTeammateModal";
 
 export function* createTeammate({ body }) {
   const requestURL = `${createTeammateEndpoint}`;

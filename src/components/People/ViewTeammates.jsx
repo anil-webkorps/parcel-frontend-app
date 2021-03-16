@@ -30,6 +30,7 @@ import {
 import {
   makeSelectTeammates,
   makeSelectLoading,
+  makeSelectDepartmentName,
 } from "store/view-teammates/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
@@ -50,7 +51,10 @@ import TeammateDetailsModal, {
 } from "./TeammateDetailsModal";
 import DeleteTeammateModal, {
   MODAL_NAME as DELETE_TEAMMATE_MODAL,
-} from "./DeleteModal";
+} from "./DeleteTeammateModal";
+import DeleteTeamModal, {
+  MODAL_NAME as DELETE_TEAM_MODAL,
+} from "./DeleteTeamModal";
 import { minifyAddress } from "components/common/Web3Utils";
 
 const { TableBody, TableHead, TableRow } = Table;
@@ -77,6 +81,7 @@ export default function ViewTeammate() {
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const icons = useSelector(makeSelectTokenIcons());
   const organisationType = useSelector(makeSelectOrganisationType());
+  const departmentName = useSelector(makeSelectDepartmentName());
 
   useEffect(() => {
     if (ownerSafeAddress) {
@@ -129,8 +134,17 @@ export default function ViewTeammate() {
     history.push(`/dashboard/people/edit?departmentId=${props.departmentId}`);
   };
 
-  const showDeleteConfirmation = (props) => {
+  const showDeleteTeammateConfirmation = (props) => {
     dispatch(show(DELETE_TEAMMATE_MODAL, { ...props }));
+  };
+
+  const showDeleteTeamConfirmation = () => {
+    dispatch(
+      show(DELETE_TEAM_MODAL, {
+        departmentId: params && params.departmentId,
+        departmentName,
+      })
+    );
   };
 
   const renderExportEmployeeData = () => {
@@ -203,7 +217,7 @@ export default function ViewTeammate() {
                 </ActionItem>
               </Button>
               <div className="title mx-3 my-0" style={{ fontSize: "20px" }}>
-                All Teammates
+                {departmentName ? departmentName : `All Teammates`}
               </div>
             </div>
 
@@ -212,7 +226,7 @@ export default function ViewTeammate() {
 
               <Button
                 iconOnly
-                className="p-0"
+                className="p-0 mr-3"
                 to={
                   params && params.departmentId
                     ? `/dashboard/people/new?departmentId=${params.departmentId}`
@@ -228,6 +242,22 @@ export default function ViewTeammate() {
                   </div>
                 </ActionItem>
               </Button>
+              {params && params.departmentId && (
+                <Button
+                  iconOnly
+                  className="p-0"
+                  onClick={showDeleteTeamConfirmation}
+                >
+                  <ActionItem>
+                    <Circle>
+                      <FontAwesomeIcon icon={faTrashAlt} color="#fff" />
+                    </Circle>
+                    <div className="mx-3">
+                      <div className="name">Delete Team</div>
+                    </div>
+                  </ActionItem>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -320,7 +350,7 @@ export default function ViewTeammate() {
                         <Button
                           iconOnly
                           onClick={() =>
-                            showDeleteConfirmation({
+                            showDeleteTeammateConfirmation({
                               firstName,
                               lastName,
                               salary: salaryAmount,
@@ -358,6 +388,7 @@ export default function ViewTeammate() {
       </Container>
       <TeammateDetailsModal />
       <DeleteTeammateModal />
+      <DeleteTeamModal />
     </div>
   );
 }

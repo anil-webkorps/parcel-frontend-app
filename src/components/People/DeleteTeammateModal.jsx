@@ -28,7 +28,7 @@ const modalStyles = `
   }
 `;
 
-function TeammateDetailsModal(props) {
+function DeleteTeammateModal(props) {
   const {
     show,
     handleHide,
@@ -124,4 +124,4 @@ function TeammateDetailsModal(props) {
   );
 }
 
-export default reduxModal({ name: MODAL_NAME })(TeammateDetailsModal);
+export default reduxModal({ name: MODAL_NAME })(DeleteTeammateModal);

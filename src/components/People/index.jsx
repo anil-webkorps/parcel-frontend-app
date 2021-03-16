@@ -54,6 +54,8 @@ export default function People() {
   useEffect(() => {
     if (allDepartments && allDepartments.length > 0) {
       setIsNormalUser(true);
+    } else {
+      setIsNormalUser(false);
     }
   }, [allDepartments]);
 
