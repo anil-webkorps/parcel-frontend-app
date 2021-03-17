@@ -96,8 +96,11 @@ export default function PaymentsCard() {
       teammates &&
       teammates.length > 0 &&
       state !== STATES.TRANSACTION_EXECUTED
-    )
+    ) {
       setState(STATES.TEAMMATES_ADDED);
+    } else if (state !== STATES.TRANSACTION_EXECUTED) {
+      setState(STATES.EMPTY_STATE);
+    }
   }, [teammates, state]);
 
   useEffect(() => {
