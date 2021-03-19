@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useHistory, Link } from "react-router-dom";
 // import DayPicker from "react-day-picker";
 
-import { Info } from "components/Dashboard/styles";
+import { Info } from "components/Dashboard-old/styles";
 import { SideNavContext } from "context/SideNavContext";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";

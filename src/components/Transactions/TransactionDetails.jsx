@@ -33,7 +33,7 @@ import tokensSaga from "store/tokens/saga";
 import tokensReducer from "store/tokens/reducer";
 import { Table, ActionItem } from "../People/styles";
 import { Circle } from "components/Header/styles";
-import { Info } from "components/Dashboard/styles";
+import { Info } from "components/Dashboard-old/styles";
 import { Container, Detail } from "./styles";
 
 const { TableBody, TableHead, TableRow } = Table;

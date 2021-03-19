@@ -9,7 +9,7 @@ import { cryptoUtils } from "parcel-sdk";
 import { show } from "redux-modal";
 
 import TransactionSubmitted from "components/Payments/TransactionSubmitted";
-import { Info } from "components/Dashboard/styles";
+import { Info } from "components/Dashboard-old/styles";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
 import Img from "components/common/Img";

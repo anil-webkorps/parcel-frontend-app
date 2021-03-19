@@ -46,22 +46,48 @@ export default function Dashboard() {
   }, [dispatch, ownerSafeAddress]);
 
   return (
-    <div>
-      DASHBOARD
-      {/* <AccountCard />
-      {loadingSetupStatus && (
-        <div className="status">
-          <Card
-            className="p-4 d-flex justify-content-center align-items-center"
-            style={{ width: "33em" }}
-          >
-            <Loading color="primary" width="50px" height="50px" />
-          </Card>
+    <div
+      className="position-relative"
+      style={{
+        transition: "all 0.25s linear",
+        minHeight: "100vh",
+      }}
+    >
+      <Info>
+        <div
+          style={{
+            maxWidth: toggled ? "900px" : "1200px",
+            transition: "all 0.25s linear",
+          }}
+          className="mx-auto"
+        >
+          <div className="title">Hey {ownerName},</div>
+          <div className="subtitle">
+            We have a few things for you to look at
+          </div>
         </div>
-      )}
-      {!loadingSetupStatus &&
-        (isSetupComplete ? <QuickTransferCard /> : <CompleteSetup />)}
-      <PaymentsCard /> */}
+      </Info>
+      <Container
+        style={{
+          maxWidth: toggled ? "900px" : "1200px",
+          transition: "all 0.25s linear",
+        }}
+      >
+        <AccountCard />
+        {loadingSetupStatus && (
+          <div className="status">
+            <Card
+              className="p-4 d-flex justify-content-center align-items-center"
+              style={{ width: "33em" }}
+            >
+              <Loading color="primary" width="50px" height="50px" />
+            </Card>
+          </div>
+        )}
+        {!loadingSetupStatus &&
+          (isSetupComplete ? <QuickTransferCard /> : <CompleteSetup />)}
+        <PaymentsCard />
+      </Container>
     </div>
   );
 }

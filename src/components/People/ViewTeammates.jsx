@@ -18,7 +18,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useParams, useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
 
-import { Info } from "components/Dashboard/styles";
+import { Info } from "components/Dashboard-old/styles";
 import { useLocalStorage } from "hooks";
 import Button from "components/common/Button";
 import viewTeammatesReducer from "store/view-teammates/reducer";

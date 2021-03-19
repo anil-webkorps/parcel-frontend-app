@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Switch } from "react-router-dom";
 import { useSelector } from "react-redux";
 
+// import Dashboard from "components/Dashboard-old";
 import Dashboard from "components/Dashboard";
 import People from "components/People";
 import AddTeammate from "components/People/AddTeammate";
@@ -24,6 +25,7 @@ import {
 } from "store/global/selectors";
 import { ToastMessage } from "components/common/Toast";
 import { useSocket } from "hooks";
+import DashboardLayout from "components/DashboardLayout";
 // import { closeNotifications } from "store/notifications/actions";
 // import { makeSelectShowNotifications } from "store/notifications/selectors";
 
@@ -41,7 +43,7 @@ const DashboardPage = ({ match }) => {
 
   return (
     <Authenticated>
-      <div>
+      <DashboardLayout>
         <Switch>
           <Route exact path={`${match.path}`} component={Dashboard} />
           <Route exact path={`${match.path}/people`} component={People} />
@@ -97,7 +99,7 @@ const DashboardPage = ({ match }) => {
           <Route component={NotFoundPage} />
         </Switch>
         <ToastMessage />
-      </div>
+      </DashboardLayout>
     </Authenticated>
   );
 };

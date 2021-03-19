@@ -10,7 +10,7 @@ import { cryptoUtils } from "parcel-sdk";
 import { show } from "redux-modal";
 import { useHistory } from "react-router-dom";
 
-import { Info } from "components/Dashboard/styles";
+import { Info } from "components/Dashboard-old/styles";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
 import viewDepartmentsReducer from "store/view-departments/reducer";

@@ -4,7 +4,7 @@ import { useLocation, useHistory } from "react-router-dom";
 import { HeaderLink, NavBar, NavBarContent, NavGroup } from "./styles";
 
 import ConnectButton from "components/Connect";
-import DashboardHeader from "./DashboardHeader";
+// import DashboardHeader from "./DashboardHeader";
 import { useActiveWeb3React } from "hooks";
 import Button from "components/common/Button";
 import ParcelLogo from "assets/images/parcel-logo-purple.png";
@@ -67,7 +67,7 @@ function PlainHeader() {
 export default function Header() {
   const location = useLocation();
 
-  if (location.pathname.includes("/dashboard")) return <DashboardHeader />;
+  if (location.pathname.includes("/dashboard")) return null;
 
   return <PlainHeader />;
 }

@@ -1,4 +1,6 @@
 import { createGlobalStyle } from "styled-components";
+import AvenirLTProBook from "assets/fonts/AvenirLTProBook.otf";
+import AvenirLTProHeavy from "assets/fonts/AvenirLTProHeavy.otf";
 
 export const lightTheme = {
   primary: "#7367f0",
@@ -48,6 +50,22 @@ export const darkTheme = {
 };
 
 const GlobalStyle = createGlobalStyle`
+  @font-face {
+    font-family: 'Avenir Pro';
+    src: local('Avenir Pro'), local('AvenirPro'),
+    url(${AvenirLTProBook}) format('opentype');
+    font-weight: normal; 
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'Avenir Pro';
+    src: local('Avenir Pro'), local('AvenirPro'),
+    url(${AvenirLTProHeavy}) format('opentype');
+    font-style: normal;
+    font-weight: bold;
+  }
+
   html,
   body {
     height: 100%;
@@ -64,7 +82,8 @@ const GlobalStyle = createGlobalStyle`
     background: ${({ theme }) => theme.background};
     color: ${({ theme }) => theme.text};
     transition: all 0.50s linear;
-    font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Avenir Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: normal;
   }
 
   body.fontLoaded {
@@ -98,15 +117,15 @@ const GlobalStyle = createGlobalStyle`
   }
 
   // Scaling/zooming depending on screen width
-  @media (max-width: 1500px) {
-    #root, .modal-dialog {
-     zoom: 85%;
-   }
+  // @media (max-width: 1500px) {
+  //   #root, .modal-dialog {
+  //    zoom: 85%;
+  //  }
 
-   .tooltip {
-      zoom: 85%;
-    }
-  }
+  //  .tooltip {
+  //     zoom: 85%;
+  //   }
+  // }
 
   .modal-content {
     border-radius: 20px;

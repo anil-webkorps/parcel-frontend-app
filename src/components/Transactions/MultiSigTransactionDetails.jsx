@@ -55,7 +55,7 @@ import TransactionSubmitted from "components/Payments/TransactionSubmitted";
 
 import { Table, ActionItem } from "../People/styles";
 import { Circle } from "components/Header/styles";
-import { Info } from "components/Dashboard/styles";
+import { Info } from "components/Dashboard-old/styles";
 import { Container, Detail, ConfirmSection } from "./styles";
 
 const { TableBody, TableHead, TableRow } = Table;
