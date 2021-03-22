@@ -10,7 +10,7 @@ export default styled.div`
   background-color: #f6f6f6;
   position: absolute;
   top: 5em;
-  right: 3em;
+  right: 1em;
   z-index: 1;
 
   .notifications-title {

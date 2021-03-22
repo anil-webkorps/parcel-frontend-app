@@ -1,5 +1,5 @@
-import { injected } from "connectors";
-import MetamaskIcon from "assets/icons/icon-metamask.svg";
+import { injected, fortmatic } from "connectors";
+import MetamaskIcon from "assets/icons/wallets/icon-metamask.svg";
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 import USDCIcon from "assets/icons/tokens/USDC-icon.png";
@@ -23,6 +23,20 @@ export const supportedWallets = [
     description: "Injected web3 provider.",
     id: 1,
   },
+  {
+    name: "Fortmatic",
+    connector: fortmatic,
+    icon: MetamaskIcon,
+    description: "Fortmatic",
+    id: 2,
+  },
+  // {
+  //   name: "Torus",
+  //   connector: torus,
+  //   icon: MetamaskIcon,
+  //   description: "Torus",
+  //   id: 3,
+  // },
   // Add other wallets and connectors here
 ];
 

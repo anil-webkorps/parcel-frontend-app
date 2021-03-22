@@ -6,6 +6,7 @@ import { Switch, Route } from "react-router-dom";
 import GlobalStyle, { lightTheme, darkTheme } from "global-styles";
 import Header from "components/Header";
 import NetworkModal from "components/Connect/NetworkModal";
+import ConnectToWalletModal from "components/Connect/ConnectModal";
 
 import RegisterPage from "pages/Register";
 import LoginPage from "pages/Login";
@@ -13,9 +14,13 @@ import DashboardPage from "./Dashboard";
 import AcceptInvitePage from "./AcceptInvite";
 import NotFoundPage from "./NotFound";
 import SideNavProvider from "context/SideNavContext";
+import { useEagerConnect, useInactiveListener } from "hooks";
 
 export default function App() {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
+  const triedEager = useEagerConnect();
+  useInactiveListener(!triedEager);
+
   return (
     <div className="app">
       <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
@@ -31,6 +36,7 @@ export default function App() {
         </SideNavProvider>
         <GlobalStyle />
         <NetworkModal />
+        <ConnectToWalletModal triedEager={triedEager} />
       </ThemeProvider>
     </div>
   );

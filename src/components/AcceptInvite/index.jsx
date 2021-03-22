@@ -1,9 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
-import { utils } from "ethers";
+import { hashMessage } from "@ethersproject/hash";
+import { recoverAddress } from "@ethersproject/transactions";
+import { toUtf8Bytes } from "@ethersproject/strings";
+import { keccak256 } from "@ethersproject/keccak256";
+import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 
 import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage } from "hooks";
@@ -64,8 +68,9 @@ const AcceptInvite = () => {
   const [hasAlreadySigned, setHasAlreadySigned] = useState(false);
   const [loadingAccount, setLoadingAccount] = useState(true);
   const [step, chooseStep] = useState(STEPS.ZERO);
+  const [signing, setSigning] = useState(false);
 
-  const { active, account, library } = useActiveWeb3React();
+  const { active, account, library, connector } = useActiveWeb3React();
 
   // Reducers
   useInjectReducer({ key: invitationKey, reducer: invitationReducer });
@@ -96,8 +101,8 @@ const AcceptInvite = () => {
 
   useEffect(() => {
     if (sign) {
-      const msgHash = utils.hashMessage(MESSAGE_TO_SIGN);
-      const recoveredAddress = utils.recoverAddress(msgHash, sign);
+      const msgHash = hashMessage(MESSAGE_TO_SIGN);
+      const recoveredAddress = recoverAddress(msgHash, sign);
       if (recoveredAddress !== account) {
         setHasAlreadySigned(false);
         setSign("");
@@ -109,8 +114,8 @@ const AcceptInvite = () => {
   useEffect(() => {
     if (step === STEPS.ONE && account) {
       if (sign) {
-        const msgHash = utils.hashMessage(MESSAGE_TO_SIGN);
-        const recoveredAddress = utils.recoverAddress(msgHash, sign);
+        const msgHash = hashMessage(MESSAGE_TO_SIGN);
+        const recoveredAddress = recoverAddress(msgHash, sign);
         if (recoveredAddress === account) {
           setHasAlreadySigned(true);
         }
@@ -118,21 +123,45 @@ const AcceptInvite = () => {
     }
   }, [step, dispatch, account, sign]);
 
-  const signTerms = useCallback(async () => {
+  const signTerms = async () => {
     if (!!library && !!account) {
+      setSigning(true);
       try {
-        await library
-          .getSigner(account)
-          .signMessage(MESSAGE_TO_SIGN)
-          .then((signature) => {
-            setSign(signature);
-            chooseStep(step + 1);
-          });
+        if (connector instanceof WalletConnectConnector) {
+          const rawMessage = MESSAGE_TO_SIGN;
+          const messageLength = new Blob([rawMessage]).size;
+          const message = toUtf8Bytes(
+            "\x19Ethereum Signed Message:\n" + messageLength + rawMessage
+          );
+          const hashedMessage = keccak256(message);
+
+          connector.walletConnectProvider.connector
+            .signMessage([account.toLowerCase(), hashedMessage])
+            .then((signature) => {
+              setSign(signature);
+              setSigning(false);
+              chooseStep(step + 1);
+            })
+            .catch((error) => {
+              setSigning(false);
+              console.error("Signature Rejected");
+            });
+        } else {
+          await library
+            .getSigner(account)
+            .signMessage(MESSAGE_TO_SIGN)
+            .then((signature) => {
+              setSign(signature);
+              setSigning(false);
+              chooseStep(step + 1);
+            });
+        }
       } catch (error) {
-        console.error("Transaction Failed");
+        console.error("Signature Rejected");
+        setSigning(false);
       }
     }
-  }, [library, account, setSign, step]);
+  };
 
   const goBack = () => {
     chooseStep(step - 1);
@@ -239,6 +268,8 @@ const AcceptInvite = () => {
               type="button"
               onClick={signTerms}
               className="mx-auto d-block proceed-btn"
+              loading={signing}
+              disabled={signing}
             >
               I'm in
             </Button>

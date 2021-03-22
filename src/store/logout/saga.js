@@ -11,6 +11,7 @@ function* invalidateSession() {
   yield localStorage.removeItem("token");
   yield localStorage.removeItem("ENCRYPTION_KEY");
   yield localStorage.removeItem("SIGNATURE");
+  yield localStorage.removeItem("walletconnect");
   yield put(clearGlobalState());
   window.location = "/";
   // yield put(push("/"));

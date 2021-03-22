@@ -1,28 +1,25 @@
 import React from "react";
-import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useWeb3React } from "@web3-react/core";
 import { startCase } from "lodash";
+import { show } from "redux-modal";
 
 import { Account } from "components/common/Web3Utils";
 import { findNetworkNameByWeb3ChainId } from "constants/networks";
-import ConnectToWalletModal from "./ConnectModal";
-// import NetworkModal from "./NetworkModal";
 import Button from "components/common/Button";
+import { MODAL_NAME as CONNECT_MODAL } from "./ConnectModal";
 
 const ConnectToWallet = ({ className, ...rest }) => {
   const { chainId, active } = useWeb3React();
+  const dispatch = useDispatch();
 
   const handleClick = () => {
-    if (!active) setShow(true);
+    if (!active) dispatch(show(CONNECT_MODAL));
   };
 
   const getNetworkName = () => {
     return startCase(findNetworkNameByWeb3ChainId(chainId));
   };
-
-  const [show, setShow] = useState(false);
-
-  const handleToggle = () => setShow(false);
 
   return (
     <div>
@@ -40,8 +37,6 @@ const ConnectToWallet = ({ className, ...rest }) => {
           </span>
         )}
       </Button>
-      <ConnectToWalletModal show={show} handleToggle={handleToggle} />
-      {/* <NetworkModal /> */}
     </div>
   );
 };

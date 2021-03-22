@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,6 +9,9 @@ import {
   faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { show } from "redux-modal";
+import { toUtf8Bytes } from "@ethersproject/strings";
+import { keccak256 } from "@ethersproject/keccak256";
+import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 
 import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage, useContract } from "hooks";
@@ -132,8 +135,9 @@ const Register = () => {
   const [loadingAccount, setLoadingAccount] = useState(true);
   const [isMetaTxEnabled, setIsMetaTxEnabled] = useState(false);
   const [txLoadingStep, setTxLoadingStep] = useState(0);
+  const [signing, setSigning] = useState(false);
 
-  const { active, account, library } = useActiveWeb3React();
+  const { active, account, library, connector } = useActiveWeb3React();
   // Reducers
   useInjectReducer({ key: registerWizardKey, reducer: registerWizardReducer });
   useInjectReducer({ key: registerKey, reducer: registerReducer });
@@ -251,21 +255,45 @@ const Register = () => {
     }
   };
 
-  const signTerms = useCallback(async () => {
+  const signTerms = async () => {
     if (!!library && !!account) {
+      setSigning(true);
       try {
-        await library
-          .getSigner(account)
-          .signMessage(MESSAGE_TO_SIGN)
-          .then(async (signature) => {
-            setSign(signature);
-            dispatch(chooseStep(step + 1));
-          });
+        if (connector instanceof WalletConnectConnector) {
+          const rawMessage = MESSAGE_TO_SIGN;
+          const messageLength = new Blob([rawMessage]).size;
+          const message = toUtf8Bytes(
+            "\x19Ethereum Signed Message:\n" + messageLength + rawMessage
+          );
+          const hashedMessage = keccak256(message);
+
+          connector.walletConnectProvider.connector
+            .signMessage([account.toLowerCase(), hashedMessage])
+            .then((signature) => {
+              setSign(signature);
+              setSigning(false);
+              dispatch(chooseStep(step + 1));
+            })
+            .catch((error) => {
+              setSigning(false);
+              console.error("Signature Rejected");
+            });
+        } else {
+          await library
+            .getSigner(account)
+            .signMessage(MESSAGE_TO_SIGN)
+            .then(async (signature) => {
+              setSign(signature);
+              setSigning(false);
+              dispatch(chooseStep(step + 1));
+            });
+        }
       } catch (error) {
-        console.error("Transaction Failed");
+        setSigning(false);
+        console.error("Signature Failed");
       }
     }
-  }, [library, account, setSign, dispatch, step]);
+  };
 
   const goBack = () => {
     dispatch(chooseStep(step - 1));
@@ -860,8 +888,8 @@ const Register = () => {
           type="button"
           onClick={signTerms}
           className="proceed-btn"
-          disabled={loadingTx}
-          loading={loadingTx}
+          disabled={signing}
+          loading={signing}
         >
           I'm in
         </Button>

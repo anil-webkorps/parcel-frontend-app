@@ -11,9 +11,12 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 // import { BigNumber } from "@ethersproject/bignumber";
 import { parseEther } from "@ethersproject/units";
+import { arrayify } from "@ethersproject/bytes";
 import { addDays, format } from "date-fns";
 import { EthersAdapter } from "contract-proxy-kit";
 import { ethers } from "ethers";
+import { LedgerConnector } from "@web3-react/ledger-connector";
+import { TrezorConnector } from "@web3-react/trezor-connector";
 
 import { useActiveWeb3React, useContract } from "hooks";
 import {
@@ -51,7 +54,7 @@ const {
 
 export default function useMassPayout(props = {}) {
   const { tokenDetails } = props;
-  const { account, library } = useActiveWeb3React();
+  const { account, library, connector } = useActiveWeb3React();
 
   const [loadingTx, setLoadingTx] = useState(false);
   const [txHash, setTxHash] = useState("");
@@ -60,6 +63,7 @@ export default function useMassPayout(props = {}) {
   const [recievers, setRecievers] = useState();
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+  const [isHardwareWallet, setIsHardwareWallet] = useState(false);
 
   useInjectReducer({ key: gasPriceKey, reducer: gasPriceReducer });
 
@@ -86,6 +90,19 @@ export default function useMassPayout(props = {}) {
       // get gas prices
       dispatch(getGasPrice());
   }, [dispatch, averageGasPrice]);
+
+  useEffect(() => {
+    if (connector) {
+      if (
+        connector instanceof LedgerConnector ||
+        connector instanceof TrezorConnector
+      ) {
+        setIsHardwareWallet(true);
+      } else {
+        setIsHardwareWallet(false);
+      }
+    }
+  }, [connector]);
 
   const encodeMultiSendCallData = (transactions, ethLibAdapter) => {
     const standardizedTxs = transactions.map(standardizeTransaction);
@@ -212,7 +229,52 @@ export default function useMassPayout(props = {}) {
     });
   };
 
-  const signTransaction = async (
+  let ethSigner = async function (account, safeTxHash) {
+    return new Promise(function (resolve, reject) {
+      // const digest = TypedDataUtils.encodeDigest(typedData);
+      try {
+        const signer = library.getSigner(account);
+
+        signer
+          .signMessage(arrayify(safeTxHash))
+          .then((signature) => {
+            let sigV = parseInt(signature.slice(-2), 16);
+            // Metamask with ledger returns v = 01, this is not valid for ethereum
+            // For ethereum valid V is 27 or 28
+            // In case V = 0 or 01 we add it to 27 and then add 4
+            // Adding 4 is required to make signature valid for safe contracts:
+            // https://gnosis-safe.readthedocs.io/en/latest/contracts/signatures.html#eth-sign-signature
+            switch (sigV) {
+              case 0:
+              case 1:
+                sigV += 31;
+                break;
+              case 27:
+              case 28:
+                sigV += 4;
+                break;
+              default:
+                throw new Error("Invalid signature");
+            }
+
+            resolve(signature.slice(0, -2) + sigV.toString(16));
+          })
+          .catch((err) => {
+            console.error(err);
+            setLoadingTx(false);
+            setApproving(false);
+            setRejecting(false);
+          });
+      } catch (err) {
+        setLoadingTx(false);
+        setApproving(false);
+        setRejecting(false);
+        return reject(err);
+      }
+    });
+  };
+
+  const eip712Signer = async (
     to,
     value,
     data,
@@ -293,18 +355,7 @@ export default function useMassPayout(props = {}) {
         setConfirmTxData("");
 
         try {
-          const approvedSign = await signTransaction(
-            to,
-            value,
-            data,
-            operation,
-            safeTxGas,
-            baseGas,
-            gasPrice,
-            gasToken,
-            refundReceiver,
-            nonce
-          );
+          let approvedSign;
 
           const contractTransactionHash = await proxyContract.getTransactionHash(
             to,
@@ -318,6 +369,23 @@ export default function useMassPayout(props = {}) {
             executor || ZERO_ADDRESS,
             nonce
           );
+
+          if (isHardwareWallet) {
+            approvedSign = await ethSigner(account, contractTransactionHash);
+          } else {
+            approvedSign = await eip712Signer(
+              to,
+              value,
+              data,
+              operation,
+              safeTxGas,
+              baseGas,
+              gasPrice,
+              gasToken,
+              refundReceiver,
+              nonce
+            );
+          }
 
           const txData = {
             // POST to gnosis
@@ -394,6 +462,7 @@ export default function useMassPayout(props = {}) {
         setTxData("");
 
         try {
+          let approvedSign;
           // estimate using api
           const estimateResponse = await fetch(
             `${gnosisSafeTransactionV2Endpoint}${safe}/transactions/estimate/`,
@@ -434,18 +503,22 @@ export default function useMassPayout(props = {}) {
           );
 
           if (isMetaEnabled) {
-            const approvedSign = await signTransaction(
-              to,
-              value,
-              data,
-              operation,
-              safeTxGas,
-              baseGas,
-              gasPrice,
-              gasToken,
-              refundReceiver,
-              nonce
-            );
+            if (isHardwareWallet) {
+              approvedSign = await ethSigner(account, contractTransactionHash);
+            } else {
+              approvedSign = await eip712Signer(
+                to,
+                value,
+                data,
+                operation,
+                safeTxGas,
+                baseGas,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                nonce
+              );
+            }
 
             const confirmingAccounts = isApproved
               ? [
@@ -468,13 +541,7 @@ export default function useMassPayout(props = {}) {
                       }
                   ),
                 ].filter(Boolean);
-            // const confirmingAccounts = [
-            //   { owner: account, signature: approvedSign },
-            //   ...confirmations.map(({ owner, signature }) => ({
-            //     owner,
-            //     signature,
-            //   })),
-            // ];
+
             confirmingAccounts.sort((a, b) =>
               a.owner.toLowerCase() > b.owner.toLowerCase() ? 1 : -1
             );
@@ -734,18 +801,40 @@ export default function useMassPayout(props = {}) {
           const nonce = lastUsedNonce === null ? 0 : lastUsedNonce + 1;
           if (!isMultiOwner) {
             if (isMetaEnabled) {
-              const approvedSign = await signTransaction(
-                to,
-                valueWei,
-                data,
-                operation,
-                0, // set gasLimit as 0 for sign
-                baseGasEstimate,
-                gasPrice,
-                gasToken,
-                refundReceiver,
-                nonce
-              );
+              let approvedSign;
+
+              if (isHardwareWallet) {
+                const contractTransactionHash = await proxyContract.getTransactionHash(
+                  to,
+                  valueWei,
+                  data,
+                  operation,
+                  0,
+                  baseGasEstimate,
+                  gasPrice,
+                  gasToken,
+                  executor,
+                  nonce
+                );
+                approvedSign = await ethSigner(
+                  account,
+                  contractTransactionHash
+                );
+              } else {
+                approvedSign = await eip712Signer(
+                  to,
+                  valueWei,
+                  data,
+                  operation,
+                  0, // set gasLimit as 0 for sign
+                  baseGasEstimate,
+                  gasPrice,
+                  gasToken,
+                  refundReceiver,
+                  nonce
+                );
+              }
+
               setTxData({
                 to: ownerSafeAddress,
                 from: ownerSafeAddress,
@@ -786,20 +875,8 @@ export default function useMassPayout(props = {}) {
             }
           } else {
             // Multiowner
+            let approvedSign;
 
-            // Create new tx
-            const approvedSign = await signTransaction(
-              to,
-              valueWei,
-              data,
-              operation,
-              0, // set gasLimit as 0 for sign
-              baseGasEstimate,
-              gasPrice,
-              gasToken,
-              refundReceiver,
-              createNonce
-            );
             const contractTransactionHash = await proxyContract.getTransactionHash(
               to,
               valueWei,
@@ -812,6 +889,24 @@ export default function useMassPayout(props = {}) {
               executor,
               createNonce
             );
+
+            if (isHardwareWallet) {
+              approvedSign = await ethSigner(account, contractTransactionHash);
+            } else {
+              // Create new tx
+              approvedSign = await eip712Signer(
+                to,
+                valueWei,
+                data,
+                operation,
+                0, // set gasLimit as 0 for sign
+                baseGasEstimate,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                createNonce
+              );
+            }
 
             setTxData({
               // safe: ownerSafeAddress,
