@@ -17,6 +17,7 @@ import { EthersAdapter } from "contract-proxy-kit";
 import { ethers } from "ethers";
 import { LedgerConnector } from "@web3-react/ledger-connector";
 import { TrezorConnector } from "@web3-react/trezor-connector";
+import { InjectedConnector } from "@web3-react/injected-connector";
 
 import { useActiveWeb3React, useContract } from "hooks";
 import {
@@ -192,38 +193,27 @@ export default function useMassPayout(props = {}) {
   };
 
   let signTypedData = async function (account, typedData) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(async function (resolve, reject) {
       // const digest = TypedDataUtils.encodeDigest(typedData);
       try {
         const signer = library.getSigner(account);
 
-        signer
-          .getAddress()
-          .then((address) =>
-            library
-              .send("eth_signTypedData_v3", [
-                address,
-                JSON.stringify({
-                  domain: typedData.domain,
-                  types: typedData.types,
-                  message: typedData.message,
-                  primaryType: "SafeTx",
-                }),
-              ])
-              .then((signature) => {
-                resolve(signature.replace("0x", ""));
-              })
-          )
-          .catch((err) => {
-            console.error(err);
-            setLoadingTx(false);
-            setApproving(false);
-            setRejecting(false);
-          });
+        const address = await signer.getAddress();
+        const signature = await library.send("eth_signTypedData_v3", [
+          address,
+          JSON.stringify({
+            domain: typedData.domain,
+            types: typedData.types,
+            message: typedData.message,
+            primaryType: "SafeTx",
+          }),
+        ]);
+
+        if (signature) {
+          console.log({ signature });
+          resolve(signature.replace("0x", ""));
+        }
       } catch (err) {
-        setLoadingTx(false);
-        setApproving(false);
-        setRejecting(false);
         return reject(err);
       }
     });
@@ -284,7 +274,8 @@ export default function useMassPayout(props = {}) {
     gasPrice,
     gasToken,
     refundReceiver,
-    nonce
+    nonce,
+    contractTransactionHash
   ) => {
     const domain = {
       verifyingContract: ownerSafeAddress,
@@ -326,9 +317,32 @@ export default function useMassPayout(props = {}) {
     };
 
     let signatureBytes = "0x";
-    const signature = await signTypedData(account, typedData);
 
-    return signatureBytes + signature;
+    let signature;
+
+    try {
+      signature = await signTypedData(account, typedData);
+      return signatureBytes + signature;
+    } catch (err) {
+      console.error(err);
+      try {
+        // Metamask with ledger or trezor doesn't work with eip712
+        // In this case, show a simple eth_sign signature
+        if (
+          connector instanceof InjectedConnector &&
+          err.message.includes("Not supported on this device")
+        ) {
+          const signature = await ethSigner(account, contractTransactionHash);
+          return signatureBytes + signature;
+        } else {
+          setLoadingTx(false);
+          setApproving(false);
+          setRejecting(false);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
   };
 
   const confirmMassPayout = async ({
@@ -383,7 +397,8 @@ export default function useMassPayout(props = {}) {
               gasPrice,
               gasToken,
               refundReceiver,
-              nonce
+              nonce,
+              contractTransactionHash
             );
           }
 
@@ -410,8 +425,6 @@ export default function useMassPayout(props = {}) {
           setLoadingTx(false);
           console.log(err.message);
         }
-
-        setLoadingTx(false);
       } catch (err) {
         setLoadingTx(false);
         console.error(err);
@@ -516,7 +529,8 @@ export default function useMassPayout(props = {}) {
                 gasPrice,
                 gasToken,
                 refundReceiver,
-                nonce
+                nonce,
+                contractTransactionHash
               );
             }
 
@@ -673,8 +687,6 @@ export default function useMassPayout(props = {}) {
           setLoadingTx(false);
           console.log(err.message);
         }
-
-        setLoadingTx(false);
       } catch (err) {
         setLoadingTx(false);
         console.error(err);
@@ -803,19 +815,20 @@ export default function useMassPayout(props = {}) {
             if (isMetaEnabled) {
               let approvedSign;
 
+              const contractTransactionHash = await proxyContract.getTransactionHash(
+                to,
+                valueWei,
+                data,
+                operation,
+                0,
+                baseGasEstimate,
+                gasPrice,
+                gasToken,
+                executor,
+                nonce
+              );
+
               if (isHardwareWallet) {
-                const contractTransactionHash = await proxyContract.getTransactionHash(
-                  to,
-                  valueWei,
-                  data,
-                  operation,
-                  0,
-                  baseGasEstimate,
-                  gasPrice,
-                  gasToken,
-                  executor,
-                  nonce
-                );
                 approvedSign = await ethSigner(
                   account,
                   contractTransactionHash
@@ -831,7 +844,8 @@ export default function useMassPayout(props = {}) {
                   gasPrice,
                   gasToken,
                   refundReceiver,
-                  nonce
+                  nonce,
+                  contractTransactionHash
                 );
               }
 
@@ -904,7 +918,8 @@ export default function useMassPayout(props = {}) {
                 gasPrice,
                 gasToken,
                 refundReceiver,
-                createNonce
+                createNonce,
+                contractTransactionHash
               );
             }
 
@@ -931,8 +946,6 @@ export default function useMassPayout(props = {}) {
           setLoadingTx(false);
           console.log(err.message);
         }
-
-        setLoadingTx(false);
       } catch (err) {
         setLoadingTx(false);
         console.error(err);

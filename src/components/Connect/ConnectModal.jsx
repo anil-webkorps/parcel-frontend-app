@@ -19,7 +19,7 @@ const modalStyles = `
 `;
 
 const ConnectToWalletModal = (props) => {
-  const { connector, activate, error } = useWeb3React();
+  const { connector, activate, error, active } = useWeb3React();
   const [showInfo, setShowInfo] = useState(false);
   const { handleHide, show, triedEager } = props;
 
@@ -36,6 +36,12 @@ const ConnectToWalletModal = (props) => {
 
   // handle logic to connect in reaction to certain events on the injected ethereum provider, if it exists
   useInactiveListener(!triedEager || !!activatingConnector);
+
+  useEffect(() => {
+    if (connector && active && !error) {
+      handleHide();
+    }
+  }, [connector, active, error, handleHide]);
 
   return (
     <Modal isOpen={show} centered>
