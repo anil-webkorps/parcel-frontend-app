@@ -13,7 +13,6 @@ import { getTokens } from "store/tokens/actions";
 import {
   makeSelectLoading as makeSelectLoadingTokens,
   makeSelectTokenList,
-  makeSelectTokenIcons,
 } from "store/tokens/selectors";
 import { Card } from "components/common/Card";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
@@ -37,7 +36,6 @@ export default function AccountCard() {
   // Selectors
   const loading = useSelector(makeSelectLoadingTokens());
   const tokenList = useSelector(makeSelectTokenList());
-  const icons = useSelector(makeSelectTokenIcons());
   // const error = useSelector(makeSelectError());
 
   const [totalBalance, setTotalBalance] = useState("0.00");
@@ -46,10 +44,10 @@ export default function AccountCard() {
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
 
   useEffect(() => {
-    if (ownerSafeAddress && !icons) {
+    if (ownerSafeAddress) {
       dispatch(getTokens(ownerSafeAddress));
     }
-  }, [ownerSafeAddress, dispatch, icons]);
+  }, [ownerSafeAddress, dispatch]);
 
   useEffect(() => {
     if (tokenList && tokenList.length > 0) {
