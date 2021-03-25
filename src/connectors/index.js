@@ -9,8 +9,8 @@ import { FortmaticConnector } from "@web3-react/fortmatic-connector";
 import MetamaskIcon from "assets/icons/wallets/icon-metamask.svg";
 // import WalletConnectIcon from "assets/icons/wallets/icon-wallet-connect.svg";
 // import FortmaticIcon from "assets/icons/wallets/icon-fortmatic.svg";
-import LedgerIcon from "assets/icons/wallets/icon-ledger.svg";
-import TrezorIcon from "assets/icons/wallets/icon-trezor.svg";
+// import LedgerIcon from "assets/icons/wallets/icon-ledger.svg";
+// import TrezorIcon from "assets/icons/wallets/icon-trezor.svg";
 import { networkId } from "constants/networks";
 
 const POLLING_INTERVAL = 12000;
