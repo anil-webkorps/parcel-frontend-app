@@ -7,8 +7,8 @@ import { TrezorConnector } from "@web3-react/trezor-connector";
 import { FortmaticConnector } from "@web3-react/fortmatic-connector";
 
 import MetamaskIcon from "assets/icons/wallets/icon-metamask.svg";
-import WalletConnectIcon from "assets/icons/wallets/icon-wallet-connect.svg";
-import FortmaticIcon from "assets/icons/wallets/icon-fortmatic.svg";
+// import WalletConnectIcon from "assets/icons/wallets/icon-wallet-connect.svg";
+// import FortmaticIcon from "assets/icons/wallets/icon-fortmatic.svg";
 import LedgerIcon from "assets/icons/wallets/icon-ledger.svg";
 import TrezorIcon from "assets/icons/wallets/icon-trezor.svg";
 import { networkId } from "constants/networks";
@@ -74,10 +74,10 @@ export const connectorsByName = {
     connector: injected,
     icon: MetamaskIcon,
   },
-  [ConnectorNames.WalletConnect]: {
-    connector: walletconnect,
-    icon: WalletConnectIcon,
-  },
+  // [ConnectorNames.WalletConnect]: {
+  //   connector: walletconnect,
+  //   icon: WalletConnectIcon,
+  // },
   [ConnectorNames.Ledger]: {
     connector: ledger,
     icon: LedgerIcon,
@@ -86,8 +86,8 @@ export const connectorsByName = {
     connector: trezor,
     icon: TrezorIcon,
   },
-  [ConnectorNames.Fortmatic]: {
-    connector: fortmatic,
-    icon: FortmaticIcon,
-  },
+  // [ConnectorNames.Fortmatic]: {
+  //   connector: fortmatic,
+  //   icon: FortmaticIcon,
+  // },
 };
