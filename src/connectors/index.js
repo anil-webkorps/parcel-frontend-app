@@ -78,14 +78,14 @@ export const connectorsByName = {
   //   connector: walletconnect,
   //   icon: WalletConnectIcon,
   // },
-  [ConnectorNames.Ledger]: {
-    connector: ledger,
-    icon: LedgerIcon,
-  },
-  [ConnectorNames.Trezor]: {
-    connector: trezor,
-    icon: TrezorIcon,
-  },
+  // [ConnectorNames.Ledger]: {
+  //   connector: ledger,
+  //   icon: LedgerIcon,
+  // },
+  // [ConnectorNames.Trezor]: {
+  //   connector: trezor,
+  //   icon: TrezorIcon,
+  // },
   // [ConnectorNames.Fortmatic]: {
   //   connector: fortmatic,
   //   icon: FortmaticIcon,
