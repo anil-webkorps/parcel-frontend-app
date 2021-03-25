@@ -247,7 +247,8 @@ export default function useMassPayout(props = {}) {
                 throw new Error("Invalid signature");
             }
 
-            resolve(signature.slice(0, -2) + sigV.toString(16));
+            let finalSignature = signature.slice(0, -2) + sigV.toString(16);
+            resolve(finalSignature.replace("0x", ""));
           })
           .catch((err) => {
             console.error(err);
@@ -567,6 +568,8 @@ export default function useMassPayout(props = {}) {
                 ""
               );
             }
+
+            console.log({ signatureBytes });
 
             const txData = {
               // POST to gnosis
