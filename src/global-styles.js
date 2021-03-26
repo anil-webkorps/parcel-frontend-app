@@ -72,6 +72,7 @@ const GlobalStyle = createGlobalStyle`
     width: 100%;
     line-height: 1.5;
     margin: 0;
+    font-size: 10px;
   }
 
   p, h1, h2, h3, h4, h5, h6 {
@@ -114,6 +115,10 @@ const GlobalStyle = createGlobalStyle`
     background-color: #fafafa;
     min-height: 100%;
     min-width: 100%;
+  }
+
+  .svg-inline--fa {
+    font-size: 1.6em;
   }
 
   // Scaling/zooming depending on screen width

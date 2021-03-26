@@ -3,7 +3,7 @@ import styled from "styled-components/macro";
 export default styled.div`
   display: grid;
   height: 100vh;
-  grid-template-columns: 0.8fr 1fr 1fr 1fr;
+  grid-template-columns: 20% 1fr 1fr 1fr;
   grid-template-rows: 0.2fr 3fr;
   grid-template-areas:
     "sidebar nav nav nav"

@@ -2,12 +2,12 @@ import styled from "styled-components/macro";
 
 export default styled.div`
   grid-area: sidebar;
-  max-width: 250px;
+  width: 100%;
   background-color: #f7f7f8;
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-right: 1px solid #dddcdc;
+  border-right: 0.1em solid #dddcdc;
   position: relative;
 
   &.sidebar-responsive {
@@ -16,13 +16,14 @@ export default styled.div`
     z-index: 2;
     left: 0;
     height: 100vh;
+    max-width: 30em;
   }
 
   .close-btn {
     display: none;
     position: absolute;
-    right: 0.5em;
-    top: 0.5em;
+    right: 2.5em;
+    top: 3.2em;
     cursor: pointer;
   }
 
@@ -31,61 +32,60 @@ export default styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 200px;
+    width: 20em;
   }
 
   .settings-container {
-    padding: 0 10px;
+    padding: 0 2.5em;
     width: 100%;
   }
 
   .settings {
-    min-height: 50px;
+    min-height: 5em;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 10px 0 25px;
-    padding: 7px 15px;
-    border-radius: 10px;
-    border: solid 1px #dddcdc;
+    margin: 1em 0 2em;
+    padding: 0.7em 1.5em;
+    border-radius: 1em;
+    border: solid 0.1em #dddcdc;
     background-color: #ffffff;
     cursor: pointer;
     position: relative;
 
     .company-title {
-      margin-bottom: 5px;
-      font-size: 14px;
+      margin-bottom: 0.5em;
+      font-size: 1.4em;
       font-weight: 900;
       font-stretch: normal;
       font-style: normal;
       line-height: normal;
-      letter-spacing: 0.7px;
+      letter-spacing: normal;
       text-align: left;
       color: #373737;
     }
 
     .company-subtitle {
-      font-size: 12px;
+      font-size: 1.2em;
       font-weight: 900;
       font-stretch: normal;
       font-style: normal;
       line-height: normal;
-      letter-spacing: 0.6px;
+      letter-spacing: normal;
       text-align: left;
       color: #aaaaaa;
     }
 
     .settings-dropdown {
       position: absolute;
-      top: 60px;
+      top: 6em;
       left: 0;
       width: 100%;
-      max-width: 230px;
-      min-height: 152px;
-      border-radius: 10px;
-      box-shadow: 10px 10px 20px 0 rgba(170, 170, 170, 0.2);
-      border: solid 1px #dddcdc;
+      max-width: 100%;
+      border-radius: 1em;
+      box-shadow: 1em 1em 20px 0 rgba(170, 170, 170, 0.2);
+      border: solid 0.1em #dddcdc;
       background-color: #ffffff;
       transition: opacity 0.15s linear;
       opacity: 0;
@@ -97,20 +97,22 @@ export default styled.div`
         visibility: visible;
         opacity: 1;
         height: auto;
+        z-index: 3;
       }
 
       .settings-option {
-        padding: 15px;
-        border-bottom: 1px solid #f1f0fd;
+        padding: 1.5em;
+        border-bottom: 0.1em solid #f1f0fd;
         display: flex;
         align-items: center;
 
         .icon {
           margin-right: 1em;
+          font-size: 1.6em;
         }
 
         .name {
-          font-size: 14px;
+          font-size: 1.4em;
           font-weight: 900;
           font-stretch: normal;
           font-style: normal;
@@ -118,11 +120,11 @@ export default styled.div`
           letter-spacing: normal;
           text-align: left;
           color: #373737;
-          padding-top: 5px;
+          padding-top: 0.3em;
         }
 
         &:hover {
-          opacity: 0.75;
+          opacity: 0.85;
         }
       }
 
@@ -138,51 +140,50 @@ export default styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    grid-gap: 10px;
-    padding: 0 10px;
+    grid-gap: 0.5em;
+    padding: 0 2.5em;
   }
 
   .menu-item {
     display: flex;
     align-items: center;
-    padding: 15px;
+    padding: 1.5em;
     width: 100%;
     color: #373737;
 
     &.menu-item-highlighted {
       width: 100%;
-      padding: 15px;
-      border-radius: 10px;
+      padding: 1.5em;
+      border-radius: 1em;
       background-color: #e3e1fc;
       color: #7367f0;
     }
 
     .icon {
-      margin-right: 1em;
+      margin-right: 1.5em;
     }
 
     .name {
-      font-size: 16px;
+      padding-top: 0.4em;
+      font-size: 1.6em;
       font-weight: 900;
       font-stretch: normal;
       font-style: normal;
       line-height: normal;
-      letter-spacing: 0.8px;
+      letter-spacing: normal;
       text-align: left;
-      padding-top: 5px;
     }
 
     &:hover {
       cursor: pointer;
-      border-radius: 10px;
-      // background-color: #e3e1fc;
-      opacity: 0.75;
+      border-radius: 1em;
+      opacity: 0.85;
     }
   }
 
   .invite-owners {
-    min-height: 50px;
-    padding: 15px;
+    min-height: 5em;
+    padding: 1em;
     background-color: #7367f0;
     position: absolute;
     bottom: 0;
@@ -197,8 +198,8 @@ export default styled.div`
     }
 
     .name {
-      padding-top: 5px;
-      font-size: 16px;
+      padding-top: 0.4em;
+      font-size: 1.6em;
       font-weight: 900;
       font-stretch: normal;
       font-style: normal;
