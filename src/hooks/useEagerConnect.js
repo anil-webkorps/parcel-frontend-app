@@ -23,14 +23,15 @@ export default function useEagerConnect() {
         }
       }
     });
-  }, [activate]); // intentionally only running on mount (make sure it's only mounted once :))
+  }, []); // eslint-disable-line
+  // intentionally only running on mount (make sure it's only mounted once :))
 
   // if the connection worked, wait until we get confirmation of that to flip the flag
   useEffect(() => {
-    if (active) {
+    if (!tried && active) {
       setTried(true);
     }
-  }, [active]);
+  }, [tried, active]);
 
   return tried;
 }

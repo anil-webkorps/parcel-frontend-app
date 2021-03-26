@@ -1,53 +1,92 @@
 import { useState, useEffect } from "react";
 import { useWeb3React } from "@web3-react/core";
+import { connectModal as reduxModal } from "redux-modal";
 
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import Loading from "components/common/Loading";
-import { supportedWallets } from "constants/index";
+// import { supportedWallets } from "constants/index";
 import { getErrorMessage } from "utils/web3-helpers";
+import { useInactiveListener } from "hooks/index";
+import { Card, WalletContainer } from "./styles";
+import { connectorsByName } from "connectors";
 
-import { Card } from "./styles";
+export const MODAL_NAME = "connect-wallet-modal";
+
+const modalStyles = `
+  .modal-dialog {
+    max-width: 700px;
+  }
+`;
 
 const ConnectToWalletModal = (props) => {
-  const { connector, activate, active, error, setError } = useWeb3React();
+  const { connector, activate, error, active } = useWeb3React();
   const [showInfo, setShowInfo] = useState(false);
-  const [selectedConnector, setSelectedConnector] = useState(null);
-  const { handleToggle, show } = props;
+  const { handleHide, show, triedEager } = props;
+
+  // handle logic to recognize the connector currently being activated
+  const [activatingConnector, setActivatingConnector] = useState();
+  useEffect(() => {
+    if (activatingConnector && activatingConnector === connector) {
+      setActivatingConnector(undefined);
+    }
+  }, [activatingConnector, connector]);
+
+  // handle logic to eagerly connect to the injected ethereum provider, if it exists and has granted access already
+  // const triedEager = useEagerConnect();
+
+  // handle logic to connect in reaction to certain events on the injected ethereum provider, if it exists
+  useInactiveListener(!triedEager || !!activatingConnector);
 
   useEffect(() => {
     if (connector && active && !error) {
-      console.log("Successfully connected");
-      handleToggle();
+      handleHide();
     }
-  }, [selectedConnector, connector, active, error, handleToggle]);
-
-  const activateWallet = (connector) => {
-    setError(null);
-    activate(connector);
-    setSelectedConnector(connector);
-  };
+  }, [connector, active, error, handleHide]);
 
   return (
     <Modal isOpen={show} centered>
-      <ModalHeader toggle={handleToggle}>
+      <style>{modalStyles}</style>
+      <ModalHeader toggle={handleHide}>
         <div>Select a Wallet to Connect to Parcel</div>
       </ModalHeader>
       <ModalBody>
-        {supportedWallets.map(({ id, name, icon, connector }) => (
-          <div key={id}>
-            <Card onClick={() => activateWallet(connector)}>
-              <div>
-                <img src={icon} alt={name} />
-              </div>
+        <WalletContainer>
+          {Object.keys(connectorsByName).map((name) => {
+            const { connector: currentConnector, icon } = connectorsByName[
+              name
+            ];
+            const activating = currentConnector === activatingConnector;
+            const connected = currentConnector === connector;
+            const disabled =
+              !triedEager || !!activatingConnector || connected || !!error;
 
-              <div className="ml-3">{name}</div>
+            return (
+              <Card
+                style={{
+                  cursor: disabled ? "unset" : "pointer",
+                }}
+                key={name}
+                onClick={() => {
+                  setActivatingConnector(currentConnector);
+                  activate(currentConnector);
+                }}
+              >
+                <div>
+                  <img src={icon} alt={name} width="40px" height="40px" />
+                </div>
 
-              {selectedConnector === connector && !error && !active && (
-                <Loading className="ml-3" color="primary" />
-              )}
-            </Card>
-          </div>
-        ))}
+                <div className="wallet-details">
+                  <div className="wallet-name">
+                    <span>{name}</span>
+                    {activating && <Loading className="ml-3" color="primary" />}
+                  </div>
+
+                  {connected && <i className="wallet-selected">selected</i>}
+                </div>
+              </Card>
+            );
+          })}
+        </WalletContainer>
         {error && (
           <div className="alert alert-danger mt-4">
             {getErrorMessage(error)}
@@ -83,4 +122,4 @@ const ConnectToWalletModal = (props) => {
   );
 };
 
-export default ConnectToWalletModal;
+export default reduxModal({ name: MODAL_NAME })(ConnectToWalletModal);

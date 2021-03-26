@@ -2,6 +2,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { hashMessage } from "@ethersproject/hash";
+import { toUtf8Bytes } from "@ethersproject/strings";
+import { keccak256 } from "@ethersproject/keccak256";
+import { recoverAddress } from "@ethersproject/transactions";
+import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
+
 import {
   faArrowLeft,
   faArrowRight,
@@ -10,7 +16,6 @@ import {
   faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { cryptoUtils } from "parcel-sdk";
-import { utils } from "ethers";
 import { show } from "redux-modal";
 
 import Container from "react-bootstrap/Container";
@@ -42,7 +47,6 @@ import {
   chooseSafe,
   getSafeOwners,
 } from "store/loginWizard/actions";
-import { makeSelectFlag } from "store/login/selectors";
 import {
   setOwnerDetails,
   setOwnersAndThreshold,
@@ -142,10 +146,10 @@ const Login = () => {
   const [encryptionKey, setEncryptionKey] = useLocalStorage("ENCRYPTION_KEY"); // eslint-disable-line
   const [hasAlreadySigned, setHasAlreadySigned] = useState(false);
   const [loadingAccount, setLoadingAccount] = useState(true);
-  const [finalSubmitted, setFinalSubmitted] = useState(false);
   const [safeDetails, setSafeDetails] = useState([]);
+  const [signing, setSigning] = useState(false);
 
-  const { active, account, library } = useActiveWeb3React();
+  const { active, account, library, connector } = useActiveWeb3React();
 
   // Reducers
   useInjectReducer({ key: loginWizardKey, reducer: loginWizardReducer });
@@ -168,7 +172,6 @@ const Login = () => {
   const getSafesLoading = useSelector(makeSelectLoading());
   const flow = useSelector(makeSelectFlow());
   const chosenSafeAddress = useSelector(makeSelectChosenSafeAddress());
-  const flag = useSelector(makeSelectFlag());
   const fetching = useSelector(makeSelectFetchingSafeDetails());
   const gnosisSafeOwners = useSelector(makeSelectGnosisSafeOwners());
   const gnosisSafeThreshold = useSelector(makeSelectGnosisSafeThreshold());
@@ -208,16 +211,19 @@ const Login = () => {
 
   useEffect(() => {
     if (sign) {
-      const msgHash = utils.hashMessage(MESSAGE_TO_SIGN);
-      const recoveredAddress = utils.recoverAddress(msgHash, sign);
+      const msgHash = hashMessage(MESSAGE_TO_SIGN);
+      const recoveredAddress = recoverAddress(msgHash, sign);
+
       if (recoveredAddress !== account) {
         setHasAlreadySigned(false);
         reset({});
         setSign("");
         dispatch(chooseStep(STEPS.ZERO));
+      } else {
+        setHasAlreadySigned(true);
       }
     }
-  }, [reset, account, dispatch, sign, setSign]);
+  }, [reset, account, dispatch, sign, setSign, connector]);
 
   useEffect(() => {
     reset({
@@ -228,13 +234,6 @@ const Login = () => {
 
   useEffect(() => {
     if (step === STEPS.ONE && account) {
-      if (sign) {
-        const msgHash = utils.hashMessage(MESSAGE_TO_SIGN);
-        const recoveredAddress = utils.recoverAddress(msgHash, sign);
-        if (recoveredAddress === account) {
-          setHasAlreadySigned(true);
-        }
-      }
       dispatch(fetchSafes(account));
     }
     if (step === STEPS.TWO && account) {
@@ -244,32 +243,13 @@ const Login = () => {
         dispatch(getParcelSafes(account));
       }
     }
-  }, [step, dispatch, account, sign, flow]);
+  }, [step, dispatch, account, flow]);
 
   useEffect(() => {
     if (step === STEPS.THREE && flow === FLOWS.IMPORT) {
       dispatch(getSafeOwners(chosenSafeAddress));
     }
   }, [step, dispatch, chosenSafeAddress, flow]);
-
-  useEffect(() => {
-    if (finalSubmitted) {
-      signup(1); // one owner
-    }
-  }, [finalSubmitted]); //eslint-disable-line
-
-  useEffect(() => {
-    // when an address is clicked in import flow,
-    // the login api is called, and it returns
-    // 145 => user not registered with parcel
-    // In this case, we take them through the register flow (with existing safe)
-    if (flag === 145) {
-      // dispatch(selectFlow(FLOWS.IMPORT));
-      dispatch(selectFlow(FLOWS.IMPORT_INDIVIDUAL)); // remove this line later
-      dispatch(chooseStep(STEPS.THREE));
-      // goNext();
-    }
-  }, [flag, dispatch]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -285,33 +265,48 @@ const Login = () => {
 
   const onSubmit = async (values) => {
     dispatch(updateForm(values));
-
-    if (
-      flow === FLOWS.IMPORT_INDIVIDUAL &&
-      step === getStepsCountByFlow(FLOWS.IMPORT_INDIVIDUAL)
-    ) {
-      setFinalSubmitted(true);
-      // await signup(1); // only one owner
-    } else {
-      goNext();
-    }
+    goNext();
   };
 
-  const signTerms = useCallback(async () => {
+  const signTerms = async () => {
     if (!!library && !!account) {
+      setSigning(true);
       try {
-        await library
-          .getSigner(account)
-          .signMessage(MESSAGE_TO_SIGN)
-          .then((signature) => {
-            setSign(signature);
-            goNext();
-          });
+        if (connector instanceof WalletConnectConnector) {
+          const rawMessage = MESSAGE_TO_SIGN;
+          const messageLength = new Blob([rawMessage]).size;
+          const message = toUtf8Bytes(
+            "\x19Ethereum Signed Message:\n" + messageLength + rawMessage
+          );
+          const hashedMessage = keccak256(message);
+
+          connector.walletConnectProvider.connector
+            .signMessage([account.toLowerCase(), hashedMessage])
+            .then((signature) => {
+              setSign(signature);
+              setSigning(false);
+              goNext();
+            })
+            .catch((error) => {
+              setSigning(false);
+              console.error("Signature Rejected");
+            });
+        } else {
+          await library
+            .getSigner(account)
+            .signMessage(MESSAGE_TO_SIGN)
+            .then((signature) => {
+              setSign(signature);
+              setSigning(false);
+              goNext();
+            });
+        }
       } catch (error) {
-        console.error("Transaction Failed");
+        console.error("Signature Rejected");
+        setSigning(false);
       }
     }
-  }, [library, account, setSign, dispatch, formData]); //eslint-disable-line
+  };
 
   const goBack = () => {
     dispatch(chooseStep(step - 1));
@@ -678,6 +673,8 @@ const Login = () => {
               type="button"
               onClick={signTerms}
               className="mx-auto d-block proceed-btn"
+              loading={signing}
+              disabled={signing}
             >
               I'm in
             </Button>

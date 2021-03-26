@@ -104,7 +104,6 @@ export default function useSocket(props) {
       socketRef.current.on(
         `${safeAddress}_${networkId}_notifications`,
         (message) => {
-          console.log({ message });
           if (
             message.notifications.length > 0 &&
             message.notifications[0].type === 1

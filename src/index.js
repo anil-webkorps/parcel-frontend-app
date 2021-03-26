@@ -15,7 +15,7 @@ import { Web3ReactProvider } from "@web3-react/core";
 import { persistStore } from "redux-persist";
 import history from "utils/history";
 import getLibrary from "utils/getLibrary";
-import Web3ReactManager from "components/hoc/Web3ReactManager";
+// import Web3ReactManager from "components/hoc/Web3ReactManager";
 import App from "./pages/App";
 import configureStore from "store";
 
@@ -34,11 +34,11 @@ window.persistor = persistStore(store, persistConfig);
 ReactDOM.render(
   <Provider store={store}>
     <Web3ReactProvider getLibrary={getLibrary}>
-      <Web3ReactManager>
-        <ConnectedRouter history={history}>
-          <App />
-        </ConnectedRouter>
-      </Web3ReactManager>
+      {/* <Web3ReactManager> */}
+      <ConnectedRouter history={history}>
+        <App />
+      </ConnectedRouter>
+      {/* </Web3ReactManager> */}
     </Web3ReactProvider>
   </Provider>,
   document.querySelector("#root")
