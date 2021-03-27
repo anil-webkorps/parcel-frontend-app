@@ -32,6 +32,7 @@ import GnosisSafeABI from "constants/abis/GnosisSafe.json";
 import ERC20ABI from "constants/abis/ERC20.json";
 import MultiSendABI from "constants/abis/MultiSend.json";
 import UniswapABI from "constants/abis/Uniswap.json";
+import AllowanceModuleABI from "constants/abis/AllowanceModule.json";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import { getGasPrice } from "store/gas/actions";
 import gasPriceSaga from "store/gas/saga";
@@ -51,6 +52,7 @@ const {
   USDC_ADDRESS,
   USDT_ADDRESS,
   UNISWAP_ROUTER_ADDRESS,
+  ALLOWANCE_MODULE_ADDRESS,
 } = addresses;
 
 export default function useMassPayout(props = {}) {
@@ -77,6 +79,12 @@ export default function useMassPayout(props = {}) {
 
   // contracts
   const proxyContract = useContract(ownerSafeAddress, GnosisSafeABI, true);
+  const allowanceModule = useContract(
+    ALLOWANCE_MODULE_ADDRESS,
+    AllowanceModuleABI,
+    true
+  );
+
   const [tokenFrom, setTokenFrom] = useState(tokens.DAI); // eslint-disable-line
   const dai = useContract(DAI_ADDRESS, ERC20ABI, true);
   const customToken = useContract(ZERO_ADDRESS, ERC20ABI, true);
@@ -210,7 +218,6 @@ export default function useMassPayout(props = {}) {
         ]);
 
         if (signature) {
-          console.log({ signature });
           resolve(signature.replace("0x", ""));
         }
       } catch (err) {
@@ -341,6 +348,209 @@ export default function useMassPayout(props = {}) {
           setRejecting(false);
         }
       } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  const executeBatchTransactions = async ({
+    transactions,
+    isMultiOwner,
+    createNonce,
+    isMetaEnabled,
+  }) => {
+    if (account && library) {
+      const ethLibAdapter = new EthersAdapter({
+        ethers,
+        signer: library.getSigner(account),
+      });
+      const dataHash = encodeMultiSendCallData(transactions, ethLibAdapter);
+
+      // Set parameters of execTransaction()
+      const to = MULTISEND_ADDRESS;
+      const valueWei = 0;
+      const data = dataHash;
+      const operation = 1; // DELEGATECALL
+      const gasPrice = 0; // If 0, then no refund to relayer
+      const gasToken = ZERO_ADDRESS; // ETH
+      const txGasEstimate = 0;
+      const baseGasEstimate = 0;
+      const executor = ZERO_ADDRESS;
+      const refundReceiver = ZERO_ADDRESS;
+
+      // (r, s, v) where v is 1 means this signature is approved by the address encoded in value r
+      // For a single user, we auto generate the signature without prompting the user
+      const autoApprovedSignature = ethLibAdapter.abiEncodePacked(
+        { type: "uint256", value: account }, // r
+        { type: "uint256", value: 0 }, // s
+        { type: "uint8", value: 1 } // v
+      );
+
+      try {
+        setLoadingTx(true);
+        setTxHash("");
+        setTxData("");
+
+        try {
+          // estimate using api
+          const estimateResponse = await fetch(
+            `${gnosisSafeTransactionV2Endpoint}${ownerSafeAddress}/transactions/estimate/`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                safe: ownerSafeAddress,
+                to,
+                value: valueWei,
+                data,
+                operation,
+                gasToken,
+              }),
+              headers: {
+                "content-type": "application/json",
+              },
+            }
+          );
+          const estimateResult = await estimateResponse.json();
+          const { safeTxGas, baseGas, lastUsedNonce } = estimateResult;
+          const gasLimit = Number(safeTxGas) + Number(baseGas) + 21000; // giving a little higher gas limit just in case
+          const nonce = lastUsedNonce === null ? 0 : lastUsedNonce + 1;
+          if (!isMultiOwner) {
+            if (isMetaEnabled) {
+              let approvedSign;
+
+              const contractTransactionHash = await proxyContract.getTransactionHash(
+                to,
+                valueWei,
+                data,
+                operation,
+                0,
+                baseGasEstimate,
+                gasPrice,
+                gasToken,
+                executor,
+                nonce
+              );
+
+              if (isHardwareWallet) {
+                approvedSign = await ethSigner(
+                  account,
+                  contractTransactionHash
+                );
+              } else {
+                approvedSign = await eip712Signer(
+                  to,
+                  valueWei,
+                  data,
+                  operation,
+                  0, // set gasLimit as 0 for sign
+                  baseGasEstimate,
+                  gasPrice,
+                  gasToken,
+                  refundReceiver,
+                  nonce,
+                  contractTransactionHash
+                );
+              }
+
+              setTxData({
+                to: ownerSafeAddress,
+                from: ownerSafeAddress,
+                params: [
+                  to,
+                  valueWei,
+                  data,
+                  operation,
+                  txGasEstimate,
+                  baseGasEstimate,
+                  gasPrice,
+                  gasToken,
+                  executor,
+                  approvedSign,
+                ],
+                gasLimit,
+              });
+            } else {
+              const tx = await proxyContract.execTransaction(
+                to,
+                valueWei,
+                data,
+                operation,
+                txGasEstimate,
+                baseGasEstimate,
+                gasPrice,
+                gasToken,
+                executor,
+                autoApprovedSignature,
+                {
+                  gasLimit,
+                  gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
+                }
+              );
+              setTxHash(tx.hash);
+
+              await tx.wait();
+            }
+          } else {
+            // Multiowner
+            let approvedSign;
+
+            const contractTransactionHash = await proxyContract.getTransactionHash(
+              to,
+              valueWei,
+              data,
+              operation,
+              0,
+              baseGasEstimate,
+              gasPrice,
+              gasToken,
+              executor,
+              createNonce
+            );
+
+            if (isHardwareWallet) {
+              approvedSign = await ethSigner(account, contractTransactionHash);
+            } else {
+              // Create new tx
+              approvedSign = await eip712Signer(
+                to,
+                valueWei,
+                data,
+                operation,
+                0, // set gasLimit as 0 for sign
+                baseGasEstimate,
+                gasPrice,
+                gasToken,
+                refundReceiver,
+                createNonce,
+                contractTransactionHash
+              );
+            }
+
+            setTxData({
+              // safe: ownerSafeAddress,
+              to,
+              value: String(valueWei),
+              data,
+              operation,
+              gasToken,
+              safeTxGas: 0,
+              baseGas: baseGasEstimate,
+              gasPrice: String(gasPrice),
+              refundReceiver,
+              nonce: createNonce,
+              contractTransactionHash,
+              sender: account,
+              signature: approvedSign.replace("0x", ""),
+              origin: null,
+              transactionHash: null,
+            });
+          }
+        } catch (err) {
+          setLoadingTx(false);
+          console.log(err.message);
+        }
+      } catch (err) {
+        setLoadingTx(false);
         console.error(err);
       }
     }
@@ -569,8 +779,6 @@ export default function useMassPayout(props = {}) {
               );
             }
 
-            console.log({ signatureBytes });
-
             const txData = {
               // POST to gnosis
               data: {
@@ -643,8 +851,6 @@ export default function useMassPayout(props = {}) {
               );
             }
 
-            console.log({ signatureBytes });
-
             const tx = await proxyContract.execTransaction(
               to,
               value,
@@ -708,252 +914,126 @@ export default function useMassPayout(props = {}) {
     setTokenFrom(tokenFrom);
     if (!tokenDetails) return;
 
-    if (account && library) {
-      const ethLibAdapter = new EthersAdapter({
-        ethers,
-        signer: library.getSigner(account),
-      });
+    const erc20 = getERC20Contract(tokenDetails.address);
 
-      const erc20 = getERC20Contract(tokenDetails.address);
-
-      // If input and output tokens are different, swap using uniswap
-      // If input and output tokens are same, simply call transfer
-      const transactions = recievers.reduce(
-        (tx, { address, salaryToken, salaryAmount }) => {
-          if (salaryToken !== tokenFrom) {
-            tx.push(
-              ...getUniswapTransactions(
-                salaryToken,
-                salaryAmount,
-                address,
-                tokenFrom,
-                tokenDetails
-              )
-            );
-            return tx;
-          }
-
-          const transferAmount = getAmountInWei(
-            salaryAmount,
-            tokenDetails.decimals
+    // If input and output tokens are different, swap using uniswap
+    // If input and output tokens are same, simply call transfer
+    const transactions = recievers.reduce(
+      (tx, { address, salaryToken, salaryAmount }) => {
+        if (salaryToken !== tokenFrom) {
+          tx.push(
+            ...getUniswapTransactions(
+              salaryToken,
+              salaryAmount,
+              address,
+              tokenFrom,
+              tokenDetails
+            )
           );
+          return tx;
+        }
 
-          // ETH
-          if (salaryToken === tokens.ETH) {
-            tx.push({
-              operation: 0, // CALL
-              data: "0x",
-              to: address,
-              value: transferAmount,
-            });
-            return tx;
-          }
+        const transferAmount = getAmountInWei(
+          salaryAmount,
+          tokenDetails.decimals
+        );
 
-          // ERC20
+        // ETH
+        if (salaryToken === tokens.ETH) {
           tx.push({
             operation: 0, // CALL
-            to: erc20.address,
-            value: 0,
-            data: erc20.interface.encodeFunctionData("transfer", [
-              address,
-              transferAmount,
-            ]),
+            data: "0x",
+            to: address,
+            value: transferAmount,
           });
           return tx;
-        },
-        []
-      );
-
-      const dataHash = encodeMultiSendCallData(transactions, ethLibAdapter);
-
-      // Set parameters of execTransaction()
-      const to = MULTISEND_ADDRESS;
-      const valueWei = 0;
-      const data = dataHash;
-      const operation = 1; // DELEGATECALL
-      const gasPrice = 0; // If 0, then no refund to relayer
-      const gasToken = ZERO_ADDRESS; // ETH
-      const txGasEstimate = 0;
-      const baseGasEstimate = 0;
-      const executor = ZERO_ADDRESS;
-      const refundReceiver = ZERO_ADDRESS;
-
-      // (r, s, v) where v is 1 means this signature is approved by the address encoded in value r
-      // For a single user, we auto generate the signature without prompting the user
-      const autoApprovedSignature = ethLibAdapter.abiEncodePacked(
-        { type: "uint256", value: account }, // r
-        { type: "uint256", value: 0 }, // s
-        { type: "uint8", value: 1 } // v
-      );
-
-      try {
-        setLoadingTx(true);
-        setTxHash("");
-        setTxData("");
-
-        try {
-          // estimate using api
-          const estimateResponse = await fetch(
-            `${gnosisSafeTransactionV2Endpoint}${ownerSafeAddress}/transactions/estimate/`,
-            {
-              method: "POST",
-              body: JSON.stringify({
-                safe: ownerSafeAddress,
-                to,
-                value: valueWei,
-                data,
-                operation,
-                gasToken,
-              }),
-              headers: {
-                "content-type": "application/json",
-              },
-            }
-          );
-          const estimateResult = await estimateResponse.json();
-          const { safeTxGas, baseGas, lastUsedNonce } = estimateResult;
-          const gasLimit = Number(safeTxGas) + Number(baseGas) + 21000; // giving a little higher gas limit just in case
-          const nonce = lastUsedNonce === null ? 0 : lastUsedNonce + 1;
-          if (!isMultiOwner) {
-            if (isMetaEnabled) {
-              let approvedSign;
-
-              const contractTransactionHash = await proxyContract.getTransactionHash(
-                to,
-                valueWei,
-                data,
-                operation,
-                0,
-                baseGasEstimate,
-                gasPrice,
-                gasToken,
-                executor,
-                nonce
-              );
-
-              if (isHardwareWallet) {
-                approvedSign = await ethSigner(
-                  account,
-                  contractTransactionHash
-                );
-              } else {
-                approvedSign = await eip712Signer(
-                  to,
-                  valueWei,
-                  data,
-                  operation,
-                  0, // set gasLimit as 0 for sign
-                  baseGasEstimate,
-                  gasPrice,
-                  gasToken,
-                  refundReceiver,
-                  nonce,
-                  contractTransactionHash
-                );
-              }
-
-              setTxData({
-                to: ownerSafeAddress,
-                from: ownerSafeAddress,
-                params: [
-                  to,
-                  valueWei,
-                  data,
-                  operation,
-                  txGasEstimate,
-                  baseGasEstimate,
-                  gasPrice,
-                  gasToken,
-                  executor,
-                  approvedSign,
-                ],
-                gasLimit,
-              });
-            } else {
-              const tx = await proxyContract.execTransaction(
-                to,
-                valueWei,
-                data,
-                operation,
-                txGasEstimate,
-                baseGasEstimate,
-                gasPrice,
-                gasToken,
-                executor,
-                autoApprovedSignature,
-                {
-                  gasLimit,
-                  gasPrice: averageGasPrice || DEFAULT_GAS_PRICE,
-                }
-              );
-              setTxHash(tx.hash);
-
-              await tx.wait();
-            }
-          } else {
-            // Multiowner
-            let approvedSign;
-
-            const contractTransactionHash = await proxyContract.getTransactionHash(
-              to,
-              valueWei,
-              data,
-              operation,
-              0,
-              baseGasEstimate,
-              gasPrice,
-              gasToken,
-              executor,
-              createNonce
-            );
-
-            if (isHardwareWallet) {
-              approvedSign = await ethSigner(account, contractTransactionHash);
-            } else {
-              // Create new tx
-              approvedSign = await eip712Signer(
-                to,
-                valueWei,
-                data,
-                operation,
-                0, // set gasLimit as 0 for sign
-                baseGasEstimate,
-                gasPrice,
-                gasToken,
-                refundReceiver,
-                createNonce,
-                contractTransactionHash
-              );
-            }
-
-            setTxData({
-              // safe: ownerSafeAddress,
-              to,
-              value: String(valueWei),
-              data,
-              operation,
-              gasToken,
-              safeTxGas: 0,
-              baseGas: baseGasEstimate,
-              gasPrice: String(gasPrice),
-              refundReceiver,
-              nonce: createNonce,
-              contractTransactionHash,
-              sender: account,
-              signature: approvedSign.replace("0x", ""),
-              origin: null,
-              transactionHash: null,
-            });
-          }
-        } catch (err) {
-          setLoadingTx(false);
-          console.log(err.message);
         }
-      } catch (err) {
-        setLoadingTx(false);
-        console.error(err);
-      }
+
+        // ERC20
+        tx.push({
+          operation: 0, // CALL
+          to: erc20.address,
+          value: 0,
+          data: erc20.interface.encodeFunctionData("transfer", [
+            address,
+            transferAmount,
+          ]),
+        });
+        return tx;
+      },
+      []
+    );
+
+    await executeBatchTransactions({
+      transactions,
+      isMultiOwner,
+      createNonce,
+      isMetaEnabled,
+    });
+  };
+
+  const createSpendingLimit = async (
+    delegate,
+    tokenAmount,
+    isMultiOwner,
+    createNonce,
+    isMetaEnabled
+  ) => {
+    const transactions = [];
+
+    // 1. enableModule
+    const allModules = await proxyContract.getModules();
+
+    const isAllowanceModuleEnabled =
+      allModules &&
+      allModules.find((module) => module === ALLOWANCE_MODULE_ADDRESS)
+        ? true
+        : false;
+
+    if (!isAllowanceModuleEnabled) {
+      transactions.push({
+        operation: 0, // CALL
+        to: proxyContract.address,
+        value: 0,
+        data: proxyContract.interface.encodeFunctionData("enableModule", [
+          ALLOWANCE_MODULE_ADDRESS,
+        ]),
+      });
     }
+
+    const transferAmount = getAmountInWei(tokenAmount, tokenDetails.decimals);
+
+    // 2. addDelegate
+    // 3. setAllowance
+    transactions.push(
+      {
+        operation: 0, // CALL
+        to: allowanceModule.address,
+        value: 0,
+        data: allowanceModule.interface.encodeFunctionData("addDelegate", [
+          delegate,
+        ]),
+      },
+      {
+        operation: 0, // CALL
+        to: allowanceModule.address,
+        value: 0,
+        data: allowanceModule.interface.encodeFunctionData("setAllowance", [
+          delegate,
+          tokenDetails.address || ZERO_ADDRESS,
+          transferAmount,
+          0, // resetTimeMin
+          0, // resetBaseMin
+        ]),
+      }
+    );
+
+    await executeBatchTransactions({
+      transactions,
+      isMultiOwner,
+      createNonce,
+      isMetaEnabled,
+    });
   };
 
   return {
@@ -971,5 +1051,6 @@ export default function useMassPayout(props = {}) {
     setRejecting,
     approving,
     rejecting,
+    createSpendingLimit,
   };
 }

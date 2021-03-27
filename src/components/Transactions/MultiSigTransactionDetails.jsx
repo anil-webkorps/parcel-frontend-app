@@ -605,7 +605,9 @@ export default function MultiSigTransactions() {
       // createdBy,
     } = txDetails;
     const paidTeammates = getDecryptedDetails(to);
+    const isMassPayout = transactionMode === 0;
     const isQuickTransfer = transactionMode === 1;
+    const isSpendingLimit = transactionMode === 2;
 
     return (
       <div
@@ -647,7 +649,7 @@ export default function MultiSigTransactions() {
         <Container>
           <Card className="payment-status-card">
             <div className="d-flex justify-content-between align-items-center">
-              <div className="payment-status-title">Payment Status</div>
+              <div className="payment-status-title">Transaction Status</div>
               {confirmedCount >= threshold || rejectedCount >= threshold ? (
                 <div className="status-card ml-3">
                   {renderFinalStatus(confirmedCount, rejectedCount, isExecuted)}
@@ -676,19 +678,19 @@ export default function MultiSigTransactions() {
               right: "0",
             }}
           >
-            {!isQuickTransfer ? (
+            {isMassPayout ? (
               <TableHead col={3} style={{ width: "683px" }} className="mx-auto">
                 <div>Full Name</div>
                 <div>Disbursement</div>
                 <div>Address</div>
               </TableHead>
-            ) : (
+            ) : isQuickTransfer || isSpendingLimit ? (
               <TableHead
                 col={1}
                 style={{ width: "683px" }}
                 className="mx-auto"
               ></TableHead>
-            )}
+            ) : null}
             <TableBody
               className="mx-auto"
               style={{
@@ -707,8 +709,10 @@ export default function MultiSigTransactions() {
                     address,
                     salaryAmount,
                     salaryToken,
+                    allowanceAmount,
+                    allowanceToken,
                   }) => {
-                    if (isQuickTransfer)
+                    if (isQuickTransfer) {
                       return (
                         <div key={`${firstName}-${lastName}-${address}`}>
                           <div className="grid my-4 mx-4">
@@ -743,6 +747,44 @@ export default function MultiSigTransactions() {
                           </div>
                         </div>
                       );
+                    }
+
+                    if (isSpendingLimit) {
+                      return (
+                        <div key={`${firstName}-${lastName}-${address}`}>
+                          <div className="grid my-4 mx-4">
+                            <Detail>
+                              <div className="title">Beneficiary</div>
+                              <div className="desc">
+                                {minifyAddress(address)}
+                              </div>
+                            </Detail>
+                            <Detail>
+                              <div className="title">Allowance</div>
+                              <div className="desc">
+                                <img
+                                  src={getDefaultIconIfPossible(
+                                    allowanceToken,
+                                    icons
+                                  )}
+                                  alt={allowanceToken}
+                                  width="16"
+                                />{" "}
+                                {allowanceAmount} {allowanceToken}
+                              </div>
+                            </Detail>
+                          </div>
+                          <div className="d-flex mx-4">
+                            <Detail className="w-100">
+                              <div className="title">Description</div>
+                              <div className="desc">
+                                {description || `No description given...`}
+                              </div>
+                            </Detail>
+                          </div>
+                        </div>
+                      );
+                    }
 
                     return (
                       <TableRow col={3} key={`${transactionId}-${address}`}>
@@ -807,40 +849,68 @@ export default function MultiSigTransactions() {
                   </Detail>
                 </div>
               </div>
-              <div className="grid mt-4">
-                <Detail style={{ width: "300px" }}>
-                  <div className="title">Paid From</div>
-                  <div className="desc">{minifyAddress(safeAddress)}</div>
-                </Detail>
-                <Detail style={{ width: "300px" }}>
-                  <div className="title">Paid To</div>
-                  <div className="desc">
-                    {paidTeammates && paidTeammates.length} people
-                  </div>
-                </Detail>
-                <Detail style={{ width: "300px" }}>
-                  <div className="title">Total Amount</div>
-                  <div className="desc">US ${fiatValue}</div>
-                </Detail>
-                <Detail style={{ width: "300px" }}>
-                  <div className="title">Transaction Fees</div>
-                  <div className="desc">
-                    {parseFloat(transactionFees).toFixed(5)} ETH
-                  </div>
-                </Detail>
-                <Detail style={{ width: "300px" }}>
-                  <div className="title">Created Date & Time</div>
-                  <div className="desc">
-                    {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}
-                  </div>
-                </Detail>
-                <Detail style={{ width: "300px" }}>
-                  <div className="title">Status</div>
-                  <div className="desc">
-                    <StatusText status={status} />
-                  </div>
-                </Detail>
-              </div>
+              {(isMassPayout || isQuickTransfer) && (
+                <div className="grid mt-4">
+                  <Detail style={{ width: "300px" }}>
+                    <div className="title">Paid From</div>
+                    <div className="desc">{minifyAddress(safeAddress)}</div>
+                  </Detail>
+                  <Detail style={{ width: "300px" }}>
+                    <div className="title">Paid To</div>
+                    <div className="desc">
+                      {paidTeammates && paidTeammates.length} people
+                    </div>
+                  </Detail>
+                  <Detail style={{ width: "300px" }}>
+                    <div className="title">Total Amount</div>
+                    <div className="desc">US ${fiatValue}</div>
+                  </Detail>
+                  <Detail style={{ width: "300px" }}>
+                    <div className="title">Transaction Fees</div>
+                    <div className="desc">
+                      {parseFloat(transactionFees).toFixed(5)} ETH
+                    </div>
+                  </Detail>
+                  <Detail style={{ width: "300px" }}>
+                    <div className="title">Created Date & Time</div>
+                    <div className="desc">
+                      {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}
+                    </div>
+                  </Detail>
+                  <Detail style={{ width: "300px" }}>
+                    <div className="title">Status</div>
+                    <div className="desc">
+                      <StatusText status={status} />
+                    </div>
+                  </Detail>
+                </div>
+              )}
+              {isSpendingLimit && (
+                <div className="grid mt-4">
+                  <Detail style={{ width: "300px" }}>
+                    <div className="title">Allowance</div>
+                    <div className="desc">US ${fiatValue}</div>
+                  </Detail>
+                  <Detail style={{ width: "300px" }}>
+                    <div className="title">Transaction Fees</div>
+                    <div className="desc">
+                      {parseFloat(transactionFees).toFixed(5)} ETH
+                    </div>
+                  </Detail>
+                  <Detail style={{ width: "300px" }}>
+                    <div className="title">Created Date & Time</div>
+                    <div className="desc">
+                      {format(new Date(createdOn), "dd/MM/yyyy HH:mm:ss")}
+                    </div>
+                  </Detail>
+                  <Detail style={{ width: "300px" }}>
+                    <div className="title">Status</div>
+                    <div className="desc">
+                      <StatusText status={status} />
+                    </div>
+                  </Detail>
+                </div>
+              )}
             </Card>
           )}
           {renderConfirmSection()}

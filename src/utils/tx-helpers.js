@@ -41,6 +41,6 @@ export const getAmountInWei = (tokenAmount, decimals) => {
   return parseUnits(tokenAmount, decimals);
 };
 
-export const getAmountFromWei = (tokenAmount, decimals) => {
-  return formatUnits(tokenAmount, decimals);
+export const getAmountFromWei = (tokenAmount, decimals, precision = 2) => {
+  return parseFloat(formatUnits(tokenAmount, decimals)).toFixed(precision);
 };

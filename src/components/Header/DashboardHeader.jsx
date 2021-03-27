@@ -36,6 +36,7 @@ import {
 import { useInjectSaga } from "utils/injectSaga";
 import { useInjectReducer } from "utils/injectReducer";
 import LogoutPng from "assets/icons/logout.png";
+import SpendingLimitsPng from "assets/icons/spending-limits.png";
 import SettingsPng from "assets/icons/settings.png";
 import ParcelSvg from "assets/icons/parcel.svg";
 import GreenDot from "assets/icons/notifications/green-dot.svg";
@@ -140,11 +141,12 @@ export default function DashboardHeader() {
           <div className="content">
             <div className="notification-heading">{data.headline}</div>
             <div className="notification-description">
-              {data.name && cryptoUtils.decryptDataUsingEncryptionKey(
-                data.name,
-                encryptionKey,
-                organisationType
-              )}{" "}
+              {data.name &&
+                cryptoUtils.decryptDataUsingEncryptionKey(
+                  data.name,
+                  encryptionKey,
+                  organisationType
+                )}{" "}
               {data.message}
             </div>
             <div className="notification-date">
@@ -238,6 +240,16 @@ export default function DashboardHeader() {
                     <div className="option">Settings</div>
                     <div>
                       <Img src={SettingsPng} alt="settings" width="16" />
+                    </div>
+                  </Link>
+                  <Link to="/dashboard/spending-limits">
+                    <div className="option">Spending Limits</div>
+                    <div>
+                      <Img
+                        src={SpendingLimitsPng}
+                        alt="spending-limits"
+                        width="16"
+                      />
                     </div>
                   </Link>
                   <li onClick={logout}>

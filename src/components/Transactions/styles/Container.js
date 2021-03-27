@@ -123,7 +123,7 @@ export default styled.div`
   .multisig-details-card {
     margin: 0 auto;
     width: 683px;
-    min-height: 351px;
+    min-height: 200px;
     padding: 17px 36px 27px 30px;
     border-radius: 16px;
     box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);

@@ -16,6 +16,7 @@ import MultiSigTransactionDetails from "components/Transactions/MultiSigTransact
 import TransactionDetails from "components/Transactions/TransactionDetails";
 import QuickTransfer from "components/QuickTransfer";
 import InviteOwners from "components/InviteOwners";
+import SpendingLimits from "components/SpendingLimits";
 import Authenticated from "components/hoc/Authenticated";
 import NotFoundPage from "pages/NotFound";
 import {
@@ -94,6 +95,11 @@ const DashboardPage = ({ match }) => {
             component={AccountSummary}
           />
           <Route exact path={`${match.path}/invite`} component={InviteOwners} />
+          <Route
+            exact
+            path={`${match.path}/spending-limits`}
+            component={SpendingLimits}
+          />
           <Route component={NotFoundPage} />
         </Switch>
         <ToastMessage />
