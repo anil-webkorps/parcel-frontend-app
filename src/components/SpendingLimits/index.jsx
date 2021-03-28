@@ -253,7 +253,7 @@ export default function SpendingLimits() {
                     decimals,
                     0
                   ),
-                  spentAmount: getAmountFromWei(tokenAllowance[1], decimals, 0),
+                  spentAmount: getAmountFromWei(tokenAllowance[1], decimals, 2),
                   resetTimeMin: tokenAllowance[2],
                   lastResetMin: tokenAllowance[3],
                   tokenName,
