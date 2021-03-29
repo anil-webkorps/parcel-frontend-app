@@ -28,6 +28,7 @@ import {
 import { ToastMessage } from "components/common/Toast";
 import { useSocket } from "hooks";
 import DashboardLayout from "components/DashboardLayout";
+import { routeTemplates } from "constants/routes/templates";
 // import { closeNotifications } from "store/notifications/actions";
 // import { makeSelectShowNotifications } from "store/notifications/selectors";
 
@@ -47,65 +48,81 @@ const DashboardPage = ({ match }) => {
     <Authenticated>
       <DashboardLayout>
         <Switch>
-          <Route exact path={`${match.path}`} component={Dashboard} />
-          <Route exact path={`${match.path}/people`} component={People} />
           <Route
             exact
-            path={`${match.path}/people/new`}
+            path={routeTemplates.dashboard.root}
+            component={Dashboard}
+          />
+          <Route
+            exact
+            path={routeTemplates.dashboard.people.root}
+            component={People}
+          />
+          <Route
+            exact
+            path={routeTemplates.dashboard.people.new}
             component={AddTeammate}
           />
           <Route
             exact
-            path={`${match.path}/department/new`}
+            path={routeTemplates.dashboard.people.view}
+            component={ViewTeammates}
+          />
+          <Route
+            exact
+            path={routeTemplates.dashboard.people.viewByDepartment}
+            component={ViewTeammates}
+          />
+          <Route
+            exact
+            path={routeTemplates.dashboard.people.edit}
+            component={EditTeammate}
+          />
+          <Route
+            exact
+            path={routeTemplates.dashboard.department.new}
             component={AddDepartment}
           />
           <Route
             exact
-            path={`${match.path}/people/view`}
-            component={ViewTeammates}
+            path={routeTemplates.dashboard.payments}
+            component={Payments}
           />
           <Route
             exact
-            path={`${match.path}/people/view/:departmentId`}
-            component={ViewTeammates}
-          />
-          <Route
-            exact
-            path={`${match.path}/people/edit`}
-            component={EditTeammate}
-          />
-          <Route exact path={`${match.path}/payments`} component={Payments} />
-          <Route
-            exact
-            path={`${match.path}/transactions`}
+            path={routeTemplates.dashboard.transactions}
             component={isMultiOwner ? MultiSigTransactions : Transactions}
           />
           <Route
             exact
-            path={`${match.path}/transactions/:transactionId`}
+            path={routeTemplates.dashboard.transactionById}
             component={
               isMultiOwner ? MultiSigTransactionDetails : TransactionDetails
             }
           />
           <Route
             exact
-            path={`${match.path}/quick-transfer`}
+            path={routeTemplates.dashboard.quickTransfer}
             component={QuickTransfer}
           />
           <Route
             exact
-            path={`${match.path}/account`}
+            path={routeTemplates.dashboard.account}
             component={AccountSummary}
           />
-          <Route exact path={`${match.path}/invite`} component={InviteOwners} />
           <Route
             exact
-            path={`${match.path}/spending-limits`}
+            path={routeTemplates.dashboard.owners}
+            component={InviteOwners}
+          />
+          <Route
+            exact
+            path={routeTemplates.dashboard.spendingLimits.root}
             component={SpendingLimits}
           />
           <Route
             exact
-            path={`${match.path}/spending-limits/new`}
+            path={routeTemplates.dashboard.spendingLimits.new}
             component={NewSpendingLimit}
           />
           <Route component={NotFoundPage} />

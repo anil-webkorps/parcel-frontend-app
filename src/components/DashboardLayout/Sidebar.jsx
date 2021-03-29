@@ -16,6 +16,7 @@ import LogoutIcon from "assets/icons/sidebar/logout-icon.svg";
 import { mainNavItems } from "./navItems";
 
 import { DashboardSidebar } from "./styles";
+import { routeTemplates } from "constants/routes/templates";
 
 export default function Sidebar({ isSidebarOpen, closeSidebar }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -86,12 +87,15 @@ export default function Sidebar({ isSidebarOpen, closeSidebar }) {
             <FontAwesomeIcon icon={faAngleDown} />
           </div>
           <div className={`settings-dropdown ${isSettingsOpen && "show"}`}>
-            <div className="settings-option">
+            <Link
+              to={routeTemplates.dashboard.owners}
+              className="settings-option"
+            >
               <div className="icon">
                 <Img src={OwnerIcon} alt="owners" />
               </div>
               <div className="name">Owners</div>
-            </div>
+            </Link>
             <div className="settings-option">
               <div className="icon">
                 <Img src={SettingsIcon} alt="settings" />

@@ -16,6 +16,7 @@ import DelegateTransfer from "./DelegateTransfer";
 import NotFoundPage from "./NotFound";
 import SideNavProvider from "context/SideNavContext";
 import { useEagerConnect, useInactiveListener } from "hooks";
+import { routeTemplates } from "constants/routes/templates";
 
 export default function App() {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
@@ -28,11 +29,24 @@ export default function App() {
         <SideNavProvider>
           <Header />
           <Switch>
-            <Route exact path="/" component={LoginPage} />
-            <Route exact path="/signup" component={RegisterPage} />
-            <Route path="/dashboard" component={DashboardPage} />
-            <Route path="/accept-invite" component={AcceptInvitePage} />
-            <Route path="/delegate-transfer" component={DelegateTransfer} />
+            <Route exact path={routeTemplates.login} component={LoginPage} />
+            <Route
+              exact
+              path={routeTemplates.signup}
+              component={RegisterPage}
+            />
+            <Route
+              path={routeTemplates.dashboard.root}
+              component={DashboardPage}
+            />
+            <Route
+              path={routeTemplates.acceptInvite}
+              component={AcceptInvitePage}
+            />
+            <Route
+              path={routeTemplates.delegateTransfer}
+              component={DelegateTransfer}
+            />
             <Route component={NotFoundPage} />
           </Switch>
         </SideNavProvider>
