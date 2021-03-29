@@ -39,7 +39,7 @@ const CustomButton = ({
   if (to) {
     return (
       <Link to={to}>
-        <Button className={`w-100 ${className}`} style={propStyles} {...rest}>
+        <Button className={className} style={propStyles} {...rest}>
           {children}
         </Button>
       </Link>

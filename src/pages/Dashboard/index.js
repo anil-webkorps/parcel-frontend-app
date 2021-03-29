@@ -17,6 +17,7 @@ import TransactionDetails from "components/Transactions/TransactionDetails";
 import QuickTransfer from "components/QuickTransfer";
 import InviteOwners from "components/InviteOwners";
 import SpendingLimits from "components/SpendingLimits";
+import NewSpendingLimit from "components/SpendingLimits/NewSpendingLimit";
 import Authenticated from "components/hoc/Authenticated";
 import NotFoundPage from "pages/NotFound";
 import {
@@ -99,6 +100,11 @@ const DashboardPage = ({ match }) => {
             exact
             path={`${match.path}/spending-limits`}
             component={SpendingLimits}
+          />
+          <Route
+            exact
+            path={`${match.path}/spending-limits/new`}
+            component={NewSpendingLimit}
           />
           <Route component={NotFoundPage} />
         </Switch>

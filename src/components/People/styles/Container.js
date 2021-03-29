@@ -129,8 +129,8 @@ export default styled.div`
 
   .new-spending-limit {
     position: absolute;
-    top: 9em;
-    min-height: 30em;
+    top: -2em;
+    min-height: 35em;
   }
 
   .choose-department {
