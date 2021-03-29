@@ -31,8 +31,10 @@ export default function TransactionSubmitted({
             Transaction Submitted
           </Title>
           <Heading>
-            We are processing the payment of {selectedCount} people. You can
-            track the status of your payment in the transactions section.{" "}
+            {selectedCount
+              ? `We are processing the payment of ${selectedCount} people. You can
+            track the status of your payment in the transactions section.`
+              : "You can track the status of your transction in the transactions section."}
           </Heading>
           <Text>
             <TransactionUrl hash={txHash} />

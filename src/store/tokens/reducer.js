@@ -56,13 +56,14 @@ const reducer = (state = initialState, action) =>
                   usd: 0,
                   address: tokenDetails.tokenInfo.address,
                   decimals: tokenDetails.tokenInfo.decimals,
+                  usdConversionRate: balanceDetails.usdConversion,
                 };
               }
               // erc20
               const balance = getAmountFromWei(
                 balanceDetails.balance,
                 tokenDetails.tokenInfo.decimals
-              ).toString();
+              );
 
               return {
                 id: idx,
@@ -73,6 +74,7 @@ const reducer = (state = initialState, action) =>
                 usd: balance * balanceDetails.fiatConversion,
                 address: tokenDetails.tokenInfo.address,
                 decimals: tokenDetails.tokenInfo.decimals,
+                usdConversionRate: balanceDetails.usdConversion,
               };
             })
             .filter(Boolean);

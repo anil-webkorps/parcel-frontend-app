@@ -89,6 +89,7 @@ export const defaultTokenDetails = [
     usd: "0.00",
     address: addresses.ZERO_ADDRESS,
     decimals: 18,
+    usdConversionRate: 1,
   },
   {
     id: 1,
@@ -98,6 +99,7 @@ export const defaultTokenDetails = [
     usd: "0.00",
     address: addresses.DAI_ADDRESS,
     decimals: 18,
+    usdConversionRate: 1,
   },
   {
     id: 2,
@@ -107,6 +109,7 @@ export const defaultTokenDetails = [
     usd: "0.00",
     address: addresses.USDC_ADDRESS,
     decimals: 6,
+    usdConversionRate: 1,
   },
   // {
   //   id: 3,

@@ -90,7 +90,8 @@ export default styled.div`
   }
 
   .add-teammate,
-  .quick-transfer {
+  .quick-transfer,
+  .new-spending-limit {
     width: 488px;
     margin: 0 auto;
     border-radius: 16px;
@@ -124,6 +125,12 @@ export default styled.div`
 
   .add-department {
     top: 140px;
+  }
+
+  .new-spending-limit {
+    position: absolute;
+    top: -2em;
+    min-height: 35em;
   }
 
   .choose-department {
