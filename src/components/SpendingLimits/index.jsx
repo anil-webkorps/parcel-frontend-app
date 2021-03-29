@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
 import { show } from "redux-modal";
+import formatDistance from "date-fns/formatDistance";
 
 import TransactionSubmitted from "components/Payments/TransactionSubmitted";
 import { Info } from "components/Dashboard/styles";
@@ -97,6 +98,29 @@ const tokensKey = "tokens";
 const metaTxKey = "metatx";
 
 const { ALLOWANCE_MODULE_ADDRESS, ZERO_ADDRESS } = addresses;
+
+const resetOptions = [
+  {
+    id: "reset-none",
+    value: 0,
+    label: "Don't reset",
+  },
+  {
+    id: "reset-daily",
+    value: 1440, // 24 * 60
+    label: "1 day",
+  },
+  {
+    id: "reset-weekly",
+    value: 10080, // 24 * 60 * 7
+    label: "1 week",
+  },
+  {
+    id: "reset-monthly",
+    value: 43200, // 24 * 60 * 30
+    label: "1 month",
+  },
+];
 
 export default function SpendingLimits() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
@@ -254,8 +278,8 @@ export default function SpendingLimits() {
                     0
                   ),
                   spentAmount: getAmountFromWei(tokenAllowance[1], decimals, 2),
-                  resetTimeMin: tokenAllowance[2],
-                  lastResetMin: tokenAllowance[3],
+                  resetTimeMin: tokenAllowance[2].toNumber(),
+                  lastResetMin: tokenAllowance[3].toNumber(),
                   tokenName,
                 });
               }
@@ -397,6 +421,7 @@ export default function SpendingLimits() {
       {
         address: values.address,
         allowanceAmount: values.amount,
+        resetTimeMin: values.resetTimeMin,
         allowanceToken: selectedTokenDetails.name,
         description: `Created a new spending limit of ${values.amount} ${selectedTokenDetails.name}`,
         usd: selectedTokenDetails.usdConversionRate * values.amount,
@@ -406,6 +431,7 @@ export default function SpendingLimits() {
     await createSpendingLimit(
       values.address,
       values.amount,
+      values.resetTimeMin,
       isMultiOwner,
       nonce,
       isMetaEnabled
@@ -508,6 +534,27 @@ export default function SpendingLimits() {
         </Col>
       </Row>
 
+      <Heading>RESET TIME</Heading>
+      <p>
+        The allowance will automatically reset after the defined time period.
+      </p>
+
+      <div className="d-flex align-items-center">
+        {resetOptions.map(({ id, value, label }, index) => (
+          <Input
+            name={`resetTimeMin`}
+            register={register}
+            type="radio"
+            id={id}
+            value={value}
+            defaultChecked={index === 0}
+            label={label}
+            key={id}
+            labelStyle={{ marginBottom: 0, padding: "0 0.8em 0 0.5em" }}
+          />
+        ))}
+      </div>
+
       <Button
         large
         type="submit"
@@ -547,6 +594,17 @@ export default function SpendingLimits() {
         </StepsCard>
       </form>
     );
+  };
+
+  const renderResetTime = (resetTimeMin, lastResetMin) => {
+    const ms = 60 * 1000;
+    if (resetTimeMin === 0) return "One-time";
+
+    return `${formatDistance(
+      new Date((lastResetMin + resetTimeMin) * ms),
+      new Date(),
+      { addSuffix: true }
+    )}`;
   };
 
   const renderAllSpendingLimits = () => {
@@ -598,6 +656,7 @@ export default function SpendingLimits() {
                   allowanceAmount,
                   spentAmount,
                   resetTimeMin,
+                  lastResetMin,
                   tokenName,
                 },
                 idx
@@ -612,7 +671,7 @@ export default function SpendingLimits() {
                     />{" "}
                     {spentAmount} of {allowanceAmount} {tokenName}
                   </div>
-                  <div>One-time</div>
+                  <div>{renderResetTime(resetTimeMin, lastResetMin)}</div>
                 </TableRow>
               )
             )}

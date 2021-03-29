@@ -975,6 +975,7 @@ export default function useMassPayout(props = {}) {
   const createSpendingLimit = async (
     delegate,
     tokenAmount,
+    resetTimeMin,
     isMultiOwner,
     createNonce,
     isMetaEnabled
@@ -1022,7 +1023,7 @@ export default function useMassPayout(props = {}) {
           delegate,
           tokenDetails.address || ZERO_ADDRESS,
           transferAmount,
-          0, // resetTimeMin
+          resetTimeMin,
           0, // resetBaseMin
         ]),
       }
