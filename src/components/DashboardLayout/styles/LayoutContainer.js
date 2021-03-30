@@ -11,7 +11,7 @@ export default styled.div`
 
   @media (max-width: 978px) {
     grid-template-columns: 1fr;
-    grid-template-rows: 0.2fr 3fr;
+    grid-template-rows: 0.2fr 2fr;
     grid-template-areas:
       "nav"
       "main";

@@ -3,7 +3,7 @@ import styled from "styled-components/macro";
 export default styled.div`
   display: grid;
   max-width: 1200px;
-  min-height: 90vh;
+  // min-height: 90vh;
   margin: 0 auto;
   grid-template-columns: 1fr;
   position: absolute;

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { makeSelectSafeOwners } from "store/global/selectors";
 import Img from "components/common/Img";
@@ -12,20 +12,34 @@ import InviteIcon from "assets/icons/sidebar/invite-icon.svg";
 import OwnerIcon from "assets/icons/sidebar/owner-icon.svg";
 import SettingsIcon from "assets/icons/sidebar/settings-icon.svg";
 import LogoutIcon from "assets/icons/sidebar/logout-icon.svg";
-
+import { logoutUser } from "store/logout/actions";
+import logoutSaga from "store/logout/saga";
+import { useInjectSaga } from "utils/injectSaga";
 import { mainNavItems } from "./navItems";
 
 import { DashboardSidebar } from "./styles";
 import { routeTemplates } from "constants/routes/templates";
+import { toggleDropdown } from "store/layout/actions";
+import { SETTINGS } from "store/layout/constants";
+import { makeSelectDropdown } from "store/layout/selectors";
+const logoutKey = "logout";
 
 export default function Sidebar({ isSidebarOpen, closeSidebar }) {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const location = useLocation();
 
+  const dispatch = useDispatch();
+
+  useInjectSaga({ key: logoutKey, saga: logoutSaga });
+
   const safeOwners = useSelector(makeSelectSafeOwners());
+  const dropdown = useSelector(makeSelectDropdown());
 
   const toggleSettings = () => {
-    setIsSettingsOpen((open) => !open);
+    dispatch(toggleDropdown(SETTINGS, !dropdown[SETTINGS]));
+  };
+
+  const logout = () => {
+    dispatch(logoutUser());
   };
 
   const renderNavItem = ({ link, href, name, icon, activeIcon }) => {
@@ -86,7 +100,7 @@ export default function Sidebar({ isSidebarOpen, closeSidebar }) {
           <div>
             <FontAwesomeIcon icon={faAngleDown} />
           </div>
-          <div className={`settings-dropdown ${isSettingsOpen && "show"}`}>
+          <div className={`settings-dropdown ${dropdown[SETTINGS] && "show"}`}>
             <Link
               to={routeTemplates.dashboard.owners}
               className="settings-option"
@@ -102,7 +116,7 @@ export default function Sidebar({ isSidebarOpen, closeSidebar }) {
               </div>
               <div className="name">Settings</div>
             </div>
-            <div className="settings-option">
+            <div className="settings-option" onClick={logout}>
               <div className="icon">
                 <Img src={LogoutIcon} alt="logout" />
               </div>

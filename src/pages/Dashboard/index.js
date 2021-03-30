@@ -32,7 +32,7 @@ import { routeTemplates } from "constants/routes/templates";
 // import { closeNotifications } from "store/notifications/actions";
 // import { makeSelectShowNotifications } from "store/notifications/selectors";
 
-const DashboardPage = ({ match }) => {
+const DashboardPage = () => {
   const isMultiOwner = useSelector(makeSelectIsMultiOwner());
   const safeAddress = useSelector(makeSelectOwnerSafeAddress());
   useSocket({ isMultiOwner, safeAddress });

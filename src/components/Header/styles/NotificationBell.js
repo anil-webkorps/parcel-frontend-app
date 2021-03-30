@@ -4,6 +4,9 @@ export default styled.div`
   position: relative;
 
   .bell {
+    width: 2.5em;
+    margin-right: 2em;
+    cursor: pointer;
     ${({ hasSeen }) =>
       !hasSeen &&
       `
@@ -17,13 +20,13 @@ export default styled.div`
   }
 
   .prompt {
-    width: 0.5em;
-    height: 0.5em;
+    width: 0.8em;
+    height: 0.8em;
     border-radius: 50%;
     background: #d64646;
     position: absolute;
-    top: 1em;
-    right: 1em;
+    top: 0;
+    left: 1.4em;
   }
 
   @-webkit-keyframes ring {

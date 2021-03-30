@@ -8,7 +8,7 @@ export const routeTemplates = {
   dashboard: {
     root: "/dashboard",
     people: {
-      root: "/",
+      root: "/dashboard/people",
       new: "/dashboard/people/new",
       view: "/dashboard/people/view",
       viewByDepartment: "/dashboard/people/view/:departmentId",
@@ -19,7 +19,7 @@ export const routeTemplates = {
     },
     payments: "/dashboard/payments",
     transactions: "/dashboard/transactions",
-    transactionById: "/dashboard/transactionById",
+    transactionById: "/dashboard/transactions/:transactionId",
     quickTransfer: "/dashboard/quick-transfer",
     account: "/dashboard/account",
     owners: "/dashboard/invite",

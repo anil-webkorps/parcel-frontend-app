@@ -84,7 +84,7 @@ export default styled.div`
       width: 100%;
       max-width: 100%;
       border-radius: 1em;
-      box-shadow: 1em 1em 20px 0 rgba(170, 170, 170, 0.2);
+      box-shadow: 1em 1em 2em 0 rgba(170, 170, 170, 0.2);
       border: solid 0.1em #dddcdc;
       background-color: #ffffff;
       transition: opacity 0.15s linear;
