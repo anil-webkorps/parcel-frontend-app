@@ -712,7 +712,8 @@ export default function Payments() {
               insufficientBalance ||
               addingTx ||
               !isMassPayoutAllowed ||
-              loadingSafeDetails
+              loadingSafeDetails ||
+              loadingTokens
             }
           >
             {threshold > 1 ? `Create Transaction` : `Pay Now`}
