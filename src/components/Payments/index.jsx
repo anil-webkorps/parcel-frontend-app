@@ -711,17 +711,11 @@ export default function Payments() {
               loadingTx ||
               insufficientBalance ||
               addingTx ||
-              !isMassPayoutAllowed
+              !isMassPayoutAllowed ||
+              loadingSafeDetails
             }
           >
-            {(loadingSafeDetails || loadingTokens) && (
-              <div className="d-flex align-items-center justify-content-center">
-                <Loading color="#fff" width="50px" height="50px" />
-              </div>
-            )}
-
-            {!loadingSafeDetails &&
-              (threshold > 1 ? `Create Transaction` : `Pay Now`)}
+            {threshold > 1 ? `Create Transaction` : `Pay Now`}
           </Button>
         </div>
       </PaymentSummary>
