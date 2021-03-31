@@ -461,18 +461,9 @@ export default function SpendingLimits() {
           addingSingleOwnerTx ||
           loadingSafeDetails
         }
-        loading={
-          loadingTx ||
-          addingMultisigTx ||
-          addingSingleOwnerTx ||
-          loadingSafeDetails
-        }
+        loading={loadingTx || addingMultisigTx || addingSingleOwnerTx}
       >
-        {loadingSafeDetails
-          ? "Loading"
-          : threshold > 1
-          ? `Create Transaction`
-          : `Create`}
+        {threshold > 1 ? `Create Transaction` : `Create`}
       </Button>
       {errorFromMetaTx && (
         <div className="text-danger mt-3">{errorFromMetaTx}</div>
