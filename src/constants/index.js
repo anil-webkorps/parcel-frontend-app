@@ -111,11 +111,14 @@ export const defaultTokenDetails = [
     decimals: 6,
     usdConversionRate: 1,
   },
-  // {
-  //   id: 3,
-  //   name: tokens.USDC,
-  //   icon: USDTIcon,
-  //   balance: "0.00",
-  //   usd: "0.00",
-  // },
+  {
+    id: 3,
+    name: tokens.USDT,
+    icon: USDTIcon,
+    balance: "0.00",
+    usd: "0.00",
+    address: addresses.USDT_ADDRESS,
+    decimals: 6,
+    usdConversionRate: 1,
+  },
 ];

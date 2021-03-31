@@ -1,8 +1,9 @@
 import produce from "immer";
-import { TOGGLE_DROPDOWN } from "./action-types";
+import { TOGGLE_DROPDOWN, TOGGLE_NOTIFICATION } from "./action-types";
 
 export const initialState = {
   dropdown: {}, // { SETTINGS: true, CURRENCY: false, ... }
+  isNotificationOpen: false,
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -19,6 +20,9 @@ const reducer = (state = initialState, action) =>
             return { ...acc, [key]: action.show };
           return { ...acc, [key]: false };
         }, {});
+        break;
+      case TOGGLE_NOTIFICATION:
+        draft.isNotificationOpen = action.show;
         break;
     }
   });

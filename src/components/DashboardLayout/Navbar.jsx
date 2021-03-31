@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { faAngleDown, faBars, faBell } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -11,29 +11,29 @@ import MassPayoutIcon from "assets/icons/navbar/mass-payout.svg";
 import PaySomeoneIcon from "assets/icons/navbar/pay-someone.svg";
 import AddFundsIcon from "assets/icons/navbar/add-funds.svg";
 import USDIcon from "assets/icons/navbar/usd.svg";
+import INRIcon from "assets/icons/navbar/inr.svg";
+import CNYIcon from "assets/icons/navbar/cny.svg";
+import CADIcon from "assets/icons/navbar/cad.svg";
 import { ConnectedAccount, Nav, NewTransfer, Currency } from "./styles";
-import { toggleDropdown } from "store/layout/actions";
+import { toggleDropdown, toggleNotification } from "store/layout/actions";
 import { CURRENCY, NEW_TRANSFER } from "store/layout/constants";
-import { makeSelectDropdown } from "store/layout/selectors";
-
+import {
+  makeSelectDropdown,
+  makeSelectIsNotificationOpen,
+} from "store/layout/selectors";
 import notificationsSaga from "store/notifications/saga";
 import notificationsReducer from "store/notifications/reducer";
 import {
-  closeNotifications,
   getNotifications,
-  openNotifications,
   updateNotificationStatus,
 } from "store/notifications/actions";
-import {
-  makeSelectHasSeen,
-  makeSelectShowNotifications,
-} from "store/notifications/selectors";
+import { makeSelectHasSeen } from "store/notifications/selectors";
 import { useInjectSaga } from "utils/injectSaga";
 import { useInjectReducer } from "utils/injectReducer";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 import BellIcon from "assets/icons/navbar/bell.svg";
 
-import { NotificationBell } from "components/Header/styles";
+import { NotificationBell } from "./styles";
 
 const notificationsKey = "notifications";
 
@@ -46,7 +46,7 @@ export default function Navbar({ isSidebarOpen, openSidebar }) {
 
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const hasSeen = useSelector(makeSelectHasSeen());
-  const showNotifications = useSelector(makeSelectShowNotifications());
+  const isNotificationOpen = useSelector(makeSelectIsNotificationOpen());
 
   useInjectReducer({ key: notificationsKey, reducer: notificationsReducer });
 
@@ -66,9 +66,9 @@ export default function Navbar({ isSidebarOpen, openSidebar }) {
   };
 
   const toggleNotifications = () => {
-    if (showNotifications) dispatch(closeNotifications());
+    if (isNotificationOpen) dispatch(toggleNotification(false));
     else {
-      dispatch(openNotifications());
+      dispatch(toggleNotification(true));
       if (account && ownerSafeAddress && !hasSeen) {
         dispatch(updateNotificationStatus(ownerSafeAddress, account));
       }
@@ -119,16 +119,16 @@ export default function Navbar({ isSidebarOpen, openSidebar }) {
               <div className="name">USD</div>
             </div>
             <div className="currency-option">
-              <Img src={USDIcon} alt="currency-usd" className="icon" />
-              <div className="name">USD</div>
+              <Img src={INRIcon} alt="currency-usd" className="icon" />
+              <div className="name">INR</div>
             </div>
             <div className="currency-option">
-              <Img src={USDIcon} alt="currency-usd" className="icon" />
-              <div className="name">USD</div>
+              <Img src={CNYIcon} alt="currency-usd" className="icon" />
+              <div className="name">CNY</div>
             </div>
             <div className="currency-option">
-              <Img src={USDIcon} alt="currency-usd" className="icon" />
-              <div className="name">USD</div>
+              <Img src={CADIcon} alt="currency-usd" className="icon" />
+              <div className="name">CAD</div>
             </div>
           </div>
         </Currency>

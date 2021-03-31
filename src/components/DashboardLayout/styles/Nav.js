@@ -9,7 +9,7 @@ export default styled.nav`
   display: grid;
   grid-template-areas: "empty content content content";
   grid-template-columns: 2fr 1fr 1fr 1fr;
-  padding: 3em 0;
+  height: 10vh;
 
   .nav-icon {
     display: none;

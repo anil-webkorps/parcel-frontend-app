@@ -1,11 +1,11 @@
 import styled from "styled-components/macro";
 
 export default styled.div`
-  min-height: 4em;
-  margin-right: 3em;
-  padding: 1.2em;
-  border-radius: 0.4em;
-  box-shadow: 1em 1em 2em 0 rgba(77, 69, 164, 0.1);
+  min-height: 4rem;
+  margin-right: 3rem;
+  padding: 1.2rem;
+  border-radius: 0.4rem;
+  box-shadow: 1rem 1rem 2rem 0 rgba(77, 69, 164, 0.1);
   background-color: #7367f0;
   display: flex;
   justify-content: center;
@@ -14,7 +14,7 @@ export default styled.div`
   position: relative;
 
   .text {
-    font-size: 1.4em;
+    font-size: 1.4rem;
     font-weight: 900;
     font-stretch: normal;
     font-style: normal;
@@ -26,12 +26,12 @@ export default styled.div`
 
   .transfer-dropdown {
     position: absolute;
-    top: 5em;
-    left: -4em;
-    min-width: 20em;
-    border-radius: 1em;
-    box-shadow: 1em 1em 2em 0 rgba(170, 170, 170, 0.2);
-    border: solid 0.1em #dddcdc;
+    top: 5rem;
+    left: -4rem;
+    min-width: 20rem;
+    border-radius: 1rem;
+    box-shadow: 1rem 1rem 2rem 0 rgba(170, 170, 170, 0.2);
+    border: solid 0.1rem #dddcdc;
     background-color: #ffffff;
     transition: opacity 0.15s linear;
     opacity: 0;
@@ -47,19 +47,19 @@ export default styled.div`
     }
 
     .transfer-option {
-      padding: 1.5em;
-      border-bottom: 0.1em solid #f1f0fd;
+      padding: 1.5rem;
+      border-bottom: 0.1rem solid #f1f0fd;
       display: flex;
       align-items: center;
       justify-content: center;
 
       .icon {
-        margin-right: 1em;
-        font-size: 1.6em;
+        margin-right: 1rem;
+        width: 1.8rem;
       }
 
       .name {
-        font-size: 1.2em;
+        font-size: 1.4rem;
         font-weight: 900;
         font-stretch: normal;
         font-style: normal;
@@ -67,7 +67,7 @@ export default styled.div`
         letter-spacing: normal;
         text-align: left;
         color: #7367f0;
-        padding-top: 0.3em;
+        padding-top: 0.3rem;
       }
 
       &:hover {

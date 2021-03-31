@@ -2,7 +2,7 @@ import styled from "styled-components/macro";
 import { Card } from "components/common/Card";
 
 export default styled(Card)`
-  grid-area: assets;
+  grid-area: recent-tx;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -30,51 +30,50 @@ export default styled(Card)`
     }
   }
 
-  .chart-container {
-    margin: 3rem auto;
-  }
-
-  .assets-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 1.5rem;
+  .tx-container {
     width: 100%;
+    margin-top: 2rem;
 
-    .asset-card {
+    .tx:last-child {
+      border-bottom: none;
+    }
+
+    .tx {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.8rem;
-      border-radius: 0.4rem;
-      background-color: #f1f0fd;
+      border-bottom: 0.1rem solid #dddcdc;
+      padding: 1.6rem 0;
 
-      .token-details {
+      .tx-info {
         display: flex;
         align-items: center;
       }
 
-      .token-icon {
-        width: 2rem;
-        margin-right: 1rem;
-      }
-
-      .token-name,
-      .usd {
-        font-size: 1.4rem;
+      .tx-status {
+        font-size: 1.2rem;
         font-weight: 900;
         font-stretch: normal;
         font-style: normal;
         line-height: normal;
         letter-spacing: normal;
         text-align: left;
+        color: #6cb44c;
+      }
+
+      .top {
+        font-size: 1.4rem;
+        font-weight: 500;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        text-align: left;
         color: #373737;
+        margin-bottom: 1rem;
       }
 
-      .token-name {
-        margin-bottom: 0.5rem;
-      }
-
-      .token-amount {
+      .bottom {
         font-size: 1.2rem;
         font-weight: normal;
         font-stretch: normal;

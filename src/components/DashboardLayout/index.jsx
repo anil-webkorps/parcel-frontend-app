@@ -5,6 +5,7 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import { useInjectReducer } from "utils/injectReducer";
 import layoutReducer from "store/layout/reducer";
+import NotificationSidebar from "./NotificationSidebar";
 
 const layoutKey = "layout";
 
@@ -26,6 +27,7 @@ export default function DashboardLayout({ children }) {
       <Sidebar isSidebarOpen={isSidebarOpen} closeSidebar={closeSidebar} />
       <Navbar isSidebarOpen={isSidebarOpen} openSidebar={openSidebar} />
       <Main>{children}</Main>
+      <NotificationSidebar />
     </LayoutContainer>
   );
 }

@@ -24,6 +24,7 @@ export const initialState = {
   prices: null,
   tokensDropdown: [],
   icons: null,
+  totalBalance: "0.00",
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -102,8 +103,15 @@ const reducer = (state = initialState, action) =>
             }
           }
         }
+
+        const total = allTokenDetails.reduce(
+          (sum, token) => (sum += parseFloat(token.usd)),
+          0
+        );
+
         draft.tokenList = allTokenDetails;
         draft.tokensDropdown = dropdownList;
+        draft.totalBalance = parseFloat(total).toFixed(2);
         draft.prices = action.prices;
         draft.loading = false;
         draft.log = action.log;

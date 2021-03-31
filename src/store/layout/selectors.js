@@ -6,4 +6,7 @@ const selectLayout = (state) => state.layout || initialState;
 const makeSelectDropdown = () =>
   createSelector(selectLayout, (layoutState) => layoutState.dropdown);
 
-export { selectLayout, makeSelectDropdown };
+const makeSelectIsNotificationOpen = () =>
+  createSelector(selectLayout, (layoutState) => layoutState.isNotificationOpen);
+
+export { selectLayout, makeSelectDropdown, makeSelectIsNotificationOpen };
