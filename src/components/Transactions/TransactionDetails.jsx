@@ -35,6 +35,7 @@ import { Table, ActionItem } from "../People/styles";
 import { Circle } from "components/Header/styles";
 import { Info } from "components/Dashboard-old/styles";
 import { Container, Detail } from "./styles";
+import { TRANSACTION_MODES } from "constants/transactions";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -114,9 +115,11 @@ export default function TransactionDetails() {
       transactionMode,
     } = transactionDetails;
     const paidTeammates = getDecryptedDetails(to);
-    const isMassPayout = transactionMode === 0;
-    const isQuickTransfer = transactionMode === 1;
-    const isSpendingLimit = transactionMode === 2;
+    const isMassPayout = transactionMode === TRANSACTION_MODES.MASS_PAYOUT;
+    const isQuickTransfer =
+      transactionMode === TRANSACTION_MODES.QUICK_TRANSFER;
+    const isSpendingLimit =
+      transactionMode === TRANSACTION_MODES.SPENDING_LIMITS;
 
     return (
       <div

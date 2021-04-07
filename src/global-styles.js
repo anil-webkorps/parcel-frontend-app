@@ -137,6 +137,18 @@ const GlobalStyle = createGlobalStyle`
     border: none;
     padding: 20px;
   }
+
+  .text-green {
+    color: #6cb44c;
+  }
+
+  .text-orange {
+    color: #fcbc04;
+  }
+  
+  .text-red {
+    color: #ff4660;
+  }
 `;
 
 export default GlobalStyle;

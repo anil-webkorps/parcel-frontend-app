@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, memo, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-// import { format } from "date-fns";
+import { format } from "date-fns";
 import { cryptoUtils } from "parcel-sdk";
 import { Link } from "react-router-dom";
 
@@ -26,17 +26,17 @@ import {
   makeSelectOrganisationType,
   makeSelectOwnerSafeAddress,
 } from "store/global/selectors";
-import Loading from "components/common/Loading";
-import { TransactionUrl } from "components/common/Web3Utils";
-import StatusText from "components/Transactions/StatusText";
+// import Loading from "components/common/Loading";
+// import { TransactionUrl } from "components/common/Web3Utils";
 
-import TeamMembersPng from "assets/images/team-members.png";
-import TeamPng from "assets/images/user-team.png";
+// import TeamMembersPng from "assets/images/team-members.png";
+// import TeamPng from "assets/images/user-team.png";
 import IncomingIcon from "assets/icons/dashboard/incoming.svg";
-import CancelledIcon from "assets/icons/dashboard/cancelled.svg";
+// import CancelledIcon from "assets/icons/dashboard/cancelled.svg";
 
 import { RecentTx } from "./styles";
 import Img from "components/common/Img";
+import { TRANSACTION_MODES, TRANSACTION_STATUS } from "constants/transactions";
 
 const transactionsKey = "transactions";
 const viewTeammatesKey = "viewTeammates";
@@ -108,21 +108,9 @@ function RecentTxCard() {
   useEffect(() => {
     if (transactions && transactions.length > 0) {
       setState(STATES.TRANSACTION_EXECUTED);
-      // const latestTx = transactions[0];
-      // const transactionData = {
-      //   transactionId: latestTx.transactionId,
-      //   amountPaid: latestTx.fiatValue,
-      //   currency: latestTx.fiatCurrency,
-      //   tokenCurrency: latestTx.tokenCurrency,
-      //   date: latestTx.createdOn,
-      //   numOfPeople: latestTx.addresses.length,
-      //   status: latestTx.status,
-      //   transactionHash: latestTx.transactionHash,
-      // };
-
       setTransactionData(transactions);
     }
-  }, [transactions, getDecryptedDetails]);
+  }, [transactions]);
 
   const stepTitle = useMemo(() => {
     switch (state) {
@@ -150,23 +138,60 @@ function RecentTxCard() {
     }
   }, [state]);
 
-  console.log({ transactionData });
+  const renderStatusText = (status) => {
+    switch (status) {
+      case TRANSACTION_STATUS.COMPLETED:
+        return <div className="text-green">Completed</div>;
+      case TRANSACTION_STATUS.PENDING:
+        return <div className="text-orange">Pending</div>;
+      case TRANSACTION_STATUS.FAILED:
+        return <div className="text-red">Failed</div>;
+      default:
+        return null;
+    }
+  };
 
-  const renderTx = () => {
+  const renderName = (to, transactionMode) => {
+    if (transactionMode === TRANSACTION_MODES.QUICK_TRANSFER) {
+      return "Quick Transfer";
+    }
+    const payeeDetails = getDecryptedDetails(to);
+
+    const { firstName, lastName } = payeeDetails[0];
+    const firstPersonName = `${firstName} ${lastName}`;
+
+    return `${firstPersonName} and ${payeeDetails.length - 1} more`;
+  };
+
+  const renderTx = ({
+    createdOn,
+    fiatCurrency,
+    fiatValue,
+    tokenCurrency,
+    tokenValue,
+    transactionMode,
+    transactionId,
+    to,
+    status,
+  }) => {
     return (
-      <div className="tx">
+      <div className="tx" key={transactionId}>
         <div className="tx-info">
           <Img src={IncomingIcon} alt="tx-icon" className="mr-4" />
           <div>
-            <div className="top">Raymond Holt</div>
-            <div className="bottom">4/5/2021</div>
+            <div className="top">{renderName(to, transactionMode)}</div>
+            <div className="bottom">
+              {format(new Date(createdOn), "dd MMM yyyy")}
+            </div>
           </div>
         </div>
         <div className="tx-amounts">
-          <div className="top">- $3490.35</div>
-          <div className="bottom">DAI 3,539.2365</div>
+          <div className="top">- ${parseFloat(fiatValue).toFixed(2)}</div>
+          <div className="bottom">
+            {parseFloat(tokenValue).toFixed(2)} {tokenCurrency}
+          </div>
         </div>
-        <div className="tx-status">Completed</div>
+        <div className="tx-status">{renderStatusText(status)}</div>
       </div>
     );
   };
@@ -179,11 +204,8 @@ function RecentTxCard() {
         </Link>
       </div>
       <div className="tx-container">
-        {renderTx()}
-        {renderTx()}
-        {renderTx()}
-        {renderTx()}
-        {renderTx()}
+        {transactionData &&
+          transactionData.slice(0, 5).map((tx) => renderTx(tx))}
       </div>
     </RecentTx>
   );

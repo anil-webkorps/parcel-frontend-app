@@ -80,6 +80,7 @@ import {
 } from "components/People/styles";
 import { ShowToken } from "./styles";
 import { Circle } from "components/Header/styles";
+import { TRANSACTION_MODES } from "constants/transactions";
 
 const transactionsKey = "transactions";
 const safeKey = "safe";
@@ -208,7 +209,7 @@ export default function QuickTransfer() {
             tokenCurrency: selectedTokenDetails.name,
             fiatValue: parseFloat(totalAmountToPay).toFixed(5),
             addresses: payoutDetails.map(({ address }) => address),
-            transactionMode: 1, // quick transfer
+            transactionMode: TRANSACTION_MODES.QUICK_TRANSFER, // quick transfer
           })
         );
       }
@@ -242,7 +243,7 @@ export default function QuickTransfer() {
               tokenCurrency: selectedTokenDetails.name,
               fiatValue: parseFloat(totalAmountToPay).toFixed(5),
               addresses: payoutDetails.map(({ address }) => address),
-              transactionMode: 1, // quick transfer
+              transactionMode: TRANSACTION_MODES.QUICK_TRANSFER, // quick transfer
             })
           );
         } else {
@@ -262,7 +263,7 @@ export default function QuickTransfer() {
               fiatValue: totalAmountToPay,
               fiatCurrency: "USD",
               addresses: payoutDetails.map(({ address }) => address),
-              transactionMode: 1, // quick transfer
+              transactionMode: TRANSACTION_MODES.QUICK_TRANSFER, // quick transfer
               nonce: nonce,
             })
           );

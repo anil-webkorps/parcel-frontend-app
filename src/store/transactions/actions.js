@@ -1,3 +1,4 @@
+import { TRANSACTION_MODES } from "constants/transactions";
 import {
   ADD_TRANSACTION,
   ADD_TRANSACTION_SUCCESS,
@@ -22,7 +23,7 @@ export function addTransaction({
   fiatValue,
   addresses,
   fiatCurrency = "USD",
-  transactionMode = 0, // 0 = mass payout, 1 = quick transfer
+  transactionMode = TRANSACTION_MODES.MASS_PAYOUT,
 }) {
   return {
     type: ADD_TRANSACTION,

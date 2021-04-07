@@ -87,7 +87,7 @@ import TransactionSubmitted from "./TransactionSubmitted";
 import SelectTokenModal, {
   MODAL_NAME as SELECT_TOKEN_MODAL,
 } from "./SelectTokenModal";
-
+import { TRANSACTION_MODES } from "constants/transactions";
 const { TableBody, TableHead, TableRow } = Table;
 
 // reducer/saga keys
@@ -405,7 +405,7 @@ export default function Payments() {
               fiatCurrency: "USD",
               addresses: recievers.map(({ address }) => address),
               nonce: nonce,
-              transactionMode: 0, // mass payout
+              transactionMode: TRANSACTION_MODES.MASS_PAYOUT,
             })
           );
         }

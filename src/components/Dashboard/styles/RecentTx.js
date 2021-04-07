@@ -39,8 +39,8 @@ export default styled(Card)`
     }
 
     .tx {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 2.5fr 2fr 0fr;
       align-items: center;
       border-bottom: 0.1rem solid #dddcdc;
       padding: 1.6rem 0;

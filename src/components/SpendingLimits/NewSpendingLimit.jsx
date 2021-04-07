@@ -76,6 +76,7 @@ import {
 
 import { ShowToken } from "components/QuickTransfer/styles";
 import { Circle } from "components/Header/styles";
+import { TRANSACTION_MODES } from "constants/transactions";
 
 const transactionsKey = "transactions";
 const safeKey = "safe";
@@ -234,7 +235,7 @@ export default function SpendingLimits() {
             tokenCurrency: selectedTokenDetails.name,
             fiatValue: parseFloat(totalAllowanceAmount).toFixed(5),
             addresses: spendingLimitDetails.map(({ address }) => address),
-            transactionMode: 2, // spending limits
+            transactionMode: TRANSACTION_MODES.SPENDING_LIMITS, // spending limits
           })
         );
       }
@@ -268,7 +269,7 @@ export default function SpendingLimits() {
               tokenCurrency: selectedTokenDetails.name,
               fiatValue: parseFloat(totalAllowanceAmount).toFixed(5),
               addresses: spendingLimitDetails.map(({ address }) => address),
-              transactionMode: 2, // spending limits
+              transactionMode: TRANSACTION_MODES.SPENDING_LIMITS, // spending limits
             })
           );
         } else {
@@ -288,7 +289,7 @@ export default function SpendingLimits() {
               fiatValue: totalAllowanceAmount,
               fiatCurrency: "USD",
               addresses: spendingLimitDetails.map(({ address }) => address),
-              transactionMode: 2, // spending limits
+              transactionMode: TRANSACTION_MODES.SPENDING_LIMITS, // spending limits
               nonce: nonce,
             })
           );
