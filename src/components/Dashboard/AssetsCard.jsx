@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { Link } from "react-router-dom";
 import { Doughnut } from "react-chartjs-2";
 import { useSelector } from "react-redux";
@@ -23,7 +23,7 @@ const chartColors = [
   "#212F3C",
 ];
 
-export default function AssetsCard() {
+function AssetsCard() {
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
 
   // Selectors
@@ -35,11 +35,6 @@ export default function AssetsCard() {
   useEffect(() => {
     if (tokenList && tokenList.length > 0) {
       setTokenDetails(tokenList.slice(0, 4));
-    }
-  }, [tokenList]);
-
-  useEffect(() => {
-    if (tokenList && tokenList.length > 0) {
       const chartData = tokenList.reduce(
         (data, { name, usd }) => {
           data.labels.push(name);
@@ -106,3 +101,5 @@ export default function AssetsCard() {
     </Assets>
   );
 }
+
+export default memo(AssetsCard);

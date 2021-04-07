@@ -1,14 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import React, { useState, useEffect, useCallback, memo, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { format } from "date-fns";
+// import { format } from "date-fns";
 import { cryptoUtils } from "parcel-sdk";
 import { Link } from "react-router-dom";
 
 import { useLocalStorage } from "hooks";
 import { routeTemplates } from "constants/routes/templates";
-import { Card } from "components/common/Card";
 import transactionsReducer from "store/transactions/reducer";
 import transactionsSaga from "store/transactions/saga";
 import { viewTransactions } from "store/transactions/actions";
@@ -50,7 +47,7 @@ const STATES = {
   TRANSACTION_EXECUTED: "TRANSACTION_EXECUTED",
 };
 
-export default function RecentTxCard() {
+function RecentTxCard() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   const [state, setState] = useState(STATES.EMPTY_STATE);
   const [loading, setLoading] = useState(true);
@@ -127,7 +124,7 @@ export default function RecentTxCard() {
     }
   }, [transactions, getDecryptedDetails]);
 
-  const renderStepTitle = () => {
+  const stepTitle = useMemo(() => {
     switch (state) {
       case STATES.EMPTY_STATE:
         return `Add Team Members`;
@@ -138,9 +135,9 @@ export default function RecentTxCard() {
       default:
         return null;
     }
-  };
+  }, [state]);
 
-  const getLinkByState = () => {
+  const linkByState = useMemo(() => {
     switch (state) {
       case STATES.EMPTY_STATE:
         return routeTemplates.dashboard.people;
@@ -151,7 +148,7 @@ export default function RecentTxCard() {
       default:
         return null;
     }
-  };
+  }, [state]);
 
   console.log({ transactionData });
 
@@ -176,8 +173,8 @@ export default function RecentTxCard() {
   return (
     <RecentTx>
       <div className="title-container">
-        <div className="title">{renderStepTitle()}</div>
-        <Link to={getLinkByState()} className="view">
+        <div className="title">{stepTitle}</div>
+        <Link to={linkByState} className="view">
           View All
         </Link>
       </div>
@@ -191,3 +188,5 @@ export default function RecentTxCard() {
     </RecentTx>
   );
 }
+
+export default memo(RecentTxCard);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
@@ -57,7 +57,7 @@ const notificationStyles = {
   },
 };
 
-export default function NotificationSidebar() {
+function NotificationSidebar() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
   const organisationType = useSelector(makeSelectOrganisationType());
@@ -196,3 +196,5 @@ export default function NotificationSidebar() {
     </NotificationMenu>
   );
 }
+
+export default memo(NotificationSidebar);
