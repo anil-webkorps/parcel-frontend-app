@@ -13,6 +13,7 @@ import {
 import { defaultTokenDetails } from "constants/index";
 
 import { Assets } from "./styles";
+import { formatNumber } from "utils/number-helpers";
 
 const chartColors = [
   "#F1C40F",
@@ -61,10 +62,10 @@ function AssetsCard() {
         <Img src={icon} alt={name} className="token-icon" />
         <div>
           <div className="token-name">{name}</div>
-          <div className="token-amount">{parseFloat(balance).toFixed(2)}</div>
+          <div className="token-amount">{formatNumber(balance)}</div>
         </div>
       </div>
-      <div className="usd">${parseFloat(usd).toFixed(2)}</div>
+      <div className="usd">${formatNumber(usd)}</div>
     </div>
   );
   return (

@@ -6,6 +6,7 @@ import {
   makeSelectLoading as makeSelectLoadingTokens,
 } from "store/tokens/selectors";
 import Loading from "components/common/Loading";
+import { formatNumber } from "utils/number-helpers";
 
 import { Overview } from "./styles";
 
@@ -31,7 +32,9 @@ export default function OverviewCard() {
         <div className="total-balance">Total Balance</div>
         <div className="amount">
           <span className="symbol">$</span>
-          <span className="value">{totalBalance.split(".")[0]}</span>
+          <span className="value">
+            {formatNumber(totalBalance.split(".")[0], 0)}
+          </span>
           <span className="decimals">.{totalBalance.split(".")[1]}</span>
           {renderLoading()}
         </div>

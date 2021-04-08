@@ -19,24 +19,19 @@ import { mainNavItems } from "./navItems";
 
 import { DashboardSidebar } from "./styles";
 import { routeTemplates } from "constants/routes/templates";
-import { toggleDropdown } from "store/layout/actions";
-import { SETTINGS } from "store/layout/constants";
-import { makeSelectDropdown } from "store/layout/selectors";
+import { useDropdown } from "hooks";
+
 const logoutKey = "logout";
 
 export default function Sidebar({ isSidebarOpen, closeSidebar }) {
   const location = useLocation();
+  const { open, toggleDropdown } = useDropdown();
 
   const dispatch = useDispatch();
 
   useInjectSaga({ key: logoutKey, saga: logoutSaga });
 
   const safeOwners = useSelector(makeSelectSafeOwners());
-  const dropdown = useSelector(makeSelectDropdown());
-
-  const toggleSettings = () => {
-    dispatch(toggleDropdown(SETTINGS, !dropdown[SETTINGS]));
-  };
 
   const logout = () => {
     dispatch(logoutUser());
@@ -92,7 +87,7 @@ export default function Sidebar({ isSidebarOpen, closeSidebar }) {
         <Img src={ParcelLogo} alt="parcel" width="100%" />
       </div>
       <div className="settings-container">
-        <div className="settings" onClick={toggleSettings}>
+        <div className="settings" onClick={toggleDropdown}>
           <div>
             <div className="company-title">Parcel</div>
             <div className="company-subtitle">{renderOwnerCount()}</div>
@@ -100,7 +95,7 @@ export default function Sidebar({ isSidebarOpen, closeSidebar }) {
           <div>
             <FontAwesomeIcon icon={faAngleDown} />
           </div>
-          <div className={`settings-dropdown ${dropdown[SETTINGS] && "show"}`}>
+          <div className={`settings-dropdown ${open && "show"}`}>
             <Link
               to={routeTemplates.dashboard.owners}
               className="settings-option"
