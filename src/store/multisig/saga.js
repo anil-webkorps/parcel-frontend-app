@@ -51,12 +51,17 @@ function* getMultisigTransactionById(action) {
 
   try {
     const result = yield call(request, requestURL, options);
-    yield put(
-      getMultisigTransactionByIdSuccess(
-        result.transaction,
-        result.executionAllowed
-      )
-    );
+
+    if (result.flag === 400) {
+      yield put(push("/dashboard/404")); // not found
+    } else {
+      yield put(
+        getMultisigTransactionByIdSuccess(
+          result.transaction,
+          result.executionAllowed
+        )
+      );
+    }
   } catch (err) {
     yield put(getMultisigTransactionByIdError(err));
   }
