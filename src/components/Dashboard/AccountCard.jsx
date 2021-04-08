@@ -19,6 +19,7 @@ import { makeSelectOwnerSafeAddress } from "store/global/selectors";
 
 import { defaultTokenDetails, isTestnet } from "constants/index";
 import Loading from "components/common/Loading";
+import { formatNumber } from "utils/number-helpers";
 
 const tokensKey = "tokens";
 
@@ -97,7 +98,9 @@ export default function AccountCard() {
             <div className="overview-cards">
               <div className="overview-card">
                 <div className="overview-text">Total Balance</div>
-                <div className="overview-amount">${totalBalance}</div>
+                <div className="overview-amount">
+                  ${formatNumber(totalBalance)}
+                </div>
               </div>
               <div className="overview-card">
                 <div className="overview-text">Interest Earned</div>
@@ -109,17 +112,13 @@ export default function AccountCard() {
                 <div className="d-flex align-items-center">
                   <img src={icon} alt="ether" width="30" />
                   <div>
-                    <div className="token-balance">
-                      {parseFloat(balance).toFixed(2)}
-                    </div>
+                    <div className="token-balance">{formatNumber(balance)}</div>
                     <div className="token-name">{name}</div>
                   </div>
                 </div>
                 <div className="token-usd">
                   <div className="token-usd-title">Total Value</div>
-                  <div className="token-usd-amount">
-                    ${parseFloat(usd).toFixed(2)}
-                  </div>
+                  <div className="token-usd-amount">${formatNumber(usd)}</div>
                 </div>
               </Assets>
             ))}

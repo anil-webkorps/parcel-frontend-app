@@ -87,6 +87,7 @@ import TransactionSubmitted from "./TransactionSubmitted";
 import SelectTokenModal, {
   MODAL_NAME as SELECT_TOKEN_MODAL,
 } from "./SelectTokenModal";
+import { formatNumber } from "utils/number-helpers";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -684,7 +685,7 @@ export default function Payments() {
             <div className="payment-title">Total Amount</div>
             {!isNaN(totalAmountToPay) ? (
               <div className="payment-subtitle">
-                US$ {parseFloat(totalAmountToPay).toFixed(2)}
+                US$ {formatNumber(totalAmountToPay)}
               </div>
             ) : (
               0
@@ -694,9 +695,9 @@ export default function Payments() {
             <div className="payment-title">Balance after payment</div>
             <div className="payment-subtitle">
               {!insufficientBalance
-                ? `US$ ${parseFloat(
+                ? `US$ ${formatNumber(
                     selectedTokenDetails.usd - totalAmountToPay
-                  ).toFixed(2)}`
+                  )}`
                 : `Insufficient Balance`}
             </div>
           </div>
@@ -766,9 +767,9 @@ export default function Payments() {
                       Paying from {selectedTokenDetails.name}
                     </div>
                     <div className="balance-value">
-                      {parseFloat(selectedTokenDetails.balance).toFixed(2)}{" "}
+                      {formatNumber(selectedTokenDetails.balance)}{" "}
                       {selectedTokenDetails.name} (US$
-                      {parseFloat(selectedTokenDetails.usd).toFixed(2)})
+                      {formatNumber(selectedTokenDetails.usd)})
                     </div>
                   </div>
                   <div className="separator"></div>

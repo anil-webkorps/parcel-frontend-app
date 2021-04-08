@@ -80,6 +80,7 @@ import {
 } from "components/People/styles";
 import { ShowToken } from "./styles";
 import { Circle } from "components/Header/styles";
+import { formatNumber } from "utils/number-helpers";
 
 const transactionsKey = "transactions";
 const safeKey = "safe";
@@ -340,7 +341,7 @@ export default function QuickTransfer() {
           <div className="token-balance">
             <div className="value">
               {selectedTokenDetails.balance
-                ? parseFloat(selectedTokenDetails.balance).toFixed(2)
+                ? formatNumber(selectedTokenDetails.balance)
                 : "0.00"}
             </div>
             <div className="name">{selectedTokenDetails.name}</div>

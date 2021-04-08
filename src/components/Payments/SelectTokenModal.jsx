@@ -17,6 +17,7 @@ import Loading from "components/common/Loading";
 
 import { Title, Heading } from "../People/styles";
 import { TokenCard } from "./styles";
+import { formatNumber } from "utils/number-helpers";
 
 export const MODAL_NAME = "select-token-modal";
 
@@ -105,12 +106,12 @@ function SelectTokenModal(props) {
                   <img src={icon} alt={name} width="35" />
                 </div>
                 <div>
-                  <div className="value">{parseFloat(balance).toFixed(2)}</div>
+                  <div className="value">{formatNumber(balance)}</div>
                   <div className="text">{name}</div>
                 </div>
                 <div className="divider"></div>
                 <div>
-                  <div className="value">US$ {parseFloat(usd).toFixed(2)}</div>
+                  <div className="value">US$ {formatNumber(usd)}</div>
                   <div className="text">Balance</div>
                 </div>
                 <div className="radio"></div>
