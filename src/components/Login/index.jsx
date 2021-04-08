@@ -1012,7 +1012,7 @@ const Login = () => {
     <Background withImage minHeight="92vh">
       <Container>
         <Card
-          className="mx-auto"
+          className="mx-auto p-0"
           style={{
             minHeight: "600px",
             width: "90%",

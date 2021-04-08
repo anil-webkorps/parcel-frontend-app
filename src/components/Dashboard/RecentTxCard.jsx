@@ -154,13 +154,18 @@ function RecentTxCard() {
   const renderName = (to, transactionMode) => {
     if (transactionMode === TRANSACTION_MODES.QUICK_TRANSFER) {
       return "Quick Transfer";
+    } else if (transactionMode === TRANSACTION_MODES.SPENDING_LIMITS) {
+      return "New Spending Limit";
+    } else if (transactionMode === TRANSACTION_MODES.MASS_PAYOUT) {
+      const payeeDetails = getDecryptedDetails(to);
+
+      const { firstName, lastName } = payeeDetails[0];
+      const firstPersonName = `${firstName} ${lastName}`;
+
+      return payeeDetails.length === 1
+        ? `${firstPersonName}`
+        : `${firstPersonName} and ${payeeDetails.length - 1} more`;
     }
-    const payeeDetails = getDecryptedDetails(to);
-
-    const { firstName, lastName } = payeeDetails[0];
-    const firstPersonName = `${firstName} ${lastName}`;
-
-    return `${firstPersonName} and ${payeeDetails.length - 1} more`;
   };
 
   const renderTx = ({
