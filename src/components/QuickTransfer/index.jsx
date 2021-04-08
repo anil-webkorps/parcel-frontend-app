@@ -81,6 +81,7 @@ import {
 import { ShowToken } from "./styles";
 import { Circle } from "components/Header/styles";
 import { TRANSACTION_MODES } from "constants/transactions";
+import { formatNumber } from "utils/number-helpers";
 
 const transactionsKey = "transactions";
 const safeKey = "safe";
@@ -341,7 +342,7 @@ export default function QuickTransfer() {
           <div className="token-balance">
             <div className="value">
               {selectedTokenDetails.balance
-                ? parseFloat(selectedTokenDetails.balance).toFixed(2)
+                ? formatNumber(selectedTokenDetails.balance)
                 : "0.00"}
             </div>
             <div className="name">{selectedTokenDetails.name}</div>
@@ -441,7 +442,8 @@ export default function QuickTransfer() {
           !formState.isValid ||
           loadingTx ||
           addingMultisigTx ||
-          addingSingleOwnerTx
+          addingSingleOwnerTx ||
+          loadingSafeDetails
         }
         loading={loadingTx || addingMultisigTx || addingSingleOwnerTx}
       >
@@ -456,20 +458,7 @@ export default function QuickTransfer() {
   const renderQuickTransfer = () => {
     return (
       <form onSubmit={handleSubmit(onSubmit)}>
-        <StepsCard>
-          {loadingSafeDetails ? (
-            <Card className="quick-transfer">
-              <div
-                className="d-flex align-items-center justify-content-center"
-                style={{ height: "400px" }}
-              >
-                <Loading color="primary" width="50px" height="50px" />
-              </div>
-            </Card>
-          ) : (
-            renderTransferDetails()
-          )}
-        </StepsCard>
+        <StepsCard>{renderTransferDetails()}</StepsCard>
       </form>
     );
   };

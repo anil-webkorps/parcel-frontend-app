@@ -88,6 +88,8 @@ import SelectTokenModal, {
   MODAL_NAME as SELECT_TOKEN_MODAL,
 } from "./SelectTokenModal";
 import { TRANSACTION_MODES } from "constants/transactions";
+import { formatNumber } from "utils/number-helpers";
+
 const { TableBody, TableHead, TableRow } = Table;
 
 // reducer/saga keys
@@ -684,7 +686,7 @@ export default function Payments() {
             <div className="payment-title">Total Amount</div>
             {!isNaN(totalAmountToPay) ? (
               <div className="payment-subtitle">
-                US$ {parseFloat(totalAmountToPay).toFixed(2)}
+                US$ {formatNumber(totalAmountToPay)}
               </div>
             ) : (
               0
@@ -694,9 +696,9 @@ export default function Payments() {
             <div className="payment-title">Balance after payment</div>
             <div className="payment-subtitle">
               {!insufficientBalance
-                ? `US$ ${parseFloat(
+                ? `US$ ${formatNumber(
                     selectedTokenDetails.usd - totalAmountToPay
-                  ).toFixed(2)}`
+                  )}`
                 : `Insufficient Balance`}
             </div>
           </div>
@@ -711,17 +713,12 @@ export default function Payments() {
               loadingTx ||
               insufficientBalance ||
               addingTx ||
-              !isMassPayoutAllowed
+              !isMassPayoutAllowed ||
+              loadingSafeDetails ||
+              loadingTokens
             }
           >
-            {(loadingSafeDetails || loadingTokens) && (
-              <div className="d-flex align-items-center justify-content-center">
-                <Loading color="#fff" width="50px" height="50px" />
-              </div>
-            )}
-
-            {!loadingSafeDetails &&
-              (threshold > 1 ? `Create Transaction` : `Pay Now`)}
+            {threshold > 1 ? `Create Transaction` : `Pay Now`}
           </Button>
         </div>
       </PaymentSummary>
@@ -771,9 +768,9 @@ export default function Payments() {
                       Paying from {selectedTokenDetails.name}
                     </div>
                     <div className="balance-value">
-                      {parseFloat(selectedTokenDetails.balance).toFixed(2)}{" "}
+                      {formatNumber(selectedTokenDetails.balance)}{" "}
                       {selectedTokenDetails.name} (US$
-                      {parseFloat(selectedTokenDetails.usd).toFixed(2)})
+                      {formatNumber(selectedTokenDetails.usd)})
                     </div>
                   </div>
                   <div className="separator"></div>

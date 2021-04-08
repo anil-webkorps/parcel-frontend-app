@@ -31,6 +31,7 @@ import { Title, Heading, ActionItem, Table } from "components/People/styles";
 import { Circle } from "components/Header/styles";
 import { Container } from "./styles";
 import { isTestnet } from "constants/index";
+import { formatNumber } from "utils/number-helpers";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -146,7 +147,9 @@ export default function AccountSummary() {
           <Col lg="6" className="pl-0">
             <Card className="balance-card">
               <div className="balance-title">Total Balance</div>
-              <div className="balance-subtitle">${totalBalance}</div>
+              <div className="balance-subtitle">
+                ${formatNumber(totalBalance)}
+              </div>
             </Card>
           </Col>
           <Col lg="6" className="pr-0">
@@ -193,8 +196,8 @@ export default function AccountSummary() {
                     <Img src={icon} alt="ether" width="30" /> {name}
                   </div>
                   <div>
-                    {parseFloat(balance).toFixed(2)} {name} (USD$
-                    {parseFloat(usd).toFixed(2)})
+                    {formatNumber(balance)} {name} (USD$
+                    {formatNumber(usd)})
                   </div>
                 </TableRow>
               ))}

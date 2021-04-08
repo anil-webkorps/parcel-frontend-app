@@ -8,6 +8,9 @@ import GHSTIcon from "assets/icons/tokens/GHST-icon.png";
 import SNXIcon from "assets/icons/tokens/SNX-icon.svg";
 import sUSDIcon from "assets/icons/tokens/sUSD-icon.webp";
 import sAUDIcon from "assets/icons/tokens/sAUD-icon.png";
+import COMPIcon from "assets/icons/tokens/COMP-icon.png";
+import DHTIcon from "assets/icons/tokens/DHT-icon.png";
+import UNIIcon from "assets/icons/tokens/UNI-icon.png";
 import DefaultIcon from "assets/icons/tokens/Default-icon.jpg";
 import addresses from "./addresses";
 
@@ -54,6 +57,9 @@ export const tokens = {
   SNX: "SNX",
   sUSD: "sUSD",
   sAUD: "sAUD",
+  COMP: "COMP",
+  DHT: "DHT",
+  UNI: "UNI",
 };
 
 export const getDefaultIconIfPossible = (tokenSymbol, icons) => {
@@ -74,6 +80,12 @@ export const getDefaultIconIfPossible = (tokenSymbol, icons) => {
       return sAUDIcon;
     case tokens.ETH:
       return ETHIcon;
+    case tokens.COMP:
+      return COMPIcon;
+    case tokens.DHT:
+      return DHTIcon;
+    case tokens.UNI:
+      return UNIIcon;
     default:
       if (icons && icons[tokenSymbol]) return icons[tokenSymbol];
       return DefaultIcon;

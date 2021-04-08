@@ -1000,7 +1000,7 @@ const Register = () => {
           </div>
         </ReviewContent>
 
-        <HighlightedText className="mt-4">
+        <HighlightedText className="mt-4 mb-5">
           {isMetaTxEnabled ? (
             <div>You’re about to create a new safe.</div>
           ) : (
