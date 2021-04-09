@@ -2,16 +2,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { UncontrolledTooltip } from "reactstrap";
 import copy from "copy-to-clipboard";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCopy } from "@fortawesome/free-solid-svg-icons";
+import CopyIcon from "assets/icons/dashboard/copy-icon.svg";
+import Img from "../Img";
 
-export default function CopyButton({
-  id,
-  value,
-  tooltip,
-  color = "#fff",
-  ...passThrough
-}) {
+export default function CopyButton({ id, value, tooltip, ...passThrough }) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -31,18 +25,20 @@ export default function CopyButton({
 
   return (
     <div className="position-relative">
-      <FontAwesomeIcon
+      <Img
+        src={CopyIcon}
         id={id}
+        alt="copy"
         onClick={onClickCopy}
-        icon={faCopy}
-        color={color}
+        width="14"
+        style={{ cursor: "pointer" }}
         {...passThrough}
       />
-      <UncontrolledTooltip placement="top" target={id}>
+      {/* <UncontrolledTooltip placement="top" target={id}>
         {copied
           ? `Copied ${tooltip || ""}`.trimRight()
           : `Copy ${tooltip || ""}`.trimRight()}
-      </UncontrolledTooltip>
+      </UncontrolledTooltip> */}
     </div>
   );
 }

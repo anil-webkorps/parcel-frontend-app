@@ -42,10 +42,10 @@ import {
   makeSelectSuccess,
   makeSelectLoading,
 } from "store/add-teammate/selectors";
-import viewDepartmentsReducer from "store/view-departments/reducer";
-import { getDepartments } from "store/view-departments/actions";
-import viewDepartmentsSaga from "store/view-departments/saga";
-import { makeSelectDepartments } from "store/view-departments/selectors";
+import viewTeamsReducer from "store/view-teams/reducer";
+import { getTeams } from "store/view-teams/actions";
+import viewTeamsSaga from "store/view-teams/saga";
+import { makeSelectDepartments } from "store/view-teams/selectors";
 import { getTokens } from "store/tokens/actions";
 import tokensReducer from "store/tokens/reducer";
 import tokensSaga from "store/tokens/saga";
@@ -112,7 +112,7 @@ const ADD_SINGLE_TEAMMATE_STEPS = {
 };
 
 const addTeammateKey = "addTeammate";
-const viewDepartmentsKey = "viewDepartments";
+const viewTeamsKey = "viewTeams";
 const tokensKey = "tokens";
 
 export default function AddTeammate() {
@@ -134,12 +134,12 @@ export default function AddTeammate() {
 
   useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
   useInjectReducer({
-    key: viewDepartmentsKey,
-    reducer: viewDepartmentsReducer,
+    key: viewTeamsKey,
+    reducer: viewTeamsReducer,
   });
   useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
-  useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
+  useInjectSaga({ key: viewTeamsKey, saga: viewTeamsSaga });
 
   useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
   useInjectSaga({ key: tokensKey, saga: tokensSaga });
@@ -192,7 +192,7 @@ export default function AddTeammate() {
 
   useEffect(() => {
     if (step === STEPS.ONE) {
-      dispatch(getDepartments(ownerSafeAddress));
+      dispatch(getTeams(ownerSafeAddress));
     }
   }, [step, ownerSafeAddress, dispatch]);
   useEffect(() => {

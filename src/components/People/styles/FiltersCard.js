@@ -29,4 +29,9 @@ export default styled(Card)`
     text-align: left;
     color: #373737;
   }
+
+  .flex {
+    display: flex;
+    align-items: center;
+  }
 `;

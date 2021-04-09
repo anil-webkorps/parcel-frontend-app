@@ -46,7 +46,7 @@ export default styled.div`
       visibility: visible;
       opacity: 1;
       height: auto;
-      z-index: 3;
+      z-index: 30;
     }
 
     .currency-option {

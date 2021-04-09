@@ -13,9 +13,9 @@ import { useHistory } from "react-router-dom";
 import { Info } from "components/Dashboard-old/styles";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
-import viewDepartmentsReducer from "store/view-departments/reducer";
-import { getDepartments } from "store/view-departments/actions";
-import viewDepartmentsSaga from "store/view-departments/saga";
+import viewTeamsReducer from "store/view-teams/reducer";
+import { getTeams } from "store/view-teams/actions";
+import viewTeamsSaga from "store/view-teams/saga";
 import viewTeammatesSaga from "store/view-teammates/saga";
 import viewTeammatesReducer from "store/view-teammates/reducer";
 import {
@@ -25,7 +25,7 @@ import {
 import {
   makeSelectDepartments,
   makeSelectLoading as makeSelectDepartmentsLoading,
-} from "store/view-departments/selectors";
+} from "store/view-teams/selectors";
 import {
   makeSelectTeammates,
   makeSelectLoading as makeSelectTeammatesLoading,
@@ -94,7 +94,7 @@ const { TableBody, TableHead, TableRow } = Table;
 
 // reducer/saga keys
 const viewTeammatesKey = "viewTeammates";
-const viewDepartmentsKey = "viewDepartments";
+const viewTeamsKey = "viewTeams";
 const transactionsKey = "transactions";
 const safeKey = "safe";
 const multisigKey = "multisig";
@@ -186,8 +186,8 @@ export default function Payments() {
   // Reducers
   useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
   useInjectReducer({
-    key: viewDepartmentsKey,
-    reducer: viewDepartmentsReducer,
+    key: viewTeamsKey,
+    reducer: viewTeamsReducer,
   });
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
   useInjectReducer({ key: safeKey, reducer: safeReducer });
@@ -198,7 +198,7 @@ export default function Payments() {
 
   // Sagas
   useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
-  useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
+  useInjectSaga({ key: viewTeamsKey, saga: viewTeamsSaga });
   useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
   useInjectSaga({ key: safeKey, saga: safeSaga });
   useInjectSaga({ key: multisigKey, saga: multisigSaga });
@@ -282,7 +282,7 @@ export default function Payments() {
       dispatch(getAllTeammates(ownerSafeAddress));
     } else {
       setDepartmentStep(0);
-      dispatch(getDepartments(ownerSafeAddress));
+      dispatch(getTeams(ownerSafeAddress));
     }
   }, [dispatch, ownerSafeAddress, activeTab]);
 

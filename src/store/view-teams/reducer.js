@@ -1,33 +1,29 @@
 import produce from "immer";
-import {
-  GET_DEPARTMENTS,
-  GET_DEPARTMENTS_SUCCESS,
-  GET_DEPARTMENTS_ERROR,
-} from "./action-types";
+import { GET_TEAMS, GET_TEAMS_SUCCESS, GET_TEAMS_ERROR } from "./action-types";
 
 export const initialState = {
   loading: false,
   departments: undefined,
   error: false,
-  totalEmployees: 0,
+  teammatesCount: 0,
 };
 
 /* eslint-disable default-case, no-param-reassign */
 const reducer = (state = initialState, action) =>
   produce(state, (draft) => {
     switch (action.type) {
-      case GET_DEPARTMENTS:
+      case GET_TEAMS:
         draft.loading = true;
         draft.error = false;
         break;
 
-      case GET_DEPARTMENTS_SUCCESS:
+      case GET_TEAMS_SUCCESS:
         draft.loading = false;
         draft.departments = action.departments;
-        draft.totalEmployees = action.totalEmployees;
+        draft.teammatesCount = action.teammatesCount;
         break;
 
-      case GET_DEPARTMENTS_ERROR:
+      case GET_TEAMS_ERROR:
         draft.loading = false;
         draft.error = action.error;
         break;

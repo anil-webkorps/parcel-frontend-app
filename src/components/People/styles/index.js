@@ -12,4 +12,10 @@ export { default as Departments } from "./Departments";
 export { default as ActionItem } from "./ActionItem";
 export { default as AllEmployees } from "./AllEmployees";
 export { default as ChooseAddOption } from "./ChooseAddOption";
+
 export { default as FiltersCard } from "./FiltersCard";
+export { default as Teams } from "./Teams";
+export { default as AddPeople } from "./AddPeople";
+export { default as SearchByTeam } from "./SearchByTeam";
+export { default as Export } from "./Export";
+export { default as PeopleDetails } from "./PeopleDetails";

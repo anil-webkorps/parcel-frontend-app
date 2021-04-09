@@ -4,12 +4,11 @@ export const CHOOSE_DEPARTMENT = "parcel/addTeammate/CHOOSE_DEPARTMENT";
 export const SELECT_FLOW = "parcel/addTeammate/SELECT_FLOW";
 export const SET_PEOPLE_ID = "parcel/addTeammate/SET_PEOPLE_ID";
 
-export const GET_DEPARTMENT_BY_ID =
-  "parcel/viewDepartments/GET_DEPARTMENT_BY_ID";
+export const GET_DEPARTMENT_BY_ID = "parcel/viewTeams/GET_DEPARTMENT_BY_ID";
 export const GET_DEPARTMENT_BY_ID_SUCCESS =
-  "parcel/viewDepartments/GET_DEPARTMENT_BY_ID_SUCCESS";
+  "parcel/viewTeams/GET_DEPARTMENT_BY_ID_SUCCESS";
 export const GET_DEPARTMENT_BY_ID_ERROR =
-  "parcel/viewDepartments/GET_DEPARTMENT_BY_ID_ERROR";
+  "parcel/viewTeams/GET_DEPARTMENT_BY_ID_ERROR";
 
 export const ADD_TEAMMATE = "parcel/addTeammate/ADD_TEAMMATE";
 export const ADD_TEAMMATE_SUCCESS = "parcel/addTeammate/ADD_TEAMMATE_SUCCESS";

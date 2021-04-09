@@ -8,14 +8,14 @@ import { Info } from "components/Dashboard-old/styles";
 import { SideNavContext } from "context/SideNavContext";
 import { Card } from "components/common/Card";
 import Button from "components/common/Button";
-import viewDepartmentsReducer from "store/view-departments/reducer";
-import { getDepartments } from "store/view-departments/actions";
-import viewDepartmentsSaga from "store/view-departments/saga";
+import viewTeamsReducer from "store/view-teams/reducer";
+import { getTeams } from "store/view-teams/actions";
+import viewTeamsSaga from "store/view-teams/saga";
 import {
   makeSelectDepartments,
-  makeSelectTotalEmployees,
+  makeSelectTeammatesCount,
   makeSelectLoading,
-} from "store/view-departments/selectors";
+} from "store/view-teams/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
@@ -27,7 +27,7 @@ import TeamPng from "assets/images/user-team.png";
 import { Container, AllEmployees } from "./styles";
 import { Circle } from "components/Header/styles";
 
-const viewDepartmentsKey = "viewDepartments";
+const viewTeamsKey = "viewTeams";
 
 export default function People() {
   // Normal users and New users have different UI at first
@@ -35,20 +35,20 @@ export default function People() {
   const [toggled] = useContext(SideNavContext);
 
   useInjectReducer({
-    key: viewDepartmentsKey,
-    reducer: viewDepartmentsReducer,
+    key: viewTeamsKey,
+    reducer: viewTeamsReducer,
   });
 
-  useInjectSaga({ key: viewDepartmentsKey, saga: viewDepartmentsSaga });
+  useInjectSaga({ key: viewTeamsKey, saga: viewTeamsSaga });
 
   const dispatch = useDispatch();
   const allDepartments = useSelector(makeSelectDepartments());
-  const totalEmployees = useSelector(makeSelectTotalEmployees());
+  const totalEmployees = useSelector(makeSelectTeammatesCount());
   const loading = useSelector(makeSelectLoading());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 
   useEffect(() => {
-    dispatch(getDepartments(ownerSafeAddress));
+    dispatch(getTeams(ownerSafeAddress));
   }, [dispatch, ownerSafeAddress]);
 
   useEffect(() => {

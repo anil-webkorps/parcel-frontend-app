@@ -6,4 +6,18 @@ const selectLayout = (state) => state.layout || initialState;
 const makeSelectIsNotificationOpen = () =>
   createSelector(selectLayout, (layoutState) => layoutState.isNotificationOpen);
 
-export { selectLayout, makeSelectIsNotificationOpen };
+const makeSelectIsPeopleDetailsOpen = () =>
+  createSelector(
+    selectLayout,
+    (layoutState) => layoutState.isPeopleDetailsOpen
+  );
+
+const makeSelectPeopleDetails = () =>
+  createSelector(selectLayout, (layoutState) => layoutState.peopleDetails);
+
+export {
+  selectLayout,
+  makeSelectIsNotificationOpen,
+  makeSelectIsPeopleDetailsOpen,
+  makeSelectPeopleDetails,
+};
