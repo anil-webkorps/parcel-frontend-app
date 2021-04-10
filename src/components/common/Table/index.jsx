@@ -1,5 +1,5 @@
 import React from "react";
-import { Table, TableHead, TableBody, TableTitle } from "./styles";
+import { Table, TableHead, TableBody, TableTitle, TableInfo } from "./styles";
 
 function CustomTable({ children, ...rest }) {
   return <Table {...rest}>{children}</Table>;
@@ -21,9 +21,14 @@ function CustomTableTitle({ children, ...rest }) {
   );
 }
 
+function CustomTableInfo({ children, ...rest }) {
+  return <TableInfo {...rest}>{children}</TableInfo>;
+}
+
 export {
   CustomTable as Table,
   CustomTableHead as TableHead,
   CustomTableBody as TableBody,
   CustomTableTitle as TableTitle,
+  CustomTableInfo as TableInfo,
 };

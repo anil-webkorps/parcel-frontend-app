@@ -11,7 +11,7 @@ const makeSelectDepartments = () =>
     selectViewTeams,
     (viewTeamsState) => viewTeamsState.departments
   );
-const makeSelectTeammatesCount = () =>
+const makeSelectPeopleCount = () =>
   createSelector(
     selectViewTeams,
     (viewTeamsState) => viewTeamsState.teammatesCount
@@ -23,7 +23,7 @@ const makeSelectError = () =>
 export {
   selectViewTeams,
   makeSelectDepartments,
-  makeSelectTeammatesCount,
+  makeSelectPeopleCount,
   makeSelectLoading,
   makeSelectError,
 };

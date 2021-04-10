@@ -14,10 +14,10 @@ export const getSafeOwnersEndpoint = `${ROOT_BE_URL}/api/v1/users/get-safe-owner
 export const loginEndpoint = `${ROOT_BE_URL}/api/v1/users/login`;
 
 // TEAMMATE
-export const getAllTeammatesEndpoint = `${ROOT_BE_URL}/api/v1/people/get`;
+export const getAllPeopleEndpoint = `${ROOT_BE_URL}/api/v1/people/get`;
 export const createTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/create`;
 export const createBulkTeammatesEndpoint = `${ROOT_BE_URL}/api/v1/people/add-multiple`;
-export const getTeammatesByDepartmentIdEndpoint = `${ROOT_BE_URL}/api/v1/people/getByDepartment`;
+export const getPeopleByDepartmentIdEndpoint = `${ROOT_BE_URL}/api/v1/people/getByDepartment`;
 export const editTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/update`;
 export const deleteTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/remove`;
 

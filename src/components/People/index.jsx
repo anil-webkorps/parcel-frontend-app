@@ -10,16 +10,27 @@ import { getTeams } from "store/view-teams/actions";
 import viewTeamsSaga from "store/view-teams/saga";
 import {
   makeSelectDepartments,
-  makeSelectTeammatesCount,
+  makeSelectPeopleCount,
   makeSelectLoading as makeSelectLoadingTeams,
 } from "store/view-teams/selectors";
-import viewTeammatesReducer from "store/view-teammates/reducer";
-import { getAllTeammates } from "store/view-teammates/actions";
-import viewTeammatesSaga from "store/view-teammates/saga";
+import viewPeopleReducer from "store/view-people/reducer";
 import {
-  makeSelectTeammates,
-  makeSelectLoading as makeSelectLoadingTeammates,
-} from "store/view-teammates/selectors";
+  getAllPeople,
+  addPeopleFilter,
+  removePeopleFilter,
+  setSearchName,
+} from "store/view-people/actions";
+import { PEOPLE_FILTERS } from "store/view-people/constants";
+import viewPeopleSaga from "store/view-people/saga";
+import {
+  makeSelectPeople,
+  makeSelectLoading as makeSelectLoadingPeople,
+  makeSelectIsSearchByTeamFilterApplied,
+  makeSelectIsSearchByNameFilterApplied,
+  makeSelectNameFilter,
+  makeSelectTeamFilter,
+  makeSelectSearchName,
+} from "store/view-people/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import {
@@ -40,6 +51,7 @@ import {
   TableHead,
   TableBody,
   TableTitle,
+  TableInfo,
 } from "components/common/Table";
 
 import { Container, FiltersCard } from "./styles";
@@ -48,44 +60,51 @@ import { getDecryptedDetails } from "utils/encryption";
 import Img from "components/common/Img";
 import { getDefaultIconIfPossible } from "constants/index";
 import { makeSelectTokenIcons } from "store/tokens/selectors";
-import PeopleDetailsSidebar from "./PeopleDetailsSidebar";
-import { makeSelectIsPeopleDetailsOpen } from "store/layout/selectors";
 import { togglePeopleDetails, setPeopleDetails } from "store/layout/actions";
 
 const viewTeamsKey = "viewTeams";
-const viewTeammatesKey = "viewTeammates";
+const viewPeopleKey = "viewPeople";
 
 export default function People() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
   const [isNewUser, setIsNewUser] = useState();
-  const [searchPeopleValue, setSearchPeopleValue] = useState("");
-  const [teammatesByAlphabet, setTeammatesByAlphabet] = useState();
-  const [sortedTeammates, setSortedTeammates] = useState();
-  const [teammatesByDepartment, setTeammatesByDepartment] = useState();
+  const [peopleByAlphabet, setPeopleByAlphabet] = useState();
+  const [allPeople, setAllPeople] = useState();
+  const [peopleByTeam, setPeopleByTeam] = useState();
+  const [filteredPeople, setFilteredPeople] = useState();
 
   useInjectReducer({
     key: viewTeamsKey,
     reducer: viewTeamsReducer,
   });
-  useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
+  useInjectReducer({ key: viewPeopleKey, reducer: viewPeopleReducer });
 
   useInjectSaga({ key: viewTeamsKey, saga: viewTeamsSaga });
-  useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
+  useInjectSaga({ key: viewPeopleKey, saga: viewPeopleSaga });
 
   const dispatch = useDispatch();
   const allDepartments = useSelector(makeSelectDepartments());
-  const teammatesCount = useSelector(makeSelectTeammatesCount());
+  const peopleCount = useSelector(makeSelectPeopleCount());
   const loadingTeams = useSelector(makeSelectLoadingTeams());
-  const loadingTeammates = useSelector(makeSelectLoadingTeammates());
+  const loadingPeople = useSelector(makeSelectLoadingPeople());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
-  const allTeammates = useSelector(makeSelectTeammates());
+  const encryptedPeople = useSelector(makeSelectPeople());
   const organisationType = useSelector(makeSelectOrganisationType());
   const icons = useSelector(makeSelectTokenIcons());
+  const isNameFilterApplied = useSelector(
+    makeSelectIsSearchByNameFilterApplied()
+  );
+  const isTeamFilterApplied = useSelector(
+    makeSelectIsSearchByTeamFilterApplied()
+  );
+  const nameFilter = useSelector(makeSelectNameFilter());
+  const teamFilter = useSelector(makeSelectTeamFilter());
+  const searchPeopleValue = useSelector(makeSelectSearchName());
 
   useEffect(() => {
     dispatch(getTeams(ownerSafeAddress));
-    dispatch(getAllTeammates(ownerSafeAddress));
+    dispatch(getAllPeople(ownerSafeAddress));
   }, [dispatch, ownerSafeAddress]);
 
   useEffect(() => {
@@ -94,18 +113,40 @@ export default function People() {
     }
   }, [allDepartments]);
 
+  useEffect(() => {
+    if (!searchPeopleValue && isNameFilterApplied) {
+      dispatch(removePeopleFilter(PEOPLE_FILTERS.NAME));
+    }
+
+    if (searchPeopleValue) {
+      dispatch(
+        addPeopleFilter(PEOPLE_FILTERS.NAME, searchPeopleValue.toLowerCase())
+      );
+    }
+  }, [dispatch, searchPeopleValue, isNameFilterApplied]);
+
+  useEffect(() => {
+    if (allPeople && nameFilter) {
+      const filteredPeople = allPeople.filter(({ firstName, lastName }) =>
+        `${firstName} ${lastName}`.toLowerCase().includes(nameFilter)
+      );
+
+      setFilteredPeople(filteredPeople);
+    }
+  }, [allPeople, nameFilter]);
+
   const handleSearchPeople = (e) => {
-    setSearchPeopleValue(e.target.value);
+    dispatch(setSearchName(e.target.value));
   };
 
   useEffect(() => {
     if (
-      allTeammates &&
-      allTeammates.length > 0 &&
+      encryptedPeople &&
+      encryptedPeople.length > 0 &&
       encryptionKey &&
       organisationType
     ) {
-      const sortedDecryptedTeammates = allTeammates
+      const sortedDecryptedPeople = encryptedPeople
         .map(({ data, ...rest }) => {
           const {
             firstName,
@@ -125,15 +166,15 @@ export default function People() {
         })
         .sort((a, b) => (a.firstName > b.firstName ? 1 : -1));
 
-      setSortedTeammates(sortedDecryptedTeammates);
+      setAllPeople(sortedDecryptedPeople);
 
-      const teammatesByAlphabet = sortedDecryptedTeammates.reduce(
-        (accumulator, teammate) => {
-          const alphabet = teammate.firstName[0];
+      const peopleByAlphabet = sortedDecryptedPeople.reduce(
+        (accumulator, people) => {
+          const alphabet = people.firstName[0];
           if (!accumulator[alphabet]) {
-            accumulator[alphabet] = [teammate];
+            accumulator[alphabet] = [people];
           } else {
-            accumulator[alphabet].push(teammate);
+            accumulator[alphabet].push(people);
           }
 
           return accumulator;
@@ -141,15 +182,15 @@ export default function People() {
         {}
       );
 
-      setTeammatesByAlphabet(teammatesByAlphabet);
+      setPeopleByAlphabet(peopleByAlphabet);
 
-      const teammatesByDepartment = sortedDecryptedTeammates.reduce(
-        (accumulator, teammate) => {
-          const departmentName = teammate.departmentName;
+      const peopleByTeam = sortedDecryptedPeople.reduce(
+        (accumulator, people) => {
+          const departmentName = people.departmentName;
           if (!accumulator[departmentName]) {
-            accumulator[departmentName] = [teammate];
+            accumulator[departmentName] = [people];
           } else {
-            accumulator[departmentName].push(teammate);
+            accumulator[departmentName].push(people);
           }
 
           return accumulator;
@@ -157,13 +198,102 @@ export default function People() {
         {}
       );
 
-      setTeammatesByDepartment(teammatesByDepartment);
+      setPeopleByTeam(peopleByTeam);
     }
-  }, [allTeammates, encryptionKey, organisationType]);
+  }, [encryptedPeople, encryptionKey, organisationType]);
 
   const openSidebar = (peopleDetails) => {
     dispatch(togglePeopleDetails(true));
     dispatch(setPeopleDetails(peopleDetails));
+  };
+
+  const renderNoPeopleFound = () => (
+    <TableInfo
+      style={{
+        fontSize: "1.4rem",
+        fontWeight: "500",
+        textAlign: "center",
+        height: "40rem",
+      }}
+    >
+      <td colSpan={4}>No results found!</td>
+    </TableInfo>
+  );
+
+  const renderRow = ({
+    firstName,
+    lastName,
+    departmentName,
+    departmentId,
+    peopleId,
+    salaryAmount,
+    salaryToken,
+    address,
+  }) => (
+    <tr
+      key={peopleId}
+      onClick={() =>
+        openSidebar({
+          firstName,
+          lastName,
+          departmentName,
+          departmentId,
+          peopleId,
+          salaryAmount,
+          salaryToken,
+          address,
+        })
+      }
+    >
+      <td className="d-flex align-items-center">
+        <Avatar className="mr-3" firstName={firstName} lastName={lastName} />
+        <div>
+          {firstName} {lastName}
+        </div>
+      </td>
+      <td>{departmentName}</td>
+      <td>
+        <Img
+          src={getDefaultIconIfPossible(salaryToken, icons)}
+          alt="token"
+          className="mr-1"
+          width="16"
+        />{" "}
+        <span>
+          {salaryAmount} {salaryToken}
+        </span>
+      </td>
+      <td>{address}</td>
+    </tr>
+  );
+
+  const renderPeopleByAlphabet = () => {
+    return (
+      peopleByAlphabet &&
+      Object.keys(peopleByAlphabet).map((alphabet) => (
+        <React.Fragment key={alphabet}>
+          <TableTitle>{alphabet}</TableTitle>
+          {peopleByAlphabet[alphabet].map((people) => renderRow(people))}
+        </React.Fragment>
+      ))
+    );
+  };
+
+  const renderFilteredPeopleByTeam = () => {
+    return (
+      <React.Fragment>
+        <TableTitle>{teamFilter}</TableTitle>
+        {peopleByTeam &&
+          peopleByTeam[teamFilter] &&
+          peopleByTeam[teamFilter].map((people) => renderRow(people))}
+      </React.Fragment>
+    );
+  };
+
+  const renderFilteredPeopleByName = () => {
+    return filteredPeople && filteredPeople.length > 0
+      ? filteredPeople.map((people) => renderRow(people))
+      : renderNoPeopleFound();
   };
 
   const renderForNewUser = () => {
@@ -220,7 +350,7 @@ export default function People() {
         </FiltersCard>
         <FiltersCard className="mt-3">
           <div>
-            <div className="title mb-0">Showing {teammatesCount} teammates</div>
+            <div className="title mb-0">Showing {peopleCount} people</div>
           </div>
           <div className="flex">
             <TeamsDropdown />
@@ -232,71 +362,18 @@ export default function People() {
         <Table style={{ marginTop: "3rem" }}>
           <TableHead>
             <tr>
-              <th style={{ width: "25%" }}>Teammates</th>
+              <th style={{ width: "25%" }}>Name</th>
               <th style={{ width: "20%" }}>Team</th>
               <th style={{ width: "20%" }}>Disbursement</th>
               <th style={{ width: "30%" }}>Address</th>
             </tr>
           </TableHead>
           <TableBody>
-            {teammatesByAlphabet &&
-              Object.keys(teammatesByAlphabet).map((alphabet) => (
-                <React.Fragment key={alphabet}>
-                  <TableTitle>{alphabet}</TableTitle>
-                  {teammatesByAlphabet[alphabet].map(
-                    ({
-                      firstName,
-                      lastName,
-                      departmentName,
-                      departmentId,
-                      peopleId,
-                      salaryAmount,
-                      salaryToken,
-                      address,
-                    }) => (
-                      <tr
-                        key={peopleId}
-                        onClick={() =>
-                          openSidebar({
-                            firstName,
-                            lastName,
-                            departmentName,
-                            departmentId,
-                            peopleId,
-                            salaryAmount,
-                            salaryToken,
-                            address,
-                          })
-                        }
-                      >
-                        <td className="d-flex align-items-center">
-                          <Avatar
-                            className="mr-3"
-                            firstName={firstName}
-                            lastName={lastName}
-                          />
-                          <div>
-                            {firstName} {lastName}
-                          </div>
-                        </td>
-                        <td>{departmentName}</td>
-                        <td>
-                          <Img
-                            src={getDefaultIconIfPossible(salaryToken, icons)}
-                            alt="token"
-                            className="mr-1"
-                            width="16"
-                          />{" "}
-                          <span>
-                            {salaryAmount} {salaryToken}
-                          </span>
-                        </td>
-                        <td>{address}</td>
-                      </tr>
-                    )
-                  )}
-                </React.Fragment>
-              ))}
+            {isNameFilterApplied
+              ? renderFilteredPeopleByName()
+              : isTeamFilterApplied
+              ? renderFilteredPeopleByTeam()
+              : renderPeopleByAlphabet()}
           </TableBody>
         </Table>
       </div>
@@ -305,7 +382,7 @@ export default function People() {
 
   return (
     <div>
-      {loadingTeams || loadingTeammates ? (
+      {loadingTeams || loadingPeople ? (
         <div
           className="d-flex align-items-center justify-content-center"
           style={{ height: "80vh" }}

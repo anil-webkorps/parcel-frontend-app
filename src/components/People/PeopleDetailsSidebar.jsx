@@ -1,13 +1,10 @@
-import React, { memo, useState } from "react";
+import React, { memo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-import { cryptoUtils } from "parcel-sdk";
-import formatDistance from "date-fns/formatDistance";
 
-import { useInjectSaga } from "utils/injectSaga";
-import { useInjectReducer } from "utils/injectReducer";
+// import { useInjectSaga } from "utils/injectSaga";
+// import { useInjectReducer } from "utils/injectReducer";
 import Img from "components/common/Img";
-import Loading from "components/common/Loading";
+// import Loading from "components/common/Loading";
 import CloseIcon from "assets/icons/navbar/close.svg";
 import {
   makeSelectIsPeopleDetailsOpen,
@@ -71,8 +68,8 @@ function PeopleDetailsSidebar() {
       firstName,
       lastName,
       departmentName,
-      departmentId,
-      peopleId,
+      // departmentId,
+      // peopleId,
       salaryAmount,
       salaryToken,
       address,

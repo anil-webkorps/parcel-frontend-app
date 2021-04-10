@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { UncontrolledTooltip } from "reactstrap";
+import ReactTooltip from "react-tooltip";
+
 import LinkIcon from "assets/icons/dashboard/link-icon.svg";
 import Img from "../Img";
 import { getEtherscanLink } from "../Web3Utils";
@@ -22,10 +23,16 @@ export default function EtherscanLink({
         rel="noopener noreferrer"
         target="_blank"
       >
-        <Img src={LinkIcon} id={id} alt="link" {...passThrough} width="14" />
-        {/* <UncontrolledTooltip placement="top" target={id}>
-          View on Etherscan
-        </UncontrolledTooltip> */}
+        <Img
+          src={LinkIcon}
+          id={id}
+          alt="link"
+          {...passThrough}
+          width="14"
+          data-for={id}
+          data-tip={"View on Etherscan"}
+        />
+        <ReactTooltip id={id} place={"top"} type={"dark"} effect={"solid"} />
       </a>
     </div>
   );

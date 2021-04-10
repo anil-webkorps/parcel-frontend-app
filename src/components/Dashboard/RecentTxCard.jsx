@@ -13,13 +13,13 @@ import {
   makeSelectTransactions,
   makeSelectFetching as makeSelectLoadingTransactions,
 } from "store/transactions/selectors";
-import viewTeammatesReducer from "store/view-teammates/reducer";
-import viewTeammatesSaga from "store/view-teammates/saga";
-import { getAllTeammates } from "store/view-teammates/actions";
+import viewPeopleReducer from "store/view-people/reducer";
+import viewPeopleSaga from "store/view-people/saga";
+import { getAllPeople } from "store/view-people/actions";
 import {
-  makeSelectTeammates,
+  makeSelectPeople,
   makeSelectLoading as makeSelectLoadingTeammates,
-} from "store/view-teammates/selectors";
+} from "store/view-people/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import {
@@ -39,7 +39,7 @@ import Img from "components/common/Img";
 import { TRANSACTION_MODES, TRANSACTION_STATUS } from "constants/transactions";
 
 const transactionsKey = "transactions";
-const viewTeammatesKey = "viewTeammates";
+const viewPeopleKey = "viewPeople";
 
 const STATES = {
   EMPTY_STATE: "EMPTY_STATE",
@@ -54,10 +54,10 @@ function RecentTxCard() {
   const [transactionData, setTransactionData] = useState();
 
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
-  useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
+  useInjectReducer({ key: viewPeopleKey, reducer: viewPeopleReducer });
 
   useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
-  useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
+  useInjectSaga({ key: viewPeopleKey, saga: viewPeopleSaga });
 
   const dispatch = useDispatch();
 
@@ -66,7 +66,7 @@ function RecentTxCard() {
   const loadingTeammates = useSelector(makeSelectLoadingTeammates());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const organisationType = useSelector(makeSelectOrganisationType());
-  const teammates = useSelector(makeSelectTeammates());
+  const teammates = useSelector(makeSelectPeople());
 
   const getDecryptedDetails = useCallback(
     (data) => {
@@ -85,7 +85,7 @@ function RecentTxCard() {
   useEffect(() => {
     if (ownerSafeAddress) {
       dispatch(viewTransactions(ownerSafeAddress));
-      dispatch(getAllTeammates(ownerSafeAddress));
+      dispatch(getAllPeople(ownerSafeAddress));
     }
   }, [dispatch, ownerSafeAddress]);
 

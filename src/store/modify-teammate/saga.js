@@ -13,10 +13,7 @@ import {
   editTeammateEndpoint,
   deleteTeammateEndpoint,
 } from "constants/endpoints";
-import {
-  getAllTeammates,
-  getTeammatesByDepartment,
-} from "store/view-teammates/actions";
+import { getAllPeople, getPeopleByDepartment } from "store/view-people/actions";
 import { MODAL_NAME as DELETE_TEAMMATE_MODAL } from "components/People/DeleteTeammateModal";
 
 export function* editTeammate({ body }) {
@@ -71,9 +68,9 @@ export function* deleteTeammate({ peopleId, safeAddress, departmentId }) {
       yield put(deleteTeammateSuccess(result.log));
       yield put(hide(DELETE_TEAMMATE_MODAL));
       if (departmentId) {
-        yield put(getTeammatesByDepartment(safeAddress, departmentId));
+        yield put(getPeopleByDepartment(safeAddress, departmentId));
       } else {
-        yield put(getAllTeammates(safeAddress));
+        yield put(getAllPeople(safeAddress));
       }
     }
   } catch (err) {

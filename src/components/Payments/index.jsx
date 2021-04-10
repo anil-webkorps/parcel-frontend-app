@@ -16,20 +16,17 @@ import Button from "components/common/Button";
 import viewTeamsReducer from "store/view-teams/reducer";
 import { getTeams } from "store/view-teams/actions";
 import viewTeamsSaga from "store/view-teams/saga";
-import viewTeammatesSaga from "store/view-teammates/saga";
-import viewTeammatesReducer from "store/view-teammates/reducer";
-import {
-  getAllTeammates,
-  getTeammatesByDepartment,
-} from "store/view-teammates/actions";
+import viewPeopleSaga from "store/view-people/saga";
+import viewPeopleReducer from "store/view-people/reducer";
+import { getAllPeople, getPeopleByDepartment } from "store/view-people/actions";
 import {
   makeSelectDepartments,
   makeSelectLoading as makeSelectDepartmentsLoading,
 } from "store/view-teams/selectors";
 import {
-  makeSelectTeammates,
-  makeSelectLoading as makeSelectTeammatesLoading,
-} from "store/view-teammates/selectors";
+  makeSelectPeople,
+  makeSelectLoading as makeSelectPeopleLoading,
+} from "store/view-people/selectors";
 import transactionsReducer from "store/transactions/reducer";
 import transactionsSaga from "store/transactions/saga";
 import {
@@ -93,7 +90,7 @@ import { formatNumber } from "utils/number-helpers";
 const { TableBody, TableHead, TableRow } = Table;
 
 // reducer/saga keys
-const viewTeammatesKey = "viewTeammates";
+const viewPeopleKey = "viewPeople";
 const viewTeamsKey = "viewTeams";
 const transactionsKey = "transactions";
 const safeKey = "safe";
@@ -184,7 +181,7 @@ export default function Payments() {
   };
 
   // Reducers
-  useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
+  useInjectReducer({ key: viewPeopleKey, reducer: viewPeopleReducer });
   useInjectReducer({
     key: viewTeamsKey,
     reducer: viewTeamsReducer,
@@ -197,7 +194,7 @@ export default function Payments() {
   useInjectReducer({ key: metaTxKey, reducer: metaTxReducer });
 
   // Sagas
-  useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
+  useInjectSaga({ key: viewPeopleKey, saga: viewPeopleSaga });
   useInjectSaga({ key: viewTeamsKey, saga: viewTeamsSaga });
   useInjectSaga({ key: transactionsKey, saga: transactionsSaga });
   useInjectSaga({ key: safeKey, saga: safeSaga });
@@ -212,8 +209,8 @@ export default function Payments() {
   // Selectors
   const allDepartments = useSelector(makeSelectDepartments());
   const loadingDepartments = useSelector(makeSelectDepartmentsLoading());
-  const loadingTeammates = useSelector(makeSelectTeammatesLoading());
-  const teammates = useSelector(makeSelectTeammates());
+  const loadingTeammates = useSelector(makeSelectPeopleLoading());
+  const teammates = useSelector(makeSelectPeople());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const prices = useSelector(makeSelectPrices());
   const txHashFromMetaTx = useSelector(makeSelectMetaTransactionHash());
@@ -279,7 +276,7 @@ export default function Payments() {
     setChecked([]);
     setIsCheckedAll(false);
     if (activeTab === TABS.PEOPLE) {
-      dispatch(getAllTeammates(ownerSafeAddress));
+      dispatch(getAllPeople(ownerSafeAddress));
     } else {
       setDepartmentStep(0);
       dispatch(getTeams(ownerSafeAddress));
@@ -500,7 +497,7 @@ export default function Payments() {
 
   const handleSelectDepartment = (departmentId) => {
     if (ownerSafeAddress && departmentId) {
-      dispatch(getTeammatesByDepartment(ownerSafeAddress, departmentId));
+      dispatch(getPeopleByDepartment(ownerSafeAddress, departmentId));
       setDepartmentStep(departmentStep + 1);
       setSelectedRows([]);
     }

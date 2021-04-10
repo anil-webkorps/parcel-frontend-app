@@ -13,7 +13,7 @@ import { getTeams } from "store/view-teams/actions";
 import viewTeamsSaga from "store/view-teams/saga";
 import {
   makeSelectDepartments,
-  makeSelectTeammatesCount,
+  makeSelectPeopleCount,
   makeSelectLoading,
 } from "store/view-teams/selectors";
 import { useInjectReducer } from "utils/injectReducer";
@@ -43,7 +43,7 @@ export default function People() {
 
   const dispatch = useDispatch();
   const allDepartments = useSelector(makeSelectDepartments());
-  const totalEmployees = useSelector(makeSelectTeammatesCount());
+  const totalEmployees = useSelector(makeSelectPeopleCount());
   const loading = useSelector(makeSelectLoading());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
 

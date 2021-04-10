@@ -1,11 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { UncontrolledTooltip } from "reactstrap";
+import ReactTooltip from "react-tooltip";
 import copy from "copy-to-clipboard";
+
 import CopyIcon from "assets/icons/dashboard/copy-icon.svg";
 import Img from "../Img";
 
-export default function CopyButton({ id, value, tooltip, ...passThrough }) {
+export default function CopyButton({
+  id,
+  value,
+  tooltip,
+  children,
+  ...passThrough
+}) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -25,20 +32,40 @@ export default function CopyButton({ id, value, tooltip, ...passThrough }) {
 
   return (
     <div className="position-relative">
-      <Img
-        src={CopyIcon}
+      {!children ? (
+        <Img
+          src={CopyIcon}
+          id={id}
+          alt="copy"
+          onClick={onClickCopy}
+          width="14"
+          style={{ cursor: "pointer" }}
+          data-for={id}
+          data-tip={tooltip}
+          {...passThrough}
+        />
+      ) : (
+        <div
+          id={id}
+          onClick={onClickCopy}
+          data-for={id}
+          data-tip={tooltip}
+          {...passThrough}
+        >
+          {children}
+        </div>
+      )}
+      <ReactTooltip
         id={id}
-        alt="copy"
-        onClick={onClickCopy}
-        width="14"
-        style={{ cursor: "pointer" }}
-        {...passThrough}
+        place={"top"}
+        type={"dark"}
+        effect={"solid"}
+        getContent={(dataTip) =>
+          copied
+            ? `Copied ${dataTip || ""}`.trimRight()
+            : `Copy ${dataTip || ""}`.trimRight()
+        }
       />
-      {/* <UncontrolledTooltip placement="top" target={id}>
-        {copied
-          ? `Copied ${tooltip || ""}`.trimRight()
-          : `Copy ${tooltip || ""}`.trimRight()}
-      </UncontrolledTooltip> */}
     </div>
   );
 }

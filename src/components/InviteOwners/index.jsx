@@ -41,7 +41,7 @@ import {
 } from "store/global/selectors";
 import Loading from "components/common/Loading";
 import { useActiveWeb3React } from "hooks";
-import CopyLink from "components/common/Copy/CopyLink";
+import CopyButton from "components/common/Copy";
 import Img from "components/common/Img";
 
 import { Title, Heading, ActionItem } from "components/People/styles";
@@ -192,7 +192,7 @@ export default function InviteOwners() {
         <div className="d-flex align-items-center">
           <div className="awaiting-status mr-2">Awaiting Confirmation</div>
           {invitationDetails.invitationLink && (
-            <CopyLink
+            <CopyButton
               id={`invitation-link-${idx}`}
               tooltip="Invitation Link"
               value={invitationDetails.invitationLink}
@@ -206,7 +206,7 @@ export default function InviteOwners() {
                 {/* Copy */}
                 <FontAwesomeIcon icon={faLink} color={"#fff"} />
               </Button>
-            </CopyLink>
+            </CopyButton>
           )}
         </div>
       );
@@ -383,7 +383,7 @@ export default function InviteOwners() {
           <StepDetails>
             <div className="step-title d-flex justify-content-center align-items-center">
               {/* <div className="mr-2">SETUP COMPLETED</div> */}
-              <CopyLink
+              <CopyButton
                 id={`invitation-link-final`}
                 tooltip="Login Link"
                 value={window.location.origin}
@@ -400,7 +400,7 @@ export default function InviteOwners() {
                   />
                   Copy Login Link
                 </Button>
-              </CopyLink>
+              </CopyButton>
             </div>
             <div className="step-subtitle mt-2 text-center">
               Share this link with the other owners and they can login to

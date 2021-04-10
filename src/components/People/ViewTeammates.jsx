@@ -21,17 +21,14 @@ import { cryptoUtils } from "parcel-sdk";
 import { Info } from "components/Dashboard-old/styles";
 import { useLocalStorage } from "hooks";
 import Button from "components/common/Button";
-import viewTeammatesReducer from "store/view-teammates/reducer";
-import viewTeammatesSaga from "store/view-teammates/saga";
+import viewPeopleReducer from "store/view-people/reducer";
+import viewPeopleSaga from "store/view-people/saga";
+import { getAllPeople, getPeopleByDepartment } from "store/view-people/actions";
 import {
-  getAllTeammates,
-  getTeammatesByDepartment,
-} from "store/view-teammates/actions";
-import {
-  makeSelectTeammates,
+  makeSelectPeople,
   makeSelectLoading,
   makeSelectDepartmentName,
-} from "store/view-teammates/selectors";
+} from "store/view-people/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import {
@@ -59,24 +56,24 @@ import { minifyAddress } from "components/common/Web3Utils";
 
 const { TableBody, TableHead, TableRow } = Table;
 
-const viewTeammatesKey = "viewTeammates";
+const viewPeopleKey = "viewPeople";
 const addTeammateKey = "addTeammate";
 const tokensKey = "tokens";
 
 export default function ViewTeammate() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
-  useInjectReducer({ key: viewTeammatesKey, reducer: viewTeammatesReducer });
+  useInjectReducer({ key: viewPeopleKey, reducer: viewPeopleReducer });
   useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
   useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
-  useInjectSaga({ key: viewTeammatesKey, saga: viewTeammatesSaga });
+  useInjectSaga({ key: viewPeopleKey, saga: viewPeopleSaga });
   useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const params = useParams();
   const history = useHistory();
 
-  const teammates = useSelector(makeSelectTeammates());
+  const teammates = useSelector(makeSelectPeople());
   const loading = useSelector(makeSelectLoading());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const icons = useSelector(makeSelectTokenIcons());
@@ -86,11 +83,9 @@ export default function ViewTeammate() {
   useEffect(() => {
     if (ownerSafeAddress) {
       if (params && params.departmentId) {
-        dispatch(
-          getTeammatesByDepartment(ownerSafeAddress, params.departmentId)
-        );
+        dispatch(getPeopleByDepartment(ownerSafeAddress, params.departmentId));
       } else {
-        dispatch(getAllTeammates(ownerSafeAddress));
+        dispatch(getAllPeople(ownerSafeAddress));
       }
     }
   }, [dispatch, ownerSafeAddress]); // eslint-disable-line
