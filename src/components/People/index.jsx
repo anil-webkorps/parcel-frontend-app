@@ -1,18 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch, useSelector } from "react-redux";
 
-import { Card } from "components/common/Card";
-import Button from "components/common/Button";
 import viewTeamsReducer from "store/view-teams/reducer";
 import { getTeams } from "store/view-teams/actions";
 import viewTeamsSaga from "store/view-teams/saga";
-import {
-  makeSelectDepartments,
-  makeSelectPeopleCount,
-  makeSelectLoading as makeSelectLoadingTeams,
-} from "store/view-teams/selectors";
 import viewPeopleReducer from "store/view-people/reducer";
 import {
   getAllPeople,
@@ -39,7 +30,6 @@ import {
 } from "store/global/selectors";
 import Loading from "components/common/Loading";
 
-import TeamMembersPng from "assets/images/team-members.png";
 import ControlledInput from "components/common/Input";
 import TeamsDropdown from "./TeamsDropdown";
 import AddPeopleDropdown from "./AddPeopleDropdown";
@@ -53,14 +43,17 @@ import {
   TableTitle,
   TableInfo,
 } from "components/common/Table";
-
-import { Container, FiltersCard } from "./styles";
+import { FiltersCard } from "./styles";
 import { useLocalStorage } from "hooks";
 import { getDecryptedDetails } from "utils/encryption";
 import Img from "components/common/Img";
 import { getDefaultIconIfPossible } from "constants/index";
 import { makeSelectTokenIcons } from "store/tokens/selectors";
 import { togglePeopleDetails, setPeopleDetails } from "store/layout/actions";
+import DeletePeopleModal from "./DeletePeopleModal";
+import AddPeopleIcon from "assets/icons/dashboard/add-people-icon.svg";
+import ModifyTeamDropdown from "./ModifyTeamDropdown";
+import { makeSelectTeams } from "store/view-teams/selectors";
 
 const viewTeamsKey = "viewTeams";
 const viewPeopleKey = "viewPeople";
@@ -73,6 +66,7 @@ export default function People() {
   const [allPeople, setAllPeople] = useState();
   const [peopleByTeam, setPeopleByTeam] = useState();
   const [filteredPeople, setFilteredPeople] = useState();
+  const [teamNameToIdMap, setTeamNameToIdMap] = useState();
 
   useInjectReducer({
     key: viewTeamsKey,
@@ -84,9 +78,7 @@ export default function People() {
   useInjectSaga({ key: viewPeopleKey, saga: viewPeopleSaga });
 
   const dispatch = useDispatch();
-  const allDepartments = useSelector(makeSelectDepartments());
-  const peopleCount = useSelector(makeSelectPeopleCount());
-  const loadingTeams = useSelector(makeSelectLoadingTeams());
+  const allTeams = useSelector(makeSelectTeams());
   const loadingPeople = useSelector(makeSelectLoadingPeople());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const encryptedPeople = useSelector(makeSelectPeople());
@@ -108,10 +100,12 @@ export default function People() {
   }, [dispatch, ownerSafeAddress]);
 
   useEffect(() => {
-    if (allDepartments && allDepartments.length === 0) {
+    if (!encryptedPeople) {
       setIsNewUser(true);
+    } else {
+      setIsNewUser(false);
     }
-  }, [allDepartments]);
+  }, [encryptedPeople]);
 
   useEffect(() => {
     if (!searchPeopleValue && isNameFilterApplied) {
@@ -140,6 +134,16 @@ export default function People() {
   };
 
   useEffect(() => {
+    if (allTeams && allTeams.length > 0) {
+      const teamNameToIdMap = allTeams.reduce((map, { departmentId, name }) => {
+        map[name] = departmentId;
+        return map;
+      }, {});
+      setTeamNameToIdMap(teamNameToIdMap);
+    }
+  }, [allTeams]);
+
+  useEffect(() => {
     if (
       encryptedPeople &&
       encryptedPeople.length > 0 &&
@@ -164,13 +168,15 @@ export default function People() {
             ...rest,
           };
         })
-        .sort((a, b) => (a.firstName > b.firstName ? 1 : -1));
+        .sort((a, b) =>
+          a.firstName.toUpperCase() > b.firstName.toUpperCase() ? 1 : -1
+        );
 
       setAllPeople(sortedDecryptedPeople);
 
       const peopleByAlphabet = sortedDecryptedPeople.reduce(
         (accumulator, people) => {
-          const alphabet = people.firstName[0];
+          const alphabet = people.firstName[0].toUpperCase();
           if (!accumulator[alphabet]) {
             accumulator[alphabet] = [people];
           } else {
@@ -220,6 +226,38 @@ export default function People() {
     </TableInfo>
   );
 
+  const renderLoading = () => (
+    <TableInfo
+      style={{
+        textAlign: "center",
+        height: "40rem",
+      }}
+    >
+      <td colSpan={4}>
+        <div className="d-flex align-items-center justify-content-center">
+          <Loading color="primary" width="50px" height="50px" />
+        </div>
+      </td>
+    </TableInfo>
+  );
+
+  const renderAddPeople = () => (
+    <TableInfo
+      style={{
+        fontSize: "1.6rem",
+        fontWeight: "900",
+        textAlign: "center",
+        height: "40rem",
+        color: "#8b8b8b",
+      }}
+    >
+      <td colSpan={4}>
+        <Img src={AddPeopleIcon} alt="add-people" />
+        <div className="mt-4">Start by adding some people!</div>
+      </td>
+    </TableInfo>
+  );
+
   const renderRow = ({
     firstName,
     lastName,
@@ -251,7 +289,9 @@ export default function People() {
           {firstName} {lastName}
         </div>
       </td>
-      <td>{departmentName}</td>
+      <td style={isTeamFilterApplied ? { color: "#dddcdc" } : {}}>
+        {departmentName}
+      </td>
       <td>
         <Img
           src={getDefaultIconIfPossible(salaryToken, icons)}
@@ -268,24 +308,30 @@ export default function People() {
   );
 
   const renderPeopleByAlphabet = () => {
-    return (
-      peopleByAlphabet &&
-      Object.keys(peopleByAlphabet).map((alphabet) => (
-        <React.Fragment key={alphabet}>
-          <TableTitle>{alphabet}</TableTitle>
-          {peopleByAlphabet[alphabet].map((people) => renderRow(people))}
-        </React.Fragment>
-      ))
-    );
+    return peopleByAlphabet && Object.keys(peopleByAlphabet).length > 0
+      ? Object.keys(peopleByAlphabet).map((alphabet) => (
+          <React.Fragment key={alphabet}>
+            <TableTitle>{alphabet}</TableTitle>
+            {peopleByAlphabet[alphabet].map((people) => renderRow(people))}
+          </React.Fragment>
+        ))
+      : renderNoPeopleFound();
   };
 
   const renderFilteredPeopleByTeam = () => {
     return (
       <React.Fragment>
-        <TableTitle>{teamFilter}</TableTitle>
-        {peopleByTeam &&
-          peopleByTeam[teamFilter] &&
-          peopleByTeam[teamFilter].map((people) => renderRow(people))}
+        <TableTitle>
+          <div className="d-flex justify-content-between align-items-center">
+            <div>{teamFilter}</div>
+            <ModifyTeamDropdown
+              departmentId={teamNameToIdMap && teamNameToIdMap[teamFilter]}
+            />
+          </div>
+        </TableTitle>
+        {peopleByTeam && peopleByTeam[teamFilter].length > 0
+          ? peopleByTeam[teamFilter].map((people) => renderRow(people))
+          : renderNoPeopleFound()}
       </React.Fragment>
     );
   };
@@ -296,37 +342,19 @@ export default function People() {
       : renderNoPeopleFound();
   };
 
-  const renderForNewUser = () => {
-    return (
-      <div>
-        <Container>
-          <div className="new-user">
-            <Card className="p-4" style={{ minHeight: "532px" }}>
-              <div className="text-center">
-                <img src={TeamMembersPng} alt="humans" width="400px" />
-              </div>
-              <div className="card-title">
-                Hassle-Free Team and People management
-              </div>
-              <div className="card-subtitle">
-                Add teams and manage people with easy imports.
-              </div>
+  const renderTableContent = () => {
+    if (loadingPeople) {
+      return renderLoading();
+    }
 
-              <Button
-                iconOnly
-                className="d-block mx-auto"
-                to="/dashboard/people/new"
-              >
-                <div className="circle">
-                  <FontAwesomeIcon icon={faPlus} color="#fff" />
-                </div>
-                <div className="add-now">Add Now</div>
-              </Button>
-            </Card>
-          </div>
-        </Container>
-      </div>
-    );
+    if (isNewUser) {
+      return renderAddPeople();
+    }
+
+    // existing user
+    if (isNameFilterApplied) return renderFilteredPeopleByName();
+    else if (isTeamFilterApplied) return renderFilteredPeopleByTeam();
+    return renderPeopleByAlphabet();
   };
 
   const renderForNormalUser = () => {
@@ -350,7 +378,10 @@ export default function People() {
         </FiltersCard>
         <FiltersCard className="mt-3">
           <div>
-            <div className="title mb-0">Showing {peopleCount} people</div>
+            <div className="title mb-0">
+              {!isNewUser &&
+                `Showing ${allPeople ? allPeople.length : 0} people`}
+            </div>
           </div>
           <div className="flex">
             <TeamsDropdown />
@@ -365,35 +396,15 @@ export default function People() {
               <th style={{ width: "25%" }}>Name</th>
               <th style={{ width: "20%" }}>Team</th>
               <th style={{ width: "20%" }}>Disbursement</th>
-              <th style={{ width: "30%" }}>Address</th>
+              <th style={{ width: "35%" }}>Address</th>
             </tr>
           </TableHead>
-          <TableBody>
-            {isNameFilterApplied
-              ? renderFilteredPeopleByName()
-              : isTeamFilterApplied
-              ? renderFilteredPeopleByTeam()
-              : renderPeopleByAlphabet()}
-          </TableBody>
+          <TableBody>{renderTableContent()}</TableBody>
         </Table>
+        <DeletePeopleModal />
       </div>
     );
   };
 
-  return (
-    <div>
-      {loadingTeams || loadingPeople ? (
-        <div
-          className="d-flex align-items-center justify-content-center"
-          style={{ height: "80vh" }}
-        >
-          <Loading color="primary" width="50px" height="50px" />
-        </div>
-      ) : !isNewUser ? (
-        renderForNormalUser()
-      ) : (
-        renderForNewUser()
-      )}
-    </div>
-  );
+  return <div>{renderForNormalUser()}</div>;
 }

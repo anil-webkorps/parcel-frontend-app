@@ -18,4 +18,8 @@ export default styled.span`
   align-items: center;
   justify-content: center;
   padding-top: 0.1rem;
+
+  @media (max-width: 600px) {
+    display: none;
+  }
 `;

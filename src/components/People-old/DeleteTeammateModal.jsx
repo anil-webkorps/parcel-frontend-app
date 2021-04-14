@@ -7,18 +7,18 @@ import CopyButton from "components/common/Copy";
 import { minifyAddress } from "components/common/Web3Utils";
 import TeamPng from "assets/images/user-team.png";
 import Button from "components/common/Button";
-import { deleteTeammate } from "store/add-teammate/actions";
+import { deleteTeammate } from "store/add-people/actions";
 import { Title, Heading, Summary } from "./styles";
 import { Circle } from "components/Header/styles";
 import { makeSelectOwnerSafeAddress } from "store/global/selectors";
-import { makeSelectUpdating } from "store/add-teammate/selectors";
+import { makeSelectUpdating } from "store/add-people/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
-import addTeammateReducer from "store/add-teammate/reducer";
-import addTeammateSaga from "store/add-teammate/saga";
+import addPeopleReducer from "store/add-people/reducer";
+import addPeopleSaga from "store/add-people/saga";
 
 export const MODAL_NAME = "delete-teammate-modal";
-const addTeammateKey = "addTeammate";
+const addPeopleKey = "addPeople";
 
 const modalStyles = `
   .modal-content {
@@ -42,9 +42,9 @@ function DeleteTeammateModal(props) {
     params,
   } = props;
 
-  useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
+  useInjectReducer({ key: addPeopleKey, reducer: addPeopleReducer });
 
-  useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
+  useInjectSaga({ key: addPeopleKey, saga: addPeopleSaga });
 
   const dispatch = useDispatch();
 

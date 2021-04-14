@@ -8,4 +8,13 @@ export default styled.div`
   grid-template-areas:
     "overview overview"
     "assets recent-tx";
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "overview"
+      "assets"
+      "recent-tx";
+  }
 `;

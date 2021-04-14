@@ -1,11 +1,11 @@
 import produce from "immer";
 import {
-  EDIT_TEAMMATE,
-  EDIT_TEAMMATE_SUCCESS,
-  EDIT_TEAMMATE_ERROR,
-  DELETE_TEAMMATE,
-  DELETE_TEAMMATE_SUCCESS,
-  DELETE_TEAMMATE_ERROR,
+  EDIT_PEOPLE,
+  EDIT_PEOPLE_SUCCESS,
+  EDIT_PEOPLE_ERROR,
+  DELETE_PEOPLE,
+  DELETE_PEOPLE_SUCCESS,
+  DELETE_PEOPLE_ERROR,
 } from "./action-types";
 
 export const initialState = {
@@ -17,18 +17,18 @@ export const initialState = {
 const reducer = (state = initialState, action) =>
   produce(state, (draft) => {
     switch (action.type) {
-      case EDIT_TEAMMATE:
-      case DELETE_TEAMMATE:
+      case EDIT_PEOPLE:
+      case DELETE_PEOPLE:
         draft.updating = true;
         break;
 
-      case EDIT_TEAMMATE_SUCCESS:
-      case DELETE_TEAMMATE_SUCCESS:
+      case EDIT_PEOPLE_SUCCESS:
+      case DELETE_PEOPLE_SUCCESS:
         draft.updating = false;
         break;
 
-      case EDIT_TEAMMATE_ERROR:
-      case DELETE_TEAMMATE_ERROR:
+      case EDIT_PEOPLE_ERROR:
+      case DELETE_PEOPLE_ERROR:
         draft.updating = false;
         draft.error = action.error;
         break;

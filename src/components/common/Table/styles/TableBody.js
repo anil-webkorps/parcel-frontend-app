@@ -41,4 +41,13 @@ export default styled.tbody`
   tr:last-child {
     border-bottom: none;
   }
+
+  @media (max-width: 600px) {
+    td:first-child {
+      padding-left: 1rem;
+    }
+    td:last-child {
+      padding-right: 1rem;
+    }
+  }
 `;

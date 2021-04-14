@@ -34,4 +34,12 @@ export default styled(Card)`
     display: flex;
     align-items: center;
   }
+
+  @media (max-width: 978px) {
+    height: auto;
+    flex-wrap: wrap;
+    .flex {
+      flex-wrap: wrap;
+    }
+  }
 `;

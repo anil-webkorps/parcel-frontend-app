@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { show } from "redux-modal";
 
 // import { useInjectSaga } from "utils/injectSaga";
 // import { useInjectReducer } from "utils/injectReducer";
@@ -16,6 +17,8 @@ import CopyButton from "components/common/Copy";
 
 import { PeopleDetails } from "./styles";
 import EtherscanLink from "components/common/EtherscanLink";
+import Button from "components/common/Button";
+import { MODAL_NAME as DELETE_PEOPLE_MODAL } from "./DeletePeopleModal";
 
 const sidebarStyles = {
   bmCrossButton: {
@@ -60,6 +63,10 @@ function PeopleDetailsSidebar() {
 
   const closeSidebar = () => {
     dispatch(togglePeopleDetails(false));
+  };
+
+  const handleDelete = () => {
+    dispatch(show(DELETE_PEOPLE_MODAL, { peopleId: peopleDetails.peopleId }));
   };
 
   const renderInfo = () => {
@@ -145,6 +152,14 @@ function PeopleDetailsSidebar() {
         </div>
       </div>
       {renderInfo()}
+      <div className="modify-buttons">
+        <Button className="mr-3" width={"10rem"}>
+          Edit
+        </Button>
+        <Button className="secondary-2" width={"10rem"} onClick={handleDelete}>
+          Delete
+        </Button>
+      </div>
     </PeopleDetails>
   );
 }

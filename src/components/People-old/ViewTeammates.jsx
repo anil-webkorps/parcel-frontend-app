@@ -11,8 +11,8 @@ import {
 import { show } from "redux-modal";
 import { CSVLink } from "react-csv";
 import { format } from "date-fns";
-import { updateForm, setPeopleId } from "store/add-teammate/actions";
-import addTeammateReducer from "store/add-teammate/reducer";
+import { updateForm, setPeopleId } from "store/add-people/actions";
+import addPeopleReducer from "store/add-people/reducer";
 // import { Col, Row } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams, useHistory } from "react-router-dom";
@@ -57,13 +57,13 @@ import { minifyAddress } from "components/common/Web3Utils";
 const { TableBody, TableHead, TableRow } = Table;
 
 const viewPeopleKey = "viewPeople";
-const addTeammateKey = "addTeammate";
+const addPeopleKey = "addPeople";
 const tokensKey = "tokens";
 
 export default function ViewTeammate() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   useInjectReducer({ key: viewPeopleKey, reducer: viewPeopleReducer });
-  useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
+  useInjectReducer({ key: addPeopleKey, reducer: addPeopleReducer });
   useInjectReducer({ key: tokensKey, reducer: tokensReducer });
 
   useInjectSaga({ key: viewPeopleKey, saga: viewPeopleSaga });

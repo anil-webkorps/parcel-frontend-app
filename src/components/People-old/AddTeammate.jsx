@@ -22,18 +22,18 @@ import {
   // Select,
   CurrencyInput,
 } from "components/common/Form";
-import addTeammateReducer from "store/add-teammate/reducer";
+import addPeopleReducer from "store/add-people/reducer";
 import { useLocalStorage } from "hooks";
 import {
   chooseStep,
   updateForm,
   chooseDepartment,
-  addTeammate,
+  addPeople,
   getDepartmentById,
   selectFlow,
-  addBulkTeammates,
-} from "store/add-teammate/actions";
-import addTeammateSaga from "store/add-teammate/saga";
+  addBulkPeople,
+} from "store/add-people/actions";
+import addPeopleSaga from "store/add-people/saga";
 import {
   makeSelectStep,
   makeSelectFormData,
@@ -41,11 +41,11 @@ import {
   makeSelectFlow,
   makeSelectSuccess,
   makeSelectLoading,
-} from "store/add-teammate/selectors";
+} from "store/add-people/selectors";
 import viewTeamsReducer from "store/view-teams/reducer";
 import { getTeams } from "store/view-teams/actions";
 import viewTeamsSaga from "store/view-teams/saga";
-import { makeSelectDepartments } from "store/view-teams/selectors";
+import { makeSelectTeams } from "store/view-teams/selectors";
 import { getTokens } from "store/tokens/actions";
 import tokensReducer from "store/tokens/reducer";
 import tokensSaga from "store/tokens/saga";
@@ -86,7 +86,7 @@ import {
 import { ShowToken } from "components/QuickTransfer/styles";
 
 import { Circle } from "components/Header/styles";
-import { FIELD_NAMES, isValidField } from "store/add-teammate/utils";
+import { FIELD_NAMES, isValidField } from "store/add-people/utils";
 
 const { TableBody, TableHead, TableRow } = Table;
 
@@ -111,7 +111,7 @@ const ADD_SINGLE_TEAMMATE_STEPS = {
   [STEPS.TWO]: "Summary",
 };
 
-const addTeammateKey = "addTeammate";
+const addPeopleKey = "addPeople";
 const viewTeamsKey = "viewTeams";
 const tokensKey = "tokens";
 
@@ -132,7 +132,7 @@ export default function AddTeammate() {
     }
   );
 
-  useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
+  useInjectReducer({ key: addPeopleKey, reducer: addPeopleReducer });
   useInjectReducer({
     key: viewTeamsKey,
     reducer: viewTeamsReducer,
@@ -141,14 +141,14 @@ export default function AddTeammate() {
 
   useInjectSaga({ key: viewTeamsKey, saga: viewTeamsSaga });
 
-  useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
+  useInjectSaga({ key: addPeopleKey, saga: addPeopleSaga });
   useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
   const chosenDepartment = useSelector(makeSelectChosenDepartment());
-  const allDepartments = useSelector(makeSelectDepartments());
+  const allDepartments = useSelector(makeSelectTeams());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const flow = useSelector(makeSelectFlow());
   const addBulkSuccess = useSelector(makeSelectSuccess());
@@ -312,7 +312,7 @@ export default function AddTeammate() {
       joiningDate: Date.now(),
     };
 
-    dispatch(addTeammate(body));
+    dispatch(addPeople(body));
     setSuccess(true);
   };
 
@@ -405,7 +405,7 @@ export default function AddTeammate() {
       .filter(Boolean);
 
     dispatch(
-      addBulkTeammates({
+      addBulkPeople({
         safeAddress: ownerSafeAddress,
         createdBy: ownerSafeAddress,
         data: finalData,

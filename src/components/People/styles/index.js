@@ -19,3 +19,6 @@ export { default as AddPeople } from "./AddPeople";
 export { default as SearchByTeam } from "./SearchByTeam";
 export { default as Export } from "./Export";
 export { default as PeopleDetails } from "./PeopleDetails";
+export { default as UploadScreen } from "./UploadScreen";
+export { default as UploadStatus } from "./UploadStatus";
+export { default as ModifyTeam } from "./ModifyTeam";

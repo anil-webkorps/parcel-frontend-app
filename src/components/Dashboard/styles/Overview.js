@@ -96,4 +96,19 @@ export default styled(Card)`
       }
     }
   }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    grid-gap: 1rem 0;
+    justify-items: flex-start;
+    .right {
+      flex-direction: column;
+      justify-content: start;
+      grid-gap: 1rem 0;
+
+      .money-out {
+        margin-left: 0;
+      }
+    }
+  }
 `;

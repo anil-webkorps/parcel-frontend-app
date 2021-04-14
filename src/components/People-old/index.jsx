@@ -12,7 +12,7 @@ import viewTeamsReducer from "store/view-teams/reducer";
 import { getTeams } from "store/view-teams/actions";
 import viewTeamsSaga from "store/view-teams/saga";
 import {
-  makeSelectDepartments,
+  makeSelectTeams,
   makeSelectPeopleCount,
   makeSelectLoading,
 } from "store/view-teams/selectors";
@@ -42,7 +42,7 @@ export default function People() {
   useInjectSaga({ key: viewTeamsKey, saga: viewTeamsSaga });
 
   const dispatch = useDispatch();
-  const allDepartments = useSelector(makeSelectDepartments());
+  const allDepartments = useSelector(makeSelectTeams());
   const totalEmployees = useSelector(makeSelectPeopleCount());
   const loading = useSelector(makeSelectLoading());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());

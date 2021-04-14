@@ -86,4 +86,10 @@ export default styled(Card)`
       }
     }
   }
+
+  @media (max-width: 600px) {
+    .assets-container {
+      grid-template-columns: 1fr;
+    }
+  }
 `;

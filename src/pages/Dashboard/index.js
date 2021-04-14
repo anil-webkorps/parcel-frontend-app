@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 // import Dashboard from "components/Dashboard-old";
 import Dashboard from "components/Dashboard";
 import People from "components/People";
-import AddTeammate from "components/People/AddTeammate";
+// import AddTeammate from "components/People/AddTeammate";
 import AddDepartment from "components/People/AddDepartment";
 import ViewTeammates from "components/People/ViewTeammates";
 import EditTeammate from "components/People/EditTeammate";
@@ -57,11 +57,6 @@ const DashboardPage = () => {
             exact
             path={routeTemplates.dashboard.people.root}
             component={People}
-          />
-          <Route
-            exact
-            path={routeTemplates.dashboard.people.new}
-            component={AddTeammate}
           />
           <Route
             exact

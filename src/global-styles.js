@@ -141,12 +141,6 @@ const GlobalStyle = createGlobalStyle`
   //   }
   // }
 
-  .modal-content {
-    border-radius: 20px;
-    border: none;
-    padding: 20px;
-  }
-
   .text-green {
     color: #6cb44c;
   }

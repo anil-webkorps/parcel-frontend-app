@@ -6,11 +6,8 @@ const selectViewTeams = (state) => state.viewTeams || initialState;
 const makeSelectLoading = () =>
   createSelector(selectViewTeams, (viewTeamsState) => viewTeamsState.loading);
 
-const makeSelectDepartments = () =>
-  createSelector(
-    selectViewTeams,
-    (viewTeamsState) => viewTeamsState.departments
-  );
+const makeSelectTeams = () =>
+  createSelector(selectViewTeams, (viewTeamsState) => viewTeamsState.teams);
 const makeSelectPeopleCount = () =>
   createSelector(
     selectViewTeams,
@@ -22,7 +19,7 @@ const makeSelectError = () =>
 
 export {
   selectViewTeams,
-  makeSelectDepartments,
+  makeSelectTeams,
   makeSelectPeopleCount,
   makeSelectLoading,
   makeSelectError,

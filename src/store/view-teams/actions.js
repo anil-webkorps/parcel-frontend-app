@@ -7,10 +7,10 @@ export function getTeams(safeAddress) {
   };
 }
 
-export function getTeamsSuccess(departments, teammatesCount, log) {
+export function getTeamsSuccess(teams, teammatesCount, log) {
   return {
     type: GET_TEAMS_SUCCESS,
-    departments,
+    teams,
     teammatesCount,
     log,
   };

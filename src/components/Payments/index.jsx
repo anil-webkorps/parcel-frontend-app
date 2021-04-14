@@ -20,8 +20,8 @@ import viewPeopleSaga from "store/view-people/saga";
 import viewPeopleReducer from "store/view-people/reducer";
 import { getAllPeople, getPeopleByDepartment } from "store/view-people/actions";
 import {
-  makeSelectDepartments,
-  makeSelectLoading as makeSelectDepartmentsLoading,
+  makeSelectTeams,
+  makeSelectLoading as makeSelectTeamsLoading,
 } from "store/view-teams/selectors";
 import {
   makeSelectPeople,
@@ -207,8 +207,8 @@ export default function Payments() {
   const history = useHistory();
 
   // Selectors
-  const allDepartments = useSelector(makeSelectDepartments());
-  const loadingDepartments = useSelector(makeSelectDepartmentsLoading());
+  const allDepartments = useSelector(makeSelectTeams());
+  const loadingDepartments = useSelector(makeSelectTeamsLoading());
   const loadingTeammates = useSelector(makeSelectPeopleLoading());
   const teammates = useSelector(makeSelectPeople());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());

@@ -3,7 +3,7 @@ import { GET_TEAMS, GET_TEAMS_SUCCESS, GET_TEAMS_ERROR } from "./action-types";
 
 export const initialState = {
   loading: false,
-  departments: undefined,
+  teams: undefined,
   error: false,
   teammatesCount: 0,
 };
@@ -19,7 +19,7 @@ const reducer = (state = initialState, action) =>
 
       case GET_TEAMS_SUCCESS:
         draft.loading = false;
-        draft.departments = action.departments;
+        draft.teams = action.teams;
         draft.teammatesCount = action.teammatesCount;
         break;
 

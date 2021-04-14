@@ -13,13 +13,13 @@ export const getParcelSafesEndpoint = `${ROOT_BE_URL}/api/v1/users/get-parcel-sa
 export const getSafeOwnersEndpoint = `${ROOT_BE_URL}/api/v1/users/get-safe-owners`;
 export const loginEndpoint = `${ROOT_BE_URL}/api/v1/users/login`;
 
-// TEAMMATE
+// PEOPLE
 export const getAllPeopleEndpoint = `${ROOT_BE_URL}/api/v1/people/get`;
-export const createTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/create`;
-export const createBulkTeammatesEndpoint = `${ROOT_BE_URL}/api/v1/people/add-multiple`;
+export const createPeopleEndpoint = `${ROOT_BE_URL}/api/v1/people/create`;
+export const createBulkPeopleEndpoint = `${ROOT_BE_URL}/api/v1/people/add-multiple`;
 export const getPeopleByDepartmentIdEndpoint = `${ROOT_BE_URL}/api/v1/people/getByDepartment`;
-export const editTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/update`;
-export const deleteTeammateEndpoint = `${ROOT_BE_URL}/api/v1/people/remove`;
+export const editPeopleEndpoint = `${ROOT_BE_URL}/api/v1/people/update`;
+export const deletePeopleEndpoint = `${ROOT_BE_URL}/api/v1/people/remove`;
 
 // DEPARTMENT
 export const createDepartmentEndpoint = `${ROOT_BE_URL}/api/v1/departments/create`;

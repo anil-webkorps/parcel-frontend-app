@@ -21,7 +21,7 @@ import {
   // Select,
   CurrencyInput,
 } from "components/common/Form";
-import addTeammateReducer from "store/add-teammate/reducer";
+import addPeopleReducer from "store/add-people/reducer";
 import { useLocalStorage } from "hooks";
 import {
   chooseStep,
@@ -29,18 +29,18 @@ import {
   chooseDepartment,
   editTeammate,
   getDepartmentById,
-} from "store/add-teammate/actions";
-import addTeammateSaga from "store/add-teammate/saga";
+} from "store/add-people/actions";
+import addPeopleSaga from "store/add-people/saga";
 import {
   makeSelectStep,
   makeSelectFormData,
   makeSelectChosenDepartment,
   makeSelectPeopleId,
-} from "store/add-teammate/selectors";
+} from "store/add-people/selectors";
 import viewTeamsReducer from "store/view-teams/reducer";
 import { getTeams } from "store/view-teams/actions";
 import viewTeamsSaga from "store/view-teams/saga";
-import { makeSelectDepartments } from "store/view-teams/selectors";
+import { makeSelectTeams } from "store/view-teams/selectors";
 import { getTokens } from "store/tokens/actions";
 import tokensReducer from "store/tokens/reducer";
 import tokensSaga from "store/tokens/saga";
@@ -94,7 +94,7 @@ const ADD_SINGLE_TEAMMATE_STEPS = {
   [STEPS.TWO]: "Summary",
 };
 
-const addTeammateKey = "addTeammate";
+const addPeopleKey = "addPeople";
 const viewTeamsKey = "viewTeams";
 const tokensKey = "tokens";
 
@@ -113,7 +113,7 @@ export default function EditTeammate() {
     }
   );
 
-  useInjectReducer({ key: addTeammateKey, reducer: addTeammateReducer });
+  useInjectReducer({ key: addPeopleKey, reducer: addPeopleReducer });
   useInjectReducer({
     key: viewTeamsKey,
     reducer: viewTeamsReducer,
@@ -122,14 +122,14 @@ export default function EditTeammate() {
 
   useInjectSaga({ key: viewTeamsKey, saga: viewTeamsSaga });
 
-  useInjectSaga({ key: addTeammateKey, saga: addTeammateSaga });
+  useInjectSaga({ key: addPeopleKey, saga: addPeopleSaga });
   useInjectSaga({ key: tokensKey, saga: tokensSaga });
 
   const dispatch = useDispatch();
   const step = useSelector(makeSelectStep());
   const formData = useSelector(makeSelectFormData());
   const chosenDepartment = useSelector(makeSelectChosenDepartment());
-  const allDepartments = useSelector(makeSelectDepartments());
+  const allDepartments = useSelector(makeSelectTeams());
   const ownerSafeAddress = useSelector(makeSelectOwnerSafeAddress());
   const loadingTokens = useSelector(makeSelectLoadingTokens());
   const tokenList = useSelector(makeSelectTokenList());

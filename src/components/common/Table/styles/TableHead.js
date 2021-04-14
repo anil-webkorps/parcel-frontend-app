@@ -22,4 +22,13 @@ export default styled.thead`
   th:last-child {
     padding-right: 4rem;
   }
+
+  @media (max-width: 600px) {
+    th:first-child {
+      padding-left: 1rem;
+    }
+    th:last-child {
+      padding-right: 1rem;
+    }
+  }
 `;

@@ -75,4 +75,11 @@ export default styled(Menu)`
       }
     }
   }
+
+  .modify-buttons {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30rem;
+  }
 `;

@@ -30,16 +30,26 @@ export default styled.nav`
       display: inline;
       padding: 0 1em;
       cursor: pointer;
+      margin-left: 1rem;
     }
   }
 
   @media (max-width: 600px) {
     display: flex;
+    height: auto;
     .nav-icon {
       grid-area: icon;
       display: inline;
       padding: 0 1em;
       cursor: pointer;
+    }
+
+    .nav-container {
+      flex-wrap: wrap;
+      justify-content: center;
+      grid-gap: 1rem 0;
+      justify-content: flex-end;
+      margin-top: 1rem;
     }
   }
 `;

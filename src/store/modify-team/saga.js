@@ -1,17 +1,22 @@
 import { takeLatest, put, call, fork } from "redux-saga/effects";
-import { push } from "connected-react-router";
-import { DELETE_DEPARTMENT } from "./action-types";
-import { deleteDepartmentError, deleteDepartmentSuccess } from "./actions";
+import { hide } from "redux-modal";
+
+import { DELETE_TEAM } from "./action-types";
+import { deleteTeamError, deleteTeamSuccess } from "./actions";
 import request from "utils/request";
 import { deleteDepartmentEndpoint } from "constants/endpoints";
+import { MODAL_NAME as DELETE_TEAM_MODAL } from "components/People/DeleteTeamModal";
+import { getAllPeople, removePeopleFilter } from "store/view-people/actions";
+import { PEOPLE_FILTERS } from "store/view-people/constants";
+import { getTeams } from "store/view-teams/actions";
 
-function* deleteDepartment(action) {
+function* deleteDepartment({ departmentId, safeAddress }) {
   const requestURL = `${deleteDepartmentEndpoint}`;
   const options = {
     method: "POST",
     body: JSON.stringify({
-      departmentId: action.departmentId,
-      safeAddress: action.safeAddress,
+      departmentId,
+      safeAddress,
     }),
   };
 
@@ -19,18 +24,22 @@ function* deleteDepartment(action) {
     const result = yield call(request, requestURL, options);
     if (result.flag !== 200) {
       // Error in payload
-      yield put(deleteDepartmentError(result.log));
+      yield put(deleteTeamError(result.log));
     } else {
-      yield put(deleteDepartmentSuccess(result.departmentId, result.log));
-      yield put(push("/dashboard/people"));
+      yield put(deleteTeamSuccess(result.departmentId, result.log));
+      yield put(hide(DELETE_TEAM_MODAL));
+      yield put(removePeopleFilter(PEOPLE_FILTERS.TEAM));
+      yield put(removePeopleFilter(PEOPLE_FILTERS.NAME));
+      yield put(getAllPeople(safeAddress));
+      yield put(getTeams(safeAddress));
     }
   } catch (err) {
-    yield put(deleteDepartmentError(err));
+    yield put(deleteTeamError(err));
   }
 }
 
 function* watchDeleteDepartment() {
-  yield takeLatest(DELETE_DEPARTMENT, deleteDepartment);
+  yield takeLatest(DELETE_TEAM, deleteDepartment);
 }
 
 export default function* modifyTeam() {

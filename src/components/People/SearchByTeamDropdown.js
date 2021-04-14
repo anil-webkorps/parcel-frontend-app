@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { useDropdown } from "hooks";
 import { SearchByTeam } from "./styles";
-import { makeSelectDepartments } from "store/view-teams/selectors";
+import { makeSelectTeams } from "store/view-teams/selectors";
 import {
   addPeopleFilter,
   removePeopleFilter,
@@ -18,7 +18,7 @@ export default function SearchByTeamDropdown() {
   const { open, toggleDropdown } = useDropdown();
   const dispatch = useDispatch();
 
-  const allTeams = useSelector(makeSelectDepartments());
+  const allTeams = useSelector(makeSelectTeams());
   const teamFilter = useSelector(makeSelectTeamFilter());
 
   const selectTeam = (name) => {
