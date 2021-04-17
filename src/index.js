@@ -17,7 +17,7 @@ import history from "utils/history";
 import getLibrary from "utils/getLibrary";
 // import Web3ReactManager from "components/hoc/Web3ReactManager";
 import App from "./pages/App";
-import configureStore from "store";
+import configureStore from "store/index";
 
 const initialState = {};
 const store = configureStore(initialState, history);
