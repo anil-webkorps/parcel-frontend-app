@@ -1,4 +1,4 @@
-import { injected, fortmatic } from "connectors";
+// import { injected, fortmatic } from "connectors";
 import MetamaskIcon from "assets/icons/wallets/icon-metamask.svg";
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
@@ -19,20 +19,20 @@ export const isMainnet = process.env.REACT_APP_NETWORK_NAME === "MAINNET";
 export const isTestnet = process.env.REACT_APP_NETWORK_NAME !== "MAINNET";
 
 export const supportedWallets = [
-  {
-    name: "MetaMask",
-    connector: injected,
-    icon: MetamaskIcon,
-    description: "Injected web3 provider.",
-    id: 1,
-  },
-  {
-    name: "Fortmatic",
-    connector: fortmatic,
-    icon: MetamaskIcon,
-    description: "Fortmatic",
-    id: 2,
-  },
+  // {
+  //   name: "MetaMask",
+  //   connector: injected,
+  //   icon: MetamaskIcon,
+  //   description: "Injected web3 provider.",
+  //   id: 1,
+  // },
+  // {
+  //   name: "Fortmatic",
+  //   connector: fortmatic,
+  //   icon: MetamaskIcon,
+  //   description: "Fortmatic",
+  //   id: 2,
+  // },
   // {
   //   name: "Torus",
   //   connector: torus,

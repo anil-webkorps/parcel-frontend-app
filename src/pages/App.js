@@ -22,6 +22,7 @@ export default function App() {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
   const triedEager = useEagerConnect();
   useInactiveListener(!triedEager);
+  // const { onboard } = useActiveWeb3React();
 
   return (
     <div className="app">

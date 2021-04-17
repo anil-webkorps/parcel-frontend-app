@@ -1,20 +1,19 @@
 import React from "react";
-import { useDispatch } from "react-redux";
-import { useWeb3React } from "@web3-react/core";
 import { startCase } from "lodash";
-import { show } from "redux-modal";
 
 import { Account } from "components/common/Web3Utils";
 import { findNetworkNameByWeb3ChainId } from "constants/networks";
 import Button from "components/common/Button";
-import { MODAL_NAME as CONNECT_MODAL } from "./ConnectModal";
+import { useActiveWeb3React } from "hooks";
 
 const ConnectToWallet = ({ className, ...rest }) => {
-  const { chainId, active } = useWeb3React();
-  const dispatch = useDispatch();
+  const { chainId, active, onboard } = useActiveWeb3React();
 
-  const handleClick = () => {
-    if (!active) dispatch(show(CONNECT_MODAL));
+  const handleClick = async () => {
+    if (onboard) {
+      await onboard.walletSelect();
+      await onboard.walletCheck();
+    }
   };
 
   const getNetworkName = () => {

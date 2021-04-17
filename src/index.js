@@ -11,14 +11,14 @@ import { Provider } from "react-redux";
 import { ConnectedRouter } from "connected-react-router";
 import localForage from "localforage";
 
-import { Web3ReactProvider } from "@web3-react/core";
+// import { Web3ReactProvider } from "@web3-react/core";
 import { persistStore } from "redux-persist";
 import history from "utils/history";
 import getLibrary from "utils/getLibrary";
 // import Web3ReactManager from "components/hoc/Web3ReactManager";
 import App from "./pages/App";
-import configureStore from "store";
-
+import configureStore from "store/index";
+import Web3ReactProvider from "context/Web3ReactContext";
 const initialState = {};
 const store = configureStore(initialState, history);
 

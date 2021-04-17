@@ -15,9 +15,9 @@ import { arrayify } from "@ethersproject/bytes";
 import { addDays, format } from "date-fns";
 import { EthersAdapter } from "contract-proxy-kit";
 import { ethers } from "ethers";
-import { LedgerConnector } from "@web3-react/ledger-connector";
-import { TrezorConnector } from "@web3-react/trezor-connector";
-import { InjectedConnector } from "@web3-react/injected-connector";
+// import { LedgerConnector } from "@web3-react/ledger-connector";
+// import { TrezorConnector } from "@web3-react/trezor-connector";
+// import { InjectedConnector } from "@web3-react/injected-connector";
 
 import { useActiveWeb3React, useContract } from "hooks";
 import {
@@ -102,10 +102,7 @@ export default function useMassPayout(props = {}) {
 
   useEffect(() => {
     if (connector) {
-      if (
-        connector instanceof LedgerConnector ||
-        connector instanceof TrezorConnector
-      ) {
+      if (connector.name === "Ledger" || connector.name === "Trezor") {
         setIsHardwareWallet(true);
       } else {
         setIsHardwareWallet(false);
@@ -337,7 +334,7 @@ export default function useMassPayout(props = {}) {
         // Metamask with ledger or trezor doesn't work with eip712
         // In this case, show a simple eth_sign signature
         if (
-          connector instanceof InjectedConnector &&
+          connector === "MetaMask" &&
           err.message.includes("Not supported on this device")
         ) {
           const signature = await ethSigner(account, contractTransactionHash);

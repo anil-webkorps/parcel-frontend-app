@@ -11,7 +11,7 @@ import {
 import { show } from "redux-modal";
 import { toUtf8Bytes } from "@ethersproject/strings";
 import { keccak256 } from "@ethersproject/keccak256";
-import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
+// import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 
 import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage, useContract } from "hooks";
@@ -259,7 +259,7 @@ const Register = () => {
     if (!!library && !!account) {
       setSigning(true);
       try {
-        if (connector instanceof WalletConnectConnector) {
+        if (connector.name === "WalletConnect") {
           const rawMessage = MESSAGE_TO_SIGN;
           const messageLength = new Blob([rawMessage]).size;
           const message = toUtf8Bytes(
@@ -267,7 +267,7 @@ const Register = () => {
           );
           const hashedMessage = keccak256(message);
 
-          connector.walletConnectProvider.connector
+          connector.provider.wc
             .signMessage([account.toLowerCase(), hashedMessage])
             .then((signature) => {
               setSign(signature);

@@ -6,7 +6,7 @@ import { hashMessage } from "@ethersproject/hash";
 import { toUtf8Bytes } from "@ethersproject/strings";
 import { keccak256 } from "@ethersproject/keccak256";
 import { recoverAddress } from "@ethersproject/transactions";
-import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
+// import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 
 import {
   faArrowLeft,
@@ -272,7 +272,7 @@ const Login = () => {
     if (!!library && !!account) {
       setSigning(true);
       try {
-        if (connector instanceof WalletConnectConnector) {
+        if (connector.name === "WalletConnect") {
           const rawMessage = MESSAGE_TO_SIGN;
           const messageLength = new Blob([rawMessage]).size;
           const message = toUtf8Bytes(
@@ -280,7 +280,7 @@ const Login = () => {
           );
           const hashedMessage = keccak256(message);
 
-          connector.walletConnectProvider.connector
+          connector.provider.wc
             .signMessage([account.toLowerCase(), hashedMessage])
             .then((signature) => {
               setSign(signature);

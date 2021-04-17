@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { useWeb3React } from "@web3-react/core";
+// import { useWeb3React } from "@web3-react/core";
 import { connectModal as reduxModal } from "redux-modal";
 
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import Loading from "components/common/Loading";
 // import { supportedWallets } from "constants/index";
 import { getErrorMessage } from "utils/web3-helpers";
-import { useInactiveListener } from "hooks/index";
+import { useActiveWeb3React, useInactiveListener } from "hooks/index";
 import { Card, WalletContainer } from "./styles";
 import { connectorsByName } from "connectors";
 
@@ -19,7 +19,7 @@ const modalStyles = `
 `;
 
 const ConnectToWalletModal = (props) => {
-  const { connector, activate, error, active } = useWeb3React();
+  const { connector, activate, error, active } = useActiveWeb3React();
   const [showInfo, setShowInfo] = useState(false);
   const { handleHide, show, triedEager } = props;
 

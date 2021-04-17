@@ -71,6 +71,7 @@ function RecentTxCard() {
   const getDecryptedDetails = useCallback(
     (data) => {
       if (!encryptionKey) return "";
+      console.log({ data, encryptionKey, organisationType });
       return JSON.parse(
         cryptoUtils.decryptDataUsingEncryptionKey(
           data,

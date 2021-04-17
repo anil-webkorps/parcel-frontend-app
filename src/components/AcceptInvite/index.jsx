@@ -7,7 +7,7 @@ import { hashMessage } from "@ethersproject/hash";
 import { recoverAddress } from "@ethersproject/transactions";
 import { toUtf8Bytes } from "@ethersproject/strings";
 import { keccak256 } from "@ethersproject/keccak256";
-import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
+// import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 
 import Container from "react-bootstrap/Container";
 import { useActiveWeb3React, useLocalStorage } from "hooks";
@@ -127,7 +127,7 @@ const AcceptInvite = () => {
     if (!!library && !!account) {
       setSigning(true);
       try {
-        if (connector instanceof WalletConnectConnector) {
+        if (connector.name === "WalletConnect") {
           const rawMessage = MESSAGE_TO_SIGN;
           const messageLength = new Blob([rawMessage]).size;
           const message = toUtf8Bytes(
@@ -135,12 +135,12 @@ const AcceptInvite = () => {
           );
           const hashedMessage = keccak256(message);
 
-          connector.walletConnectProvider.connector
+          connector.provider.wc
             .signMessage([account.toLowerCase(), hashedMessage])
             .then((signature) => {
               setSign(signature);
               setSigning(false);
-              chooseStep(step + 1);
+              goNext();
             })
             .catch((error) => {
               setSigning(false);

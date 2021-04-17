@@ -19,12 +19,13 @@ import { mainNavItems } from "./navItems";
 
 import { DashboardSidebar } from "./styles";
 import { routeTemplates } from "constants/routes/templates";
-import { useDropdown } from "hooks";
+import { useActiveWeb3React, useDropdown } from "hooks";
 
 const logoutKey = "logout";
 
 export default function Sidebar({ isSidebarOpen, closeSidebar }) {
   const location = useLocation();
+  const { chainId, active, onboard } = useActiveWeb3React();
   const { open, toggleDropdown } = useDropdown();
 
   const dispatch = useDispatch();
@@ -33,7 +34,10 @@ export default function Sidebar({ isSidebarOpen, closeSidebar }) {
 
   const safeOwners = useSelector(makeSelectSafeOwners());
 
-  const logout = () => {
+  const logout = async () => {
+    if (onboard) {
+      await onboard.walletReset();
+    }
     dispatch(logoutUser());
   };
 
