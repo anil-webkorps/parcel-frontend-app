@@ -65,7 +65,6 @@ const reducer = (state = initialState, action) =>
         break;
       case GET_SAFE_INFO_SUCCESS:
         draft.loading = false;
-        draft.ownerName = action.name;
         draft.owners = action.owners;
         draft.threshold = action.threshold;
         draft.isOwner = action.isOwner;

@@ -3,10 +3,14 @@ import { Modal, ModalHeader } from "reactstrap";
 import { connectModal as reduxModal } from "redux-modal";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
+import { cryptoUtils } from "parcel-sdk";
 
 import Button from "components/common/Button";
 import { Title } from "components/People/styles";
-import { makeSelectOwnerSafeAddress } from "store/global/selectors";
+import {
+  makeSelectOwnerSafeAddress,
+  makeSelectOrganisationType,
+} from "store/global/selectors";
 import { useInjectReducer } from "utils/injectReducer";
 import { useInjectSaga } from "utils/injectSaga";
 import safeSaga from "store/safe/saga";
@@ -14,6 +18,7 @@ import safeReducer from "store/safe/reducer";
 import { updateOwnerName } from "store/safe/actions";
 import { makeSelectUpdating } from "store/safe/selectors";
 import { Input, ErrorMessage } from "components/common/Form";
+import { useLocalStorage } from "hooks";
 
 export const MODAL_NAME = "edit-owner-modal";
 const safeKey = "safe";
@@ -27,6 +32,7 @@ const modalStyles = `
 `;
 
 function EditOwnerModal(props) {
+  const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
   const { show, handleHide, name, ownerAddress } = props;
 
   const { register, errors, handleSubmit, formState } = useForm({
@@ -41,9 +47,20 @@ function EditOwnerModal(props) {
 
   const safeAddress = useSelector(makeSelectOwnerSafeAddress());
   const updating = useSelector(makeSelectUpdating());
+  const organisationType = useSelector(makeSelectOrganisationType());
 
   const onSubmit = async (values) => {
-    dispatch(updateOwnerName({ name: values.name, ownerAddress, safeAddress }));
+    dispatch(
+      updateOwnerName({
+        name: cryptoUtils.encryptDataUsingEncryptionKey(
+          values.name,
+          encryptionKey,
+          organisationType
+        ),
+        ownerAddress,
+        safeAddress,
+      })
+    );
   };
 
   return (

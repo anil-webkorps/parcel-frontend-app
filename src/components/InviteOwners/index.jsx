@@ -303,39 +303,48 @@ export default function InviteOwners() {
 
           {!loading &&
             safeOwners &&
-            safeOwners.map(({ name, owner, invitationDetails }, idx) => (
-              <Row key={`${owner}${idx}`}>
-                <Col lg="12">
-                  <OwnerDetails>
-                    <div className="left">
-                      <div className="icon">
-                        <FontAwesomeIcon icon={faUserCircle} color="#333" />
-                      </div>
-                      <div className="details">
-                        <div className="name">
-                          {cryptoUtils.decryptDataUsingEncryptionKey(
-                            name,
-                            encryptionKey,
-                            organisationType
-                          )}
-                          <FontAwesomeIcon
-                            icon={faEdit}
-                            color="#8b8b8b"
-                            className="ml-2 cursor-pointer"
-                            onClick={() => handleEditName(name, owner)}
-                          />
+            safeOwners.map(
+              ({ name: encryptedName, owner, invitationDetails }, idx) => {
+                const isOwnerWithoutName =
+                  encryptedName === "0000" ? true : false;
+                const name = isOwnerWithoutName
+                  ? "New Owner"
+                  : cryptoUtils.decryptDataUsingEncryptionKey(
+                      encryptedName,
+                      encryptionKey,
+                      organisationType
+                    );
+                return (
+                  <Row key={`${owner}${idx}`}>
+                    <Col lg="12">
+                      <OwnerDetails>
+                        <div className="left">
+                          <div className="icon">
+                            <FontAwesomeIcon icon={faUserCircle} color="#333" />
+                          </div>
+                          <div className="details">
+                            <div className="name">
+                              {name}
+                              <FontAwesomeIcon
+                                icon={faEdit}
+                                color="#8b8b8b"
+                                className="ml-2 cursor-pointer"
+                                onClick={() => handleEditName(name, owner)}
+                              />
+                            </div>
+                            <div className="address">
+                              Address: {minifyAddress(owner)}
+                            </div>
+                          </div>
                         </div>
-                        <div className="address">
-                          Address: {minifyAddress(owner)}
-                        </div>
-                      </div>
-                    </div>
-                    {renderInvitationStatus(owner, invitationDetails, idx)}
-                    {/* {showEmail === idx && renderEmail()} */}
-                  </OwnerDetails>
-                </Col>
-              </Row>
-            ))}
+                        {renderInvitationStatus(owner, invitationDetails, idx)}
+                        {/* {showEmail === idx && renderEmail()} */}
+                      </OwnerDetails>
+                    </Col>
+                  </Row>
+                );
+              }
+            )}
           <Heading className="payment-status-threshold">
             Every transaction requires the confirmation of{" "}
             <span>
