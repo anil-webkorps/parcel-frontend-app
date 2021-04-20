@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Route, Switch } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import Dashboard from "components/Dashboard";
 import People from "components/People";
@@ -25,21 +25,26 @@ import {
   makeSelectOwnerSafeAddress,
 } from "store/global/selectors";
 import { ToastMessage } from "components/common/Toast";
-import { useSocket } from "hooks";
-// import { closeNotifications } from "store/notifications/actions";
-// import { makeSelectShowNotifications } from "store/notifications/selectors";
+import { useActiveWeb3React, useSocket } from "hooks";
+import { getSafeInfo } from "store/global/actions";
+import { useInjectSaga } from "utils/injectSaga";
+import globalSaga from "store/global/saga";
+
+const globalKey = "global";
 
 const DashboardPage = ({ match }) => {
   const isMultiOwner = useSelector(makeSelectIsMultiOwner());
   const safeAddress = useSelector(makeSelectOwnerSafeAddress());
+  const { account } = useActiveWeb3React();
   useSocket({ isMultiOwner, safeAddress });
 
-  // const showNotifications = useSelector(makeSelectShowNotifications());
-  // const dispatch = useDispatch();
+  useInjectSaga({ key: globalKey, saga: globalSaga });
 
-  // const closeNotificationsIfOpen = () => {
-  //   if (showNotifications) dispatch(closeNotifications());
-  // };
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (safeAddress && account) dispatch(getSafeInfo(safeAddress, account));
+  }, [dispatch, safeAddress, account]);
 
   return (
     <Authenticated>

@@ -5,12 +5,14 @@ import {
   faUserCircle,
   faInfoCircle,
   faLink,
+  faEdit,
 } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row } from "reactstrap";
 import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
+import { show } from "redux-modal";
 
 import { Info } from "components/Dashboard/styles";
 import { Card } from "components/common/Card";
@@ -51,6 +53,9 @@ import { minifyAddress } from "components/common/Web3Utils";
 import Step1Png from "assets/icons/invite/step-1.png";
 import Step2Png from "assets/icons/invite/step-2.png";
 import Step3Png from "assets/icons/invite/step-3.png";
+import EditOwnerModal, {
+  MODAL_NAME as EDIT_OWNER_MODAL,
+} from "./EditOwnerModal";
 
 const invitationKey = "invitation";
 
@@ -153,6 +158,10 @@ export default function InviteOwners() {
       setShowEmail(idx);
       setOwnerToBeInvited(owner);
     }
+  };
+
+  const handleEditName = (name, ownerAddress) => {
+    dispatch(show(EDIT_OWNER_MODAL, { name, ownerAddress }));
   };
 
   const renderInvitationStatus = (owner, invitationDetails, idx) => {
@@ -309,6 +318,12 @@ export default function InviteOwners() {
                             encryptionKey,
                             organisationType
                           )}
+                          <FontAwesomeIcon
+                            icon={faEdit}
+                            color="#8b8b8b"
+                            className="ml-2 cursor-pointer"
+                            onClick={() => handleEditName(name, owner)}
+                          />
                         </div>
                         <div className="address">
                           Address: {minifyAddress(owner)}
@@ -329,6 +344,7 @@ export default function InviteOwners() {
             owners
           </Heading>
         </Card>
+        <EditOwnerModal />
       </form>
     );
   };
