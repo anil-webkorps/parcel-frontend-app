@@ -25,7 +25,7 @@ const logoutKey = "logout";
 
 export default function Sidebar({ isSidebarOpen, closeSidebar }) {
   const location = useLocation();
-  const { chainId, active, onboard } = useActiveWeb3React();
+  const { onboard } = useActiveWeb3React();
   const { open, toggleDropdown } = useDropdown();
 
   const dispatch = useDispatch();

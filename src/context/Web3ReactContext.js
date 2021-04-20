@@ -4,7 +4,6 @@ import { getAddress } from "@ethersproject/address";
 
 import { initOnboard } from "utils/initOnboard";
 export const Web3ReactContext = createContext();
-// let provider;
 
 export default function Web3ReactProvider({ children }) {
   const [address, setAddress] = useState(null);

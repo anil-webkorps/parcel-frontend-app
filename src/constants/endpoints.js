@@ -31,6 +31,7 @@ export const deleteDepartmentEndpoint = `${ROOT_BE_URL}/api/v1/departments/remov
 export const createTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/create`;
 export const getTransactionsEndpoint = `${ROOT_BE_URL}/api/v1/transactions/get`;
 export const getTransactionByIdEndpoint = `${ROOT_BE_URL}/api/v1/transactions/getById`;
+export const getMoneyInOutEndpoint = `${ROOT_BE_URL}/api/v1/transactions/getMoneyInMoneyOut`;
 
 // MULTISIG
 export const createMultisigTransactionEndpoint = `${ROOT_BE_URL}/api/v1/transactions/multisig/create`;

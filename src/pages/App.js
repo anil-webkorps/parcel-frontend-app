@@ -6,7 +6,6 @@ import { Switch, Route } from "react-router-dom";
 import GlobalStyle, { lightTheme, darkTheme } from "global-styles";
 import Header from "components/Header";
 import NetworkModal from "components/Connect/NetworkModal";
-import ConnectToWalletModal from "components/Connect/ConnectModal";
 
 import RegisterPage from "pages/Register";
 import LoginPage from "pages/Login";
@@ -15,14 +14,10 @@ import AcceptInvitePage from "./AcceptInvite";
 import DelegateTransfer from "./DelegateTransfer";
 import NotFoundPage from "./NotFound";
 import SideNavProvider from "context/SideNavContext";
-import { useEagerConnect, useInactiveListener } from "hooks";
 import { routeTemplates } from "constants/routes/templates";
 
 export default function App() {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
-  const triedEager = useEagerConnect();
-  useInactiveListener(!triedEager);
-  // const { onboard } = useActiveWeb3React();
 
   return (
     <div className="app">
@@ -53,7 +48,6 @@ export default function App() {
         </SideNavProvider>
         <GlobalStyle />
         <NetworkModal />
-        <ConnectToWalletModal triedEager={triedEager} />
       </ThemeProvider>
     </div>
   );

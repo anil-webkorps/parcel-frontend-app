@@ -1,5 +1,3 @@
-// import { injected, fortmatic } from "connectors";
-import MetamaskIcon from "assets/icons/wallets/icon-metamask.svg";
 import ETHIcon from "assets/icons/tokens/ETH-icon.png";
 import DAIIcon from "assets/icons/tokens/DAI-icon.png";
 import USDCIcon from "assets/icons/tokens/USDC-icon.png";
@@ -17,31 +15,6 @@ import addresses from "./addresses";
 export const NetworkContextName = "NETWORK";
 export const isMainnet = process.env.REACT_APP_NETWORK_NAME === "MAINNET";
 export const isTestnet = process.env.REACT_APP_NETWORK_NAME !== "MAINNET";
-
-export const supportedWallets = [
-  // {
-  //   name: "MetaMask",
-  //   connector: injected,
-  //   icon: MetamaskIcon,
-  //   description: "Injected web3 provider.",
-  //   id: 1,
-  // },
-  // {
-  //   name: "Fortmatic",
-  //   connector: fortmatic,
-  //   icon: MetamaskIcon,
-  //   description: "Fortmatic",
-  //   id: 2,
-  // },
-  // {
-  //   name: "Torus",
-  //   connector: torus,
-  //   icon: MetamaskIcon,
-  //   description: "Torus",
-  //   id: 3,
-  // },
-  // Add other wallets and connectors here
-];
 
 export const DEFAULT_GAS_PRICE = "10000000000"; // 100 gwei
 export const ONE_GWEI = "100000000";
