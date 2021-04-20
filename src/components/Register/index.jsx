@@ -371,7 +371,6 @@ const Register = () => {
 
       const threshold = formData.threshold ? Number(formData.threshold) : 1;
       const organisationType = parseInt(formData.organisationType);
-      // console.log({ threshold, ownerAddresses });
 
       const creationData = gnosisSafeMasterContract.interface.encodeFunctionData(
         "setup",

@@ -37,7 +37,6 @@ const SelectTokenDropdownField = ({
 }) => {
   const [selectedOption, setSelectedOption] = useState(options[0]);
 
-  // console.log({ selectedOption, options });
   return (
     <div>
       <Select
