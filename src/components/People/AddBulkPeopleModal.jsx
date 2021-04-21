@@ -331,7 +331,7 @@ function AddBulkPeopleModal(props) {
   };
 
   return (
-    <Modal isOpen={show} centered toggle={handleHide} backdrop={true}>
+    <Modal isOpen={show} toggle={handleHide}>
       <ModalHeader
         style={{ borderBottom: "none" }}
         title={"Upload CSV"}

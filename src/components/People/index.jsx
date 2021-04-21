@@ -144,12 +144,7 @@ export default function People() {
   }, [allTeams]);
 
   useEffect(() => {
-    if (
-      encryptedPeople &&
-      encryptedPeople.length > 0 &&
-      encryptionKey &&
-      organisationType
-    ) {
+    if (encryptedPeople && encryptedPeople.length > 0 && encryptionKey) {
       const sortedDecryptedPeople = encryptedPeople
         .map(({ data, ...rest }) => {
           const {
@@ -235,7 +230,7 @@ export default function People() {
     >
       <td colSpan={4}>
         <div className="d-flex align-items-center justify-content-center">
-          <Loading color="primary" width="50px" height="50px" />
+          <Loading color="primary" width="3rem" height="3rem" />
         </div>
       </td>
     </TableInfo>
