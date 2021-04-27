@@ -324,7 +324,7 @@ export default function People() {
             />
           </div>
         </TableTitle>
-        {peopleByTeam && peopleByTeam[teamFilter].length > 0
+        {peopleByTeam && peopleByTeam[teamFilter]?.length > 0
           ? peopleByTeam[teamFilter].map((people) => renderRow(people))
           : renderNoPeopleFound()}
       </React.Fragment>
