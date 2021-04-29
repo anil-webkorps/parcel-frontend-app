@@ -8,12 +8,17 @@ import { useDropdown } from "hooks";
 import AddBulkPeoplModal, {
   MODAL_NAME as ADD_BULK_MODAL,
 } from "./AddBulkPeopleModal";
+import AddSinglePeopleModal, { MODAL_NAME as ADD_SINGLE_MODAL } from "./AddSinglePeopleModal";
 import { AddPeople } from "./styles";
 
 export default function AddPeopleDropdown() {
   const { open, toggleDropdown } = useDropdown();
 
   const dispatch = useDispatch();
+
+  const showAddSingleModal = () => {
+    dispatch(show(ADD_SINGLE_MODAL));
+  };
 
   const showBulkAddModal = () => {
     dispatch(show(ADD_BULK_MODAL));
@@ -24,7 +29,7 @@ export default function AddPeopleDropdown() {
       <div className="text">Add People</div>
       <FontAwesomeIcon icon={faAngleDown} className="ml-2" color="#fff" />
       <div className={`add-people-dropdown ${open && "show"}`}>
-        <div className="add-people-option">
+        <div className="add-people-option" onClick={showAddSingleModal}>
           <div className="name">Add One</div>
         </div>
         <div className="add-people-option" onClick={showBulkAddModal}>
@@ -32,6 +37,7 @@ export default function AddPeopleDropdown() {
         </div>
       </div>
       <AddBulkPeoplModal />
+      <AddSinglePeopleModal />
     </AddPeople>
   );
 }

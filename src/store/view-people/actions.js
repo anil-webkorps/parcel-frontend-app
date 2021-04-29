@@ -2,6 +2,7 @@ import {
   GET_ALL_PEOPLE,
   GET_ALL_PEOPLE_SUCCESS,
   GET_ALL_PEOPLE_ERROR,
+  GET_PEOPLE_BY_TEAM,
   GET_PEOPLE_BY_DEPARTMENT,
   GET_PEOPLE_BY_DEPARTMENT_SUCCESS,
   GET_PEOPLE_BY_DEPARTMENT_ERROR,
@@ -28,6 +29,14 @@ export function getAllPeopleError(error) {
   return {
     type: GET_ALL_PEOPLE_ERROR,
     error,
+  };
+}
+
+export function getPeopleByTeam(safeAddress, departmentId) {
+  return {
+    type: GET_PEOPLE_BY_TEAM,
+    safeAddress,
+    departmentId,
   };
 }
 

@@ -3,13 +3,15 @@ import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { CustomSelect } from "./styles";
+//import { useForm } from "react-hook-form";
 
+// const { register } = useForm();
 const SelectField = ({ name, register, required, options, ...rest }) => (
   <CustomSelect>
     <select
       defaultValue={""}
       name={name}
-      ref={register({ required })}
+      ref={register({ required})}
       {...rest}
     >
       <option value="" disabled>

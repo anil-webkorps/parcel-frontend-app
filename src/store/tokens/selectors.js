@@ -31,6 +31,9 @@ const makeSelectTokenIcons = () =>
 const makeSelectTokensDropdown = () =>
   createSelector(selectTokens, (tokensState) => tokensState.tokensDropdown);
 
+const makeSelectTokensDetails = () =>
+  createSelector(selectTokens, (tokensState) => tokensState.tokenDetails);
+
 const makeSelectTotalBalance = () =>
   createSelector(selectTokens, (tokensState) => tokensState.totalBalance);
 
@@ -49,4 +52,5 @@ export {
   makeSelectUpdating,
   makeSelectTotalBalance,
   makeSelectError,
+  makeSelectTokensDetails
 };

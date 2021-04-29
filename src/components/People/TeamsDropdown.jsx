@@ -8,6 +8,7 @@ import { useDropdown } from "hooks";
 import ViewTeamsModal, {
   MODAL_NAME as VIEW_TEAMS_MODAL,
 } from "./ViewTeamsModal";
+import AddTeamModal, { MODAL_NAME as ADD_TEAM_MODAL } from "./AddTeamModal";
 import { Teams } from "./styles";
 
 export default function TeamsDropdown() {
@@ -18,6 +19,10 @@ export default function TeamsDropdown() {
     dispatch(show(VIEW_TEAMS_MODAL));
   };
 
+  const showAddTeamModal = () => {
+    dispatch(show(ADD_TEAM_MODAL));
+  };
+
   return (
     <Teams onClick={toggleDropdown}>
       <div className="text">Teams</div>
@@ -26,11 +31,12 @@ export default function TeamsDropdown() {
         <div className="teams-option" onClick={showTeamsModal}>
           <div className="name">View All</div>
         </div>
-        <div className="teams-option">
+        <div className="teams-option" onClick={showAddTeamModal}>
           <div className="name">Add Team</div>
         </div>
       </div>
       <ViewTeamsModal />
+      <AddTeamModal />
     </Teams>
   );
 }
