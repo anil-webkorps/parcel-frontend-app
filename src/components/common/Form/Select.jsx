@@ -18,11 +18,19 @@ const SelectField = ({ name, register, required, options, ...rest }) => (
         Select Token
       </option>
       {options &&
-        options.map(({ name, value }) => (
-          <option key={value} value={value}>
-            {name}
-          </option>
-        ))}
+        options.map(({ name, value, label }) => 
+          {
+            return(
+              <>
+                {value &&
+                <option key={value} value={value}>
+                  {name?name:label}
+                </option>
+                }
+              </>
+            )
+          }
+        )}
     </select>
     <span className="custom-arrow">
       <FontAwesomeIcon className="arrow" icon={faChevronDown} color="#373737" />

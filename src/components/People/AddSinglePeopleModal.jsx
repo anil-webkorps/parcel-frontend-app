@@ -131,7 +131,8 @@ function AddSinglePeopleModal(props) {
       amount,
     } = values;
     const tokenInfo = tokenDetails && tokenDetails[values.token.value];
-    if (account && safeAddress && tokenInfo) {
+
+    if (account && safeAddress) {
       const encryptedEmployeeDetails = cryptoUtils.encryptDataUsingEncryptionKey(
         JSON.stringify({
           firstName,
@@ -148,7 +149,7 @@ function AddSinglePeopleModal(props) {
         encryptedEmployeeDetails,
         safeAddress,
         createdBy: account,
-        departmentId: team.value || undefined,
+        departmentId: team || undefined,
         departmentName: teamName
           ? teamName
           : teamIdToDetailsMap[team.value].name,
@@ -217,6 +218,7 @@ function AddSinglePeopleModal(props) {
           <div className="title">Choose Team</div>
           <div className="row">
             <div className="col-md-6">
+              {console.log({teamsDropdown})}
               <Select
                 name="team"
                 register={register}
@@ -226,7 +228,7 @@ function AddSinglePeopleModal(props) {
               />
             </div>
             {teamChanged && !teamChanged.value && (
-              <div className="col-md-6 mt-5">
+              <div className="col-md-6">
                 <Input
                   type="text"
                   name="teamName"
