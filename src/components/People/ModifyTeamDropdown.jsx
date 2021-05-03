@@ -49,8 +49,7 @@ export default function ModifyTeamDropdown({ departmentId }) {
         <Img src={DotsIcon} alt="modify" />
       </div>
       <div className={`modify-team-dropdown ${open && "show"}`}>
-        <div className="modify-team-option">
-          {/*  onClick={showEditTeamModal} */}
+        <div className="modify-team-option" onClick={showEditTeamModal} >
           <FontAwesomeIcon
             icon={faEdit}
             color="#373737"

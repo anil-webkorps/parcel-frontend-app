@@ -88,17 +88,17 @@ function AddSinglePeopleModal(props) {
   const errorInUpdate = useSelector(makeSelectErrorInUpdate());
 
   useEffect(() => {
-    if (
-      teamChanged &&
-      teamChanged.value &&
-      teamIdToDetailsMap[teamChanged.value]
-    ) {
-      const { tokenInfo } = teamIdToDetailsMap[teamChanged.value];
-      setValue("token", {
-        value: tokenInfo.symbol,
-        label: constructLabel(tokenInfo.symbol, tokenInfo.logoURI),
-      });
-    }
+    // if (
+    //   teamChanged &&
+    //   teamChanged.value &&
+    //   teamIdToDetailsMap[teamChanged.value]
+    // ) {
+    //   const { tokenInfo } = teamIdToDetailsMap[teamChanged.value];
+    //   setValue("token", {
+    //     value: tokenInfo.symbol,
+    //     label: constructLabel(tokenInfo.symbol, tokenInfo.logoURI),
+    //   });
+    // }
   }, [teamChanged, setValue, teamIdToDetailsMap]);
 
   useEffect(() => {
@@ -131,7 +131,6 @@ function AddSinglePeopleModal(props) {
       amount,
     } = values;
     const tokenInfo = tokenDetails && tokenDetails[values.token.value];
-
     if (account && safeAddress) {
       const encryptedEmployeeDetails = cryptoUtils.encryptDataUsingEncryptionKey(
         JSON.stringify({
@@ -218,16 +217,16 @@ function AddSinglePeopleModal(props) {
           <div className="title">Choose Team</div>
           <div className="row">
             <div className="col-md-6">
-              {console.log({teamsDropdown})}
               <Select
                 name="team"
+                control={control}
                 register={register}
                 required={`Team is required`}
                 options={teamsDropdown}
                 placeholder={`Select Team...`}
               />
-            </div>
-            {teamChanged && !teamChanged.value && (
+            </div>            
+            {teamChanged && (!teamChanged.value || teamChanged?.value) && (
               <div className="col-md-6">
                 <Input
                   type="text"
@@ -235,6 +234,7 @@ function AddSinglePeopleModal(props) {
                   register={register}
                   required={`Team Name is required`}
                   placeholder="Enter Team Name"
+                  value={teamChanged?.label}
                 />
                 <ErrorMessage name="teamName" errors={errors} />
               </div>

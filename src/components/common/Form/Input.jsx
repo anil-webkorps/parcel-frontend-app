@@ -12,21 +12,23 @@ const InputField = ({
   type,
   labelStyle = {},
   ...rest
-}) => (
-  <>
-    <Input
-      name={name}
-      id={id || name}
-      ref={register({ required, pattern })}
-      type={type}
-      {...rest}
-    />
-    {label ? (
-      <label htmlFor={id || name} style={labelStyle}>
-        {label}
-      </label>
-    ) : null}
-  </>
-);
+}) => {
+  return(
+    <>
+      <Input
+        name={name}
+        id={id || name}
+        ref={register({ required, pattern })}
+        type={type}
+        {...rest}
+      />
+      {label ? (
+        <label htmlFor={id || name} style={labelStyle}>
+          {label}
+        </label>
+      ) : null}
+    </>
+  );
+}
 
 export default InputField;

@@ -319,9 +319,9 @@ export default function People() {
         <TableTitle>
           <div className="d-flex justify-content-between align-items-center">
             <div>{teamFilter}</div>
-            {/* <ModifyTeamDropdown
+            <ModifyTeamDropdown
               departmentId={teamNameToIdMap && teamNameToIdMap[teamFilter]}
-            /> */}
+            />
           </div>
         </TableTitle>
         {peopleByTeam && peopleByTeam[teamFilter] && peopleByTeam[teamFilter].length > 0
