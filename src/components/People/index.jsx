@@ -55,8 +55,16 @@ import AddPeopleIcon from "assets/icons/dashboard/add-people-icon.svg";
 import ModifyTeamDropdown from "./ModifyTeamDropdown";
 import { makeSelectTeams } from "store/view-teams/selectors";
 
+import { makeSelectOwnerName } from "store/global/selectors";
+
+
+import tokensReducer from "store/tokens/reducer";
+import tokensSaga from "store/tokens/saga";
+import { getTokens } from "store/tokens/actions";
+
 const viewTeamsKey = "viewTeams";
 const viewPeopleKey = "viewPeople";
+const tokensKey = "tokens";
 
 export default function People() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
@@ -93,6 +101,21 @@ export default function People() {
   const nameFilter = useSelector(makeSelectNameFilter());
   const teamFilter = useSelector(makeSelectTeamFilter());
   const searchPeopleValue = useSelector(makeSelectSearchName());
+
+
+  // Reducers
+  useInjectReducer({ key: tokensKey, reducer: tokensReducer });
+
+  // Sagas
+  useInjectSaga({ key: tokensKey, saga: tokensSaga });
+
+  const ownerName = useSelector(makeSelectOwnerName());
+
+  useEffect(() => {
+    if (ownerSafeAddress) {
+      dispatch(getTokens(ownerSafeAddress));
+    }
+  }, [ownerSafeAddress, dispatch]);
 
   useEffect(() => {
     dispatch(getTeams(ownerSafeAddress));
