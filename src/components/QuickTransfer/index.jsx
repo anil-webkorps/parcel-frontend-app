@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { cryptoUtils } from "parcel-sdk";
 import { show } from "redux-modal";
+import web3 from 'web3';
 
 import TransactionSubmitted from "components/Payments/TransactionSubmitted";
 import { Info } from "components/Dashboard-old/styles";
@@ -92,17 +93,23 @@ const metaTxKey = "metatx";
 export default function QuickTransfer() {
   const [encryptionKey] = useLocalStorage("ENCRYPTION_KEY");
 
-  const { account } = useActiveWeb3React();
+  let { account,balance } = useActiveWeb3React();
   const [submittedTx, setSubmittedTx] = useState(false);
-  const [selectedTokenDetails, setSelectedTokenDetails] = useState();
+  var [selectedTokenDetails, setSelectedTokenDetails] = useState();
   const [selectedTokenName, setSelectedTokenName] = useState();
   const [tokenDetails, setTokenDetails] = useState(defaultTokenDetails);
   const [payoutDetails, setPayoutDetails] = useState(null);
   const [metaTxHash, setMetaTxHash] = useState();
 
+  var balances= parseFloat(web3.utils.fromWei(balance,'Ether'));
+  var newbal = {...selectedTokenDetails};
+  newbal.balance = balances
+  selectedTokenDetails = {...newbal}
+  
   const { txHash, loadingTx, massPayout, txData } = useMassPayout({
     tokenDetails: selectedTokenDetails,
   });
+
   // Reducers
   useInjectReducer({ key: tokensKey, reducer: tokensReducer });
   useInjectReducer({ key: transactionsKey, reducer: transactionsReducer });
@@ -288,7 +295,6 @@ export default function QuickTransfer() {
   ]);
 
   const onSubmit = async (values) => {
-    console.log({ selectedTokenDetails });
     const payoutDetails = [
       {
         address: values.address,
@@ -296,8 +302,7 @@ export default function QuickTransfer() {
         salaryToken: selectedTokenDetails.name,
         description: values.description || "",
         usd:
-          (selectedTokenDetails.usd / selectedTokenDetails.balance) *
-          values.amount,
+          (selectedTokenDetails.usd / selectedTokenDetails.balance) * values.amount,
       },
     ];
     setPayoutDetails(payoutDetails);
@@ -341,9 +346,9 @@ export default function QuickTransfer() {
           </div>
           <div className="token-balance">
             <div className="value">
-              {selectedTokenDetails.balance
-                ? formatNumber(selectedTokenDetails.balance)
-                : "0.00"}
+              { balances
+                /*? formatNumber(selectedTokenDetails.balance)
+              : "0.00"*/}
             </div>
             <div className="name">{selectedTokenDetails.name}</div>
           </div>
@@ -379,7 +384,7 @@ export default function QuickTransfer() {
               validate: (value) => {
                 if (value <= 0) return "Please check your input";
                 else if (
-                  selectedTokenDetails &&
+                  selectedTokenDetails.balance &&
                   parseFloat(value) > parseFloat(selectedTokenDetails.balance)
                 )
                   return "Insufficient balance";

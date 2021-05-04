@@ -9,6 +9,7 @@
 
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+// import rp from 'request-promise'
 // import { BigNumber } from "@ethersproject/bignumber";
 import { parseEther } from "@ethersproject/units";
 import { arrayify } from "@ethersproject/bytes";
@@ -18,6 +19,9 @@ import { ethers } from "ethers";
 // import { LedgerConnector } from "@web3-react/ledger-connector";
 // import { TrezorConnector } from "@web3-react/trezor-connector";
 // import { InjectedConnector } from "@web3-react/injected-connector";
+
+// import axios from 'axios';
+
 
 import { useActiveWeb3React, useContract } from "hooks";
 import {
@@ -58,7 +62,6 @@ const {
 export default function useMassPayout(props = {}) {
   const { tokenDetails } = props;
   const { account, library, connector } = useActiveWeb3React();
-
   const [loadingTx, setLoadingTx] = useState(false);
   const [txHash, setTxHash] = useState("");
   const [txData, setTxData] = useState("");
@@ -390,24 +393,63 @@ export default function useMassPayout(props = {}) {
 
         try {
           // estimate using api
-          const estimateResponse = await fetch(
+          const estimateResponse = fetch(
             `${gnosisSafeTransactionV2Endpoint}${ownerSafeAddress}/transactions/estimate/`,
             {
               method: "POST",
               body: JSON.stringify({
                 safe: ownerSafeAddress,
-                to,
+                to:to,
                 value: valueWei,
-                data,
-                operation,
-                gasToken,
+                data:data,
+                operation:operation,
+                gasToken:gasToken,
               }),
               headers: {
                 "content-type": "application/json",
               },
             }
-          );
-          const estimateResult = await estimateResponse.json();
+          )
+
+          // var estimateResponse = {
+          //   method: 'POST',
+          //   uri: `${gnosisSafeTransactionV2Endpoint}${ownerSafeAddress}/transactions/estimate/`,
+          //   body: {
+          //     safe: ownerSafeAddress,
+          //     to:to,
+          //     value: valueWei,
+          //     data:data,
+          //     operation:operation,
+          //     gasToken:gasToken,
+          //   },
+          //   json: true // Automatically stringifies the body to JSON
+          // };
+          // rp(estimateResponse)
+          //   .then(function (parsedBody) {
+          //       console.log(parsedBody)
+          //   })
+          //   .catch(function (err) {
+          //       // POST failed...
+          //   });
+
+          // var estimateResponse = axios(
+          //   `${gnosisSafeTransactionV2Endpoint}${ownerSafeAddress}/transactions/estimate/`,
+          //   {
+          //     method: 'POST',
+          //     data: {
+          //       to:to,
+          //       value: valueWei,
+          //       data:data,
+          //       operation:operation,
+          //     },
+          //     // headers: {
+          //     //   "content-type": "application/json",
+          //     // },
+          //   }
+          // )
+
+          const estimateResult = await (await estimateResponse).json();
+          console.log(estimateResult)
           const { safeTxGas, baseGas, lastUsedNonce } = estimateResult;
           const gasLimit = Number(safeTxGas) + Number(baseGas) + 21000; // giving a little higher gas limit just in case
           const nonce = lastUsedNonce === null ? 0 : lastUsedNonce + 1;

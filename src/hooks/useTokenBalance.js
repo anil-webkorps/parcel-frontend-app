@@ -25,7 +25,6 @@ const useTokenBalance = (address, dependencies = null) => {
   useEffect(() => {
     getBalance();
   }, [account, chainId, getBalance, dependencies]);
-
   return tokenBalance;
 };
 

@@ -1,7 +1,6 @@
 import { useEffect, useState, createContext } from "react";
 import { Web3Provider } from "@ethersproject/providers";
 import { getAddress } from "@ethersproject/address";
-
 import { initOnboard } from "utils/initOnboard";
 export const Web3ReactContext = createContext();
 
@@ -11,7 +10,6 @@ export default function Web3ReactProvider({ children }) {
   const [balance, setBalance] = useState(null);
   const [wallet, setWallet] = useState({});
   const [provider, setProvider] = useState(null);
-
   const [onboard, setOnboard] = useState(null);
 
   // const [darkMode, setDarkMode] = useState(false)
@@ -55,11 +53,14 @@ export default function Web3ReactProvider({ children }) {
     }
   }, [onboard]);
 
+  //console.log(address,balance)
+
   return (
     <Web3ReactContext.Provider
       value={{
         onboard,
         account: address ? getAddress(address) : undefined,
+        balance: balance,
         chainId: network,
         library: provider,
         connector: wallet,

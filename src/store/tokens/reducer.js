@@ -66,6 +66,7 @@ const reducer = (state = initialState, action) =>
                 tokenDetails.tokenInfo.decimals
               );
 
+
               return {
                 id: idx,
                 name: tokenDetails.tokenInfo.symbol,
