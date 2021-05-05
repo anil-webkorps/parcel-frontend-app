@@ -16,6 +16,7 @@ import MultiSigTransactions from "components/Transactions/MultiSigTransactions";
 import MultiSigTransactionDetails from "components/Transactions/MultiSigTransactionDetails";
 import TransactionDetails from "components/Transactions/TransactionDetails";
 import QuickTransfer from "components/QuickTransfer";
+import PaySomeone from "components/PaySomeone/PaySomeoneModal";
 import InviteOwners from "components/InviteOwners";
 import SpendingLimits from "components/SpendingLimits";
 import NewSpendingLimit from "components/SpendingLimits/NewSpendingLimit";
@@ -100,6 +101,16 @@ const DashboardPage = () => {
             path={routeTemplates.dashboard.quickTransfer}
             component={QuickTransfer}
           />
+          <Route 
+            exact
+            path={routeTemplates.dashboard.paySomeone}
+            component={PaySomeone}
+          />
+          {/* <Route 
+            exact
+            path={routeTemplates.dashboard.addFund}
+            component={Addfund}
+          /> */}
           <Route
             exact
             path={routeTemplates.dashboard.account}

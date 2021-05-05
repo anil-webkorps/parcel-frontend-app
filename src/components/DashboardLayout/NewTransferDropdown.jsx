@@ -27,14 +27,20 @@ export default function NewTransferDropdown() {
           <Img src={MassPayoutIcon} alt="mass-payout" className="icon" />
           <div className="name">Mass Payout</div>
         </Link>
-        <div className="transfer-option">
+        <Link 
+          to={routeTemplates.dashboard.paySomeone} 
+          className="transfer-option"
+        >
           <Img src={PaySomeoneIcon} alt="pay-someone" className="icon" />
           <div className="name">Pay Someone</div>
-        </div>
-        <div className="transfer-option">
+        </Link>
+        <Link
+          to={routeTemplates.dashboard.addFund} 
+          className="transfer-option"
+        >
           <Img src={AddFundsIcon} alt="add-funds" className="icon" />
           <div className="name">Add Funds</div>
-        </div>
+          </Link>
       </div>
     </NewTransfer>
   );

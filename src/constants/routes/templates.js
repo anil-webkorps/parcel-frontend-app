@@ -21,6 +21,8 @@ export const routeTemplates = {
     transactions: "/dashboard/transactions",
     transactionById: "/dashboard/transactions/:transactionId",
     quickTransfer: "/dashboard/quick-transfer",
+    addFund: "/dashboard/add-fund",
+    paySomeone: "/dashboard/pay-someone",
     account: "/dashboard/account",
     owners: "/dashboard/invite",
     spendingLimits: {
